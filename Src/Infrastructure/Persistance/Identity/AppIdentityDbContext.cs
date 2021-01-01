@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Pesabooks.Domain.Identity;
 using Pesabooks.Infrastructure.Persistance.Configurations;
-using Pesabooks.Tenancy.Entities;
+using Pesabooks.Tenancy.Domain;
 
 namespace Pesabooks.Infrastructure.Persistance
 {

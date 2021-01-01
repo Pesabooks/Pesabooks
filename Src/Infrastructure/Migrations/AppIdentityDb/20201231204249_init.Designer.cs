@@ -2,16 +2,18 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pesabooks.Infrastructure.Persistance;
 
-namespace Pesabooks.Infrastructure.Migrations
+namespace Pesabooks.Infrastructure.Migrations.AppIdentityDb
 {
     [DbContext(typeof(AppIdentityDbContext))]
-    partial class AppIdentityDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201231204249_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -139,6 +141,9 @@ namespace Pesabooks.Infrastructure.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
+                    b.Property<int>("TenantId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
@@ -258,7 +263,7 @@ namespace Pesabooks.Infrastructure.Migrations
                     b.ToTable("UserTenants");
                 });
 
-            modelBuilder.Entity("Pesabooks.Tenancy.Entities.Tenant", b =>
+            modelBuilder.Entity("Pesabooks.Tenancy.Domain.Tenant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -270,6 +275,9 @@ namespace Pesabooks.Infrastructure.Migrations
 
                     b.Property<int?>("CreatedById")
                         .HasColumnType("integer");
+
+                    b.Property<string>("DefaultCurrency")
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("timestamp without time zone");
@@ -298,15 +306,6 @@ namespace Pesabooks.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tenants");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Domain = "default",
-                            IsDeleted = false,
-                            Name = "Default"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -362,7 +361,7 @@ namespace Pesabooks.Infrastructure.Migrations
 
             modelBuilder.Entity("Pesabooks.Domain.Identity.UserTenant", b =>
                 {
-                    b.HasOne("Pesabooks.Tenancy.Entities.Tenant", "Tenant")
+                    b.HasOne("Pesabooks.Tenancy.Domain.Tenant", "Tenant")
                         .WithMany("UserTenants")
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -384,7 +383,7 @@ namespace Pesabooks.Infrastructure.Migrations
                     b.Navigation("UserTenants");
                 });
 
-            modelBuilder.Entity("Pesabooks.Tenancy.Entities.Tenant", b =>
+            modelBuilder.Entity("Pesabooks.Tenancy.Domain.Tenant", b =>
                 {
                     b.Navigation("UserTenants");
                 });

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Pesabooks.Tenancy.Entities;
 using System.Collections.Generic;
 
 namespace Pesabooks.Domain.Identity

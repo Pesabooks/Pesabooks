@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Pesabooks.Domain.Common;
+using Pesabooks.Application.Common.Interfaces;
+using Pesabooks.Domain.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +12,7 @@ namespace Pesabooks.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -19,9 +22,11 @@ namespace Pesabooks.Api.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPesabooksDbContext context)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IPesabooksDbContext context, ISession session)
         {
             _logger = logger;
+            var userid = session.UserId;
+            var tenant = session.TenantId;
         }
 
         [HttpGet]

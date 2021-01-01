@@ -17,8 +17,8 @@ namespace Pesabooks.Infrastructure.Persistance
 
         public TContext CreateDbContext(string[] args)
         {
-            var basePath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}Pesabooks.Api";
-            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            var basePath = $"{Directory.GetCurrentDirectory()}{Path.DirectorySeparatorChar}..{Path.DirectorySeparatorChar}Api";
+            var environmentName = Environment.GetEnvironmentVariable(AspNetCoreEnvironment);
             
             return Create(basePath, environmentName);
         }

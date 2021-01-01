@@ -1,10 +1,5 @@
-﻿using Pesabooks.Domain.Common.Entities;
-using Pesabooks.Tenancy.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Pesabooks.Domain.Common;
+using Pesabooks.Tenancy.Domain;
 
 namespace Pesabooks.Domain.Identity
 {

@@ -32,6 +32,12 @@ namespace Pesabooks.Infrastructure.Persistance
                     var context = scope.ServiceProvider.GetService<AppIdentityDbContext>();
                     context.Database.Migrate();
 
+                    if (!context.Tenants.Any())
+                    {
+                        context.Tenants.Add(new Tenancy.Domain.Tenant("Default", "", "default", "CAD"));
+
+                    }
+
                     var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                     var alice = userMgr.FindByNameAsync("admin").Result;
                     if (alice == null)
@@ -59,7 +65,7 @@ namespace Pesabooks.Infrastructure.Persistance
                             throw new Exception(result.Errors.First().Description);
                         }
                     }
-
+                    context.SaveChanges();
 
                 }
             }

@@ -1,4 +1,5 @@
-﻿using IdentityServer4.Models;
+﻿using IdentityServer4;
+using IdentityServer4.Models;
 using System.Collections.Generic;
 
 namespace Pesabooks.Infrastructure.Persistance.Identity
@@ -12,6 +13,14 @@ namespace Pesabooks.Infrastructure.Persistance.Identity
                 new IdentityResources.Profile(),
                    };
 
+        public static IEnumerable<ApiResource> GetApiResources()
+        {
+            return new List<ApiResource>
+            {
+                new ApiResource("api1", "My API"),
+                new ApiResource("postman_api", "Postman Test Resource")
+            };
+        }
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
             {
@@ -42,13 +51,48 @@ namespace Pesabooks.Infrastructure.Persistance.Identity
 
                     AllowedGrantTypes = GrantTypes.Code,
 
-                    RedirectUris = { "https://localhost:44300/signin-oidc" },
-                    FrontChannelLogoutUri = "https://localhost:44300/signout-oidc",
-                    PostLogoutRedirectUris = { "https://localhost:44300/signout-callback-oidc" },
+                    RedirectUris = { "https://localhost:5001/signin-oidc" },
+                    FrontChannelLogoutUri = "https://localhost:5001/signout-oidc",
+                    PostLogoutRedirectUris = { "https://localhost:5001/signout-callback-oidc" },
 
                     AllowOfflineAccess = true,
                     AllowedScopes = { "openid", "profile", "scope2" }
                 },
+
+                //postman
+                new Client{
+                    ClientName = "Postman", //_configuration.GetSection("PostmanClient").GetValue<string>("ClientName"),
+                    ClientId = "postman", //_configuration.GetSection("PostmanClient").GetValue<string>("ClientId"),
+                    RequirePkce = false,
+                    AllowedGrantTypes = GrantTypes.Code,
+                    AllowOfflineAccess = true,
+                    IdentityTokenLifetime = 60 * 60 * 24,
+                    AccessTokenLifetime = 60 * 60 * 24,
+                    RedirectUris = new List<string>()
+                    {
+                        "https://www.getpostman.com/oauth2/callback"
+                    },
+                    PostLogoutRedirectUris = new List<string>()
+                    {
+                        "https://www.getpostman.com"
+                    },
+                    AllowedCorsOrigins = new List<string>()
+                    {
+                        "https://www.getpostman.com"
+                    },
+                   AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        "scope1"
+                    },
+                    ClientSecrets = { new Secret("123456".Sha256()) },
+                    AllowAccessTokensViaBrowser = true,
+                    RequireConsent = false,
+                    EnableLocalLogin = true,
+                    Enabled = true
+                }
             };
     }
 }

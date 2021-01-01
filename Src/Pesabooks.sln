@@ -5,11 +5,13 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Domain", "Domain\Pesabooks.Domain.csproj", "{2CCE9669-640F-4C82-AD81-6F5630182DDA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Api", "Api\Pesabooks.Api.csproj", "{B316D9D4-2E43-4292-8AA6-F0D799912AF7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Api", "Api\Pesabooks.Api.csproj", "{B316D9D4-2E43-4292-8AA6-F0D799912AF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Infrastructure", "Infrastructure\Pesabooks.Infrastructure.csproj", "{BD438B6A-FEB3-4118-9068-2EF2E8D020EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Infrastructure", "Infrastructure\Pesabooks.Infrastructure.csproj", "{BD438B6A-FEB3-4118-9068-2EF2E8D020EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Common", "Common\Pesabooks.Common.csproj", "{57E99980-2B26-4EC7-8E6C-D7F7FFD563C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Common", "Common\Pesabooks.Common.csproj", "{57E99980-2B26-4EC7-8E6C-D7F7FFD563C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Application", "Pesabooks.Application\Pesabooks.Application.csproj", "{EEF2CE75-51C9-469E-A175-706B60C29FF0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{57E99980-2B26-4EC7-8E6C-D7F7FFD563C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57E99980-2B26-4EC7-8E6C-D7F7FFD563C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57E99980-2B26-4EC7-8E6C-D7F7FFD563C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEF2CE75-51C9-469E-A175-706B60C29FF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEF2CE75-51C9-469E-A175-706B60C29FF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEF2CE75-51C9-469E-A175-706B60C29FF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEF2CE75-51C9-469E-A175-706B60C29FF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

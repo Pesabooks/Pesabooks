@@ -18,10 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Common\Pesabooks.Common.csproj" />
     <ProjectReference Include="..\Domain\Pesabooks.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Persistance\EntityConfigurations\" />
+    <ProjectReference Include="..\Pesabooks.Application\Pesabooks.Application.csproj" />
   </ItemGroup>
 
 </Project>

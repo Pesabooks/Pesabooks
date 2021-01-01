@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Pesabooks.Accounting.Domain;
+using Pesabooks.Application.Common.Interfaces;
+using Pesabooks.Domain.Accounting;
 using Pesabooks.Domain.Common;
+using Pesabooks.Domain.Members;
 using Pesabooks.Domain.Session;
 using Pesabooks.Infrastructure.Persistance.Configurations;
 using Pesabooks.Infrastructure.Persistance.Extensions;
-using Pesabooks.Tenancy.Entities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,17 +18,29 @@ namespace Pesabooks.Infrastructure.Persistance
     public class PesabooksDbContext : DbContext, IPesabooksDbContext
     {
         private ISession Session;
+
+        public DbSet<Member> Members { get; set; }
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<JournalEntry> _journalEntries { get; set; }
+
+        public IQueryable<JournalEntry> JournalEntries => _journalEntries.AsNoTracking();
+
+
         public PesabooksDbContext(ISession session, DbContextOptions<PesabooksDbContext> options)
            : base(options)
         {
             Session = session;
         }
 
-     
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             SetGlobalQuery(modelBuilder);
+            modelBuilder.ApplyConfiguration(new MemberConfiguration());
+            modelBuilder.ApplyConfiguration(new AccountConfiguration());
+            modelBuilder.ApplyConfiguration(new JournalEntryConfiguration());
 
             base.OnModelCreating(modelBuilder);
         }

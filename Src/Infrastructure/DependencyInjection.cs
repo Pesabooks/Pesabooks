@@ -2,11 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Pesabooks.Infrastructure.Persistance;
 using Microsoft.Extensions.Configuration;
-using Pesabooks.Domain.Common;
 using Microsoft.AspNetCore.Identity;
 using Pesabooks.Domain.Identity;
 using Pesabooks.Infrastructure.Persistance.Identity;
 using Microsoft.AspNetCore.Hosting;
+using Pesabooks.Application.Common.Interfaces;
 
 namespace Pesabooks.Infrastructure
 {
@@ -33,6 +33,8 @@ namespace Pesabooks.Infrastructure
 
             var builder = services.AddIdentityServer(options =>
             {
+                options.UserInteraction.LoginUrl = "/identity/account/login";
+                options.UserInteraction.ErrorUrl = "/identity/home/error";
                 options.Events.RaiseErrorEvents = true;
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
@@ -48,6 +50,9 @@ namespace Pesabooks.Infrastructure
 
             // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
+
+            //Tenant
+            services.AddTransient<ITenantManager, TenantManager>();
 
             return services;
         }

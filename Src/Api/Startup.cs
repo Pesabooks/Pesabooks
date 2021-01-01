@@ -1,3 +1,5 @@
+using FluentValidation.AspNetCore;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -7,7 +9,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Pesabooks.Application;
+using Pesabooks.Application.Common.Interfaces;
 using Pesabooks.Domain.Session;
 using Pesabooks.Infrastructure;
 using System;
@@ -31,16 +36,42 @@ namespace Pesabooks.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<IPesabooksDbContext>()); ;
 
+            services.AddApplication();
             services.AddInfrastructure(Configuration, Environment);
 
-            services.AddScoped<ISession>(provider => new NullSession());
+            services.AddAuthentication("Bearer")
+                  .AddJwtBearer("Bearer", options =>
+                  {
+                      options.Authority = "https://localhost:5001";
+
+                      options.TokenValidationParameters = new TokenValidationParameters
+                      {
+                          ValidateAudience = false
+                      };
+                  });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    context.Response.Headers["Location"] = context.RedirectUri;
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
+
+            });
+            services.AddScoped<ISession, WebSession>();
+
+            services.AddScoped<TenantActionFilter>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Pesabooks.Api", Version = "v1" });
+                c.OperationFilter<AddRequiredHeaderParameter>();
             });
         }
 
@@ -60,6 +91,7 @@ namespace Pesabooks.Api
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseIdentityServer();
 

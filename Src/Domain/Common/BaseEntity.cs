@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pesabooks.Domain.Common.Entities
+namespace Pesabooks.Domain.Common
 {
     public class BaseEntity : IAuditable, ISoftDelete
     {

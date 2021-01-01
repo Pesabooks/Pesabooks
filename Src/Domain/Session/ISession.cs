@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pesabooks.Tenancy.Domain;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,6 @@ namespace Pesabooks.Domain.Session
         int? TenantId { get; }
 
 
-
+        Tenant Tenant { get; }
     }
 }
