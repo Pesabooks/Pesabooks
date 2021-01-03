@@ -18,32 +18,37 @@ namespace Pesabooks.Application.Members.Commands
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
+    }
 
-        public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
+    public class UpdateMemberCommandHandler : IRequestHandler<UpdateMemberCommand>
+    {
+        private readonly IPesabooksDbContext _dbContext;
+
+        public UpdateMemberCommandHandler(IPesabooksDbContext context)
         {
-            private readonly IPesabooksDbContext _dbContext;
+            _dbContext = context;
+        }
 
-            public UpdateMemberCommandHandler(IPesabooksDbContext context)
+        public async Task<Unit> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
+        {
+            var member = await _dbContext.Members
+                .FindAsync(request.Id);
+
+            if (member == null)
             {
-                _dbContext = context;
+                throw new NotFoundException(nameof(Member), request.Id);
             }
 
-            public async Task<Unit> Handle(UpdateMemberCommand request, CancellationToken cancellationToken)
-            {
-                var member = await _dbContext.Members
-                    .FindAsync(request.Id);
+            var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
+            var phone = phoneNumberUtil.Parse(request.Phone, null);
+            var formattedPhone = phoneNumberUtil.Format(phone, PhoneNumbers.PhoneNumberFormat.E164);
 
-                if (member == null)
-                {
-                    throw new NotFoundException(nameof(Member), request.Id);
-                }
 
-                member.Update(request.FirstName, request.LastName, request.Email, request.Phone);
+            member.Update(request.FirstName, request.LastName, request.Email, formattedPhone);
 
-                await _dbContext.SaveChangesAsync(cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-                return Unit.Value;
-            }
+            return Unit.Value;
         }
     }
 }

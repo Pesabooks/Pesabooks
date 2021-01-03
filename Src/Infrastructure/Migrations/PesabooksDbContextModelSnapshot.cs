@@ -201,6 +201,9 @@ namespace Pesabooks.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasComputedColumnSql("\"FirstName\" || ' ' || \"LastName\"", true);
 
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 

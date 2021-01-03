@@ -10,7 +10,7 @@ using Pesabooks.Infrastructure.Persistance;
 namespace Pesabooks.Infrastructure.Migrations
 {
     [DbContext(typeof(PesabooksDbContext))]
-    [Migration("20201231203931_Init")]
+    [Migration("20210103012716_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -202,6 +202,9 @@ namespace Pesabooks.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text")
                         .HasComputedColumnSql("\"FirstName\" || ' ' || \"LastName\"", true);
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");

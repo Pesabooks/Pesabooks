@@ -39,27 +39,28 @@ namespace Pesabooks.Infrastructure.Persistance
                     }
 
                     var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                    var alice = userMgr.FindByNameAsync("admin").Result;
-                    if (alice == null)
+                    var amdin = userMgr.FindByNameAsync("admin").Result;
+                    if (amdin == null)
                     {
-                        alice = new User
+                        amdin = new User
                         {
                             UserName = "admin",
                             Email = "admin@pesabooks.com",
                             EmailConfirmed = true,
                         };
-                        var result = userMgr.CreateAsync(alice, "P@ssw0rd").Result;
+                        var result = userMgr.CreateAsync(amdin, "P@ssw0rd").Result;
                         if (!result.Succeeded)
                         {
                             throw new Exception(result.Errors.First().Description);
                         }
 
-                        result = userMgr.AddClaimsAsync(alice, new Claim[]{
+                        result = userMgr.AddClaimsAsync(amdin, new Claim[]{
                             new Claim(JwtClaimTypes.Name, "System Admin"),
-                            new Claim(JwtClaimTypes.GivenName, "Alice"),
-                            new Claim(JwtClaimTypes.FamilyName, "Smith"),
+                            new Claim(JwtClaimTypes.GivenName, "System"),
+                            new Claim(JwtClaimTypes.FamilyName, "Admin"),
                             new Claim(JwtClaimTypes.WebSite, "https://pesabooks.com")
                         }).Result;
+
                         if (!result.Succeeded)
                         {
                             throw new Exception(result.Errors.First().Description);

@@ -10,14 +10,14 @@ namespace Pesabooks.Infrastructure.Persistance
 {
     public class PesabooksDbContextFactory : DesignTimeDbContextFactoryBase<PesabooksDbContext>
     {
-        
+
         protected override PesabooksDbContext CreateNewInstance(DbContextOptions<PesabooksDbContext> options)
         {
-            return new PesabooksDbContext(new NullSession(), options);
+            return new PesabooksDbContext(options, new NullSession(), new SystemDateTime());
         }
     }
 
-   
 
-  
+
+
 }

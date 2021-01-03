@@ -23,13 +23,6 @@ namespace Pesabooks.Api.Controllers
             return Ok(members);
         }
 
-        //// GET api/<MembersController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
-
         // POST api/<MembersController>
         [HttpPost]
         public async Task Post([FromBody] CreateMemberCommand command)
@@ -44,10 +37,17 @@ namespace Pesabooks.Api.Controllers
             await Mediator.Send(command);
         }
 
-        //// DELETE api/<MembersController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+        // DELETE api/<MembersController>/5
+        [HttpDelete("{id}")]
+        public async Task Delete(int id)
+        {
+            await Mediator.Send(new DeleteMemberCommand { MemberId = id });
+        }
+
+        [HttpPost("{id}/archive")]
+        public async Task Archive(int id)
+        {
+            await Mediator.Send(new ArchiveMemberCommand { MemberId = id });
+        }
     }
 }

@@ -11,6 +11,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Pesabooks.Api.Common;
 using Pesabooks.Application;
 using Pesabooks.Application.Common.Interfaces;
 using Pesabooks.Domain.Session;
@@ -85,6 +86,7 @@ namespace Pesabooks.Api
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pesabooks.Api v1"));
             }
 
+            app.UseCustomExceptionHandler();
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();

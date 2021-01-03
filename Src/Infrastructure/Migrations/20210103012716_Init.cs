@@ -52,6 +52,7 @@ namespace Pesabooks.Infrastructure.Migrations
                     Email = table.Column<string>(type: "text", nullable: true),
                     Phone = table.Column<string>(type: "text", nullable: true),
                     TenantId = table.Column<int>(type: "integer", nullable: false),
+                    IsArchived = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CreatedById = table.Column<int>(type: "integer", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),

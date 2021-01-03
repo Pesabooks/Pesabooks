@@ -7,39 +7,43 @@ using System.Threading.Tasks;
 
 namespace Pesabooks.Application.Members.Commands
 {
-    public class CreateMemberCommand: IRequest
+    public class CreateMemberCommand : IRequest
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
+    }
 
-        public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand>
+    public class CreateMemberCommandHandler : IRequestHandler<CreateMemberCommand>
+    {
+        private readonly IPesabooksDbContext _dbContext;
+        private readonly IMediator _mediator;
+
+        public CreateMemberCommandHandler(IPesabooksDbContext context, IMediator mediator)
         {
-            private readonly IPesabooksDbContext _dbContext;
-            private readonly IMediator _mediator;
+            _dbContext = context;
+            _mediator = mediator;
+        }
 
-            public CreateMemberCommandHandler(IPesabooksDbContext context, IMediator mediator)
-            {
-                _dbContext = context;
-                _mediator = mediator;
-            }
+        public async Task<Unit> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
+        {
+            var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
+            var phone = phoneNumberUtil.Parse(request.Phone, null);
+            var formattedPhone = phoneNumberUtil.Format(phone, PhoneNumbers.PhoneNumberFormat.E164);
 
-            public async Task<Unit> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
-            {
-                var member = new Member(
-                        request.FirstName,
-                        request.LastName,
-                        request.Email,
-                        request.Phone);
+            var member = new Member(
+                    request.FirstName,
+                    request.LastName,
+                    request.Email,
+                    formattedPhone);
 
-                await this._dbContext.Members.AddAsync(member);
-                await _dbContext.SaveChangesAsync(cancellationToken);
+            await this._dbContext.Members.AddAsync(member);
+            await _dbContext.SaveChangesAsync(cancellationToken);
 
-                await _mediator.Publish(new MemberCreated { MemberId = member.Id }, cancellationToken);
+            await _mediator.Publish(new MemberCreated { MemberId = member.Id }, cancellationToken);
 
-                return Unit.Value;
-            }
+            return Unit.Value;
         }
     }
 }

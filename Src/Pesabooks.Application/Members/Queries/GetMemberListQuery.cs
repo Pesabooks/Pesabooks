@@ -15,26 +15,32 @@ namespace Pesabooks.Application.Members.Queries
 {
     public class GetMemberListQuery : IRequest<IList<MemberListDto>>
     {
-        private class GetMemberListQueryHandler : IRequestHandler<GetMemberListQuery, IList<MemberListDto>>
+        public bool IncludeArchived { get; set; }       
+    }
+
+    public class GetMemberListQueryHandler : IRequestHandler<GetMemberListQuery, IList<MemberListDto>>
+    {
+        private readonly IPesabooksDbContext _context;
+        private readonly IMapper _mapper;
+
+        public GetMemberListQueryHandler(IPesabooksDbContext context, IMapper mapper)
         {
-            private readonly IPesabooksDbContext _context;
-            private readonly IMapper _mapper;
+            _context = context;
+            _mapper = mapper;
+        }
 
-            public GetMemberListQueryHandler(IPesabooksDbContext context, IMapper mapper)
+        public async Task<IList<MemberListDto>> Handle(GetMemberListQuery request, CancellationToken cancellationToken)
+        {
+            var query = _context.Members.AsQueryable();
+            if (!request.IncludeArchived)
             {
-                _context = context;
-                _mapper = mapper;
+                query = query.Where(m => !m.IsArchived);
             }
 
-            public async Task<IList<MemberListDto>> Handle(GetMemberListQuery request, CancellationToken cancellationToken)
-            {
-                var query = _context.Members.AsQueryable();
+            var members = await query.ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
+                .ToListAsync(cancellationToken);
 
-                var members = await query.ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)
-                    .ToListAsync(cancellationToken);
-
-                return members;
-            }
+            return members;
         }
     }
 }

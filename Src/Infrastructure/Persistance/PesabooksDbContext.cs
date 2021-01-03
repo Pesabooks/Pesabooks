@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Pesabooks.Accounting.Domain;
 using Pesabooks.Application.Common.Interfaces;
+using Pesabooks.Common.Interfaces;
 using Pesabooks.Domain.Accounting;
 using Pesabooks.Domain.Common;
 using Pesabooks.Domain.Members;
@@ -17,7 +18,9 @@ namespace Pesabooks.Infrastructure.Persistance
 {
     public class PesabooksDbContext : DbContext, IPesabooksDbContext
     {
-        private ISession Session;
+        private readonly ISession Session;
+        private readonly IDateTime _dateTime;
+
 
         public DbSet<Member> Members { get; set; }
         public DbSet<Account> Accounts { get; set; }
@@ -26,11 +29,15 @@ namespace Pesabooks.Infrastructure.Persistance
 
         public IQueryable<JournalEntry> JournalEntries => _journalEntries.AsNoTracking();
 
+        //public PesabooksDbContext(DbContextOptions<PesabooksDbContext> options) : base(options)
+        //{
+        //}
 
-        public PesabooksDbContext(ISession session, DbContextOptions<PesabooksDbContext> options)
+        public PesabooksDbContext(DbContextOptions<PesabooksDbContext> options, ISession session, IDateTime dateTime)
            : base(options)
         {
             Session = session;
+            _dateTime = dateTime;
         }
 
 
@@ -129,65 +136,18 @@ namespace Pesabooks.Infrastructure.Persistance
                 return;
             }
 
-            if (entityWithCreatedAt.CreatedAt == null)
-            {
-                entityWithCreatedAt.CreatedAt = DateTime.UtcNow;
-            }
-
-            if (Session.UserId.HasValue && entityAsObj is IAuditable)
-            {
-                var entity = entityAsObj as IAuditable;
-                if (!entity.CreatedById.HasValue)
-                {
-                    if (entity is IHaveTenant)
-                    {
-                        //Sets CreatorUserId only if current user is in same tenant/host with the given entity
-                        if (entity is IHaveTenant && ((IHaveTenant)entity).TenantId == Session.TenantId)
-                        {
-                            entity.CreatedById = Session.UserId;
-                        }
-                    }
-                    else
-                    {
-                        entity.CreatedById = Session.UserId;
-                    }
-                }
-            }
+            entityWithCreatedAt.CreatedAt = _dateTime.UtcNow;
+            entityWithCreatedAt.CreatedById = Session.UserId;
         }
 
         private void SetModificationAuditProperties(EntityEntry entry)
         {
-            if (entry.Entity is IAuditable)
-            {
-                ((IAuditable)entry.Entity).ModifiedAt = DateTime.UtcNow;
-            }
-
             if (entry.Entity is IAuditable entity)
             {
-                if (!Session.UserId.HasValue)
-                {
-                    entity.ModifiedById = null;
-                    return;
-                }
-
-                //Special check for multi-tenant entities
-                if (entity is IHaveTenant)
-                {
-                    //Sets LastModifierUserId only if current user is in same tenant/host with the given entity
-                    if (((IHaveTenant)entry.Entity).TenantId == Session.TenantId)
-                    {
-                        entity.ModifiedById = Session.UserId;
-                    }
-                    else
-                    {
-                        entity.ModifiedById = null;
-                    }
-                }
-                else
-                {
-                    entity.ModifiedById = Session.UserId;
-                }
+                entity.ModifiedAt = _dateTime.UtcNow;
+                entity.ModifiedById = Session.UserId;
             }
+
         }
 
         private void CancelDeletionForSoftDelete(EntityEntry entry)
@@ -203,48 +163,11 @@ namespace Pesabooks.Infrastructure.Persistance
 
         private void SetDeletionAuditProperties(object entityAsObj)
         {
-            if (entityAsObj is IAuditable)
+            if (entityAsObj is IAuditable entity)
             {
-                var entity = (IAuditable)entityAsObj;
 
-                if (entity.DeletedAt == null)
-                {
-                    entity.DeletedAt = DateTime.Now;
-                }
-            }
-
-            if (entityAsObj is IAuditable)
-            {
-                var entity = (IAuditable)entityAsObj;
-
-                if (!entity.DeletedById.HasValue)
-                {
-                    return;
-                }
-
-                if (!Session.UserId.HasValue)
-                {
-                    entity.DeletedById = null;
-                    return;
-                }
-
-                //Special check for multi-tenant entities
-                if (entity is IHaveTenant)
-                {
-                    //Sets LastModifierUserId only if current user is in same tenant/host with the given entity
-                    if ((entity is IHaveTenant && ((IHaveTenant)entity).TenantId == Session.TenantId))
-                    {
-                        entity.DeletedById = Session.UserId;
-                    }
-                    else
-                    {
-                        entity.DeletedById = null;
-                    }
-                }
-                else
-                {
-                    entity.DeletedById = Session.UserId;
-                }
+                entity.DeletedAt = _dateTime.UtcNow;
+                entity.DeletedById = Session.UserId;
             }
         }
     }
