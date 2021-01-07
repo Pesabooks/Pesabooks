@@ -1,10 +1,12 @@
 ﻿using IdentityModel.Client;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Pesabooks.Application.Common.Interfaces;
+using Pesabooks.Domain.Identity;
 using Pesabooks.Domain.Session;
 using Pesabooks.Infrastructure.Persistance;
 using System;
@@ -40,7 +42,7 @@ namespace Pesabooks.Api.IntegrationTests.Common
                         options.UseInternalServiceProvider(serviceProvider);
                     });
 
-                    services.AddScoped<ISession, TestSession>();
+                   // services.AddScoped<ISession, TestSession>();
                     services.AddScoped<IPesabooksDbContext>(provider => provider.GetService<PesabooksDbContext>());
 
                     var sp = services.BuildServiceProvider();
@@ -51,13 +53,14 @@ namespace Pesabooks.Api.IntegrationTests.Common
                     var context = scopedServices.GetRequiredService<PesabooksDbContext>();
                     var logger = scopedServices.GetRequiredService<ILogger<CustomWebApplicationFactory<TStartup>>>();
 
+                    var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                     // Ensure the database is created.
                     context.Database.EnsureCreated();
 
                     try
                     {
                         // Seed the database with test data.
-                        Utilities.InitializeDbForTests(context);
+                        Utilities.InitializeDbForTests(context, userMgr);
                     }
                     catch (Exception ex)
                     {
@@ -75,7 +78,7 @@ namespace Pesabooks.Api.IntegrationTests.Common
 
         public async Task<HttpClient> GetAuthenticatedClientAsync()
         {
-            return await GetAuthenticatedClientAsync("test@pesabooks", "123qwe");
+            return await GetAuthenticatedClientAsync("test@pesabooks.com", "P@ssw0rd");
         }
 
         public async Task<HttpClient> GetAuthenticatedClientAsync(string userName, string password, string tenantId = "1")
@@ -85,7 +88,7 @@ namespace Pesabooks.Api.IntegrationTests.Common
             var token = await GetAccessTokenAsync(client, userName, password);
 
             client.SetBearerToken(token);
-            client.DefaultRequestHeaders.Add("Tenant", tenantId);
+            client.DefaultRequestHeaders.Add("psbk-tenant", tenantId);
 
             return client;
         }
@@ -105,7 +108,7 @@ namespace Pesabooks.Api.IntegrationTests.Common
                 ClientId = "Pesabooks.IntegrationTests",
                 ClientSecret = "secret",
                 GrantType = IdentityServer4.Models.GrantType.ResourceOwnerPassword,
-                Scope = "openid profile",
+                Scope = "openid profile api",
                 UserName = userName,
                 Password = password
             });

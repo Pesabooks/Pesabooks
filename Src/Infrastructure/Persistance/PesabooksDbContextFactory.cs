@@ -13,7 +13,7 @@ namespace Pesabooks.Infrastructure.Persistance
 
         protected override PesabooksDbContext CreateNewInstance(DbContextOptions<PesabooksDbContext> options)
         {
-            return new PesabooksDbContext(options, new NullSession(), new SystemDateTime());
+            return new PesabooksDbContext(options);
         }
     }
 

@@ -28,15 +28,11 @@ namespace Pesabooks.Application.Members.Commands
 
         public async Task<Unit> Handle(CreateMemberCommand request, CancellationToken cancellationToken)
         {
-            var phoneNumberUtil = PhoneNumbers.PhoneNumberUtil.GetInstance();
-            var phone = phoneNumberUtil.Parse(request.Phone, null);
-            var formattedPhone = phoneNumberUtil.Format(phone, PhoneNumbers.PhoneNumberFormat.E164);
-
             var member = new Member(
                     request.FirstName,
                     request.LastName,
                     request.Email,
-                    formattedPhone);
+                    request.Phone);
 
             await this._dbContext.Members.AddAsync(member);
             await _dbContext.SaveChangesAsync(cancellationToken);

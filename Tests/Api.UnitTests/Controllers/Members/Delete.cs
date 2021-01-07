@@ -35,14 +35,7 @@ namespace Pesabooks.Api.IntegrationTests.Controllers.Members
         {
             var client = await _factory.GetAuthenticatedClientAsync();
 
-            var command = new DeleteMemberCommand
-            {
-                MemberId = -1,
-            };
-
-            var content = Utilities.GetRequestContent(command);
-
-            var response = await client.PutAsync($"/api/members/999", content);
+            var response = await client.DeleteAsync($"/api/members/999");
 
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }

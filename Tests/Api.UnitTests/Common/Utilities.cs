@@ -1,6 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
 using Pesabooks.Common.Tests;
+using Pesabooks.Domain.Identity;
 using Pesabooks.Infrastructure.Persistance;
+using Pesabooks.Tenancy.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,10 +29,22 @@ namespace Pesabooks.Api.IntegrationTests.Common
             return result;
         }
 
-        public static void InitializeDbForTests(PesabooksDbContext context)
+        public static void InitializeDbForTests(PesabooksDbContext context, UserManager<User> userMgr)
         {
+            var user = new User
+            {
+                UserName = "test@pesabooks.com",
+                Email = "test@pesabooks.com",
+                EmailConfirmed = true,
+            };
+            var result = userMgr.CreateAsync(user, "P@ssw0rd").Result;
+
             var memberFaker = new MemberFaker();
             context.Members.AddRange(memberFaker.Generate(10));
+            
+
+            var tenantREsult = context.Tenants.Add(new Tenant(1, "test", "", ""));
+
             context.SaveChangesAsync().Wait();
         }
     }

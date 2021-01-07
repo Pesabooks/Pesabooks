@@ -96,6 +96,7 @@ namespace Pesabooks.Api
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseIdentityServer();
+            app.UseTenantMiddleware();
 
             app.UseEndpoints(endpoints =>
             {

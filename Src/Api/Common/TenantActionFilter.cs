@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Pesabooks.Api.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Pesabooks.Api
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            var tenant = context.HttpContext?.Request.Headers["Tenant"].FirstOrDefault();
+            var tenant = context.HttpContext.Items[Constants.HttpContextTenantKey];
             if (tenant is null)
             {
                 context.Result = new BadRequestObjectResult("Tenant is required");

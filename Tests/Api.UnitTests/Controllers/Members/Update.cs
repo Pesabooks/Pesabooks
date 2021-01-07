@@ -31,7 +31,7 @@ namespace Pesabooks.Api.IntegrationTests.Controllers.Members
                 FirstName = "John",
                 LastName = "Doe",
                 Email = "john@email.com",
-                Phone = "+888000000"
+                Phone = "+151400545623"
             };
 
             var content = Utilities.GetRequestContent(command);
@@ -64,7 +64,7 @@ namespace Pesabooks.Api.IntegrationTests.Controllers.Members
 
         [Theory]
         [ClassData(typeof(InvalidUpdateemberParameters))]
-        public async Task WhenCUpdateMember_ShouldReturnBadRequest(UpdateMemberCommand command)
+        public async Task WhenUpdateMember_ShouldReturnBadRequest(UpdateMemberCommand command)
         {
             // arrange
             var client = await _factory.GetAuthenticatedClientAsync();

@@ -10,9 +10,8 @@ namespace Pesabooks.Api.Controllers
     [Authorize]
     public class AccountsController : BaseController
     {
-        public AccountsController(ISession session)
+        public AccountsController()
         {
-            var tenant = session.Tenant;
         }
 
         // GET: api/accounts

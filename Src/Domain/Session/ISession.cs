@@ -21,8 +21,7 @@ namespace Pesabooks.Domain.Session
         /// It can be null if is a host user or no user logged in.
         /// </summary>
         int? TenantId { get; }
-
-
         Tenant Tenant { get; }
+
     }
 }

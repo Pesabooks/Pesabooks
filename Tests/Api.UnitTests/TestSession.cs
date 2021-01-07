@@ -14,6 +14,8 @@ namespace Pesabooks.Api.IntegrationTests
 
         public int? TenantId => 1;
 
-        public Tenant Tenant => null;
+        public Tenant Tenant => new Tenant { Id = 1 };
+    
+        
     }
 }

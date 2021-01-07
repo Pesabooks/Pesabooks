@@ -50,6 +50,9 @@ namespace Pesabooks.Api.Common
                 case NotFoundException _:
                     code = HttpStatusCode.NotFound;
                     break;
+                case UnauthorizedException _:
+                    code = HttpStatusCode.Unauthorized;
+                    break;
             }
 
             context.Response.ContentType = "application/json";

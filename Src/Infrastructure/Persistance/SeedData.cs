@@ -18,25 +18,20 @@ namespace Pesabooks.Infrastructure.Persistance
         {
             var services = new ServiceCollection();
             services.AddLogging();
-            services.AddDbContext<AppIdentityDbContext>(options =>
+            services.AddDbContext<PesabooksDbContext>(options =>
                options.UseNpgsql(connectionString));
 
             services.AddIdentity<User, Role>()
-                 .AddEntityFrameworkStores<AppIdentityDbContext>()
+                 .AddEntityFrameworkStores<PesabooksDbContext>()
                     .AddDefaultTokenProviders();
 
             using (var serviceProvider = services.BuildServiceProvider())
             {
                 using (var scope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope())
                 {
-                    var context = scope.ServiceProvider.GetService<AppIdentityDbContext>();
+                    var context = scope.ServiceProvider.GetService<PesabooksDbContext>();
                     context.Database.Migrate();
-
-                    if (!context.Tenants.Any())
-                    {
-                        context.Tenants.Add(new Tenancy.Domain.Tenant("Default", "", "default", "CAD"));
-
-                    }
+                   
 
                     var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                     var amdin = userMgr.FindByNameAsync("admin").Result;

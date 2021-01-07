@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Any;
+using Pesabooks.Api.Common;
 
 namespace Pesabooks.Api
 {
@@ -16,7 +17,7 @@ namespace Pesabooks.Api
 
             operation.Parameters.Add(new OpenApiParameter()
             {
-                Name = "Tenant",
+                Name = Constants.HttpContextTenantKey,
                 Description = "Tenant Id",
                 In = ParameterLocation.Header,
                // Schema = new OpenApiSchema() { Type = "String" },

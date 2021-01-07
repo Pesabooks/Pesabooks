@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Moq;
 using Pesabooks.Accounting.Domain;
 using Pesabooks.Common.Interfaces;
@@ -20,6 +21,7 @@ namespace Pesabooks.Application.UnitTests.Common
         {
             var options = new DbContextOptionsBuilder<PesabooksDbContext>()
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
                 .Options;
 
             var _sessionMock = new Mock<ISession>();
@@ -34,16 +36,16 @@ namespace Pesabooks.Application.UnitTests.Common
 
             context.Database.EnsureCreated();
 
-            context.Accounts.AddRange(DefaultAccounts.GetDefaultAccounts("CAD"));
-
+            // add members
             var memberFaker = new MemberFaker();
-            var members = memberFaker.Generate(10);
-            for (int i = 0; i < 4; i++)
+            var members = memberFaker.Generate(Constants.InitialMembersCount);
+            for (int i = 0; i < Constants.InitialMembersArchivedCount; i++)
             {
                 members[i].Archive();
             }
             context.Members.AddRange(members);
-            context.SaveChangesAsync().Wait();
+
+            context.SaveChanges();
 
             return context;
         }

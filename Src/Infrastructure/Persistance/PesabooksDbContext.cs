@@ -1,14 +1,19 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
 using Pesabooks.Accounting.Domain;
 using Pesabooks.Application.Common.Interfaces;
 using Pesabooks.Common.Interfaces;
 using Pesabooks.Domain.Accounting;
 using Pesabooks.Domain.Common;
+using Pesabooks.Domain.Identity;
 using Pesabooks.Domain.Members;
 using Pesabooks.Domain.Session;
 using Pesabooks.Infrastructure.Persistance.Configurations;
 using Pesabooks.Infrastructure.Persistance.Extensions;
+using Pesabooks.Tenancy.Domain;
 using System;
 using System.Linq;
 using System.Threading;
@@ -16,12 +21,13 @@ using System.Threading.Tasks;
 
 namespace Pesabooks.Infrastructure.Persistance
 {
-    public class PesabooksDbContext : DbContext, IPesabooksDbContext
+
+    public class PesabooksDbContext : IdentityDbContext<User, Role, int, IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>, IPesabooksDbContext
     {
         private readonly ISession Session;
         private readonly IDateTime _dateTime;
 
-
+        public DbSet<Tenant> Tenants { get; set; }
         public DbSet<Member> Members { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
@@ -29,9 +35,9 @@ namespace Pesabooks.Infrastructure.Persistance
 
         public IQueryable<JournalEntry> JournalEntries => _journalEntries.AsNoTracking();
 
-        //public PesabooksDbContext(DbContextOptions<PesabooksDbContext> options) : base(options)
-        //{
-        //}
+        public PesabooksDbContext(DbContextOptions<PesabooksDbContext> options) : base(options)
+        {
+        }
 
         public PesabooksDbContext(DbContextOptions<PesabooksDbContext> options, ISession session, IDateTime dateTime)
            : base(options)
@@ -41,13 +47,21 @@ namespace Pesabooks.Infrastructure.Persistance
         }
 
 
+        public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            return this.Database.BeginTransactionAsync(default);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             SetGlobalQuery(modelBuilder);
+
+            modelBuilder.ApplyConfiguration(new TenantConfiguration());
+            modelBuilder.ApplyConfiguration(new UserTenantConfiguration());
             modelBuilder.ApplyConfiguration(new MemberConfiguration());
             modelBuilder.ApplyConfiguration(new AccountConfiguration());
             modelBuilder.ApplyConfiguration(new JournalEntryConfiguration());
+
 
             base.OnModelCreating(modelBuilder);
         }
@@ -71,6 +85,12 @@ namespace Pesabooks.Infrastructure.Persistance
         {
             AddTimestamps();
             return base.SaveChangesAsync(cancellationToken);
+        }
+
+        public override int SaveChanges()
+        {
+            AddTimestamps();
+            return base.SaveChanges();
         }
 
         private void AddTimestamps()
@@ -170,5 +190,7 @@ namespace Pesabooks.Infrastructure.Persistance
                 entity.DeletedById = Session.UserId;
             }
         }
+
+     
     }
 }

@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using Pesabooks.Application.Members.Dto;
+using Pesabooks.Application.Tenancy.Dto;
 using Pesabooks.Domain.Members;
+using Pesabooks.Tenancy.Domain;
 using Shouldly;
 using System;
 using System.Collections.Generic;
@@ -41,6 +43,20 @@ namespace Pesabooks.Application.UnitTests.Mappings
             result.LastName.ShouldBe("Doe");
             result.Email.ShouldBe("jd@email.com");
             result.Phone.ShouldBe("+1800547474");
+        }
+
+        [Fact]
+        public void ShouldMapTenantToTenantDto()
+        {
+            var entity = new Tenant("Tenant", "Description", "Currency");
+
+            var result = _mapper.Map<TenantDto>(entity);
+
+            result.ShouldNotBeNull();
+            result.ShouldBeOfType<TenantDto>();
+            result.Name.ShouldBe("Tenant");
+            result.Description.ShouldBe("Description");
+            result.DefaultCurrency.ShouldBe("Currency");
         }
     }
 }

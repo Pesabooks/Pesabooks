@@ -22,15 +22,13 @@ namespace Pesabooks.Application.UnitTests.Members.Queries
         private readonly PesabooksDbContext _context;
         private readonly IMapper _mapper;
 
-        private int TotalMembers = 10;
-        private int ArchivedMembers = 4;
+        private int TotalMembers = Constants.InitialMembersCount;
+        private int ArchivedMembers = Constants.InitialMembersArchivedCount;
 
         public GetMemberListQueryTests(QueryTestFixture fixture)
         {
             _context = fixture.Context;
             _mapper = fixture.Mapper;
-
-           
         }
 
         [Fact]

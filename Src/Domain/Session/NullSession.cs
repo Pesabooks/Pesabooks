@@ -1,4 +1,5 @@
-﻿using Pesabooks.Tenancy.Domain;
+﻿using Pesabooks.Domain.Identity;
+using Pesabooks.Tenancy.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,12 +8,10 @@ using System.Threading.Tasks;
 
 namespace Pesabooks.Domain.Session
 {
-    public class NullSession : ISession
-    {
-        public int? UserId => null;
+    //public class NullSession : ISession
+    //{
+    //    public User CurrentUser => null;
 
-        public int? TenantId => null;
-
-        public Tenant Tenant => null;
-    }
+    //    public Tenant Tenant => null;
+    //}
 }
