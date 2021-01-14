@@ -11,6 +11,7 @@ namespace Pesabooks.Application.Tenancy.Dto
 {
     public class TenantDto : IMapFrom<Tenant>
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string DefaultCurrency { get; set; }

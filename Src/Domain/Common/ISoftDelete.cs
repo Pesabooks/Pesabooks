@@ -16,5 +16,14 @@ namespace Pesabooks.Domain.Common
         /// Used to mark an Entity as 'Deleted'. 
         /// </summary>
         bool IsDeleted { get; set; }
+
+        /// <summary>
+        /// The soft deletion time for this entity.
+        /// </summary>
+        DateTime? DeletedAt { get; set; }
+        /// <summary>
+        /// Last modified user id for this entity.
+        /// </summary>
+        int? DeletedById { get; set; }
     }
 }

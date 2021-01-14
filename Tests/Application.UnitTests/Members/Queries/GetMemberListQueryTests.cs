@@ -48,7 +48,7 @@ namespace Pesabooks.Application.UnitTests.Members.Queries
         {
 
             var sut = new GetMemberListQueryHandler(_context, _mapper);
-            var result = await sut.Handle(new GetMemberListQuery { IncludeArchived = true }, CancellationToken.None);
+            var result = await sut.Handle(new GetMemberListQuery { IncludeDeactivated = true }, CancellationToken.None);
 
 
             result.ShouldBeOfType<List<MemberListDto>>();

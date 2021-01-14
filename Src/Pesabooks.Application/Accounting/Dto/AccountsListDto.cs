@@ -2,7 +2,7 @@
 using Pesabooks.Application.Common.Mappings;
 using Pesabooks.Domain.Accounting;
 
-namespace Pesabooks.Application.Accounting.Queries
+namespace Pesabooks.Application.Accounting.Dto
 {
     public class AccountsListDto : IMapFrom<Account>
     {

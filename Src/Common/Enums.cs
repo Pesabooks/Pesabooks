@@ -55,14 +55,24 @@
                 Deposit = 1,
                 Withdrawal = 2,
                 Transfert = 3,
-                Expense = 4
+                Expense = 4,
+                Payment = 5
             }
 
 
             public enum JournalEntryType
             {
+                // Money flowing into an account
                 Debit = 1,
+                // Money flowing out of an account
                 Credit = 2
+            }
+
+            public enum TransactionDirection
+            {
+                Incoming=1,
+                Outgoing=2,
+                None=3
             }
         }
     }

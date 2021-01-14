@@ -10,8 +10,8 @@ using Pesabooks.Infrastructure.Persistance;
 namespace Pesabooks.Infrastructure.Migrations
 {
     [DbContext(typeof(PesabooksDbContext))]
-    [Migration("20210103171933_Init")]
-    partial class Init
+    [Migration("20210114015604_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -107,55 +107,6 @@ namespace Pesabooks.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Pesabooks.Accounting.Domain.JournalEntry", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .UseIdentityByDefaultColumn();
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int?>("CreatedById")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int?>("DeletedById")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<DateTime?>("ModifiedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int?>("ModifiedById")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TransactionId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("TransactionId");
-
-                    b.ToTable("JournalEntries");
-                });
-
             modelBuilder.Entity("Pesabooks.Accounting.Domain.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -172,17 +123,8 @@ namespace Pesabooks.Infrastructure.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int?>("DeletedById")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Description")
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<int?>("MemberId")
                         .HasColumnType("integer");
@@ -191,6 +133,9 @@ namespace Pesabooks.Infrastructure.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("ModifiedById")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TenantId")
                         .HasColumnType("integer");
 
                     b.Property<int>("Type")
@@ -234,6 +179,9 @@ namespace Pesabooks.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsInactive")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
 
@@ -256,7 +204,49 @@ namespace Pesabooks.Infrastructure.Migrations
 
                     b.HasIndex("ParentId");
 
+                    b.HasIndex("TenantId");
+
                     b.ToTable("Accounts");
+                });
+
+            modelBuilder.Entity("Pesabooks.Domain.Accounting.JournalEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .UseIdentityByDefaultColumn();
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModifiedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int?>("ModifiedById")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TransactionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("TransactionId");
+
+                    b.ToTable("JournalEntries");
                 });
 
             modelBuilder.Entity("Pesabooks.Domain.Identity.Role", b =>
@@ -393,19 +383,10 @@ namespace Pesabooks.Infrastructure.Migrations
                     b.Property<bool>("Default")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int?>("DeletedById")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .UseIdentityByDefaultColumn();
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
@@ -450,10 +431,10 @@ namespace Pesabooks.Infrastructure.Migrations
                         .HasColumnType("text")
                         .HasComputedColumnSql("\"FirstName\" || ' ' || \"LastName\"", true);
 
-                    b.Property<bool>("IsArchived")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<bool>("IsInactive")
                         .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
@@ -492,17 +473,8 @@ namespace Pesabooks.Infrastructure.Migrations
                     b.Property<string>("DefaultCurrency")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int?>("DeletedById")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Description")
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
@@ -554,25 +526,6 @@ namespace Pesabooks.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Pesabooks.Accounting.Domain.JournalEntry", b =>
-                {
-                    b.HasOne("Pesabooks.Domain.Accounting.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Pesabooks.Accounting.Domain.Transaction", "Transaction")
-                        .WithMany("JournalEntries")
-                        .HasForeignKey("TransactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Account");
-
-                    b.Navigation("Transaction");
-                });
-
             modelBuilder.Entity("Pesabooks.Accounting.Domain.Transaction", b =>
                 {
                     b.HasOne("Pesabooks.Domain.Members.Member", "Member")
@@ -589,7 +542,32 @@ namespace Pesabooks.Infrastructure.Migrations
                         .HasForeignKey("ParentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Pesabooks.Tenancy.Domain.Tenant", null)
+                        .WithMany("Accounts")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("Pesabooks.Domain.Accounting.JournalEntry", b =>
+                {
+                    b.HasOne("Pesabooks.Domain.Accounting.Account", "Account")
+                        .WithMany("JournalEntries")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pesabooks.Accounting.Domain.Transaction", "Transaction")
+                        .WithMany("JournalEntries")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("Pesabooks.Domain.Identity.Role", b =>
@@ -644,6 +622,8 @@ namespace Pesabooks.Infrastructure.Migrations
 
             modelBuilder.Entity("Pesabooks.Domain.Accounting.Account", b =>
                 {
+                    b.Navigation("JournalEntries");
+
                     b.Navigation("SubAccounts");
                 });
 
@@ -654,6 +634,8 @@ namespace Pesabooks.Infrastructure.Migrations
 
             modelBuilder.Entity("Pesabooks.Tenancy.Domain.Tenant", b =>
                 {
+                    b.Navigation("Accounts");
+
                     b.Navigation("Roles");
 
                     b.Navigation("UserTenants");

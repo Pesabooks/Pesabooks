@@ -13,7 +13,7 @@ namespace Pesabooks.Infrastructure.UnitTests
 {
     public class PesabooksDbContextTests : IDisposable
     {
-        private readonly int _userId;
+        private const int _userId = 2;
         private readonly DateTime _dateTime;
         private readonly Mock<ISession> _sessionMock;
         private readonly Mock<IDateTime> _dateTimeMock;

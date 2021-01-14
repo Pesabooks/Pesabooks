@@ -27,13 +27,8 @@ namespace Pesabooks.Application.Members.Commands
 
         public async Task<Unit> Handle(DeleteMemberCommand request, CancellationToken cancellationToken)
         {
-            var member = await _dbContext.Members
-                .FindAsync(request.MemberId);
-
-            if (member == null)
-            {
-                throw new NotFoundException(nameof(Member), request.MemberId);
-            }
+            var member = await _dbContext.Members.FindAsync(request.MemberId)
+                ?? throw new NotFoundException(nameof(Member), request.MemberId);
 
             _dbContext.Members.Remove(member);
 

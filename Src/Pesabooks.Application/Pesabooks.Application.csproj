@@ -17,4 +17,8 @@
     <ProjectReference Include="..\Domain\Pesabooks.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Accounting\Queries\Transactions\" />
+  </ItemGroup>
+
 </Project>

@@ -4,42 +4,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Pesabooks.Infrastructure.Migrations
 {
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Accounts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    Category = table.Column<int>(type: "integer", nullable: false),
-                    Code = table.Column<string>(type: "text", nullable: true),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    CurrencyCode = table.Column<string>(type: "text", nullable: true),
-                    ParentId = table.Column<int>(type: "integer", nullable: true),
-                    TenantId = table.Column<int>(type: "integer", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    CreatedById = table.Column<int>(type: "integer", nullable: true),
-                    ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    ModifiedById = table.Column<int>(type: "integer", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    DeletedById = table.Column<int>(type: "integer", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Accounts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Accounts_Accounts_ParentId",
-                        column: x => x.ParentId,
-                        principalTable: "Accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
             migrationBuilder.CreateTable(
                 name: "AspNetUsers",
                 columns: table => new
@@ -78,14 +46,14 @@ namespace Pesabooks.Infrastructure.Migrations
                     Email = table.Column<string>(type: "text", nullable: true),
                     Phone = table.Column<string>(type: "text", nullable: true),
                     TenantId = table.Column<int>(type: "integer", nullable: false),
-                    IsArchived = table.Column<bool>(type: "boolean", nullable: false),
+                    IsInactive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    DeletedById = table.Column<int>(type: "integer", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CreatedById = table.Column<int>(type: "integer", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    ModifiedById = table.Column<int>(type: "integer", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    DeletedById = table.Column<int>(type: "integer", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    ModifiedById = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -104,10 +72,7 @@ namespace Pesabooks.Infrastructure.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CreatedById = table.Column<int>(type: "integer", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    ModifiedById = table.Column<int>(type: "integer", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    DeletedById = table.Column<int>(type: "integer", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    ModifiedById = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -185,13 +150,11 @@ namespace Pesabooks.Infrastructure.Migrations
                     Description = table.Column<string>(type: "text", nullable: true),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     MemberId = table.Column<int>(type: "integer", nullable: true),
+                    TenantId = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CreatedById = table.Column<int>(type: "integer", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    ModifiedById = table.Column<int>(type: "integer", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    DeletedById = table.Column<int>(type: "integer", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    ModifiedById = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -202,6 +165,45 @@ namespace Pesabooks.Infrastructure.Migrations
                         principalTable: "Members",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Accounts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Category = table.Column<int>(type: "integer", nullable: false),
+                    Code = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    CurrencyCode = table.Column<string>(type: "text", nullable: true),
+                    ParentId = table.Column<int>(type: "integer", nullable: true),
+                    TenantId = table.Column<int>(type: "integer", nullable: false),
+                    IsInactive = table.Column<bool>(type: "boolean", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    DeletedById = table.Column<int>(type: "integer", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    CreatedById = table.Column<int>(type: "integer", nullable: true),
+                    ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    ModifiedById = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Accounts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Accounts_Accounts_ParentId",
+                        column: x => x.ParentId,
+                        principalTable: "Accounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Accounts_Tenants_TenantId",
+                        column: x => x.TenantId,
+                        principalTable: "Tenants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -238,10 +240,7 @@ namespace Pesabooks.Infrastructure.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CreatedById = table.Column<int>(type: "integer", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    ModifiedById = table.Column<int>(type: "integer", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    DeletedById = table.Column<int>(type: "integer", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    ModifiedById = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -273,10 +272,7 @@ namespace Pesabooks.Infrastructure.Migrations
                     CreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     CreatedById = table.Column<int>(type: "integer", nullable: true),
                     ModifiedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    ModifiedById = table.Column<int>(type: "integer", nullable: true),
-                    DeletedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    DeletedById = table.Column<int>(type: "integer", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    ModifiedById = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -345,6 +341,11 @@ namespace Pesabooks.Infrastructure.Migrations
                 name: "IX_Accounts_ParentId",
                 table: "Accounts",
                 column: "ParentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Accounts_TenantId",
+                table: "Accounts",
+                column: "TenantId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

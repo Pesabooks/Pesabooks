@@ -41,7 +41,7 @@ namespace Pesabooks.Application.UnitTests.Common
             var members = memberFaker.Generate(Constants.InitialMembersCount);
             for (int i = 0; i < Constants.InitialMembersArchivedCount; i++)
             {
-                members[i].Archive();
+                members[i].Deactivate();
             }
             context.Members.AddRange(members);
 

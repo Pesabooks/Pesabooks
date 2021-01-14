@@ -15,7 +15,7 @@ namespace Pesabooks.Application.Members.Queries
 {
     public class GetMemberListQuery : IRequest<IList<MemberListDto>>
     {
-        public bool IncludeArchived { get; set; }       
+        public bool IncludeDeactivated { get; set; }       
     }
 
     public class GetMemberListQueryHandler : IRequestHandler<GetMemberListQuery, IList<MemberListDto>>
@@ -32,9 +32,9 @@ namespace Pesabooks.Application.Members.Queries
         public async Task<IList<MemberListDto>> Handle(GetMemberListQuery request, CancellationToken cancellationToken)
         {
             var query = _context.Members.AsQueryable();
-            if (!request.IncludeArchived)
+            if (!request.IncludeDeactivated)
             {
-                query = query.Where(m => !m.IsArchived);
+                query = query.Where(m => !m.IsInactive);
             }
 
             var members = await query.ProjectTo<MemberListDto>(_mapper.ConfigurationProvider)

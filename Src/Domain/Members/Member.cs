@@ -1,17 +1,20 @@
 ﻿using Pesabooks.Domain.Common;
+using System;
 
 namespace Pesabooks.Domain.Members
 {
-    public class Member : BaseEntity, IHaveTenant, IArchivable
+    public class Member : BaseEntity, IHaveTenant, IInactivable, ISoftDelete
     {
         public string FirstName { get; private set; }
         public string LastName { get; private set; }
         public string FullName { get; private set; }
         public string Email { get; private set; }
         public string Phone { get; private set; }
-        public int TenantId { get; set; }
-        public bool IsArchived { get;  set; }
-
+        public int TenantId { get; set; }   
+        public bool IsInactive { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
+        public int? DeletedById { get; set; }
         private Member()
         {
 
@@ -36,9 +39,9 @@ namespace Pesabooks.Domain.Members
             Phone = phone;
         }
 
-        public void Archive()
+        public void Deactivate()
         {
-            IsArchived = !IsArchived;
+            IsInactive = !IsInactive;
         }
     }
 }

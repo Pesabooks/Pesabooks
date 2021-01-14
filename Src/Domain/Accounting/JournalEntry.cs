@@ -1,8 +1,8 @@
-﻿    using Pesabooks.Domain.Accounting;
+﻿using Pesabooks.Accounting.Domain;
 using Pesabooks.Domain.Common;
 using static Pesabooks.Enums.Accounting;
 
-namespace Pesabooks.Accounting.Domain
+namespace Pesabooks.Domain.Accounting
 {
     public class JournalEntry : BaseEntity
     {
@@ -12,7 +12,7 @@ namespace Pesabooks.Accounting.Domain
         public int TransactionId { get; private set; }
         public Transaction Transaction { get; private set; }
         public decimal Amount { get; private set; }
-        public JournalEntryType Type{ get; set; }
+        public JournalEntryType Type { get; set; }
 
         private JournalEntry()
         {

@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Pesabooks.Domain.Common
 {
-    public interface IArchivable
+    public interface IInactivable
     {
-        public bool IsArchived { get; set; }
+        public bool IsInactive { get; set; }
+        public void Deactivate();
     }
 }

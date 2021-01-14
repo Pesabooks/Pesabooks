@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Pesabooks.Domain.Common
 {
-    public class BaseEntity : IAuditable, ISoftDelete
+    public class BaseEntity : IAuditable
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -18,8 +18,6 @@ namespace Pesabooks.Domain.Common
         public int? CreatedById { get; set; }
         public DateTime? ModifiedAt { get; set; }
         public int? ModifiedById { get; set; }
-        public DateTime? DeletedAt { get; set; }
-        public int? DeletedById { get; set; }
-        public bool IsDeleted { get; set; }
     }
+
 }

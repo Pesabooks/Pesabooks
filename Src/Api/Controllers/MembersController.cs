@@ -44,10 +44,10 @@ namespace Pesabooks.Api.Controllers
             await Mediator.Send(new DeleteMemberCommand { MemberId = id });
         }
 
-        [HttpPost("{id}/archive")]
-        public async Task Archive(int id)
+        [HttpPost("{id}/deactivate")]
+        public async Task Deactivate(int id)
         {
-            await Mediator.Send(new ArchiveMemberCommand { MemberId = id });
+            await Mediator.Send(new DeactivateMemberCommand { MemberId = id });
         }
     }
 }

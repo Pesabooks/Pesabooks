@@ -1,5 +1,6 @@
 ﻿using Pesabooks.Common.Extensions;
 using Pesabooks.Domain.Accounting;
+using Pesabooks.Tenancy.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,40 +12,40 @@ namespace Pesabooks.Accounting.Domain
 {
     public static class DefaultAccounts
     {
-        public static List<Account> GetDefaultAccounts(string currencyCode)
+        public static List<Account> GetDefaultAccounts(Tenant tenant)
         {
             return new List<Account>
             {
                 // Assets  
-                new Account("101", "Cash", AccountType.Asset, AccountCategory.Cash, currencyCode),
-                new Account("110", "ShortTermLoan", AccountType.Asset, AccountCategory.ShortTermLoan, currencyCode),
-                new Account("120", "LongTermLoan", AccountType.Asset, AccountCategory.LongTermLoan, currencyCode),
-                new Account("130", "LoanLossProvision", AccountType.Asset, AccountCategory.LoanLossProvision, currencyCode),
-                new Account("140", "InterestReceivable", AccountType.Asset, AccountCategory.InterestReceivable, currencyCode),
-                new Account("180", "OtherAssets", AccountType.Asset, AccountCategory.OtherAssets, currencyCode),
+                new Account("101", "Cash", AccountCategory.Cash, null),
+                new Account("110", "ShortTermLoan", AccountCategory.ShortTermLoan, null),
+                new Account("120", "LongTermLoan", AccountCategory.LongTermLoan, null),
+                new Account("130", "LoanLossProvision", AccountCategory.LoanLossProvision, null),
+                new Account("140", "InterestReceivable", AccountCategory.InterestReceivable, null),
+                new Account("180", "OtherAssets", AccountCategory.OtherAssets, null),
 
                 //Liabilities
                 
-                new Account("201", "MandatorySavings", AccountType.Liability, AccountCategory.MandatorySavings, currencyCode),
-                new Account("210", "VoluntarySavings", AccountType.Liability, AccountCategory.VoluntarySavings, currencyCode),
-                new Account("215", "ShortTermBorrowing", AccountType.Liability, AccountCategory.ShortTermBorrowing, currencyCode),
-                new Account("220", "LongTermBorrowing", AccountType.Liability, AccountCategory.LongTermBorrowing, currencyCode),
-                new Account("225", "InterestPayable", AccountType.Liability, AccountCategory.InterestPayable, currencyCode),
-                new Account("280", "OtherLiabilities", AccountType.Liability, AccountCategory.OtherLiabilities, currencyCode),
+                new Account("201", "MandatorySavings", AccountCategory.MandatorySavings, null),
+                new Account("210", "VoluntarySavings", AccountCategory.VoluntarySavings, null),
+                new Account("215", "ShortTermBorrowing", AccountCategory.ShortTermBorrowing, null),
+                new Account("220", "LongTermBorrowing", AccountCategory.LongTermBorrowing, null),
+                new Account("225", "InterestPayable", AccountCategory.InterestPayable, null),
+                new Account("280", "OtherLiabilities", AccountCategory.OtherLiabilities, null),
 
                 //Equity
-                new Account("301", "OpeningBalance", AccountType.Equity, AccountCategory.OpeningBalance, currencyCode),
+                new Account("301", "OpeningBalance", AccountCategory.OpeningBalance, null),
 
                 // Income
-                new Account("401", "InterestOnLoan", AccountType.Income, AccountCategory.InterestOnLoan, currencyCode),
-                new Account("405", "Penalty", AccountType.Income, AccountCategory.Penalty, currencyCode),
-                new Account("410", "Fee", AccountType.Income, AccountCategory.Fee, currencyCode),
-                new Account("480", "OtherIncome", AccountType.Income, AccountCategory.OtherIncome, currencyCode),
+                new Account("401", "InterestOnLoan", AccountCategory.InterestOnLoan, null),
+                new Account("405", "Penalty", AccountCategory.Penalty, null),
+                new Account("410", "Fee", AccountCategory.Fee, null),
+                new Account("480", "OtherIncome", AccountCategory.OtherIncome, null),
 
                 // Expense
-                new Account("501", "InterestOnSavings", AccountType.Expense, AccountCategory.InterestOnSavings, currencyCode),
-                new Account("510", "InterestOnBorrowing", AccountType.Expense, AccountCategory.InterestOnBorrowing, currencyCode),
-                new Account("580", "OtherExpense", AccountType.Expense, AccountCategory.OtherExpense, currencyCode)
+                new Account("501", "InterestOnSavings", AccountCategory.InterestOnSavings, null),
+                new Account("510", "InterestOnBorrowing", AccountCategory.InterestOnBorrowing, null),
+                new Account("580", "OtherExpense", AccountCategory.OtherExpense, null)
             };
         }
     }

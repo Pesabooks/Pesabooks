@@ -77,8 +77,7 @@ namespace Pesabooks.Infrastructure.Persistance
                     builder.Entity(entityType.ClrType).AddQueryFilter<IHaveTenant>(e => EF.Property<int?>(e, nameof(IHaveTenant.TenantId)) == Session.TenantId);
             }
 
-            //builder.Entity<Tenant>().HasQueryFilter(e => !e.IsDeleted);
-            ////builder.Entity<Tenant>().HasQueryFilter(b => EF.Property<int?>(b, nameof(IHaveTenant.TenantId)) == Session.TenantId);
+            builder.Entity<Tenant>().HasQueryFilter(e => e.UserTenants.Any(ut=>ut.UserId == Session.UserId));
         }
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
@@ -183,7 +182,7 @@ namespace Pesabooks.Infrastructure.Persistance
 
         private void SetDeletionAuditProperties(object entityAsObj)
         {
-            if (entityAsObj is IAuditable entity)
+            if (entityAsObj is ISoftDelete entity)
             {
 
                 entity.DeletedAt = _dateTime.UtcNow;

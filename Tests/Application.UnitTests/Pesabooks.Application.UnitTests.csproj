@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -28,6 +28,10 @@
     <ProjectReference Include="..\..\Src\Infrastructure\Pesabooks.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Src\Pesabooks.Application\Pesabooks.Application.csproj" />
     <ProjectReference Include="..\Common.Tests\Pesabooks.Common.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Accounting\Commands\Transactions\" />
   </ItemGroup>
 
 </Project>

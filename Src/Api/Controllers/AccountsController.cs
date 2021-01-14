@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Pesabooks.Application.Accounting.Commands;
+using Pesabooks.Application.Accounting.Commands.Accounts;
+using Pesabooks.Application.Accounting.Dto;
 using Pesabooks.Application.Accounting.Queries;
 using Pesabooks.Domain.Session;
 using System.Threading.Tasks;
@@ -23,36 +24,44 @@ namespace Pesabooks.Api.Controllers
             return Ok(list);
         }
 
-        [HttpPost("defaultAccount")]
-        public async Task<ActionResult> Post()
+        [HttpGet("{id}/journalEntries")]
+        public async Task<ActionResult<JournalEntryDto>> Get(int id)
         {
-            await Mediator.Send(new CreateDefaultAccountsCommand());
-            return Ok();
+            var query = new GetJournalEntriesListQuery { AccountId = id };
+            var entries = await Mediator.Send(query); ;
+
+            return Ok(entries);
         }
 
-        //// GET api/<ValuesController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
 
-        //// POST api/<ValuesController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
+        // POST api/accounts
+        [HttpPost]
+        public async Task Post([FromBody] CreateAccountCommand command)
+        {
+            await Mediator.Send(command);
+        }
 
-        //// PUT api/<ValuesController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
+        // PUT api/AccountS/5
+        [HttpPut("{id}")]
+        public async Task Put(int id, [FromBody] UpdateAccountCommand command)
+        {
+            await Mediator.Send(command);
+        }
 
-        //// DELETE api/<ValuesController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
+        // DELETE api/AccountS/5
+        [HttpDelete("{id}")]
+        public async Task Delete(int id)
+        {
+            await Mediator.Send(new DeleteAccountCommand { AccountId = id });
+        }
+
+        // POST api/accounts
+        [HttpPost("{id}/deactivate")]
+        public async Task Deactivate([FromBody] DeactivateAccountCommand command)
+        {
+            await Mediator.Send(command);
+        }
+
     }
+
 }

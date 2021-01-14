@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Pesabooks.Application.Accounting.Dto;
 using Pesabooks.Application.Common.Interfaces;
 using Pesabooks.Common.Specifications;
 using Pesabooks.Domain.Accounting.Specifications;
@@ -17,6 +18,7 @@ namespace Pesabooks.Application.Accounting.Queries
     public class GetAccountsListQuery : IRequest<IList<AccountsListDto>>
     {
         public bool OnlySavings { get; set; }
+        public bool IncludeDeactivated { get; set; }
 
         private class GetAccountsListQueryHandler : IRequestHandler<GetAccountsListQuery, IList<AccountsListDto>>
         {
@@ -33,12 +35,19 @@ namespace Pesabooks.Application.Accounting.Queries
             {
                 var query = _context.Accounts.AsQueryable();
 
+                if (!request.IncludeDeactivated)
+                {
+                    query = query.Where(m => !m.IsInactive);
+                }
+
                 if (request.OnlySavings)
                 {
                     query = query.Specify(new SavingAccountsSpecification());
                 }
 
-                var accounts = await query.ProjectTo<AccountsListDto>(_mapper.ConfigurationProvider)
+                var accounts = await query
+                    .OrderBy(a => a.Code)
+                    .ProjectTo<AccountsListDto>(_mapper.ConfigurationProvider)
                     .ToListAsync(cancellationToken);
 
                 return accounts;

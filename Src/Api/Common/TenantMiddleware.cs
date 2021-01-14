@@ -36,7 +36,7 @@ namespace Pesabooks.Api.Common
                     var user = await context.Users.Where(t => t.Id == userId).FirstOrDefaultAsync();
                     httpContext.Items.Add(Constants.HttpContextUserKey, user);
 
-                    var tenant = await context.Tenants.Where(t => t.Id == tenantId && t.UserTenants.Any(ut => ut.UserId == userId)).FirstOrDefaultAsync();
+                    var tenant = await context.Tenants.Where(t => t.Id == tenantId).FirstOrDefaultAsync();
                     if (tenant is null)
                     {
                         throw new UnauthorizedException("Attempted to accesss an unauthorized tenant.");
@@ -47,7 +47,7 @@ namespace Pesabooks.Api.Common
                     }
 
                 }
-                catch (FormatException e)
+                catch (FormatException)
                 {
                     throw new BadRequestException("Malformed Tenant Id. Should be a number");
                 }

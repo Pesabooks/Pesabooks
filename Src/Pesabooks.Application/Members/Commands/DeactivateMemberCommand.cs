@@ -11,22 +11,22 @@ using System.Threading.Tasks;
 
 namespace Pesabooks.Application.Members.Commands
 {
-    public class ArchiveMemberCommand : IRequest
+    public class DeactivateMemberCommand : IRequest
     {
         public int MemberId { get; set; }
 
     }
 
-    public class ArchiveMemberCommandHandler : IRequestHandler<ArchiveMemberCommand>
+    public class DeactivateMemberCommandHandler : IRequestHandler<DeactivateMemberCommand>
     {
         private readonly IPesabooksDbContext _dbContext;
 
-        public ArchiveMemberCommandHandler(IPesabooksDbContext context)
+        public DeactivateMemberCommandHandler(IPesabooksDbContext context)
         {
             _dbContext = context;
         }
 
-        public async Task<Unit> Handle(ArchiveMemberCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(DeactivateMemberCommand request, CancellationToken cancellationToken)
         {
             var member = await _dbContext.Members
                 .FindAsync(request.MemberId);
@@ -36,7 +36,7 @@ namespace Pesabooks.Application.Members.Commands
                 throw new NotFoundException(nameof(Member), request.MemberId);
             }
 
-            member.Archive();
+            member.Deactivate();
 
             await _dbContext.SaveChangesAsync(cancellationToken);
 
