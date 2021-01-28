@@ -15,11 +15,6 @@ namespace Pesabooks.Infrastructure.Persistance.Identity
                         new IdentityResources.OpenId(),
                         new IdentityResources.Profile(),
                         new IdentityResources.Email(),
-                        new IdentityResource
-                        {
-                            Name = "role",
-                            UserClaims = new List<string> {"role"}
-                        }
                    };
 
 
@@ -29,12 +24,9 @@ namespace Pesabooks.Infrastructure.Persistance.Identity
             {
             new ApiResource
             {
-                Name = "api",
+                Name = "pesabooksApi",
                 DisplayName = "Pesabooks API",
-                Description = "Allow the application to access Pesabooks API on your behalf",
-                Scopes = new List<string> {"api"},
-                ApiSecrets = new List<Secret> {new Secret("ScopeSecret".Sha256())},
-                UserClaims = new List<string> {"role"}
+                Scopes = {"api"}
             }
         };
         }
@@ -42,7 +34,7 @@ namespace Pesabooks.Infrastructure.Persistance.Identity
         public static IEnumerable<ApiScope> ApiScopes =>
             new ApiScope[]
             {
-                new ApiScope("api","Access to Pesabooks API"),
+                new ApiScope("api","Full access to Pesabooks api"),
             };
 
 

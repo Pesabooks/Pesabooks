@@ -1,14 +1,19 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pesabooks.Application.Accounting.Commands.Accounts;
 using Pesabooks.Application.Accounting.Dto;
 using Pesabooks.Application.Accounting.Queries;
-using Pesabooks.Domain.Session;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Pesabooks.Api.Controllers
 {
-    [Authorize]
+    public class ApiError
+    {
+        public string Message { get; set; }
+    }
+
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public class AccountsController : BaseController
     {
         public AccountsController()
@@ -17,15 +22,16 @@ namespace Pesabooks.Api.Controllers
 
         // GET: api/accounts
         [HttpGet]
-        public async Task<ActionResult<AccountsListDto>> Get([FromQuery] GetAccountsListQuery query)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IEnumerable<AccountsListDto>> GetAll([FromQuery] GetAccountsListQuery query)
         {
             var list = await Mediator.Send(query);
-
-            return Ok(list);
+            return list;
         }
 
         [HttpGet("{id}/journalEntries")]
-        public async Task<ActionResult<JournalEntryDto>> Get(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(JournalEntryDto[]))]
+        public async Task<ActionResult<JournalEntryDto[]>> GetJournalEntries(int id)
         {
             var query = new GetJournalEntriesListQuery { AccountId = id };
             var entries = await Mediator.Send(query); ;

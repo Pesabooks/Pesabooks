@@ -49,7 +49,7 @@ namespace Pesabooks.Infrastructure
                 options.EmitStaticAudienceClaim = true;
             })
                 .AddInMemoryIdentityResources(Config.IdentityResources)
-                //.AddInMemoryApiResources(Config.GetApiResources())
+                .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(configuration.GetSection("IdentityServer:Clients"))
                 .AddAspNetIdentity<User>()

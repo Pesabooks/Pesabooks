@@ -1,24 +1,21 @@
 using FluentValidation.AspNetCore;
-using MediatR;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pesabooks.Api.Common;
+using Pesabooks.Api.Controllers;
 using Pesabooks.Application;
 using Pesabooks.Application.Common.Interfaces;
 using Pesabooks.Domain.Session;
 using Pesabooks.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Pesabooks.Api
@@ -33,26 +30,39 @@ namespace Pesabooks.Api
 
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment Environment { get; }
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews()
-                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<IPesabooksDbContext>()); ;
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader();
+                    });
+            });
+
+            services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add(new ProducesResponseTypeAttribute(typeof(ApiError), Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest));
+            }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<IPesabooksDbContext>()); ;
+
 
             services.AddApplication();
             services.AddInfrastructure(Configuration, Environment);
 
             services.AddAuthentication("Bearer")
-                  .AddJwtBearer("Bearer", options =>
-                  {
-                      options.Authority = "https://localhost:5001";
+            .AddIdentityServerAuthentication(options =>
+            {
+                options.Authority = "https://localhost:5001";
+                options.RequireHttpsMetadata = false;
+                options.ApiName = "pesabooksApi";
+            });
 
-                      options.TokenValidationParameters = new TokenValidationParameters
-                      {
-                          ValidateAudience = false
-                      };
-                  });
+
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -79,8 +89,10 @@ namespace Pesabooks.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
             if (env.IsDevelopment())
             {
+
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Pesabooks.Api v1"));
@@ -93,11 +105,14 @@ namespace Pesabooks.Api
 
             app.UseRouting();
 
+
             app.UseAuthentication();
-            app.UseAuthorization();
             app.UseIdentityServer();
+            app.UseAuthorization();
+
             app.UseTenantMiddleware();
 
+            app.UseCors(MyAllowSpecificOrigins);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

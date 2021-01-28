@@ -21,7 +21,7 @@ namespace Pesabooks.Api
                 Description = "Tenant Id",
                 In = ParameterLocation.Header,
                // Schema = new OpenApiSchema() { Type = "String" },
-                Required = true,
+                Required = false,
                 Example = new OpenApiString("1")
             });
         }

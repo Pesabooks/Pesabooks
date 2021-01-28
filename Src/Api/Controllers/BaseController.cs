@@ -1,15 +1,15 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Pesabooks.Api.Controllers
 {
     [ApiController]
-    [ServiceFilter(typeof(TenantActionFilter))]
     [Route("api/[controller]")]
     [Authorize]
-    public abstract class BaseController : ControllerBase
+    public  class BaseController : ControllerBase
     {
         private IMediator _mediator;
 
