@@ -38,7 +38,7 @@ namespace Pesabooks.Application.Accounting.Queries
                 query = query.Where(j => j.MemberId == request.MemberId.Value);
             }
 
-            var transactions = await query.ProjectTo<TransactionDto>(_mapper.ConfigurationProvider).ToListAsync();
+            var transactions = await query.OrderByDescending(t => t.Date).ProjectTo<TransactionDto>(_mapper.ConfigurationProvider).ToListAsync();
 
             return transactions;
         }

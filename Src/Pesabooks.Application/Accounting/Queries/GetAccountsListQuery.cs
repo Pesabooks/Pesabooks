@@ -17,7 +17,6 @@ namespace Pesabooks.Application.Accounting.Queries
 {
     public class GetAccountsListQuery : IRequest<IList<AccountsListDto>>
     {
-        public bool OnlySavings { get; set; }
         public bool IncludeDeactivated { get; set; }
 
         private class GetAccountsListQueryHandler : IRequestHandler<GetAccountsListQuery, IList<AccountsListDto>>
@@ -38,11 +37,6 @@ namespace Pesabooks.Application.Accounting.Queries
                 if (!request.IncludeDeactivated)
                 {
                     query = query.Where(m => !m.IsInactive);
-                }
-
-                if (request.OnlySavings)
-                {
-                    query = query.Specify(new SavingAccountsSpecification());
                 }
 
                 var accounts = await query

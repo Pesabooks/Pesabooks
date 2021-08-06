@@ -15,15 +15,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Application", "Pe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{C5592C10-E6CE-4AE6-BB23-F25B0681D42D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Application.UnitTests", "..\Tests\Application.UnitTests\Pesabooks.Application.UnitTests.csproj", "{D387487E-6F68-4D51-A40A-01320AB9FFF8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Application.UnitTests", "..\Tests\Application.UnitTests\Pesabooks.Application.UnitTests.csproj", "{D387487E-6F68-4D51-A40A-01320AB9FFF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Api.IntegrationTests", "..\Tests\Api.UnitTests\Pesabooks.Api.IntegrationTests.csproj", "{DE7D354F-C39B-4717-9F6C-FE50AFC95711}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Api.IntegrationTests", "..\Tests\Api.UnitTests\Pesabooks.Api.IntegrationTests.csproj", "{DE7D354F-C39B-4717-9F6C-FE50AFC95711}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Domain.UnitTests", "..\Tests\Domain.UnitTests\Pesabooks.Domain.UnitTests.csproj", "{539EEDFF-EB42-44D8-A94C-49DB68945B75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Domain.UnitTests", "..\Tests\Domain.UnitTests\Pesabooks.Domain.UnitTests.csproj", "{539EEDFF-EB42-44D8-A94C-49DB68945B75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Infrastructure.UnitTests", "..\Tests\Infrastructure.UnitTests\Pesabooks.Infrastructure.UnitTests.csproj", "{F758AB24-0E45-4169-BE54-3A0A3DE4CA86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Infrastructure.UnitTests", "..\Tests\Infrastructure.UnitTests\Pesabooks.Infrastructure.UnitTests.csproj", "{F758AB24-0E45-4169-BE54-3A0A3DE4CA86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pesabooks.Common.Tests", "..\Tests\Common.Tests\Pesabooks.Common.Tests.csproj", "{6ACE7E6E-7BF4-4B68-9B3D-1FFFE967AB6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.Common.Tests", "..\Tests\Common.Tests\Pesabooks.Common.Tests.csproj", "{6ACE7E6E-7BF4-4B68-9B3D-1FFFE967AB6F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pesabooks.IdentityServer", "Pesabooks.IdentityServer\Pesabooks.IdentityServer.csproj", "{4269D388-F0C3-45F7-9101-17AD3426022E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +73,10 @@ Global
 		{6ACE7E6E-7BF4-4B68-9B3D-1FFFE967AB6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6ACE7E6E-7BF4-4B68-9B3D-1FFFE967AB6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6ACE7E6E-7BF4-4B68-9B3D-1FFFE967AB6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4269D388-F0C3-45F7-9101-17AD3426022E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4269D388-F0C3-45F7-9101-17AD3426022E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4269D388-F0C3-45F7-9101-17AD3426022E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4269D388-F0C3-45F7-9101-17AD3426022E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

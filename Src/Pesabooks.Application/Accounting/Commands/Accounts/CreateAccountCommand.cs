@@ -44,6 +44,11 @@ namespace Pesabooks.Application.Accounting.Commands.Accounts
             {
                 parentAcount = await _dbContext.Accounts.FindAsync(request.ParentAccountId) ?? throw new ArgumentException("Cannot find parent Account");
 
+                if (parentAcount.Category != request.Category)
+                {
+                    throw new BadRequestException("You can only link account with the same category");
+                }
+
             }
 
             var account = new Account(request.Code, request.Name, request.Category, request.CurrencyCode, parentAcount);

@@ -22,9 +22,9 @@ namespace Pesabooks.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<TransactionDto>> Get([FromQuery] GetTransactionsListQuery query)
+        public async Task<IEnumerable<TransactionDto>> GetAll(int? memberId)
         {
-            var transactions = await Mediator.Send(query);
+            var transactions = await Mediator.Send(new GetTransactionsListQuery { MemberId = memberId });
             return transactions;
         }
 

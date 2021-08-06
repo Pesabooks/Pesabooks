@@ -5,8 +5,9 @@ using System;
 
 namespace Pesabooks.Application.Accounting.Dto
 {
-    public class JournalEntryDto: IMapFrom<JournalEntry>
+    public class JournalEntryDto : IMapFrom<JournalEntry>
     {
+        public int Id { get; set; }
         public int AccountId { get; set; }
         public string AccountName { get; set; }
 

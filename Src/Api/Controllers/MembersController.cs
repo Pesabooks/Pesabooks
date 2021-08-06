@@ -16,11 +16,11 @@ namespace Pesabooks.Api.Controllers
     {
         // GET: api/<MembersController>
         [HttpGet]
-        public async Task<ActionResult<MemberListDto>> Get()
+        public async Task<IEnumerable<MemberListDto>> GetAll(bool IncludeDeactivated = false)
         {
-            var members = await Mediator.Send(new GetMemberListQuery());
+            var members = await Mediator.Send(new GetMemberListQuery { IncludeDeactivated = IncludeDeactivated });
 
-            return Ok(members);
+            return members;
         }
 
         // POST api/<MembersController>

@@ -8,10 +8,14 @@ using System.Threading.Tasks;
 
 namespace Pesabooks.Domain.Session
 {
-    //public class NullSession : ISession
-    //{
-    //    public User CurrentUser => null;
+    public class NullSession : ISession
+    {
+        public User CurrentUser => null;
 
-    //    public Tenant Tenant => null;
-    //}
+        public Tenant Tenant => null;
+
+        public int? UserId => null;
+
+        public int? TenantId => null;
+    }
 }

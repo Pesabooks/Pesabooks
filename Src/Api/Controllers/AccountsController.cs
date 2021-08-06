@@ -22,10 +22,9 @@ namespace Pesabooks.Api.Controllers
 
         // GET: api/accounts
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IEnumerable<AccountsListDto>> GetAll([FromQuery] GetAccountsListQuery query)
+        public async Task<IEnumerable<AccountsListDto>> GetAll(bool IncludeDeactivated = false)
         {
-            var list = await Mediator.Send(query);
+            var list = await Mediator.Send(new GetAccountsListQuery { IncludeDeactivated = IncludeDeactivated });
             return list;
         }
 
@@ -54,17 +53,18 @@ namespace Pesabooks.Api.Controllers
             await Mediator.Send(command);
         }
 
-        // DELETE api/AccountS/5
-        [HttpDelete("{id}")]
-        public async Task Delete(int id)
-        {
-            await Mediator.Send(new DeleteAccountCommand { AccountId = id });
-        }
+        //// DELETE api/AccountS/5
+        //[HttpDelete("{id}")]
+        //public async Task Delete(int id)
+        //{
+        //    await Mediator.Send(new DeleteAccountCommand { AccountId = id });
+        //}
 
         // POST api/accounts
         [HttpPost("{id}/deactivate")]
-        public async Task Deactivate([FromBody] DeactivateAccountCommand command)
+        public async Task Deactivate(int id)
         {
+            var command = new DeactivateAccountCommand { AccountId = id };
             await Mediator.Send(command);
         }
 

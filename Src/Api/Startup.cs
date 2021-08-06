@@ -1,14 +1,10 @@
 using FluentValidation.AspNetCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Pesabooks.Api.Common;
 using Pesabooks.Api.Controllers;
@@ -16,7 +12,7 @@ using Pesabooks.Application;
 using Pesabooks.Application.Common.Interfaces;
 using Pesabooks.Domain.Session;
 using Pesabooks.Infrastructure;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace Pesabooks.Api
 {
@@ -30,7 +26,6 @@ namespace Pesabooks.Api
 
         public IConfiguration Configuration { get; }
         public IWebHostEnvironment Environment { get; }
-        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -38,51 +33,52 @@ namespace Pesabooks.Api
 
             services.AddCors(options =>
             {
-                options.AddPolicy(name: MyAllowSpecificOrigins,
-                    builder =>
-                    {
-                        builder.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader();
-                    });
+                options.AddPolicy("DefaultCorsPolicy", corsOptions =>
+                {
+                    corsOptions.SetIsOriginAllowed(host => true)
+                               .AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .AllowCredentials();
+                });
             });
-
-            services.AddControllersWithViews(options =>
-            {
-                options.Filters.Add(new ProducesResponseTypeAttribute(typeof(ApiError), Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest));
-            }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<IPesabooksDbContext>()); ;
 
 
             services.AddApplication();
-            services.AddInfrastructure(Configuration, Environment);
+            services.AddInfrastructure(Configuration);
 
             services.AddAuthentication("Bearer")
-            .AddIdentityServerAuthentication(options =>
-            {
-                options.Authority = "https://localhost:5001";
-                options.RequireHttpsMetadata = false;
-                options.ApiName = "pesabooksApi";
-            });
+            //.AddIdentityServerAuthentication(options =>
+            //{
+            //    options.Authority = "https://localhost:6001";
+            //    options.RequireHttpsMetadata = false;
+            //    options.ApiName = "pesabooksApi";
+            //});
+            .AddJwtBearer(o =>
+             {
+                 o.Authority = Configuration.GetSection("IdentityServerUrl").Value;
+                 o.RequireHttpsMetadata = false;
+                 o.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                 {
+                     ValidateAudience = false
+                 };
+             });
 
-
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Events.OnRedirectToLogin = context =>
-                {
-                    context.Response.Headers["Location"] = context.RedirectUri;
-                    context.Response.StatusCode = 401;
-                    return Task.CompletedTask;
-                };
-
-            });
             services.AddScoped<ISession, WebSession>();
 
             services.AddScoped<TenantActionFilter>();
 
-            services.AddControllers();
+            services.AddControllers(options =>
+            {
+                options.Filters.Add(new ProducesResponseTypeAttribute(typeof(ApiError), Microsoft.AspNetCore.Http.StatusCodes.Status400BadRequest));
+            })
+                .AddJsonOptions(options =>
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<IPesabooksDbContext>());
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Pesabooks.Api", Version = "v1" });
-                c.OperationFilter<AddRequiredHeaderParameter>();
+               // c.OperationFilter<AddRequiredHeaderParameter>();
             });
         }
 
@@ -105,20 +101,15 @@ namespace Pesabooks.Api
 
             app.UseRouting();
 
+            app.UseCors("DefaultCorsPolicy");
 
             app.UseAuthentication();
-            app.UseIdentityServer();
             app.UseAuthorization();
 
             app.UseTenantMiddleware();
 
-            app.UseCors(MyAllowSpecificOrigins);
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "areas",
-                    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-                 );
                 endpoints.MapControllers();
             });
         }
