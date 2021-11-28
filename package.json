@@ -1,0 +1,15 @@
+{
+  "private": true,
+  "name": "pesapool",
+  "workspaces": [
+    "src/*"
+  ],
+  "scripts": {
+    "start:web": "yarn workspace @pesapool/web start",
+    "start:api": "yarn workspace @pesapool/api start",
+    "start": "concurrently --kill-others-on-fail \"yarn server\"  \"yarn client\" "
+  },
+  "dependencies": {
+    "concurrently": "^6.4.0"
+  }
+}
