@@ -1,15 +1,15 @@
 {
   "private": true,
-  "name": "pesapool",
+  "name": "pesabooks",
   "workspaces": [
     "src/*"
   ],
   "scripts": {
-    "start:web": "yarn workspace @pesapool/web start",
-    "start:api": "yarn workspace @pesapool/api start",
-    "start": "concurrently --kill-others-on-fail \"yarn server\"  \"yarn client\" "
+    "build:ui": "yarn workspace @pesabooks/ui build",
+    "build:contracts": "yarn workspace @pesabooks/contracts compile",
+    "build": "yarn build:contracts && yarn build:ui"
   },
-  "dependencies": {
-    "concurrently": "^6.4.0"
+  "devDependencies": {
+    "ts-node": "^10.4.0"
   }
 }
