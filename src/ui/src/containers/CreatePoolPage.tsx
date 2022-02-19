@@ -25,7 +25,7 @@ import { Token } from '../types';
 export const CreatePoolPage = () => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const navigate = useNavigate();
-  const { library } = useWeb3React();
+  const { library, chainId: connectedChainId } = useWeb3React();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
@@ -78,7 +78,7 @@ export const CreatePoolPage = () => {
             Create a new pool
           </Text>
           <Text color="gray.400" fontWeight="normal" fontSize={{ sm: 'sm', md: 'lg' }}>
-            This information will let us know more network you.
+            
           </Text>
         </Flex>
         <Tabs variant="unstyled" mt="24px" display="flex" flexDirection="column">
@@ -102,10 +102,10 @@ export const CreatePoolPage = () => {
                 position="relative"
                 _before={{
                   content: "''",
-                  width: { sm: '120px', md: '250px', lg: '300px' },
+                  width: { sm: '145px', md: '275px', lg: '345px' },
                   height: '3px',
                   bg: activeBullets.account ? textColor : 'gray.200',
-                  left: { sm: '12px', md: '26px' },
+                  left: { sm: '12px', md: '50px' },
                   top: { sm: activeBullets.network ? '6px' : '4px', md: '' },
                   position: 'absolute',
                   bottom: activeBullets.network ? '40px' : '38px',
@@ -126,11 +126,12 @@ export const CreatePoolPage = () => {
                   display={{ sm: 'none', md: 'block' }}
                   fontSize="sm"
                 >
-                  About
+                  select a network
                 </Text>
               </Flex>
             </Tab>
             <Tab
+              isDisabled={!chainId}
               ref={connectTab}
               _focus={{}}
               w={{ sm: '120px', md: '250px', lg: '300px' }}
@@ -149,7 +150,7 @@ export const CreatePoolPage = () => {
                 position="relative"
                 _before={{
                   content: "''",
-                  width: { sm: '120px', md: '250px', lg: '300px' },
+                  width: { sm: '140px', md: '270px', lg: '320px' },
                   height: '3px',
                   bg: activeBullets.address ? textColor : 'gray.200',
                   left: { sm: '12px', md: '28px' },
@@ -175,11 +176,12 @@ export const CreatePoolPage = () => {
                   _hover={{ color: textColor }}
                   display={{ sm: 'none', md: 'block' }}
                 >
-                  Account
+                  Connect wallet
                 </Text>
               </Flex>
             </Tab>
             <Tab
+              isDisabled={chainId !== connectedChainId}
               ref={poolTab}
               _focus={{}}
               w={{ sm: '120px', md: '250px', lg: '300px' }}
@@ -198,7 +200,7 @@ export const CreatePoolPage = () => {
                 position="relative"
                 _before={{
                   content: "''",
-                  width: { sm: '120px', md: '250px', lg: '300px' },
+                  width: { sm: '120px', md: '250px', lg: '320px' },
                   height: '3px',
                   // bg: activeBullets.profile ? textColor : "gray.200",
                   left: { sm: '12px', md: '32px' },

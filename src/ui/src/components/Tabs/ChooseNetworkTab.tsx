@@ -1,14 +1,14 @@
 import { CheckIcon } from '@chakra-ui/icons';
 import {
-    Button,
-    Checkbox,
-    Divider,
-    Flex,
-    Image,
-    Spacer,
-    Stack,
-    Text,
-    useColorModeValue
+  Button,
+  Checkbox,
+  Divider,
+  Flex,
+  Image,
+  Spacer,
+  Stack,
+  Text,
+  useColorModeValue
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Card, CardBody, CardHeader } from '../Card';
@@ -34,11 +34,9 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
           mx="auto"
         >
           <Text color={textColor} fontSize="lg" fontWeight="bold" mb="4px">
-            What are you doing? (checkboxes)
+            Select a network
           </Text>
-          <Text color="gray.400" fontWeight="normal" fontSize="sm">
-            Give us more details about you. What do you enjoy doing in your spare time?
-          </Text>
+        
         </Flex>
       </CardHeader>
       <CardBody>
