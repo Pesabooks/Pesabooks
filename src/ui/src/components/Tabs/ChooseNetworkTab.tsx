@@ -36,7 +36,6 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
           <Text color={textColor} fontSize="lg" fontWeight="bold" mb="4px">
             Select a network
           </Text>
-        
         </Flex>
       </CardHeader>
       <CardBody>
@@ -49,7 +48,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
             mb="24px"
           >
             <Button
-              bg={chainId === 137 ? 'teal.300' : '#fff'}
+               variant={chainId === 137 ? 'solid' : 'outline'}
               size="lg"
               display="flex"
               justifyContent="start"
@@ -76,7 +75,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
             </Checkbox>
             {includeTestnets && (
               <Button
-                bg={chainId === 80001 ? 'teal.300' : '#fff'}
+                variant={chainId === 80001 ? 'solid' : 'outline'}
                 size="lg"
                 display="flex"
                 justifyContent="start"

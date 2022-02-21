@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { BsCircleFill } from 'react-icons/bs';
 import { useNavigate } from 'react-router';
+import { Navbar } from '../components/Layout/Navbar';
 import { ChooseNetworkTab } from '../components/Tabs/ChooseNetworkTab';
 import { ConnectToYourWalletTab } from '../components/Tabs/ConnectToYourWalletTab';
 import { CreatePoolFormValue, PoolFormTab } from '../components/Tabs/PoolFormTab';
@@ -73,6 +74,7 @@ export const CreatePoolPage = () => {
         <title>Create a new pool</title>
       </Helmet>
       <Flex direction="column" minH="100vh" align="center" pt={{ sm: '125px', lg: '75px' }}>
+      <Navbar/> 
         <Flex direction="column" textAlign="center" mb={{ sm: '25px', md: '45px' }}>
           <Text fontSize={{ sm: '2xl', md: '3xl', lg: '4xl' }} fontWeight="bold" mb="8px">
             Create a new pool

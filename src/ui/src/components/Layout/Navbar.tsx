@@ -29,7 +29,7 @@ import { WithdrawButton } from '../Buttons/WithdrawButton';
 import { ConnectedChain } from '../ConnectedChain';
 import { PoolSelectorMenu } from './PoolSelectorMenu';
 interface NavBarProps extends FlexProps {
-  onOpen: () => void;
+  onOpen?: () => void;
 }
 
 export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
