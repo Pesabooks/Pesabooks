@@ -11,7 +11,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-  useToast,
+  useToast
 } from '@chakra-ui/react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
@@ -36,10 +36,9 @@ export const SigninPage = () => {
       const { email, password } = values;
       await auth.signIn?.({ email, password });
       navigate(searchParams.get('returnUrl') ?? '/');
-    } catch (error) {
-      const message = error instanceof Error ? error.message : null;
+    } catch {
       toast({
-        title: message,
+        title: 'Your login is invalid. Please try again.',
         status: 'error',
         isClosable: true,
       });

@@ -1,7 +1,19 @@
+const webpack = require('webpack');
+
 module.exports = {
   style: {},
   plugins: [],
   webpack: {
+    resolve: {
+      fallback: {
+        buffer: require.resolve('buffer/'),
+      },
+    },
+    plugins: [
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+      }),
+    ],
     configure: (webpackConfig) => {
       // ts-loader is required to reference external typescript projects/files (non-transpiled)
       // usefull for @pesabooks/contracts. todo: remove if move in separate repo
