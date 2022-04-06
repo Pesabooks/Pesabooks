@@ -1,5 +1,5 @@
 import { Button, Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { MembersTable } from '../components/MembersTable';
 import { InviteMemberFormValue, InviteMemberModal } from '../components/Modals/InviteMemberModal';
@@ -7,7 +7,7 @@ import { usePool } from '../hooks/usePool';
 import {
   createInvitation,
   getActiveInvitations,
-  revokeInvitation,
+  revokeInvitation
 } from '../services/invitationService';
 import { getMembers } from '../services/membersService';
 import { Invitation } from '../types';
@@ -20,18 +20,20 @@ export const MembersPage = () => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const toast = useToast();
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    console.log("load Data");
+    
     if (pool) {
       const members = await getMembers(pool.id);
       const activeInvitations = await getActiveInvitations(pool.id);
       setMembers(members ?? []);
       setInvitations(activeInvitations ?? []);
     }
-  };
+  }, [pool]);
 
   useEffect(() => {
     loadData();
-  }, [pool]);
+  }, [loadData]);
 
   const inviteMember = async ({ name, email }: InviteMemberFormValue) => {
     if (!pool) throw new Error('Argument Exception: pool');

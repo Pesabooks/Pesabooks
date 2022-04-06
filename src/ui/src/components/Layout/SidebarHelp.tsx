@@ -23,12 +23,16 @@ export function SidebarHelp(props: SidebarHelpProps) {
         <QuestionIcon color="teal.300" h="18px" w="18px" />
       </IconBox>
       <Text fontSize="sm" color="white" fontWeight="bold">
-        Get tokens for testing?
+        Need tokens for testing?
       </Text>
       <Text fontSize="xs" color="white" mb="10px">
-        You can use Aave faucet. Make sure to select the right network in the top right corner
+        Please check our docs
       </Text>
-      <Link w="100%" target="_blank" href="https://staging.aave.com/#/faucet">
+      <Link
+        w="100%"
+        target="_blank"
+        href="https://www.notion.so/Testing-Pesabooks-on-Polygon-Tesnet-1dbd6d2c0da1473cb06d32efc36e2408"
+      >
         <Button
           fontSize="10px"
           fontWeight="bold"
@@ -45,7 +49,7 @@ export function SidebarHelp(props: SidebarHelpProps) {
           }}
           color="black"
         >
-          AAVE Faucet
+          Testing Pesabooks
         </Button>
       </Link>
     </Flex>

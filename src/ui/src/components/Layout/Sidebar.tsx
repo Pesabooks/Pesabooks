@@ -8,13 +8,14 @@ import {
   Link,
   Stack,
   Text,
-  useColorModeValue,
+  useColorModeValue
 } from '@chakra-ui/react';
 import { FaExchangeAlt, FaHome, FaUsers } from 'react-icons/fa';
 import { MdOutlineBubbleChart } from 'react-icons/md';
 import { Link as reactRouterLink, NavLink, useLocation, useParams } from 'react-router-dom';
 import { IconBox } from '../Icons';
 import { Separator } from './Separator';
+import { SidebarHelp } from './SidebarHelp';
 
 interface SidebarProps extends BoxProps {
   onClose: () => void;
@@ -190,7 +191,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
           <>{createLinks(routes(pool_id))}</>
         </Box>
       </Stack>
-      {/* <SidebarHelp></SidebarHelp> */}
+      <SidebarHelp></SidebarHelp>
     </Box>
   );
 };
