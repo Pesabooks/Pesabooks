@@ -6,7 +6,6 @@ import { IconBox } from '../Icons';
 interface SidebarHelpProps extends FlexProps {}
 export function SidebarHelp(props: SidebarHelpProps) {
   // Pass the computed styles into the `__css` prop
-  const { children, ...rest } = props;
   return (
     <Flex
       borderRadius="15px"
