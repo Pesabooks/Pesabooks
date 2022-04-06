@@ -8,6 +8,7 @@ import { Layout } from './components/Layout/Layout';
 import { CreatePoolPage } from './containers/CreatePoolPage';
 import { DashboardPage } from './containers/DashboardPage';
 import { DepositPage } from './containers/DepositPage';
+import { InvitationPage } from './containers/InvitationPage';
 import { MembersPage } from './containers/MembersPage';
 import { NotFound } from './containers/NotFound';
 import { RedirectToPool } from './containers/Pool';
@@ -41,6 +42,7 @@ function App() {
                 <Route path="*" element={<NotFound />} />
                 <Route path="/signin" element={<SigninPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route path="/invitation/:invitation_id" element={<InvitationPage />} />
                 <Route
                   path="/new-pool"
                   element={

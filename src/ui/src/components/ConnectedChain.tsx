@@ -8,7 +8,7 @@ interface ConnectedChainProps extends BoxProps {}
 
 export const ConnectedChain = (props: ConnectedChainProps) => {
   const { chainId } = useWeb3React();
-  const textcolor =  useColorModeValue('gray.700', 'white');
+  const textcolor = useColorModeValue('gray.700', 'white');
   if (!chainId) return null;
   return (
     <Box {...props}>

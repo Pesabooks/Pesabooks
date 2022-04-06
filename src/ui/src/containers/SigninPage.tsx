@@ -11,7 +11,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
@@ -30,12 +30,13 @@ export const SigninPage = () => {
 
   let auth = useAuth();
   let [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') ?? '/';
 
   let signIn = async (values: SigninFormValue) => {
     try {
       const { email, password } = values;
       await auth.signIn?.({ email, password });
-      navigate(searchParams.get('returnUrl') ?? '/');
+      navigate(returnUrl);
     } catch {
       toast({
         title: 'Your login is invalid. Please try again.',
@@ -114,7 +115,10 @@ export const SigninPage = () => {
                 <Stack pt={6}>
                   <Text align={'center'}>
                     Don't have an account?{' '}
-                    <Link color={'teal.500'} onClick={() => navigate('/signup')}>
+                    <Link
+                      color={'teal.500'}
+                      onClick={() => navigate(`/signup?returnUrl=${returnUrl}`)}
+                    >
                       Sign Up
                     </Link>
                   </Text>

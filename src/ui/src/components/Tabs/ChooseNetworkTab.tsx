@@ -8,7 +8,7 @@ import {
   Spacer,
   Stack,
   Text,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Card, CardBody, CardHeader } from '../Card';
@@ -48,7 +48,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
             mb="24px"
           >
             <Button
-               variant={chainId === 137 ? 'solid' : 'outline'}
+              variant={chainId === 137 ? 'solid' : 'outline'}
               size="lg"
               display="flex"
               justifyContent="start"

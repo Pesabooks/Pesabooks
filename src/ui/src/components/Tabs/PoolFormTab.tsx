@@ -9,7 +9,7 @@ import {
   Stack,
   Text,
   Textarea,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
 import { useMemo } from 'react';

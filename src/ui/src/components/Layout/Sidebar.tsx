@@ -8,7 +8,7 @@ import {
   Link,
   Stack,
   Text,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { FaExchangeAlt, FaHome, FaUsers } from 'react-icons/fa';
 import { MdOutlineBubbleChart } from 'react-icons/md';

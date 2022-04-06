@@ -17,6 +17,7 @@ import {
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { insertProfile } from '../services/profilesService';
 
@@ -30,13 +31,15 @@ export const SignupPage = () => {
   const auth = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
+  let [searchParams] = useSearchParams();
+  const returnUrl = searchParams.get('returnUrl') ?? '/';
 
   let signUp = async (values: SignupFormValue) => {
     try {
       const { name, email, password } = values;
       const userId = (await auth.signUp?.({ email, password })) ?? '';
       await insertProfile(userId, name, email);
-      await navigate('/');
+      navigate(returnUrl);
     } catch (e) {
       const message = e instanceof Error ? e.message : null;
       toast({
@@ -120,7 +123,10 @@ export const SignupPage = () => {
                 <Stack pt={6}>
                   <Text align={'center'}>
                     Already a user?{' '}
-                    <Link color={'teal.500'} onClick={() => navigate('/signin')}>
+                    <Link
+                      color={'teal.500'}
+                      onClick={() => navigate(`/signin?returnUrl=${returnUrl}`)}
+                    >
                       Login
                     </Link>
                   </Text>

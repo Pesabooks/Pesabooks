@@ -15,7 +15,7 @@ import {
   Spacer,
   Stack,
   Text,
-  useColorMode
+  useColorMode,
 } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
