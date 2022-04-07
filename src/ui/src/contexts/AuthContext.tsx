@@ -82,6 +82,9 @@ export const AuthProvider = ({ children }: any) => {
     loading,
     signUp: async (data: SignInType) => {
       const result = await supabase.auth.signUp(data);
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
       setLoading(true);
       return result.user?.id ?? '';
     },

@@ -16,7 +16,7 @@ import {
   Thead,
   Tr,
   useClipboard,
-  useColorModeValue,
+  useColorModeValue
 } from '@chakra-ui/react';
 import { FiMoreVertical } from 'react-icons/fi';
 import { Invitation } from '../types';
@@ -103,7 +103,7 @@ const TableRow = ({
   let bgStatus = useColorModeValue('gray.400', '#1a202c');
   let colorStatus = useColorModeValue('white', 'gray.400');
 
-  const link = `${window.location.origin}/invitation/${id}`;
+  const link = `${window.location.origin}/auth/invitation/${id}`;
   const { onCopy } = useClipboard(link);
 
   if (isInvitation) {

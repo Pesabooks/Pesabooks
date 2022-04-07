@@ -1,5 +1,5 @@
 import { handleSupabaseError, invitationsTable, supabase } from '../supabase';
-import { Invitation } from '../types';
+import { Invitation, Pool, Profile } from '../types';
 
 export const getActiveInvitations = async (pool_id: number) => {
   const { data, error } = await invitationsTable()
@@ -32,12 +32,20 @@ export const invitationExists = async (pool_id: number, email: string) => {
   return !!data?.[0];
 };
 
-export const createInvitation = async (pool_id: number, name: string, email: string) => {
-  if (await invitationExists(pool_id, email)) {
+export const createInvitation = async (pool: Pool, name: string, email: string, user: Profile) => {
+  if (await invitationExists(pool.id, email)) {
     throw new Error('An invitation already exists for this email');
   }
 
-  const invitation: Partial<Invitation> = { pool_id, name, email, active: true, role: 'member' };
+  const invitation: Partial<Invitation> = {
+    pool_id: pool.id,
+    name,
+    email,
+    active: true,
+    role: 'member',
+    pool_name: pool.name,
+    invited_by: user.name,
+  };
   const { data, error } = await invitationsTable().insert(invitation);
   handleSupabaseError(error);
 

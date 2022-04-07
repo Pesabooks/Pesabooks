@@ -6,7 +6,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-  useToast,
+  useToast
 } from '@chakra-ui/react';
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -51,67 +51,58 @@ export const InvitationPage = () => {
       <Helmet>
         <title>Invitation</title>
       </Helmet>
-      <Flex
-        minH={'100vh'}
-        align={'center'}
-        justify={'center'}
-        backgroundImage="url('/images/bg.jpg')"
-        backgroundPosition="center"
-        backgroundRepeat="no-repeat"
-        backgroundSize="cover"
+
+      <Stack
+        spacing={8}
+        mx={'auto'}
+        maxW={'lg'}
+        py={12}
+        px={6}
+        bg={useColorModeValue('white', 'gray.700')}
       >
-        <Stack
-          spacing={8}
-          mx={'auto'}
-          maxW={'lg'}
-          py={12}
-          px={6}
-          bg={useColorModeValue('white', 'gray.700')}
-        >
-          <Stack spacing={4}>
-            <Heading fontSize={'2xl'}>
-              {' '}
-              Join{' '}
-              <Text as="span" color={'red'}>
-                {invitation?.pool_name}
-              </Text>{' '}
-              on Pesabooks
-            </Heading>
-            <Text>
-              {invitation?.invited_by} has invited you to join the tontine{' '}
-              <b>{invitation?.pool_name}</b>.
-            </Text>
-          </Stack>
-
-          {!auth.authenticated && (
-            <Stack>
-              <Text mt={4}>
-                {' '}
-                To continue, you must either login to your existing account, or create a new one
-              </Text>
-
-              <Flex>
-                <Button onClick={() => navigate(`/signup?returnUrl=${location.pathname}`)}>
-                  Create a new account
-                </Button>
-                <Spacer />
-                <Button onClick={() => navigate(`/signin?returnUrl=${location.pathname}`)}>
-                  {' '}
-                  Login as an Existing User
-                </Button>
-              </Flex>
-            </Stack>
-          )}
-
-          {auth.authenticated && (
-            <Stack align="center">
-              <Button onClick={() => onJoin()} isLoading={loading}>
-                Join Now
-              </Button>
-            </Stack>
-          )}
+        <Stack spacing={4}>
+          <Heading fontSize={'2xl'}>
+            {' '}
+            Join{' '}
+            <Text as="span" color={'red'}>
+              {invitation?.pool_name}
+            </Text>{' '}
+            on Pesabooks
+          </Heading>
+          <Text>
+            {invitation?.invited_by} has invited you to join the tontine{' '}
+            <b>{invitation?.pool_name}</b>.
+          </Text>
         </Stack>
-      </Flex>
+
+        {!auth.authenticated && (
+          <Stack>
+            <Text mt={4}>
+              {' '}
+              To continue, you must either login to your existing account, or create a new one
+            </Text>
+
+            <Flex>
+              <Button onClick={() => navigate(`/auth/signup?returnUrl=${location.pathname}`)}>
+                Create a new account
+              </Button>
+              <Spacer />
+              <Button onClick={() => navigate(`/auth/signin?returnUrl=${location.pathname}`)}>
+                {' '}
+                Login as an Existing User
+              </Button>
+            </Flex>
+          </Stack>
+        )}
+
+        {auth.authenticated && (
+          <Stack align="center">
+            <Button onClick={() => onJoin()} isLoading={loading}>
+              Join Now
+            </Button>
+          </Stack>
+        )}
+      </Stack>
     </>
   );
 };

@@ -1,23 +1,20 @@
-import { useColorModeValue } from '@chakra-ui/color-mode';
-import {} from '@chakra-ui/form-control';
+// Chakra imports
 import {
-  Box,
   Button,
   Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Heading,
   Input,
   Link,
-  Stack,
   Text,
-  useToast,
+  useColorModeValue,
+  useToast
 } from '@chakra-ui/react';
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { insertProfile } from '../services/profilesService';
 
@@ -27,7 +24,11 @@ interface SignupFormValue {
   password: string;
 }
 
-export const SignupPage = () => {
+export const SignUpPage = () => {
+  const titleColor = useColorModeValue('teal.300', 'teal.200');
+  const textColor = useColorModeValue('gray.700', 'white');
+  const bgColor = useColorModeValue('white', 'gray.700');
+
   const auth = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
@@ -61,80 +62,118 @@ export const SignupPage = () => {
       <Helmet>
         <title>Sign Up</title>
       </Helmet>
-      <Flex
-        minH={'100vh'}
-        align={'center'}
-        justify={'center'}
-        backgroundImage="url('/images/bg.jpg')"
-        backgroundPosition="center"
-        backgroundRepeat="no-repeat"
-        backgroundSize="cover"
-      >
-        <Stack
-          spacing={8}
-          mx={'auto'}
-          maxW={'lg'}
-          py={12}
-          px={6}
-          bg={useColorModeValue('white', 'gray.700')}
-          minW="400px"
-        >
-          <Stack align={'center'}>
-            <Heading fontSize={'4xl'}>Sign up</Heading>
-          </Stack>
-          <Box rounded={'lg'} boxShadow={'lg'} p={8}>
-            <form onSubmit={handleSubmit(signUp)}>
-              <Stack spacing={4}>
-                <FormControl isInvalid={!!errors.name}>
-                  <FormLabel htmlFor="name">Name</FormLabel>
-                  <Input id="name" {...register('name', { required: true })} />
-                  <FormErrorMessage>{errors.name && 'Name is required'}</FormErrorMessage>
-                </FormControl>
+      <Flex alignItems="center" justifyContent="center" mb="60px" mt="20px">
+        <form onSubmit={handleSubmit(signUp)}>
+          <Flex
+            direction="column"
+            w="445px"
+            background="transparent"
+            borderRadius="15px"
+            p="40px"
+            mx={{ base: '100px' }}
+            bg={bgColor}
+            boxShadow="0 20px 27px 0 rgb(0 0 0 / 5%)"
+          >
+            <Text fontSize="xl" color={textColor} fontWeight="bold" textAlign="center" mb="22px">
+              Sign Up
+            </Text>
 
-                <FormControl isInvalid={!!errors.email}>
-                  <FormLabel htmlFor="email">Email address</FormLabel>
-                  <Input id="email" type="email" {...register('email', { required: true })} />
-                  <FormErrorMessage> {errors.email && 'Email is required'}</FormErrorMessage>
-                </FormControl>
+            <FormControl isInvalid={!!errors.name}>
+              <FormLabel htmlFor="name" ms="4px" fontSize="sm" fontWeight="normal">
+                Name
+              </FormLabel>
+              <Input
+                id="name"
+                {...register('name', { required: true })}
+                fontSize="sm"
+                ms="4px"
+                borderRadius="15px"
+                type="text"
+                placeholder="Your full name"
+                mb="24px"
+                size="lg"
+              />
+              <FormErrorMessage>{errors.name && 'Name is required'}</FormErrorMessage>
+            </FormControl>
 
-                <FormControl isInvalid={!!errors.password}>
-                  <FormLabel htmlFor="password">Password</FormLabel>
-                  <Input
-                    id="password"
-                    type="password"
-                    {...register('password', { required: true })}
-                  />
-                  <FormErrorMessage>{errors.password && 'Password is required'}</FormErrorMessage>
-                </FormControl>
-                <Stack spacing={10} pt={2}>
-                  <Button
-                    type="submit"
-                    isLoading={isSubmitting}
-                    bg={'teal.400'}
-                    color={'white'}
-                    _hover={{
-                      bg: 'teal.500',
-                    }}
-                  >
-                    Sign up
-                  </Button>
-                </Stack>
+            <FormControl isInvalid={!!errors.email}>
+              <FormLabel htmlFor="email" ms="4px" fontSize="sm" fontWeight="normal">
+                Email address
+              </FormLabel>
+              <Input
+                id="email"
+                type="email"
+                fontSize="sm"
+                ms="4px"
+                borderRadius="15px"
+                placeholder="Your email address"
+                mb="24px"
+                size="lg"
+                {...register('email', { required: true })}
+              />
+              <FormErrorMessage> {errors.email && 'Email is required'}</FormErrorMessage>
+            </FormControl>
 
-                <Stack pt={6}>
-                  <Text align={'center'}>
-                    Already a user?{' '}
-                    <Link
-                      color={'teal.500'}
-                      onClick={() => navigate(`/signin?returnUrl=${returnUrl}`)}
-                    >
-                      Login
-                    </Link>
-                  </Text>
-                </Stack>
-              </Stack>
-            </form>
-          </Box>
-        </Stack>
+            <FormControl isInvalid={!!errors.password}>
+              <FormLabel htmlFor="password" ms="4px" fontSize="sm" fontWeight="normal">
+                Password
+              </FormLabel>
+              <Input
+                id="password"
+                fontSize="sm"
+                ms="4px"
+                borderRadius="15px"
+                type="password"
+                placeholder="Your password"
+                mb="24px"
+                size="lg"
+                {...register('password', { required: true })}
+              />
+              <FormErrorMessage>{errors.password && 'Password is required'}</FormErrorMessage>
+            </FormControl>
+
+            <Button
+              type="submit"
+              isLoading={isSubmitting}
+              bg="teal.300"
+              fontSize="sm"
+              color="white"
+              fontWeight="bold"
+              w="100%"
+              h="45"
+              mb="24px"
+              _hover={{
+                bg: 'teal.200',
+              }}
+              _active={{
+                bg: 'teal.400',
+              }}
+            >
+              SIGN UP
+            </Button>
+            <Flex
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              maxW="100%"
+              mt="0px"
+            >
+              <Text color={textColor} fontWeight="medium">
+                Already have an account?
+                <Link
+                  color={titleColor}
+                  onClick={() => navigate(`/auth/signin?returnUrl=${returnUrl}`)}
+                  as="span"
+                  ms="5px"
+                  href="#"
+                  fontWeight="bold"
+                >
+                  Sign In
+                </Link>
+              </Text>
+            </Flex>
+          </Flex>
+        </form>
       </Flex>
     </>
   );

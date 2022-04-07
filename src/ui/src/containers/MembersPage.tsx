@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { MembersTable } from '../components/MembersTable';
 import { InviteMemberFormValue, InviteMemberModal } from '../components/Modals/InviteMemberModal';
+import { useAuth } from '../hooks/useAuth';
 import { usePool } from '../hooks/usePool';
 import {
   createInvitation,
@@ -14,6 +15,7 @@ import { Invitation } from '../types';
 import { Member } from '../types/Member';
 
 export const MembersPage = () => {
+  const { user } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const { pool } = usePool();
@@ -21,8 +23,7 @@ export const MembersPage = () => {
   const toast = useToast();
 
   const loadData = useCallback(async () => {
-    console.log("load Data");
-    
+
     if (pool) {
       const members = await getMembers(pool.id);
       const activeInvitations = await getActiveInvitations(pool.id);
@@ -37,8 +38,9 @@ export const MembersPage = () => {
 
   const inviteMember = async ({ name, email }: InviteMemberFormValue) => {
     if (!pool) throw new Error('Argument Exception: pool');
+    if (!user) throw new Error('Argument Exception: user');
     try {
-      await createInvitation(pool.id, name, email);
+      await createInvitation(pool, name, email, user);
       toast({
         title: `Invitation created. Please copy the link and send it to the member`,
         status: 'success',

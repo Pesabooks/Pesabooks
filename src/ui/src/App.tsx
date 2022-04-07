@@ -5,6 +5,7 @@ import { Web3ReactProvider } from '@web3-react/core';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout/Layout';
+import { Auth } from './containers/Auth';
 import { CreatePoolPage } from './containers/CreatePoolPage';
 import { DashboardPage } from './containers/DashboardPage';
 import { DepositPage } from './containers/DepositPage';
@@ -12,8 +13,8 @@ import { InvitationPage } from './containers/InvitationPage';
 import { MembersPage } from './containers/MembersPage';
 import { NotFound } from './containers/NotFound';
 import { RedirectToPool } from './containers/Pool';
-import { SigninPage } from './containers/SigninPage';
-import { SignupPage } from './containers/SignupPage';
+import { SignInPage } from './containers/SignInPage';
+import { SignUpPage } from './containers/SignUpPage';
 import { TransactionsPage } from './containers/TransactionsPage';
 import { WithdrawPage } from './containers/WithdrawPage';
 import { AuthProvider } from './contexts/AuthContext';
@@ -40,9 +41,11 @@ function App() {
             <AuthProvider>
               <Routes>
                 <Route path="*" element={<NotFound />} />
-                <Route path="/signin" element={<SigninPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-                <Route path="/invitation/:invitation_id" element={<InvitationPage />} />
+                <Route path="/auth" element={<Auth />}>
+                  <Route path="signin" element={<SignInPage />} />
+                  <Route path="signup" element={<SignUpPage />} />
+                <Route path="invitation/:invitation_id" element={<InvitationPage />} />
+                </Route>
                 <Route
                   path="/new-pool"
                   element={
