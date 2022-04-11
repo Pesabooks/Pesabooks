@@ -1,4 +1,4 @@
-import { HamburgerIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
+import { ExternalLinkIcon, HamburgerIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
 import {
   Avatar,
   Box,
@@ -7,6 +7,7 @@ import {
   Flex,
   FlexProps,
   IconButton,
+  Link,
   Menu,
   MenuButton,
   MenuDivider,
@@ -15,12 +16,14 @@ import {
   Spacer,
   Stack,
   Text,
-  useColorMode,
+  useColorMode
 } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
+import { Network } from '../../data/networks';
 import { useAuth } from '../../hooks/useAuth';
 import { usePool } from '../../hooks/usePool';
+import { getNetwork } from '../../services/blockchainServices';
 import { getMyPools } from '../../services/poolsService';
 import { Pool } from '../../types';
 import { ConnectWalletButton } from '../Buttons/ConnectWalletButton';
@@ -36,12 +39,19 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
   const { toggleColorMode } = useColorMode();
   const { pool } = usePool();
   const { user, signOut } = useAuth();
-  const web3 = useWeb3React();
+  const { active, account, deactivate, chainId } = useWeb3React();
   const [myPools, setMyPools] = useState<Pool[]>([]);
+  const [netWork, setNetWork] = useState<Network>();
 
   useEffect(() => {
     getMyPools().then((pools) => setMyPools(pools ?? []));
   }, []);
+
+  useEffect(() => {
+    if (chainId) {
+      setNetWork(getNetwork(chainId));
+    }
+  }, [chainId]);
 
   return (
     <Flex
@@ -73,26 +83,27 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
         <Flex gap={7} display={{ sm: 'none', xl: 'flex' }} alignItems="center">
           <DepositButton />
           <WithdrawButton />
-          {!web3.active && pool && <ConnectWalletButton chainId={pool.chain_id} />}
-          {web3.active && pool && <ConnectedChain />}
+          {!active && pool && <ConnectWalletButton chainId={pool.chain_id} />}
+          {active && pool && <ConnectedChain />}
         </Flex>
         <Menu>
           <MenuButton as={Button} rounded={'full'} variant={'link'} cursor={'pointer'} minW={0}>
             <Avatar size={'sm'} name={user?.name} />
           </MenuButton>
           <MenuList alignItems={'center'}>
-            <br />
             <Center flexDirection="column">
               <p>{user?.name}</p>
-              {web3.account && (
-                <p>
-                  {web3.account.substring(0, 4)}...
-                  {web3.account.substring(web3.account.length - 4)}
-                </p>
+              {account && (
+                <Link isExternal href={netWork?.blockExplorerUrls[0] + 'address/' + account}>
+                  {account.substring(0, 5)}...
+                  {account.substring(account.length - 5)}
+                  <ExternalLinkIcon mx="3px" />
+                </Link>
               )}
             </Center>
-            <br />
+
             <MenuDivider />
+            {account && <MenuItem onClick={() => deactivate()}> Disconnect Wallet</MenuItem>}
             <MenuItem onClick={toggleColorMode} w="100%">
               <Flex w="100%">
                 <Box>
