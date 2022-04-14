@@ -29,8 +29,8 @@ export function SidebarHelp(props: SidebarHelpProps) {
       </Text>
       <Link
         w="100%"
-        target="_blank"
-        href="https://www.notion.so/Testing-Pesabooks-on-Polygon-Tesnet-1dbd6d2c0da1473cb06d32efc36e2408"
+        isExternal
+        href="https://season-tangelo-df2.notion.site/Testing-Pesabooks-on-Polygon-Testnet-1dbd6d2c0da1473cb06d32efc36e2408"
       >
         <Button
           fontSize="10px"

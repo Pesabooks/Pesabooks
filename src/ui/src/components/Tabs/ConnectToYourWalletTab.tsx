@@ -33,7 +33,7 @@ export const ConnectToYourWalletTab = ({
             Connect to your wallet
           </Text>
           <Text color="gray.400" fontWeight="normal" fontSize="sm">
-            To create a new pool, a smart contract need to be deployed on chain. To interact with
+            To create a new group, a smart contract need to be deployed on chain. To interact with
             Pesabooks, please connect to your wallet
           </Text>
         </Flex>

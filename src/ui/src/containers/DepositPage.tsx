@@ -17,6 +17,7 @@ import { approveToken, getAddressBalance, isTokenApproved } from '../services/bl
 import { getAllCategories } from '../services/categoriesService';
 import { deposit } from '../services/transactionsServices';
 import { Account, Category } from '../types';
+import { checkError } from '../utils';
 
 interface DepositFormValue {
   amount: number;
@@ -110,10 +111,9 @@ export const DepositPage = () => {
 
         methods.reset();
       }
-    } catch (e: unknown) {
-      const message = e instanceof Error ? e.message : null;
+    } catch (e: any) {
       toast({
-        title: message,
+        title: checkError(e),
         status: 'error',
         isClosable: true,
       });

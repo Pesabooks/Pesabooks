@@ -21,18 +21,23 @@ export const MembersPage = () => {
   const { pool } = usePool();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const toast = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const loadData = useCallback(async () => {
-
-    if (pool) {
-      const members = await getMembers(pool.id);
-      const activeInvitations = await getActiveInvitations(pool.id);
-      setMembers(members ?? []);
-      setInvitations(activeInvitations ?? []);
+    try {
+      if (pool) {
+        const members = await getMembers(pool.id);
+        const activeInvitations = await getActiveInvitations(pool.id);
+        setMembers(members ?? []);
+        setInvitations(activeInvitations ?? []);
+      }
+    } finally {
+      setIsLoading(false);
     }
   }, [pool]);
 
   useEffect(() => {
+    setIsLoading(true);
     loadData();
   }, [loadData]);
 
@@ -80,7 +85,12 @@ export const MembersPage = () => {
         <Spacer />
         <Button onClick={onOpen}> Invite a member</Button>
       </Flex>
-      <MembersTable members={members} invitations={invitations} onRevoke={revoke}></MembersTable>
+      <MembersTable
+        members={members}
+        invitations={invitations}
+        onRevoke={revoke}
+        isLoading={isLoading}
+      ></MembersTable>
       <InviteMemberModal
         isOpen={isOpen}
         onClose={onClose}

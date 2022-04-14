@@ -21,60 +21,65 @@ import {
 import { FiMoreVertical } from 'react-icons/fi';
 import { Invitation } from '../types';
 import { Member } from '../types/Member';
+import Loading from './Loading';
 
 interface MembersTableProps {
   members: Member[];
   invitations: Invitation[];
   onRevoke: (id: string) => void;
+  isLoading: boolean;
 }
-export const MembersTable = ({ members, invitations, onRevoke }: MembersTableProps) => {
+export const MembersTable = ({ members, invitations, onRevoke, isLoading }: MembersTableProps) => {
   return (
-    <Table variant="simple">
-      <Thead>
-        <Tr my=".8rem" pl="0px" color="gray.400">
-          <Th pl="0px" color="gray.400">
-            Member
-          </Th>
-          <Th color="gray.400">Email</Th>
-          <Th color="gray.400">Role</Th>
-          <Th color="gray.400">Status</Th>
-          {/* <Th></Th> */}
-          <Th></Th>
-          <Th></Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {members.map((member, index) => {
-          return (
-            <TableRow
-              key={member.user_id}
-              name={member.user?.name}
-              email={member.user?.email}
-              role={member.role}
-              active={member.active}
-              status={member.active ? 'active' : 'inactive'}
-              isInvitation={false}
-              id={member.user_id}
-            ></TableRow>
-          );
-        })}
-        {invitations.map((invitation, index) => {
-          return (
-            <TableRow
-              key={invitation.id}
-              name={invitation.name}
-              email={invitation.email}
-              role={invitation.role}
-              active={invitation.active}
-              status="invited"
-              isInvitation={true}
-              id={invitation.id}
-              onRemove={onRevoke}
-            ></TableRow>
-          );
-        })}
-      </Tbody>
-    </Table>
+    <>
+      <Table variant="simple">
+        <Thead>
+          <Tr my=".8rem" pl="0px" color="gray.400">
+            <Th pl="0px" color="gray.400">
+              Member
+            </Th>
+            <Th color="gray.400">Email</Th>
+            <Th color="gray.400">Role</Th>
+            <Th color="gray.400">Status</Th>
+            {/* <Th></Th> */}
+            <Th></Th>
+            <Th></Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {members.map((member, index) => {
+            return (
+              <TableRow
+                key={member.user_id}
+                name={member.user?.name}
+                email={member.user?.email}
+                role={member.role}
+                active={member.active}
+                status={member.active ? 'active' : 'inactive'}
+                isInvitation={false}
+                id={member.user_id}
+              ></TableRow>
+            );
+          })}
+          {invitations.map((invitation, index) => {
+            return (
+              <TableRow
+                key={invitation.id}
+                name={invitation.name}
+                email={invitation.email}
+                role={invitation.role}
+                active={invitation.active}
+                status="invited"
+                isInvitation={true}
+                id={invitation.id}
+                onRemove={onRevoke}
+              ></TableRow>
+            );
+          })}
+        </Tbody>
+      </Table>
+      {isLoading && <Loading m={4} />}
+    </>
   );
 };
 

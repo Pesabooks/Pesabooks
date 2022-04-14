@@ -9,10 +9,10 @@ import { Auth } from './containers/Auth';
 import { CreatePoolPage } from './containers/CreatePoolPage';
 import { DashboardPage } from './containers/DashboardPage';
 import { DepositPage } from './containers/DepositPage';
+import { HomePage } from './containers/HomePage';
 import { InvitationPage } from './containers/InvitationPage';
 import { MembersPage } from './containers/MembersPage';
 import { NotFound } from './containers/NotFound';
-import { RedirectToPool } from './containers/Pool';
 import { SignInPage } from './containers/SigninPage';
 import { SignUpPage } from './containers/SignupPage';
 import { TransactionsPage } from './containers/TransactionsPage';
@@ -44,41 +44,29 @@ function App() {
                 <Route path="/auth" element={<Auth />}>
                   <Route path="signin" element={<SignInPage />} />
                   <Route path="signup" element={<SignUpPage />} />
-                <Route path="invitation/:invitation_id" element={<InvitationPage />} />
+                  <Route path="invitation/:invitation_id" element={<InvitationPage />} />
                 </Route>
-                <Route
-                  path="/new-pool"
-                  element={
-                    <AuthGuard>
-                      <CreatePoolPage />
-                    </AuthGuard>
-                  }
-                />
-                <Route
-                  index
-                  element={
-                    <AuthGuard>
-                      <RedirectToPool />
-                    </AuthGuard>
-                  }
-                />
-                <Route
-                  path="/pool/:pool_id"
-                  element={
-                    <AuthGuard>
+                <Route element={<AuthGuard />}>
+                  <Route path="/new-pool" element={<CreatePoolPage />} />
+
+                  <Route path="/" element={<HomePage />} />
+
+                  <Route
+                    path="/pool/:pool_id"
+                    element={
                       <PoolProvider>
                         <PoolGuard>
                           <Layout />
                         </PoolGuard>
                       </PoolProvider>
-                    </AuthGuard>
-                  }
-                >
-                  <Route index element={<DashboardPage />} />
-                  <Route path="transactions" element={<TransactionsPage />} />
-                  <Route path="members" element={<MembersPage />} />
-                  <Route path="deposit" element={<DepositPage />} />
-                  <Route path="withdraw" element={<WithdrawPage />} />
+                    }
+                  >
+                    <Route index element={<DashboardPage />} />
+                    <Route path="transactions" element={<TransactionsPage />} />
+                    <Route path="members" element={<MembersPage />} />
+                    <Route path="deposit" element={<DepositPage />} />
+                    <Route path="withdraw" element={<WithdrawPage />} />
+                  </Route>
                 </Route>
               </Routes>
             </AuthProvider>

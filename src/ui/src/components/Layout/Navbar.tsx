@@ -1,57 +1,34 @@
-import { ExternalLinkIcon, HamburgerIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
+import { HamburgerIcon } from '@chakra-ui/icons';
 import {
-  Avatar,
-  Box,
-  Button,
-  Center,
   Flex,
   FlexProps,
-  IconButton,
-  Link,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList,
-  Spacer,
-  Stack,
-  Text,
-  useColorMode
+  IconButton, Stack
 } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
-import { Network } from '../../data/networks';
-import { useAuth } from '../../hooks/useAuth';
 import { usePool } from '../../hooks/usePool';
-import { getNetwork } from '../../services/blockchainServices';
 import { getMyPools } from '../../services/poolsService';
 import { Pool } from '../../types';
 import { ConnectWalletButton } from '../Buttons/ConnectWalletButton';
 import { DepositButton } from '../Buttons/DepositButton';
 import { WithdrawButton } from '../Buttons/WithdrawButton';
 import { ConnectedChain } from '../ConnectedChain';
+import { AvatarMenu } from './AvatarMenu';
 import { PoolSelectorMenu } from './PoolSelectorMenu';
 interface NavBarProps extends FlexProps {
   onOpen?: () => void;
 }
 
 export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
-  const { toggleColorMode } = useColorMode();
   const { pool } = usePool();
-  const { user, signOut } = useAuth();
-  const { active, account, deactivate, chainId } = useWeb3React();
+  const { active } = useWeb3React();
   const [myPools, setMyPools] = useState<Pool[]>([]);
-  const [netWork, setNetWork] = useState<Network>();
 
   useEffect(() => {
     getMyPools().then((pools) => setMyPools(pools ?? []));
   }, []);
 
-  useEffect(() => {
-    if (chainId) {
-      setNetWork(getNetwork(chainId));
-    }
-  }, [chainId]);
+
 
   return (
     <Flex
@@ -86,39 +63,7 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
           {!active && pool && <ConnectWalletButton chainId={pool.chain_id} />}
           {active && pool && <ConnectedChain />}
         </Flex>
-        <Menu>
-          <MenuButton as={Button} rounded={'full'} variant={'link'} cursor={'pointer'} minW={0}>
-            <Avatar size={'sm'} name={user?.name} />
-          </MenuButton>
-          <MenuList alignItems={'center'}>
-            <Center flexDirection="column">
-              <p>{user?.name}</p>
-              {account && (
-                <Link isExternal href={netWork?.blockExplorerUrls[0] + 'address/' + account}>
-                  {account.substring(0, 5)}...
-                  {account.substring(account.length - 5)}
-                  <ExternalLinkIcon mx="3px" />
-                </Link>
-              )}
-            </Center>
-
-            <MenuDivider />
-            {account && <MenuItem onClick={() => deactivate()}> Disconnect Wallet</MenuItem>}
-            <MenuItem onClick={toggleColorMode} w="100%">
-              <Flex w="100%">
-                <Box>
-                  <Text>Color Mode</Text>
-                </Box>
-                <Spacer></Spacer>
-                <Box>
-                  {' '}
-                  <MoonIcon /> | <SunIcon />
-                </Box>
-              </Flex>
-            </MenuItem>
-            <MenuItem onClick={signOut}>Logout</MenuItem>
-          </MenuList>
-        </Menu>
+       <AvatarMenu/>
       </Stack>
     </Flex>
   );

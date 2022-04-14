@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
 import { supabase } from '../../supabase';
 import { Card } from '../Card';
+import Loading from '../Loading';
 
 const options: ApexOptions = {
   chart: {
@@ -65,33 +66,43 @@ interface TransactionsPerMonthProps {
 
 export const TransactionsPerMonth = ({ pool_id }: TransactionsPerMonthProps) => {
   const [series, setSeries] = useState<unknown[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await supabase.rpc('get_transactions_per_month', { pool_id });
+      try {
+        const { data } = await supabase.rpc('get_transactions_per_month', { pool_id });
 
-      const deposit = [];
-      const withdrawal = [];
+        const deposit = [];
+        const withdrawal = [];
 
-      if (data) {
-        for (const d of data) {
-          deposit.push({ x: d.month, y: d.deposit });
-          withdrawal.push({ x: d.month, y: d.withdrawal });
+        if (data) {
+          for (const d of data) {
+            deposit.push({ x: d.month, y: d.deposit });
+            withdrawal.push({ x: d.month, y: d.withdrawal });
+          }
         }
-      }
 
-      setSeries([
-        { name: 'Deposit', data: deposit },
-        { name: 'Withdrawal', data: withdrawal },
-      ]);
+        setSeries([
+          { name: 'Deposit', data: deposit },
+          { name: 'Withdrawal', data: withdrawal },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
     };
+
     fetchData();
   }, [pool_id]);
 
   return (
     <Card p="28px 10px 16px 0px" mb={{ sm: '26px', lg: '0px' }}>
       <Box w="100%" h={{ sm: '300px' }} ps="8px">
-        <Chart options={options} series={series} type="bar" width="100%" height="100%" />
+        {isLoading ? (
+          <Loading/>
+        ) : (
+          <Chart options={options} series={series} type="bar" width="100%" height="100%" />
+        )}
       </Box>
     </Card>
   );

@@ -1,7 +1,7 @@
-import { Flex, ThemingProps } from '@chakra-ui/react';
+import { BoxProps, Flex, ThemingProps } from '@chakra-ui/react';
 import React from 'react';
 
-export interface SeparatorProps extends ThemingProps {}
+export interface SeparatorProps extends ThemingProps, BoxProps {}
 
 export const Separator = (props: SeparatorProps) => {
   const { variant, ...rest } = props;

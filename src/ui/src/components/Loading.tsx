@@ -1,10 +1,13 @@
-import { Flex, Spinner } from '@chakra-ui/react';
+import { Center, Spinner, SpinnerProps } from '@chakra-ui/react';
 
-function Loading() {
+interface LoadingProps extends SpinnerProps {
+  fullHeight?: boolean;
+}
+function Loading({ fullHeight, ...centerProps }: LoadingProps) {
   return (
-    <Flex h="100vh" w="100%" justify="center" alignItems="center">
-      <Spinner thickness="4px" speed="0.65s" size="xl" />
-    </Flex>
+    <Center h={fullHeight ? '100vh' : '100%'} >
+      <Spinner thickness="4px" speed="0.65s" size="xl" {...centerProps} />
+    </Center>
   );
 }
 

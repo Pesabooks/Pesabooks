@@ -19,7 +19,9 @@ export const getPool = async (pool_id: string) => {
 };
 
 export const getMyPools = async () => {
-  const { data, error } = await poolsTable().select().eq('active', true);
+  const { data, error } = await poolsTable()
+    .select('*,members:profiles!members(name)')
+    .eq('active', true);
   handleSupabaseError(error);
 
   return data;

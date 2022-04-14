@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { supabase } from '../../supabase';
 import { Card, CardHeader } from '../Card';
+import Loading from '../Loading';
 
 const options: ApexOptions = {
   chart: {
@@ -65,12 +66,17 @@ interface BalancesPerMonthProps {
 
 export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
   const [series, setSeries] = useState<unknown[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await supabase.rpc('get_balance_per_month', { pool_id });
+      try {
+        const { data } = await supabase.rpc('get_balance_per_month', { pool_id });
 
-      setSeries([{ name: 'Balance', data: data?.map((d) => ({ x: d.month, y: d.balance })) }]);
+        setSeries([{ name: 'Balance', data: data?.map((d) => ({ x: d.month, y: d.balance })) }]);
+      } finally {
+        setIsLoading(false);
+      }
     };
     fetchData();
   }, [pool_id]);
@@ -85,7 +91,17 @@ export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
         </Flex>
       </CardHeader>
       <Box w="100%" h={{ sm: '300px' }} ps="8px">
-        <ReactApexChart options={options} series={series} type="area" width="100%" height="100%" />
+        {isLoading ? (
+          <Loading/>
+        ) : (
+          <ReactApexChart
+            options={options}
+            series={series}
+            type="area"
+            width="100%"
+            height="100%"
+          />
+        )}
       </Box>
     </Card>
   );

@@ -8,6 +8,7 @@ export interface Network {
     decimals: number;
   };
   blockExplorerUrls: string[];
+  isTest: boolean;
 }
 
 export const networks: { [chainId: number]: Network } = {
@@ -21,6 +22,7 @@ export const networks: { [chainId: number]: Network } = {
       decimals: 18,
     },
     blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
+    isTest: true,
   },
   137: {
     chainId: '0x89',
@@ -32,5 +34,6 @@ export const networks: { [chainId: number]: Network } = {
       decimals: 18,
     },
     blockExplorerUrls: ['https://polygonscan.com/'],
+    isTest: false,
   },
 };

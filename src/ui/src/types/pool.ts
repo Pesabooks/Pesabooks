@@ -1,4 +1,5 @@
 import { Entity } from './Entity';
+import { Profile } from './Profile';
 import { Token } from './Token';
 
 export interface Pool extends Entity {
@@ -9,4 +10,5 @@ export interface Pool extends Entity {
   chain_id: number;
   active: boolean;
   contract_address: string;
+  members?: Profile[];
 }

@@ -1,7 +1,18 @@
 import { AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
-import { Button, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
+import {
+  Button,
+  Icon,
+  Link,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  Text
+} from '@chakra-ui/react';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { MdOutlineBubbleChart } from 'react-icons/md';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { updateLastPool } from '../../services/profilesService';
 import { Pool } from '../../types';
@@ -40,7 +51,7 @@ export const PoolSelectorMenu = ({ pool, pools }: PoolSelectorMenuProps) => {
 
             <MenuDivider />
             <MenuItem onClick={() => navigate('/new-pool')} icon={<AddIcon />}>
-              Add a Pool
+              Create New Group
             </MenuItem>
           </MenuList>
         </Menu>
@@ -48,8 +59,21 @@ export const PoolSelectorMenu = ({ pool, pools }: PoolSelectorMenuProps) => {
     );
   } else {
     return (
-      <Link href="/" fontWeight="bold">
-        Pesabooks
+      <Link
+        variant="no-decoration"
+        as={RouterLink}
+        to="/"
+        display="flex"
+        fontWeight="bold"
+        justifyContent="start"
+        alignItems="center"
+        fontSize="11px"
+      >
+        <Icon as={MdOutlineBubbleChart} w="32px" h="32px" me="10px" />
+
+        <Text fontSize="sm" mt="3px" casing="uppercase">
+          Pesabooks
+        </Text>
       </Link>
     );
   }

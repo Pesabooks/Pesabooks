@@ -10,9 +10,13 @@ import {
   Text,
   useColorModeValue
 } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 import { FaExchangeAlt, FaHome, FaUsers } from 'react-icons/fa';
 import { MdOutlineBubbleChart } from 'react-icons/md';
-import { Link as reactRouterLink, NavLink, useLocation, useParams } from 'react-router-dom';
+import { Link as reactRouterLink, NavLink, useLocation } from 'react-router-dom';
+import { Network } from '../../data/networks';
+import { usePool } from '../../hooks/usePool';
+import { getNetwork } from '../../services/blockchainServices';
 import { IconBox } from '../Icons';
 import { Separator } from './Separator';
 import { SidebarHelp } from './SidebarHelp';
@@ -36,7 +40,14 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
   let activeColor = useColorModeValue('gray.700', 'white');
   let inactiveColor = useColorModeValue('gray.400', 'gray.400');
   let sidebarActiveShadow = '0px 7px 11px rgba(0, 0, 0, 0.04)';
-  let { pool_id } = useParams();
+  let {pool} = usePool();
+  const [network, setNetwork] = useState<Network>();
+
+  useEffect(() => {
+    if (pool?.chain_id) {
+      setNetwork(getNetwork(pool.chain_id));
+    }
+  }, [pool]);
 
   const activeRoute = (routeName: string) => {
     return location.pathname === routeName ? 'active' : '';
@@ -143,6 +154,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
     <Box pt="10px" ps="16px" mb="8px">
       <Flex justifyContent="space-between">
         <Link
+          variant="no-decoration"
           as={reactRouterLink}
           to="/"
           display="flex"
@@ -188,10 +200,10 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
 
       <Stack direction="column" mb="40px">
         <Box>
-          <>{createLinks(routes(pool_id))}</>
+          <>{createLinks(routes(`${pool?.id}`))}</>
         </Box>
       </Stack>
-      <SidebarHelp></SidebarHelp>
+     {network?.isTest && <SidebarHelp></SidebarHelp>}
     </Box>
   );
 };

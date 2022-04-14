@@ -5,17 +5,19 @@ export const useBalance = (
   chainId: number,
   tokenAddress: string,
   userOrContractAddress: string,
-): number => {
+): { balance: number; loading: boolean } => {
   const [balance, setBalance] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getBalance = async () => {
       const balance = await getAddressBalance(chainId, tokenAddress, userOrContractAddress);
       setBalance(balance);
+      setLoading(false);
     };
 
     getBalance();
   }, [chainId, tokenAddress, userOrContractAddress]);
 
-  return balance;
+  return { balance, loading };
 };

@@ -8,7 +8,7 @@ import {
   Tabs,
   Text,
   useColorModeValue,
-  useToast,
+  useToast
 } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useRef, useState } from 'react';
@@ -71,13 +71,13 @@ export const CreatePoolPage = () => {
   return (
     <>
       <Helmet>
-        <title>Create a new pool</title>
+        <title>Create a New Group</title>
       </Helmet>
       <Flex direction="column" minH="100vh" align="center" pt={{ sm: '125px', lg: '75px' }}>
         <Navbar />
         <Flex direction="column" textAlign="center" mb={{ sm: '25px', md: '45px' }}>
           <Text fontSize={{ sm: '2xl', md: '3xl', lg: '4xl' }} fontWeight="bold" mb="8px">
-            Create a new pool
+            Create a New Group
           </Text>
           <Text color="gray.400" fontWeight="normal" fontSize={{ sm: 'sm', md: 'lg' }}></Text>
         </Flex>

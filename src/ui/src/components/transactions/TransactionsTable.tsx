@@ -3,7 +3,6 @@ import {
   Badge,
   Box,
   chakra,
-  Progress,
   Select,
   Table,
   Tbody,
@@ -11,7 +10,7 @@ import {
   Text,
   Th,
   Thead,
-  Tr,
+  Tr
 } from '@chakra-ui/react';
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { Cell, Column, useSortBy, useTable } from 'react-table';
@@ -19,6 +18,7 @@ import { updateTransactionCategory } from '../../services/transactionsServices';
 import { AddressLookup, Category, Pool } from '../../types';
 import { Transaction } from '../../types/transaction';
 import { RefreshTransactionButton } from '../Buttons/RefreshTransactionButton';
+import Loading from '../Loading';
 
 interface TransactionsTableProps {
   pool: Pool;
@@ -181,7 +181,6 @@ export const TransactionsTable = ({
 
   return (
     <>
-      {loading && <Progress size="xs" isIndeterminate />}
       <Table {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup) => (
@@ -221,6 +220,7 @@ export const TransactionsTable = ({
           })}
         </Tbody>
       </Table>
+      {loading && <Loading m={4}/>}
     </>
   );
 };

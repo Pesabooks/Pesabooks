@@ -1,14 +1,15 @@
-import { CheckIcon } from '@chakra-ui/icons';
+import { CheckIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import {
   Button,
   Checkbox,
   Divider,
   Flex,
   Image,
+  Link,
   Spacer,
   Stack,
   Text,
-  useColorModeValue,
+  useColorModeValue
 } from '@chakra-ui/react';
 import React, { useState } from 'react';
 import { Card, CardBody, CardHeader } from '../Card';
@@ -35,6 +36,15 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
         >
           <Text color={textColor} fontSize="lg" fontWeight="bold" mb="4px">
             Select a network
+          </Text>
+          <Text color="gray.400" fontWeight="normal" fontSize={{ sm: 'sm', md: 'lg' }}>
+            Use a testnet if you want to use Pesabooks without spending real crypto.{' '}
+            <Link
+              isExternal
+              href="https://season-tangelo-df2.notion.site/Testing-Pesabooks-on-Polygon-Testnet-1dbd6d2c0da1473cb06d32efc36e2408"
+            >
+              See the documentation <ExternalLinkIcon mx="2px" />
+            </Link>
           </Text>
         </Flex>
       </CardHeader>
