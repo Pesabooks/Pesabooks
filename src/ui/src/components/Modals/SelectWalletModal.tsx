@@ -1,50 +1,32 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import {
-  Avatar,
-  Box,
-  Button,
-  Flex,
+  Box, Flex,
   Link,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
-  ModalOverlay,
-  Stack,
-  Text,
+  ModalOverlay, Text
 } from '@chakra-ui/react';
-import { AbstractConnector } from '@web3-react/abstract-connector';
+import { MetaMask } from '@web3-react/metamask';
+import { WalletConnect } from '@web3-react/walletconnect';
 import React from 'react';
-import { ConnectorNames } from '../../types/ConnectorNames';
-
-const connectors = [
-  {
-    name: ConnectorNames.Injected,
-    description:
-      'Connect using a browser plugin or mobile app. Best supported on Chrome or Firefox.',
-  },
-  {
-    name: ConnectorNames.WalletConnect,
-    description:
-      'Connect by scanning a QR code with any mobile wallet that supports wallet connect (i.e Trust, Argent, Rainbow + more)',
-  },
-];
+import { ConnectWithMetamask } from '../Connectors/ConnectWithMetamask';
+import { ConnectWithWallentConnect } from '../Connectors/WalletConnectContext';
 
 interface SelectWalletModalProps {
+  chainId: number;
   isOpen: boolean;
   onClose: () => void;
-  onConnect: (name: ConnectorNames, currentConnector: AbstractConnector) => void;
-  connectorsByName: {
-    [connectorName in ConnectorNames]: AbstractConnector;
-  };
+  onConnect: (connector: MetaMask | WalletConnect) => void;
 }
 
 export const SelectWalletModal = ({
+  chainId,
   isOpen,
   onConnect,
   onClose,
-  connectorsByName,
 }: SelectWalletModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
@@ -54,40 +36,8 @@ export const SelectWalletModal = ({
         <ModalCloseButton />
         <ModalBody>
           <Flex p="8" direction="column" gap="4">
-            {connectors.map(({ name, description }) => {
-              return (
-                <Button
-                  height="150px"
-                  p="4"
-                  size="lg"
-                  display="flex"
-                  justifyContent="start"
-                  key={name}
-                  onClick={() => onConnect(name, connectorsByName[name])}
-                  variant="outline"
-                  style={{
-                    whiteSpace: 'normal',
-                    wordWrap: 'break-word',
-                  }}
-                >
-                  <Stack direction={'row'} spacing={4} align={'center'}>
-                    <Avatar
-                      size="lg"
-                      p="2"
-                      src={`${process.env.PUBLIC_URL}/images/wallet/${name}.png`}
-                    />
-                    <Stack direction={'column'} align="start" spacing={2}>
-                      <Text fontSize={'md'} fontWeight={600}>
-                        {name}
-                      </Text>
-                      <Text align="left" fontSize={'sm'} color={'gray.500'}>
-                        {description}
-                      </Text>
-                    </Stack>
-                  </Stack>
-                </Button>
-              );
-            })}
+            <ConnectWithMetamask onConnect={(connector) => onConnect(connector)} />
+            <ConnectWithWallentConnect onConnect={(connector) => onConnect(connector)} />
           </Flex>
           <Box mt="8">
             <Text fontWeight="bold">New to Ethereum?</Text>

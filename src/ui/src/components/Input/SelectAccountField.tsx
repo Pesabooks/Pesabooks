@@ -21,7 +21,7 @@ export const SelectAccountField = ({ accounts, ...boxProps }: Props) => {
       }) => (
         <FormControl {...boxProps} isInvalid={invalid} isRequired>
           <FormLabel htmlFor="account">Account</FormLabel>
-          <Select
+          <Select 
             name={name}
             ref={ref}
             onChange={onChange}

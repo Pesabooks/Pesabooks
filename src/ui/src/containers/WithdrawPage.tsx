@@ -1,10 +1,11 @@
-import { Box, Button, Heading, useToast } from '@chakra-ui/react';
+import { Button, Container, Heading, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ConnectWalletButton } from '../components/Buttons/ConnectWalletButton';
+import { Card, CardHeader } from '../components/Card';
 import { InputAmountField } from '../components/Input/InputAmountField';
 import { SelectAccountField } from '../components/Input/SelectAccountField';
 import { SelectCategoryField } from '../components/Input/SelectCategoryField';
@@ -30,7 +31,7 @@ export const WithdrawPage = () => {
   const [users, setUsers] = useState<AddressLookup[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const { library, active } = useWeb3React<Web3Provider>();
+  const { provider, isActive } = useWeb3React();
   const { pool } = usePool();
   const toast = useToast();
   const [selectedAccountBalance, setSelectedAccountBalance] = useState<number>(0);
@@ -64,14 +65,14 @@ export const WithdrawPage = () => {
   }, [accounts, token, selectedAccount, pool.chain_id]);
 
   const submit = async (formValue: WithdrawFormValue) => {
-    if (!library) return;
+    if (!provider) return;
 
     const { amount, memo, account, user, category } = formValue;
 
     try {
       await withdraw(
         user.id,
-        library,
+        provider as Web3Provider,
         pool,
         account,
         category.id,
@@ -110,32 +111,35 @@ export const WithdrawPage = () => {
       <Helmet>
         <title>Withdraw | {pool?.name}</title>
       </Helmet>
-      <Heading as="h2" mb={20} size="lg">
-        Withdraw
-      </Heading>
-      <Box display="flex">
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(submit)}>
-            <SelectAccountField mb="4" accounts={accounts} />
 
-            <SelectCategoryField mb="4" categories={categories} />
+      <Container mt={20}>
+        <Card>
+          <CardHeader p="6px 0px 32px 0px">
+            <Heading size="lg">Withdraw</Heading>
+          </CardHeader>
+          <FormProvider {...methods}>
+            <form onSubmit={methods.handleSubmit(submit)}>
+              <SelectAccountField mb="4" accounts={accounts} />
 
-            <SelectUserField mb="4" users={users} />
+              <SelectCategoryField mb="4" categories={categories} />
 
-            <InputAmountField mb="4" balance={selectedAccountBalance} symbol={token.symbol} />
+              <SelectUserField label='To User' mb="4" users={users} />
 
-            <TextAreaMemoField mb="4" />
+              <InputAmountField mb="4" balance={selectedAccountBalance} symbol={token.symbol} />
 
-            {active ? (
-              <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
-                Withdraw
-              </Button>
-            ) : (
-              <ConnectWalletButton mt={4} chainId={pool.chain_id} />
-            )}
-          </form>
-        </FormProvider>
-      </Box>
+              <TextAreaMemoField mb="4" />
+
+              {isActive ? (
+                <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
+                  Withdraw
+                </Button>
+              ) : (
+                <ConnectWalletButton mt={4} chainId={pool.chain_id} />
+              )}
+            </form>
+          </FormProvider>
+        </Card>
+      </Container>
     </>
   );
 };

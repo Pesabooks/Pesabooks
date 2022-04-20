@@ -1,4 +1,5 @@
 import { Button } from '@chakra-ui/react';
+import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,17 +8,19 @@ import { isSignerAnAdmin } from '../../services/poolsService';
 
 export const WithdrawButton = () => {
   const { pool } = usePool();
-  const { library, active, account } = useWeb3React();
+  const { provider, isActive, account, chainId } = useWeb3React();
   const [isAdmin, setIsAdmin] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (pool) isSignerAnAdmin(pool, library).then(setIsAdmin);
-  }, [library, pool, account]);
+  const connected = isActive && pool?.chain_id === chainId;
 
-  return active && pool ? (
+  useEffect(() => {
+    if (pool && connected) isSignerAnAdmin(pool, provider as Web3Provider).then(setIsAdmin);
+  }, [provider, pool, account, isActive, connected]);
+
+  return connected ? (
     <>
-      <Button onClick={() => navigate(`/pool/${pool.id}/withdraw`)} disabled={!isAdmin}>
+      <Button onClick={() => navigate(`/pool/${pool?.id}/withdraw`)} disabled={!isAdmin}>
         Withdraw
       </Button>
     </>

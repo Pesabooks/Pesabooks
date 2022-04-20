@@ -93,6 +93,7 @@ export const HomePage = () => {
           {pools.map((pool, index) => {
             return (
               <Button
+              key={index}
                 variant="no-hover"
                 w="100%"
                 h="100%"

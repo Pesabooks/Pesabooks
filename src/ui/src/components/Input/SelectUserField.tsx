@@ -5,7 +5,7 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Text,
+  Text
 } from '@chakra-ui/react';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
 import React from 'react';
@@ -15,6 +15,7 @@ import { shortenAddress } from '../../utils/addresses';
 
 interface Props extends BoxProps {
   users: AddressLookup[];
+  label?: string;
 }
 
 const AvatarOption = (props: OptionProps<AddressLookup, boolean, GroupBase<AddressLookup>>) => {
@@ -31,7 +32,7 @@ const AvatarOption = (props: OptionProps<AddressLookup, boolean, GroupBase<Addre
   );
 };
 
-export const SelectUserField = ({ users, ...boxProps }: Props) => {
+export const SelectUserField = ({ users, label, ...boxProps }: Props) => {
   const { control } = useFormContext();
 
   return (
@@ -44,7 +45,7 @@ export const SelectUserField = ({ users, ...boxProps }: Props) => {
         fieldState: { invalid, error },
       }) => (
         <FormControl {...boxProps} isInvalid={invalid} isRequired>
-          <FormLabel htmlFor="user">User</FormLabel>
+          <FormLabel htmlFor="user">{label ?? 'User'}</FormLabel>
           <Select
             name={name}
             ref={ref}

@@ -1,10 +1,13 @@
 import { ChakraProvider } from '@chakra-ui/react';
-import { Web3Provider } from '@ethersproject/providers';
 import * as Sentry from '@sentry/react';
-import { Web3ReactProvider } from '@web3-react/core';
+import { Web3ReactHooks, Web3ReactProvider } from '@web3-react/core';
+import { MetaMask } from '@web3-react/metamask';
+import { WalletConnect } from '@web3-react/walletconnect';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout/Layout';
+import { hooks as metaMaskHooks, metaMask } from './connectors/metaMask';
+import { hooks as walletConnectHooks, walletConnect } from './connectors/walletConnect';
 import { Auth } from './containers/Auth';
 import { CreatePoolPage } from './containers/CreatePoolPage';
 import { DashboardPage } from './containers/DashboardPage';
@@ -23,20 +26,19 @@ import { AuthGuard } from './guards/authGuard';
 import { PoolGuard } from './guards/poolGuard';
 import theme from './theme/theme';
 
-function App() {
-  function getLibrary(provider: any): Web3Provider {
-    const library = new Web3Provider(provider);
-    library.pollingInterval = 12000;
-    return library;
-  }
+const connectors: [MetaMask | WalletConnect, Web3ReactHooks][] = [
+  [metaMask, metaMaskHooks],
+  [walletConnect, walletConnectHooks],
+];
 
+function App() {
   return (
     <HelmetProvider>
       <Helmet titleTemplate="%s - Pesabooks" defaultTitle="Pesabooks">
         <meta name="description" content="A crypto-powered financial platform for saving clubs" />
       </Helmet>
       <ChakraProvider theme={theme}>
-        <Web3ReactProvider getLibrary={getLibrary}>
+        <Web3ReactProvider connectors={connectors}>
           <BrowserRouter>
             <AuthProvider>
               <Routes>

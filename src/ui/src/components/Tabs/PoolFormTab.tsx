@@ -9,7 +9,7 @@ import {
   Stack,
   Text,
   Textarea,
-  useColorModeValue,
+  useColorModeValue
 } from '@chakra-ui/react';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
 import { useMemo } from 'react';
@@ -77,7 +77,7 @@ export const PoolFormTab = ({ chainId, tokens, onCreate, loading, onPrev }: Pool
           mx="auto"
         >
           <Text fontSize="lg" fontWeight="bold" mb="4px">
-            Pool info
+            Group info
           </Text>
         </Flex>
       </CardHeader>

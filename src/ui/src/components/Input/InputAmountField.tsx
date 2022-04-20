@@ -3,17 +3,14 @@ import {
   Flex,
   FormControl,
   FormErrorMessage,
-  FormLabel,
-  Icon,
-  InputGroup,
+  FormLabel, InputGroup,
   InputRightAddon,
   NumberInput,
   NumberInputField,
   Spacer,
-  Text,
+  Text
 } from '@chakra-ui/react';
 import { useFormContext } from 'react-hook-form';
-import { FaWallet } from 'react-icons/fa';
 
 interface InputAmountFieldProps extends BoxProps {
   balance: number;
@@ -40,13 +37,12 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
   return (
     <FormControl {...boxProps} isInvalid={errors.amount} isRequired>
       <Flex>
-        <FormLabel htmlFor="amount">amount</FormLabel>
+        <FormLabel htmlFor="amount">Amount</FormLabel>
         <Spacer />
         <Flex align="center" gap={1}>
-          <Icon as={FaWallet} h={'12px'} w={'12px'} />
-          <Text fontSize="sm">
-            {balance} {symbol}
-          </Text>
+          <Text fontSize='sm'>Balance:  {balance} {symbol}</Text>
+          {/* <Icon as={FaWallet} h={'12px'} w={'12px'} /> */}
+        
         </Flex>
       </Flex>
 

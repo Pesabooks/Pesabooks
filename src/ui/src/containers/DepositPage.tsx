@@ -1,10 +1,11 @@
-import { Box, Button, Heading, useDisclosure, useToast } from '@chakra-ui/react';
+import { Button, Container, Heading, useDisclosure, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ConnectWalletButton } from '../components/Buttons/ConnectWalletButton';
+import { Card, CardHeader } from '../components/Card';
 import { InputAmountField } from '../components/Input/InputAmountField';
 import { SelectAccountField } from '../components/Input/SelectAccountField';
 import { SelectCategoryField } from '../components/Input/SelectCategoryField';
@@ -29,7 +30,7 @@ interface DepositFormValue {
 export const DepositPage = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const { library, active, account } = useWeb3React<Web3Provider>();
+  const { provider, isActive, account } = useWeb3React();
   const { pool } = usePool();
   const [balance, setBalance] = useState<number>(0);
   const { user } = useAuth();
@@ -62,8 +63,8 @@ export const DepositPage = () => {
 
   useEffect(() => {
     const getBalance = async () => {
-      if (library) {
-        const address = await library.getSigner().getAddress();
+      if (provider) {
+        const address = await (provider as Web3Provider).getSigner().getAddress();
         if (pool?.token) {
           const balance = await getAddressBalance(pool.chain_id, pool.token.address, address);
           setBalance(balance);
@@ -72,13 +73,13 @@ export const DepositPage = () => {
     };
 
     getBalance();
-  }, [library, pool, account]);
+  }, [provider, pool, account]);
 
   const approve = async () => {
-    if (!library) return;
+    if (!provider) return;
     try {
       setIsApproving(true);
-      await approveToken(library, token.address, selectedAccount);
+      await approveToken(provider as Web3Provider, token.address, selectedAccount);
       onCloseApproveToken();
     } finally {
       setIsApproving(false);
@@ -86,22 +87,36 @@ export const DepositPage = () => {
   };
 
   const submit = async (formValue: DepositFormValue) => {
-    if (!library) return;
+    if (!provider) return;
 
     const { amount, memo, account, category } = formValue;
 
     try {
-      const tokenApproved = await isTokenApproved(library, token.address, account, amount);
+      const tokenApproved = await isTokenApproved(
+        provider as Web3Provider,
+        token.address,
+        account,
+        amount,
+      );
       if (!tokenApproved) {
         onOpenApproveToken();
       } else {
-        await deposit(user.id, library, pool, account, category.id, amount, memo, () => {
-          toast({
-            title: 'Your transaction is completed',
-            status: 'success',
-            isClosable: true,
-          });
-        });
+        await deposit(
+          user.id,
+          provider as Web3Provider,
+          pool,
+          account,
+          category.id,
+          amount,
+          memo,
+          () => {
+            toast({
+              title: 'Your transaction is completed',
+              status: 'success',
+              isClosable: true,
+            });
+          },
+        );
 
         toast({
           title: 'Your transaction is pending',
@@ -126,30 +141,32 @@ export const DepositPage = () => {
       <Helmet>
         <title>Deposit | {pool?.name}</title>
       </Helmet>
-      <Heading as="h2" mb={20} size="lg">
-        Deposit
-      </Heading>
-      <Box display="flex">
-        <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(submit)}>
-            <SelectAccountField mb="4" accounts={accounts} />
+      <Container mt={20}>
+        <Card>
+          <CardHeader p="6px 0px 32px 0px">
+            <Heading size="lg">Deposit</Heading>
+          </CardHeader>
+          <FormProvider {...methods}>
+            <form onSubmit={methods.handleSubmit(submit)}>
+              <SelectAccountField mb="4" accounts={accounts} />
 
-            <SelectCategoryField mb="4" categories={categories} />
+              <SelectCategoryField mb="4" categories={categories} />
 
-            <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
+              <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
 
-            <TextAreaMemoField mb="4" />
+              <TextAreaMemoField mb="4" />
 
-            {active ? (
-              <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
-                Deposit
-              </Button>
-            ) : (
-              <ConnectWalletButton mt={4} chainId={pool.chain_id} />
-            )}
-          </form>
-        </FormProvider>
-      </Box>
+              {isActive ? (
+                <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
+                  Deposit
+                </Button>
+              ) : (
+                <ConnectWalletButton mt={4} chainId={pool.chain_id} />
+              )}
+            </form>
+          </FormProvider>
+        </Card>
+      </Container>
       <ApproveTokenModal
         isOpen={isOpenApproveToken}
         onOpen={onOpenApproveToken}

@@ -3,14 +3,15 @@ import { useWeb3React } from '@web3-react/core';
 import { useNavigate } from 'react-router-dom';
 import { usePool } from '../../hooks/usePool';
 
+
 export const DepositButton = () => {
   const { pool } = usePool();
-  const { active } = useWeb3React();
+  const { isActive,chainId } = useWeb3React();
   const navigate = useNavigate();
 
-  return active && pool ? (
+  return isActive && pool?.chain_id===chainId ? (
     <>
-      <Button onClick={() => navigate(`/pool/${pool.id}/deposit`)}>Deposit</Button>
+      <Button onClick={() => navigate(`/pool/${pool?.id}/deposit`)}>Deposit</Button>
     </>
   ) : null;
 };

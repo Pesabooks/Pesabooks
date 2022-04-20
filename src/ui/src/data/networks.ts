@@ -1,3 +1,5 @@
+import { AddEthereumChainParameter } from '@web3-react/types';
+
 export interface Network {
   chainId: string;
   rpcUrls: string[];
@@ -37,3 +39,26 @@ export const networks: { [chainId: number]: Network } = {
     isTest: false,
   },
 };
+
+export const getAddChainParameters = (chainId: number): AddEthereumChainParameter => {
+  const chainInformation = networks[chainId];
+  return {
+    chainId,
+    chainName: chainInformation.chainName,
+    nativeCurrency: { ...chainInformation.nativeCurrency, decimals: 18 },
+    rpcUrls: chainInformation.rpcUrls,
+    blockExplorerUrls: chainInformation.blockExplorerUrls,
+  };
+};
+
+export const RPCURLS: { [chainId: number]: string[] } = Object.keys(networks).reduce<{
+  [chainId: number]: string[];
+}>((accumulator, chainId) => {
+  const validURLs: string[] = networks[Number(chainId)].rpcUrls;
+
+  if (validURLs.length) {
+    accumulator[Number(chainId)] = validURLs;
+  }
+
+  return accumulator;
+}, {});

@@ -10,6 +10,7 @@ import {
   useColorModeValue,
   useToast
 } from '@chakra-ui/react';
+import type { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -26,7 +27,7 @@ import { Token } from '../types';
 export const CreatePoolPage = () => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const navigate = useNavigate();
-  const { library, chainId: connectedChainId } = useWeb3React();
+  const { provider, chainId: connectedChainId } = useWeb3React();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
@@ -49,7 +50,7 @@ export const CreatePoolPage = () => {
     try {
       const { name, description, token } = values;
 
-      const pool_id = await createNewPool(library, name, description, token);
+      const pool_id = await createNewPool(provider as Web3Provider, name, description, token);
 
       navigate(`/pool/${pool_id}`);
     } catch (e) {

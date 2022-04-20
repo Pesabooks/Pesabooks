@@ -6,7 +6,7 @@ export const shortenAddress = (address: string): string => {
     return (
       formattedAddress.substring(0, 6) +
       '...' +
-      formattedAddress.substring(formattedAddress.length - 4)
+      formattedAddress.substring(formattedAddress.length - 5)
     );
   } catch {
     throw new TypeError("Invalid input, address can't be parsed");

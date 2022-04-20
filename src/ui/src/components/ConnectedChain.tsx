@@ -14,7 +14,7 @@ export const ConnectedChain = (props: ConnectedChainProps) => {
     <Box {...props}>
       <Tag size="lg" variant="outline" colorScheme="green">
         <TagLeftIcon boxSize="12px" as={BsCircleFill} />
-        <TagLabel color={textcolor}>{networks[chainId].chainName}</TagLabel>
+        <TagLabel color={textcolor}>{networks[chainId]?.chainName}</TagLabel>
       </Tag>
     </Box>
   );
