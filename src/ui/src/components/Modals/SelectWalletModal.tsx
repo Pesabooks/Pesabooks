@@ -13,7 +13,7 @@ import { MetaMask } from '@web3-react/metamask';
 import { WalletConnect } from '@web3-react/walletconnect';
 import React from 'react';
 import { ConnectWithMetamask } from '../Connectors/ConnectWithMetamask';
-import { ConnectWithWallentConnect } from '../Connectors/WalletConnectContext';
+import { ConnectWithWalletConnect } from '../Connectors/ConnectWithWalletConnect';
 
 interface SelectWalletModalProps {
   chainId: number;
@@ -37,7 +37,7 @@ export const SelectWalletModal = ({
         <ModalBody>
           <Flex p="8" direction="column" gap="4">
             <ConnectWithMetamask onConnect={(connector) => onConnect(connector)} />
-            <ConnectWithWallentConnect onConnect={(connector) => onConnect(connector)} />
+            <ConnectWithWalletConnect onConnect={(connector) => onConnect(connector)} />
           </Flex>
           <Box mt="8">
             <Text fontWeight="bold">New to Ethereum?</Text>

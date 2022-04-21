@@ -3,10 +3,10 @@ import React from 'react';
 import { walletConnect } from '../../connectors/walletConnect';
 import { ConnectButton } from './ConnectButton';
 
-interface WConnectWithWallentConnectProps {
+interface WConnectWithWalletConnectProps {
   onConnect: (connector: WalletConnect) => void;
 }
-export const ConnectWithWallentConnect = ({ onConnect }: WConnectWithWallentConnectProps) => {
+export const ConnectWithWalletConnect = ({ onConnect }: WConnectWithWalletConnectProps) => {
   return (
     <ConnectButton
       name="WalletConnect"

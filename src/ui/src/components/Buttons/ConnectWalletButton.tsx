@@ -71,7 +71,7 @@ export const ConnectWalletButton = ({ chainId, ...buttonProps }: ConnectWalletBu
         onOpenInstallMetamaskModal();
       }
     }
-  }, [error]);
+  }, [error, onOpenInstallMetamaskModal]);
 
 
   
