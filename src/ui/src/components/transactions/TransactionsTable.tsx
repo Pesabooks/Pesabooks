@@ -3,6 +3,7 @@ import {
   Badge,
   Box,
   chakra,
+  Flex,
   Select,
   Table,
   Tbody,
@@ -18,6 +19,7 @@ import { updateTransactionCategory } from '../../services/transactionsServices';
 import { AddressLookup, Category, Pool } from '../../types';
 import { Transaction } from '../../types/transaction';
 import { RefreshTransactionButton } from '../Buttons/RefreshTransactionButton';
+import { ViewReceiptButton } from '../Buttons/ViewReceiptButton';
 import Loading from '../Loading';
 
 interface TransactionsTableProps {
@@ -167,9 +169,14 @@ export const TransactionsTable = ({
             row: { original },
           },
         }) => {
-          return original.status === 0 ? (
-            <RefreshTransactionButton chainId={pool.chain_id} transactionHash={original.hash} />
-          ) : null;
+          return (
+            <Flex>
+              {original.status === 0 && (
+                <RefreshTransactionButton chainId={pool.chain_id} transactionHash={original.hash} />
+              )}
+              <ViewReceiptButton chainId={pool.chain_id} transactionHash={original.hash} />
+            </Flex>
+          );
         },
       },
     ];
@@ -220,7 +227,7 @@ export const TransactionsTable = ({
           })}
         </Tbody>
       </Table>
-      {loading && <Loading m={4}/>}
+      {loading && <Loading m={4} />}
     </>
   );
 };

@@ -5,6 +5,5 @@ export interface Member {
   user?: Profile;
   pool_id: number;
   pool?: Pool;
-  role: 'admin' | 'member';
   active: boolean;
 }

@@ -2,7 +2,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import { Account__factory } from '@pesabooks/contracts/typechain';
 import { handleSupabaseError, poolsTable, supabase } from '../supabase';
 import { AddressLookup, Pool, Token } from '../types';
-import { createPoolAccountContract, getPoolContract } from './blockchainServices';
+import { createPoolAccountContract, defaultProvider, getPoolContract } from './blockchainServices';
 
 export const getPool = async (pool_id: string) => {
   const { data, error } = await poolsTable()
@@ -77,4 +77,31 @@ export const isSignerAnAdmin = async (pool: Pool, provider: Web3Provider) => {
   const poolContract = await getPoolContract(pool.contract_address, provider);
 
   return poolContract.isAdmin(signerAddress);
+};
+
+export const addAdmin = async (pool: Pool, address: AddressLookup, provider: Web3Provider) => {
+  if (!provider) return false;
+  const signer = provider.getSigner();
+
+  const poolContract = await getPoolContract(pool.contract_address, signer);
+  const tx = await poolContract.addAdmin(address.address);
+
+  return tx;
+};
+
+export const removeAdmin = async (pool: Pool, address: AddressLookup, provider: Web3Provider) => {
+  if (!provider) return false;
+  const signer = provider.getSigner();
+
+  const poolContract = await getPoolContract(pool.contract_address, signer);
+  const tx = await poolContract.removeAdmin(address.address);
+
+  return tx;
+};
+
+export const getAdminAddresses = async (pool: Pool) => {
+  const provider = defaultProvider(pool.chain_id);
+
+  const poolContract = await getPoolContract(pool.contract_address, provider);
+  return poolContract.getAdmins();
 };

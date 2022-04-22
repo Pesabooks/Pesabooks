@@ -11,6 +11,7 @@ import { SelectAccountField } from '../components/Input/SelectAccountField';
 import { SelectCategoryField } from '../components/Input/SelectCategoryField';
 import { TextAreaMemoField } from '../components/Input/TextAreaMemoField';
 import { ApproveTokenModal } from '../components/Modals/ApproveTokenModal';
+import { TransactionSubmittedModal } from '../components/Modals/TransactionSubmittedModal';
 import { useAuth } from '../hooks/useAuth';
 import { usePool } from '../hooks/usePool';
 import { getAccounts } from '../services/accountsService';
@@ -18,7 +19,6 @@ import { approveToken, getAddressBalance, isTokenApproved } from '../services/bl
 import { getAllCategories } from '../services/categoriesService';
 import { deposit } from '../services/transactionsServices';
 import { Account, Category } from '../types';
-import { checkError } from '../utils';
 
 interface DepositFormValue {
   amount: number;
@@ -30,6 +30,7 @@ interface DepositFormValue {
 export const DepositPage = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [lastTxHash, setLastTxHash] = useState('');
   const { provider, isActive, account } = useWeb3React();
   const { pool } = usePool();
   const [balance, setBalance] = useState<number>(0);
@@ -43,6 +44,13 @@ export const DepositPage = () => {
     onOpen: onOpenApproveToken,
     onClose: onCloseApproveToken,
   } = useDisclosure();
+
+  const {
+    isOpen: isOpenTransactionConfirmation,
+    onOpen: onOpenTransactionConfirmationn,
+    onClose: onCloseTransactionConfirmation,
+  } = useDisclosure();
+
   const [isApproving, setIsApproving] = useState(false);
 
   const token = pool?.token;
@@ -101,7 +109,7 @@ export const DepositPage = () => {
       if (!tokenApproved) {
         onOpenApproveToken();
       } else {
-        await deposit(
+        const tx = await deposit(
           user.id,
           provider as Web3Provider,
           pool,
@@ -109,26 +117,44 @@ export const DepositPage = () => {
           category.id,
           amount,
           memo,
-          () => {
-            toast({
-              title: 'Your transaction is completed',
-              status: 'success',
-              isClosable: true,
-            });
+          (success) => {
+            if (success)
+              toast.update(tx.hash, {
+                title: 'Transaction Completed',
+                description: `Your Deposit of ${amount} ${token.symbol} is completed`,
+                status: 'success',
+                duration: 5000,
+                isClosable: true,
+              });
+            else
+              toast.update(tx.hash, {
+                title: 'Transaction failed',
+                description: `Your Deposit of ${amount} ${token.symbol} failed`,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+              });
           },
         );
 
         toast({
-          title: 'Your transaction is pending',
-          status: 'warning',
-          isClosable: true,
+          id: tx.hash,
+          title: 'Deposit Submitted',
+          description: `Your Deposit of ${amount} ${token.symbol} is pending`,
+          status: 'info',
+          duration: null,
+          isClosable: false,
+          position: 'bottom-right',
         });
+
+        setLastTxHash(tx.hash);
+        onOpenTransactionConfirmationn();
 
         methods.reset();
       }
     } catch (e: any) {
       toast({
-        title: checkError(e),
+        title: e.message,
         status: 'error',
         isClosable: true,
       });
@@ -167,13 +193,23 @@ export const DepositPage = () => {
           </FormProvider>
         </Card>
       </Container>
-      <ApproveTokenModal
-        isOpen={isOpenApproveToken}
-        onOpen={onOpenApproveToken}
-        onClose={onCloseApproveToken}
-        onApprove={approve}
-        isApproving={isApproving}
-      />
+      {isOpenApproveToken && (
+        <ApproveTokenModal
+          isOpen={isOpenApproveToken}
+          onClose={onCloseApproveToken}
+          onApprove={approve}
+          isApproving={isApproving}
+        />
+      )}
+      {isOpenTransactionConfirmation && (
+        <TransactionSubmittedModal
+          isOpen={isOpenTransactionConfirmation}
+          onClose={onCloseTransactionConfirmation}
+          description="Your Deposit is submitted"
+          chainId={pool.chain_id}
+          hash={lastTxHash}
+        />
+      )}
     </>
   );
 };

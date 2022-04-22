@@ -1,9 +1,10 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Account__factory } from '@pesabooks/contracts/typechain';
-import { ContractTransaction, ethers } from 'ethers';
+import { ContractReceipt, ethers } from 'ethers';
 import { Filter } from 'react-supabase';
+import { networks } from '../data/networks';
 import { handleSupabaseError, transationsTable } from '../supabase';
-import { Pool } from '../types';
+import { AddressLookup, Pool } from '../types';
 import { Account } from '../types/account';
 import { Transaction } from '../types/transaction';
 import { defaultProvider, getTokenContract } from './blockchainServices';
@@ -16,8 +17,8 @@ export const deposit = async (
   category_id: number,
   amount: number,
   memo: string | undefined,
-  onConfirmation: () => void,
-): Promise<Transaction | undefined> => {
+  onTxFullFilled?: (success: boolean) => void,
+) => {
   const signer = provider.getSigner();
   const signerAddress = await signer.getAddress();
   const accountContract = Account__factory.connect(account.contract_address, signer);
@@ -43,17 +44,19 @@ export const deposit = async (
     pool_id: pool.id,
   };
 
-  const newTx = await SaveTransactionAndWaitToComplete(
-    pool.chain_id,
-    tx,
-    transaction,
-    onConfirmation,
-  );
-  return newTx;
+  const { error } = await transationsTable().insert(transaction);
+  handleSupabaseError(error);
+
+  tx.wait().then((receipt) => {
+    onTransactionComplete(receipt, pool.chain_id);
+    onTxFullFilled?.(receipt.status === 1);
+  });
+
+  return tx;
 };
 
 export const withdraw = async (
-  user_id: string,
+  user: AddressLookup,
   provider: Web3Provider,
   pool: Pool,
   account: Account,
@@ -61,8 +64,8 @@ export const withdraw = async (
   amount: number,
   memo: string | undefined,
   recipient: string,
-  onConfirmation: () => void,
-): Promise<Transaction | undefined> => {
+  onTxFullFilled?: (success: boolean) => void,
+) => {
   const signer = provider.getSigner();
   const accountContract = Account__factory.connect(account.contract_address, signer);
 
@@ -78,7 +81,7 @@ export const withdraw = async (
   const transaction: Partial<Transaction> = {
     amount: amount,
     memo: memo,
-    user_id: user_id,
+    user_id: user.id,
     type: 'withdrawal',
     category_id: category_id,
     hash: tx.hash,
@@ -90,38 +93,25 @@ export const withdraw = async (
     pool_id: pool.id,
   };
 
-  const newTx = await SaveTransactionAndWaitToComplete(
-    pool.chain_id,
-    tx,
-    transaction,
-    onConfirmation,
-  );
-
-  return newTx;
-};
-
-const SaveTransactionAndWaitToComplete = async (
-  chain_id: number,
-  tx: ContractTransaction,
-  transaction: Partial<Transaction>,
-  onConfirmation?: () => void,
-) => {
-  //Save pending transaction
-  const { data, error } = await transationsTable().insert(transaction);
+  const { error } = await transationsTable().insert(transaction);
   handleSupabaseError(error);
 
-  tx.wait().then(async (receipt) => {
-    if (receipt.blockNumber) {
-      onConfirmation?.();
-      const timestamp = (await defaultProvider(chain_id).getBlock(receipt.blockNumber)).timestamp;
-      const { error } = await transationsTable()
-        .update({ status: 1, timestamp })
-        .eq('hash', receipt.transactionHash);
-      if (error) console.error(error);
-    }
+  tx.wait().then((receipt) => {
+    onTransactionComplete(receipt, pool.chain_id);
+    onTxFullFilled?.(receipt.status === 1);
   });
 
-  return data?.[0];
+  return tx;
+};
+
+const onTransactionComplete = async (receipt: ContractReceipt, chainId: number) => {
+  if (receipt.blockNumber) {
+    const timestamp = (await defaultProvider(chainId).getBlock(receipt.blockNumber)).timestamp;
+    const { error } = await transationsTable()
+      .update({ status: 1, timestamp })
+      .eq('hash', receipt.transactionHash);
+    if (error) console.error(error);
+  }
 };
 
 export const getAllTransactions = async (pool_id: number, filter?: Filter<Transaction>) => {
@@ -164,4 +154,8 @@ export const refreshTransaction = async (chain_id: number, txHash: string) => {
 
 export const updateTransactionCategory = async (id: number, category_id: number) => {
   await transationsTable().update({ category_id }).match({ id: id });
+};
+
+export const getTxScanLink = (hash: string, chainId: number) => {
+  return `${networks[chainId].blockExplorerUrls[0]}tx/${hash}`;
 };

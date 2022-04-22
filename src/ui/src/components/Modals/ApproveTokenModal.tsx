@@ -7,13 +7,12 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
+  Text
 } from '@chakra-ui/react';
 import React from 'react';
 
 interface ApproveTokenModalProps {
   isOpen: boolean;
-  onOpen: () => void;
   onClose: () => void;
   onApprove: () => void;
   isApproving: boolean;
@@ -21,7 +20,6 @@ interface ApproveTokenModalProps {
 
 export const ApproveTokenModal = ({
   isOpen,
-  onOpen,
   onClose,
   onApprove,
   isApproving,

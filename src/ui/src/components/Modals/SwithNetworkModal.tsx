@@ -31,16 +31,12 @@ export const SwitchNetworkModal = ({
         <ModalHeader>Wrong Network</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          To continue you must switch the network your wallet is on to <b>{networks[chainId].chainName}</b>, or connect another
-          wallet.
+          To continue you must switch the network your wallet is on to{' '}
+          <b>{networks[chainId].chainName}</b>, or connect another wallet.
         </ModalBody>
 
         <ModalFooter>
-          {/* {activatingConnector instanceof MetaMask && ( */}
-            <Button  onClick={onSwith}>
-              Switch to {networks[chainId].chainName}
-            </Button>
-          {/* )} */}
+          <Button onClick={onSwith}>Switch to {networks[chainId].chainName}</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

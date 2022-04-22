@@ -6,7 +6,7 @@ import {
   Pool as PoolContract,
   Pool__factory,
 } from '@pesabooks/contracts/typechain';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers, Signer } from 'ethers';
 import { networks } from '../data/networks';
 import { Account } from '../types';
 
@@ -37,7 +37,10 @@ export const getAccountContract = (contract_address: string, signerOrPovider: Js
   return Account__factory.connect(contract_address, signerOrPovider);
 };
 
-export const getPoolContract = (contract_address: string, signerOrPovider: JsonRpcProvider) => {
+export const getPoolContract = (
+  contract_address: string,
+  signerOrPovider: JsonRpcProvider | Signer,
+) => {
   return Pool__factory.connect(contract_address, signerOrPovider);
 };
 

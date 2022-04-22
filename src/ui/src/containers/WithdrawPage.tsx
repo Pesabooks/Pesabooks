@@ -1,4 +1,4 @@
-import { Button, Container, Heading, useToast } from '@chakra-ui/react';
+import { Button, Container, Heading, useDisclosure, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
@@ -11,6 +11,7 @@ import { SelectAccountField } from '../components/Input/SelectAccountField';
 import { SelectCategoryField } from '../components/Input/SelectCategoryField';
 import { SelectUserField } from '../components/Input/SelectUserField';
 import { TextAreaMemoField } from '../components/Input/TextAreaMemoField';
+import { TransactionSubmittedModal } from '../components/Modals/TransactionSubmittedModal';
 import { usePool } from '../hooks/usePool';
 import { getAccounts } from '../services/accountsService';
 import { getAddressBalance } from '../services/blockchainServices';
@@ -35,6 +36,12 @@ export const WithdrawPage = () => {
   const { pool } = usePool();
   const toast = useToast();
   const [selectedAccountBalance, setSelectedAccountBalance] = useState<number>(0);
+  const [lastTxHash, setLastTxHash] = useState('');
+  const {
+    isOpen: isOpenTransactionConfirmation,
+    onOpen: onOpenTransactionConfirmationn,
+    onClose: onCloseTransactionConfirmation,
+  } = useDisclosure();
 
   const methods = useForm<WithdrawFormValue>();
   const selectedAccount = methods.watch('account');
@@ -70,8 +77,8 @@ export const WithdrawPage = () => {
     const { amount, memo, account, user, category } = formValue;
 
     try {
-      await withdraw(
-        user.id,
+      const tx = await withdraw(
+        user,
         provider as Web3Provider,
         pool,
         account,
@@ -79,25 +86,43 @@ export const WithdrawPage = () => {
         amount,
         memo,
         user.address,
-        () => {
-          toast({
-            title: 'Your transaction is confirmed',
-            status: 'success',
-            isClosable: true,
-          });
+        (success) => {
+          if (success)
+            toast.update(tx.hash, {
+              title: 'Transaction Completed',
+              description: `Your withdrawal of ${amount} ${token.symbol} to ${user.name} is completed`,
+              status: 'success',
+              duration: 5000,
+              isClosable: true,
+            });
+          else
+            toast.update(tx.hash, {
+              title: 'Transaction Failed',
+              description: `Your withdrawal of ${amount} ${token.symbol} to ${user.name} failed`,
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+            });
         },
       );
+
       toast({
-        title: 'Your transaction is pending',
-        status: 'warning',
-        isClosable: true,
+        id: tx.hash,
+        title: 'Withdrawal Submitted',
+        description: `Your Withdrawal of ${amount} ${token.symbol} to ${user.name} is pending`,
+        status: 'info',
+        duration: null,
+        isClosable: false,
+        position: 'bottom-right',
       });
 
+      setLastTxHash(tx.hash);
+      onOpenTransactionConfirmationn();
+
       methods.reset();
-    } catch (e) {
-      const message = e instanceof Error ? e.message : null;
+    } catch (e: any) {
       toast({
-        title: message,
+        title: e.message,
         status: 'error',
         isClosable: true,
       });
@@ -123,7 +148,7 @@ export const WithdrawPage = () => {
 
               <SelectCategoryField mb="4" categories={categories} />
 
-              <SelectUserField label='To User' mb="4" users={users} />
+              <SelectUserField label="To User" mb="4" users={users} />
 
               <InputAmountField mb="4" balance={selectedAccountBalance} symbol={token.symbol} />
 
@@ -140,6 +165,15 @@ export const WithdrawPage = () => {
           </FormProvider>
         </Card>
       </Container>
+      {isOpenTransactionConfirmation && (
+        <TransactionSubmittedModal
+          isOpen={isOpenTransactionConfirmation}
+          onClose={onCloseTransactionConfirmation}
+          description="Your Withdrawal is submitted"
+          chainId={pool.chain_id}
+          hash={lastTxHash}
+        />
+      )}
     </>
   );
 };

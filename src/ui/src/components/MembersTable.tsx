@@ -3,6 +3,7 @@ import {
   Badge,
   Button,
   Flex,
+  Icon,
   IconButton,
   Menu,
   MenuButton,
@@ -18,18 +19,38 @@ import {
   useClipboard,
   useColorModeValue
 } from '@chakra-ui/react';
+import { FaUserShield } from 'react-icons/fa';
 import { FiMoreVertical } from 'react-icons/fi';
-import { Invitation } from '../types';
+import { AddressLookup, Invitation } from '../types';
 import { Member } from '../types/Member';
 import Loading from './Loading';
 
 interface MembersTableProps {
   members: Member[];
+  lookups: AddressLookup[];
+  adminAddresses: string[];
   invitations: Invitation[];
   onRevoke: (id: string) => void;
+  onAddAdmin?: (id: string) => void;
   isLoading: boolean;
 }
-export const MembersTable = ({ members, invitations, onRevoke, isLoading }: MembersTableProps) => {
+export const MembersTable = ({
+  members,
+  invitations,
+  onRevoke,
+  isLoading,
+  adminAddresses,
+  lookups,
+}: MembersTableProps) => {
+  const isAdmin = (userId: string) => {
+    const userAddresses = lookups.filter((l) => l.id === userId).map((l) => l.address);
+    for (const address of userAddresses) {
+      if (adminAddresses.find((a) => a === address)) {
+        return true;
+      }
+    }
+    return false;
+  };
   return (
     <>
       <Table variant="simple">
@@ -53,11 +74,11 @@ export const MembersTable = ({ members, invitations, onRevoke, isLoading }: Memb
                 key={member.user_id}
                 name={member.user?.name}
                 email={member.user?.email}
-                role={member.role}
                 active={member.active}
                 status={member.active ? 'active' : 'inactive'}
                 isInvitation={false}
                 id={member.user_id}
+                isAdmin={isAdmin(member.user_id)}
               ></TableRow>
             );
           })}
@@ -67,12 +88,12 @@ export const MembersTable = ({ members, invitations, onRevoke, isLoading }: Memb
                 key={invitation.id}
                 name={invitation.name}
                 email={invitation.email}
-                role={invitation.role}
                 active={invitation.active}
                 status="invited"
                 isInvitation={true}
                 id={invitation.id}
                 onRemove={onRevoke}
+                isAdmin={false}
               ></TableRow>
             );
           })}
@@ -86,22 +107,22 @@ export const MembersTable = ({ members, invitations, onRevoke, isLoading }: Memb
 interface TableRowProps {
   name: string | undefined;
   email: string | undefined;
-  role: string;
   active: boolean;
   status: string;
   isInvitation: boolean;
   id: string;
   onRemove?: (id: string) => void;
+  isAdmin: boolean;
 }
 
 const TableRow = ({
   name,
   email,
-  role,
   status,
   active,
   isInvitation,
   id,
+  isAdmin,
   onRemove,
 }: TableRowProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
@@ -136,11 +157,12 @@ const TableRow = ({
         </Text>
       </Td>
       <Td>
-        <Flex direction="column">
-          <Text fontSize="md" color={textColor} fontWeight="bold">
-            {role}
-          </Text>
-        </Flex>
+        {isAdmin && (
+          <Flex align="center">
+            <Icon as={FaUserShield} color="green.400" w="24px" h="24px" me="6px" />
+            <Text>Admin</Text>
+          </Flex>
+        )}
       </Td>
       <Td>
         <Badge bg={bgStatus} color={colorStatus} fontSize="16px" p="3px 10px" borderRadius="8px">
