@@ -8,12 +8,14 @@ export const useIsAdmin = (): boolean => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { pool } = usePool();
 
-  const { provider, isActive, account, chainId } = useWeb3React();
+  const { provider, isActive, chainId } = useWeb3React();
+
+  const connected = isActive && pool?.chain_id === chainId;
 
   useEffect(() => {
-    if (pool && isActive && pool?.chain_id === chainId)
-      isSignerAnAdmin(pool, provider as Web3Provider).then(setIsAdmin);
-  }, [provider, pool, account, isActive, chainId]);
+    if (pool && connected) isSignerAnAdmin(pool, provider as Web3Provider).then(setIsAdmin);
+    else setIsAdmin(false);
+  }, [provider, pool, connected]);
 
   return isAdmin;
 };
