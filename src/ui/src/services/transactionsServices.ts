@@ -1,19 +1,17 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { Account__factory } from '@pesabooks/contracts/typechain';
+import { PoolSafe__factory } from '@pesabooks/contracts/typechain';
 import { ContractReceipt, ethers } from 'ethers';
 import { Filter } from 'react-supabase';
 import { networks } from '../data/networks';
 import { handleSupabaseError, transationsTable } from '../supabase';
 import { AddressLookup, Pool } from '../types';
-import { Account } from '../types/account';
 import { Transaction } from '../types/transaction';
-import { defaultProvider, getTokenContract } from './blockchainServices';
+import { defaultProvider, getPoolLogicContract, getTokenContract } from './blockchainServices';
 
 export const deposit = async (
   user_id: string,
   provider: Web3Provider,
   pool: Pool,
-  account: Account,
   category_id: number,
   amount: number,
   memo: string | undefined,
@@ -21,13 +19,18 @@ export const deposit = async (
 ) => {
   const signer = provider.getSigner();
   const signerAddress = await signer.getAddress();
-  const accountContract = Account__factory.connect(account.contract_address, signer);
+  const safe = PoolSafe__factory.connect(pool.contract_address, signer);
+  const poolLogic = await getPoolLogicContract(pool.chain_id, signer);
 
-  const tokenAddress = await accountContract.token();
+  const tokenAddress = await safe.token();
   const tokenContract = getTokenContract(defaultProvider(pool.chain_id), tokenAddress);
   const decimals = await tokenContract.decimals();
 
-  const tx = await accountContract.deposit(ethers.utils.parseUnits(amount.toString(), decimals));
+  const tx = await poolLogic.deposit(
+    safe.address,
+    tokenAddress,
+    ethers.utils.parseUnits(amount.toString(), decimals),
+  );
 
   const transaction: Partial<Transaction> = {
     amount: amount,
@@ -39,7 +42,7 @@ export const deposit = async (
     from: tx.from,
     to: tx.to,
     transfer_from: signerAddress,
-    transfer_to: account.contract_address,
+    transfer_to: pool.contract_address,
     status: 0,
     pool_id: pool.id,
   };
@@ -59,7 +62,6 @@ export const withdraw = async (
   user: AddressLookup,
   provider: Web3Provider,
   pool: Pool,
-  account: Account,
   category_id: number,
   amount: number,
   memo: string | undefined,
@@ -67,13 +69,17 @@ export const withdraw = async (
   onTxFullFilled?: (success: boolean) => void,
 ) => {
   const signer = provider.getSigner();
-  const accountContract = Account__factory.connect(account.contract_address, signer);
+  const safe = PoolSafe__factory.connect(pool.contract_address, signer);
+  const poolLogic = await getPoolLogicContract(pool.chain_id, signer);
 
-  const tokenAddress = await accountContract.token();
+  const tokenAddress = pool.token?.address ?? '';
+
   const tokenContract = getTokenContract(defaultProvider(pool.chain_id), tokenAddress);
   const decimals = await tokenContract.decimals();
 
-  const tx = await accountContract.withdraw(
+  const tx = await poolLogic.withdraw(
+    safe.address,
+    tokenAddress,
     recipient,
     ethers.utils.parseUnits(amount.toString(), decimals),
   );
@@ -87,7 +93,7 @@ export const withdraw = async (
     hash: tx.hash,
     from: tx.from,
     to: tx.to,
-    transfer_from: account.contract_address,
+    transfer_from: pool.contract_address,
     transfer_to: recipient,
     status: 0,
     pool_id: pool.id,

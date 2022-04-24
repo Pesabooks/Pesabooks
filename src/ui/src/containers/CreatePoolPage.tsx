@@ -47,10 +47,17 @@ export const CreatePoolPage = () => {
 
   const createPool = async (values: CreatePoolFormValue) => {
     setLoading(true);
+    if (!chainId) return;
     try {
       const { name, description, token } = values;
 
-      const pool_id = await createNewPool(provider as Web3Provider, name, description, token);
+      const pool_id = await createNewPool(
+        provider as Web3Provider,
+        name,
+        description,
+        token,
+        chainId,
+      );
 
       navigate(`/pool/${pool_id}`);
     } catch (e) {

@@ -1,7 +1,7 @@
 import { Flex, Grid, SimpleGrid, Text } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import AccountCard from '../components/AccountCard';
+import BalanceCard from '../components/BalanceCard';
 import { Card, CardBody, CardHeader } from '../components/Card';
 import { BalancesPerMonth } from '../components/reports/BalancePerMonth';
 import { TotalPerCategory } from '../components/reports/TotalPerCategory';
@@ -10,14 +10,12 @@ import { TransactionsStats } from '../components/reports/TransactionsStats';
 import { TransactionsList } from '../components/transactions/TransactionsList';
 import { usePool } from '../hooks/usePool';
 import { useTransactions } from '../hooks/useTransactions';
-import { getAccounts } from '../services/accountsService';
 import { getAddressLookUp } from '../services/poolsService';
-import { Account, AddressLookup } from '../types';
+import { AddressLookup } from '../types';
 
 export const DashboardPage = () => {
   const { pool } = usePool();
   const [addressLookups, setAddressLookups] = useState<AddressLookup[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
 
   const token = pool?.token;
   if (!token) {
@@ -35,7 +33,6 @@ export const DashboardPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       getAddressLookUp(pool.id).then(setAddressLookups);
-      setAccounts((await getAccounts(pool.id)) ?? []);
     };
     fetchData();
   }, [pool]);
@@ -46,11 +43,7 @@ export const DashboardPage = () => {
         <title>Dashboard | {pool?.name}</title>
       </Helmet>
       <SimpleGrid mb={4} columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
-        {accounts.map((account, index) => {
-          return (
-            <AccountCard key={index} chainId={pool.chain_id} token={token} account={account} />
-          );
-        })}
+        <BalanceCard chainId={pool.chain_id} token={token} address={pool.contract_address} />
       </SimpleGrid>
 
       <Grid

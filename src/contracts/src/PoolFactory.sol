@@ -1,39 +1,33 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.9;
 
-import "./Pool.sol";
+import "./PoolSafe.sol";
 
-contract PoolFactory {
-    event Deployed(address addr, uint salt);
+contract PoolSafeFactory {
+    event Deployed(address addr, uint256 salt);
 
     // Get bytecode of contract to be deployed
-   
-    function getBytecode(IERC20 _token) public pure returns (bytes memory) {
-        bytes memory bytecode = type(Pool).creationCode;
 
-        return abi.encodePacked(bytecode, abi.encode(_token));
+    function getBytecode(IERC20 _token, Registry _proxy) public pure returns (bytes memory) {
+        bytes memory bytecode = type(PoolSafe).creationCode;
+
+        return abi.encodePacked(bytecode, abi.encode(_token, _proxy));
     }
 
     // 2. Compute the address of the contract to be deployed
     // NOTE: _salt is a random number used to create an address
-    function getAddress(bytes memory bytecode, uint _salt)
-        public
-        view
-        returns (address)
-    {
-        bytes32 hash = keccak256(
-            abi.encodePacked(bytes1(0xff), address(this), _salt, keccak256(bytecode))
-        );
+    function getAddress(bytes memory bytecode, uint256 _salt) public view returns (address) {
+        bytes32 hash = keccak256(abi.encodePacked(bytes1(0xff), address(this), _salt, keccak256(bytecode)));
 
         // NOTE: cast last 20 bytes of hash to address
-        return address(uint160(uint(hash)));
+        return address(uint160(uint256(hash)));
     }
 
     // 3. Deploy the contract
     // NOTE:
     // Check the event log Deployed which contains the address of the deployed TestContract.
     // The address in the log should equal the address computed from above.
-    function deploy(bytes memory bytecode, uint _salt) public payable {
+    function deploy(bytes memory bytecode, uint256 _salt) public payable {
         address addr;
 
         /*

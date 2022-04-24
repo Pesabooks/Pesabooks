@@ -11,6 +11,7 @@ export interface Network {
   };
   blockExplorerUrls: string[];
   isTest: boolean;
+  registryAddress: string;
 }
 
 export const networks: { [chainId: number]: Network } = {
@@ -25,6 +26,7 @@ export const networks: { [chainId: number]: Network } = {
     },
     blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
     isTest: true,
+    registryAddress: '0x0d3ED482F98050eC6F71E7560b22d2cB74baB06C',
   },
   137: {
     chainId: '0x89',
@@ -37,6 +39,7 @@ export const networks: { [chainId: number]: Network } = {
     },
     blockExplorerUrls: ['https://polygonscan.com/'],
     isTest: false,
+    registryAddress: '0x0d3ED482F98050eC6F71E7560b22d2cB74baB06C',
   },
 };
 

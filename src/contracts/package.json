@@ -10,6 +10,10 @@
     "start": "npx hardhat node",
     "test": "npx hardhat test",
     "deploy": "npx hardhat run scripts/deploy.ts --network localhost",
+    "deploy:mumbai": "npx hardhat run scripts/deploy.ts --network mumbai",
+    "deploy:polygon": "npx hardhat run scripts/deploy.ts --network polygon",
+    "update:mumbai": "npx hardhat run scripts/update.ts --network mumbai",
+    "update:polygon": "npx hardhat run scripts/update.ts --network polygon",
     "lint": "yarn lint:sol && yarn lint:ts && yarn prettier:check",
     "lint:sol": "solhint --config ./.solhint.json --max-warnings 0 \"contracts/**/*.sol\"",
     "lint:ts": "eslint --config ./.eslintrc.js --ignore-path ./.eslintignore --ext .js,.ts ."

@@ -7,35 +7,31 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { ConnectWalletButton } from '../components/Buttons/ConnectWalletButton';
 import { Card, CardHeader } from '../components/Card';
 import { InputAmountField } from '../components/Input/InputAmountField';
-import { SelectAccountField } from '../components/Input/SelectAccountField';
 import { SelectCategoryField } from '../components/Input/SelectCategoryField';
 import { SelectUserField } from '../components/Input/SelectUserField';
 import { TextAreaMemoField } from '../components/Input/TextAreaMemoField';
 import { TransactionSubmittedModal } from '../components/Modals/TransactionSubmittedModal';
 import { usePool } from '../hooks/usePool';
-import { getAccounts } from '../services/accountsService';
 import { getAddressBalance } from '../services/blockchainServices';
 import { getAllCategories } from '../services/categoriesService';
 import { getAddressLookUp } from '../services/poolsService';
 import { withdraw } from '../services/transactionsServices';
-import { Account, AddressLookup, Category } from '../types';
+import { AddressLookup, Category } from '../types';
 
 interface WithdrawFormValue {
   amount: number;
   memo?: string;
-  account: Account;
   user: AddressLookup;
   category: Category;
 }
 
 export const WithdrawPage = () => {
   const [users, setUsers] = useState<AddressLookup[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const { provider, isActive } = useWeb3React();
   const { pool } = usePool();
   const toast = useToast();
-  const [selectedAccountBalance, setSelectedAccountBalance] = useState<number>(0);
+  const [balance, setBalance] = useState<number>(0);
   const [lastTxHash, setLastTxHash] = useState('');
   const {
     isOpen: isOpenTransactionConfirmation,
@@ -44,7 +40,6 @@ export const WithdrawPage = () => {
   } = useDisclosure();
 
   const methods = useForm<WithdrawFormValue>();
-  const selectedAccount = methods.watch('account');
 
   const token = pool?.token;
 
@@ -54,34 +49,26 @@ export const WithdrawPage = () => {
 
   useEffect(() => {
     getAddressLookUp(pool.id, 'user').then(setUsers);
-    getAccounts(pool.id).then((accounts) => {
-      if (accounts) {
-        setAccounts(accounts);
-        methods.setValue('account', accounts[0]);
-      }
-    });
+
     getAllCategories(pool.id).then((categories) => setCategories(categories ?? []));
   }, [methods, pool]);
 
   useEffect(() => {
-    if (selectedAccount) {
-      getAddressBalance(pool.chain_id, token.address, selectedAccount.contract_address).then(
-        setSelectedAccountBalance,
-      );
+    if (pool) {
+      getAddressBalance(pool.chain_id, token.address, pool.contract_address).then(setBalance);
     }
-  }, [accounts, token, selectedAccount, pool.chain_id]);
+  }, [token, pool]);
 
   const submit = async (formValue: WithdrawFormValue) => {
     if (!provider) return;
 
-    const { amount, memo, account, user, category } = formValue;
+    const { amount, memo, user, category } = formValue;
 
     try {
       const tx = await withdraw(
         user,
         provider as Web3Provider,
         pool,
-        account,
         category.id,
         amount,
         memo,
@@ -144,13 +131,11 @@ export const WithdrawPage = () => {
           </CardHeader>
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(submit)}>
-              <SelectAccountField mb="4" accounts={accounts} />
-
               <SelectCategoryField mb="4" categories={categories} />
 
               <SelectUserField label="To User" mb="4" users={users} />
 
-              <InputAmountField mb="4" balance={selectedAccountBalance} symbol={token.symbol} />
+              <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
 
               <TextAreaMemoField mb="4" />
 

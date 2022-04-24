@@ -1,8 +1,9 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { Account__factory } from '@pesabooks/contracts/typechain';
+import { PoolSafe__factory } from '@pesabooks/contracts/typechain';
+import { networks } from '../data/networks';
 import { handleSupabaseError, poolsTable, supabase } from '../supabase';
 import { AddressLookup, Pool, Token } from '../types';
-import { createPoolAccountContract, defaultProvider, getPoolContract } from './blockchainServices';
+import { defaultProvider, getPoolContract } from './blockchainServices';
 
 export const getPool = async (pool_id: string) => {
   const { data, error } = await poolsTable()
@@ -32,19 +33,22 @@ export const createNewPool = async (
   name: string,
   description: string,
   token: Token,
+  chainId: number,
 ) => {
-  const poolContract = await createPoolAccountContract(provider, token.address);
-  const primaryAccountContract = Account__factory.connect(
-    await poolContract.defaultAccount(),
-    provider,
-  );
+  const registryAddress = networks[chainId].registryAddress;
 
-  const { data, error } = await supabase.rpc<number>('create_pool', {
+  if (!registryAddress) throw new Error('Registry address missing from config');
+  const signer = provider.getSigner();
+  const factory = new PoolSafe__factory(signer);
+  const poolSafe = await factory.deploy(token.address, registryAddress);
+  await poolSafe.deployed();
+
+  const { data, error } = await supabase.rpc<number>('create_pool2', {
+    chain_id: chainId,
     name: name,
     description: description ?? '',
     token_id: token.id,
-    pool_address: poolContract.address,
-    account_address: primaryAccountContract.address,
+    contract_address: poolSafe.address,
   });
 
   handleSupabaseError(error);
@@ -54,7 +58,7 @@ export const createNewPool = async (
 
 export const getAddressLookUp = async (
   pool_id: number,
-  type?: 'user' | 'account',
+  type?: 'user' | 'pool',
 ): Promise<AddressLookup[]> => {
   let query = supabase.rpc<AddressLookup>('get_address_lookup', {
     pool_id: pool_id,

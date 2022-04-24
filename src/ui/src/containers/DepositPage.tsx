@@ -7,28 +7,24 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { ConnectWalletButton } from '../components/Buttons/ConnectWalletButton';
 import { Card, CardHeader } from '../components/Card';
 import { InputAmountField } from '../components/Input/InputAmountField';
-import { SelectAccountField } from '../components/Input/SelectAccountField';
 import { SelectCategoryField } from '../components/Input/SelectCategoryField';
 import { TextAreaMemoField } from '../components/Input/TextAreaMemoField';
 import { ApproveTokenModal } from '../components/Modals/ApproveTokenModal';
 import { TransactionSubmittedModal } from '../components/Modals/TransactionSubmittedModal';
 import { useAuth } from '../hooks/useAuth';
 import { usePool } from '../hooks/usePool';
-import { getAccounts } from '../services/accountsService';
 import { approveToken, getAddressBalance, isTokenApproved } from '../services/blockchainServices';
 import { getAllCategories } from '../services/categoriesService';
 import { deposit } from '../services/transactionsServices';
-import { Account, Category } from '../types';
+import { Category } from '../types';
 
 interface DepositFormValue {
   amount: number;
   memo?: string;
-  account: Account;
   category: Category;
 }
 
 export const DepositPage = () => {
-  const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [lastTxHash, setLastTxHash] = useState('');
   const { provider, isActive, account } = useWeb3React();
@@ -37,7 +33,6 @@ export const DepositPage = () => {
   const { user } = useAuth();
   const toast = useToast();
   const methods = useForm<DepositFormValue>();
-  const selectedAccount = methods.watch('account');
 
   const {
     isOpen: isOpenApproveToken,
@@ -60,12 +55,6 @@ export const DepositPage = () => {
   }
 
   useEffect(() => {
-    getAccounts(pool.id).then((accounts) => {
-      if (accounts) {
-        setAccounts(accounts);
-        methods.setValue('account', accounts?.[0]);
-      }
-    });
     getAllCategories(pool.id).then((categories) => setCategories(categories ?? []));
   }, [methods, pool]);
 
@@ -87,7 +76,7 @@ export const DepositPage = () => {
     if (!provider) return;
     try {
       setIsApproving(true);
-      await approveToken(provider as Web3Provider, token.address, selectedAccount);
+      await approveToken(provider as Web3Provider, token.address, pool.contract_address);
       onCloseApproveToken();
     } finally {
       setIsApproving(false);
@@ -97,13 +86,13 @@ export const DepositPage = () => {
   const submit = async (formValue: DepositFormValue) => {
     if (!provider) return;
 
-    const { amount, memo, account, category } = formValue;
+    const { amount, memo, category } = formValue;
 
     try {
       const tokenApproved = await isTokenApproved(
         provider as Web3Provider,
         token.address,
-        account,
+        pool.contract_address,
         amount,
       );
       if (!tokenApproved) {
@@ -113,7 +102,6 @@ export const DepositPage = () => {
           user.id,
           provider as Web3Provider,
           pool,
-          account,
           category.id,
           amount,
           memo,
@@ -174,7 +162,6 @@ export const DepositPage = () => {
           </CardHeader>
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(submit)}>
-              <SelectAccountField mb="4" accounts={accounts} />
 
               <SelectCategoryField mb="4" categories={categories} />
 

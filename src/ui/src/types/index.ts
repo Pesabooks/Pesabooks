@@ -1,5 +1,4 @@
 // prettier-ignore
-export type { Account } from './account';
 export type { AddressLookup } from './AddressLookup';
 export type { Category } from './Category';
 export type { Invitation } from './Invitation';

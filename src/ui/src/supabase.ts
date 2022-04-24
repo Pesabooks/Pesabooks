@@ -1,5 +1,5 @@
 import { createClient, PostgrestError } from '@supabase/supabase-js';
-import { Account, Category, Invitation, Pool, Profile, Token, Transaction } from './types';
+import { Category, Invitation, Pool, Profile, Token, Transaction } from './types';
 import { Member } from './types/Member';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -12,7 +12,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export const profilesTable = () => supabase.from<Profile>('profiles');
 export const transationsTable = () => supabase.from<Transaction>('transactions');
-export const accountsTable = () => supabase.from<Account>('accounts');
 export const poolsTable = () => supabase.from<Pool>('pools');
 export const tokensTable = () => supabase.from<Token>('tokens');
 export const categoriesTable = () => supabase.from<Category>('categories');

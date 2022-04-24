@@ -1,9 +1,9 @@
-import * as dotenv from 'dotenv';
-import {HardhatUserConfig, task} from 'hardhat/config';
 import '@nomiclabs/hardhat-etherscan';
 import '@nomiclabs/hardhat-waffle';
 import '@typechain/hardhat';
+import * as dotenv from 'dotenv';
 import 'hardhat-gas-reporter';
+import {HardhatUserConfig, task} from 'hardhat/config';
 import 'solidity-coverage';
 
 dotenv.config();
@@ -30,9 +30,13 @@ const config: HardhatUserConfig = {
     hardhat: {
       chainId: 1337,
     },
-    ropsten: {
-      url: process.env.ROPSTEN_URL || '',
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    mumbai: {
+      url: process.env.POLYGON_MUMBAI_URL,
+      accounts: process.env.DEVOPS_PRIVATE_KEY !== undefined ? [process.env.DEVOPS_PRIVATE_KEY] : [],
+    },
+    polygon: {
+      url: process.env.POLYGON_MAINNET_URL,
+      accounts: process.env.DEVOPS_PRIVATE_KEY !== undefined ? [process.env.DEVOPS_PRIVATE_KEY] : [],
     },
     forking: {
       url: process.env.MAINNET_FORK_URL || '',
