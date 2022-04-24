@@ -31,11 +31,11 @@ const config: HardhatUserConfig = {
       chainId: 1337,
     },
     mumbai: {
-      url: process.env.POLYGON_MUMBAI_URL,
+      url: process.env.POLYGON_MUMBAI_URL || '',
       accounts: process.env.DEVOPS_PRIVATE_KEY !== undefined ? [process.env.DEVOPS_PRIVATE_KEY] : [],
     },
     polygon: {
-      url: process.env.POLYGON_MAINNET_URL,
+      url: process.env.POLYGON_MAINNET_URL || '',
       accounts: process.env.DEVOPS_PRIVATE_KEY !== undefined ? [process.env.DEVOPS_PRIVATE_KEY] : [],
     },
     forking: {
