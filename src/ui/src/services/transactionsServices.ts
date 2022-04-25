@@ -15,7 +15,6 @@ export const deposit = async (
   category_id: number,
   amount: number,
   memo: string | undefined,
-  onTxFullFilled?: (success: boolean) => void,
 ) => {
   const signer = provider.getSigner();
   const signerAddress = await signer.getAddress();
@@ -52,7 +51,6 @@ export const deposit = async (
 
   tx.wait().then((receipt) => {
     onTransactionComplete(receipt, pool.chain_id);
-    onTxFullFilled?.(receipt.status === 1);
   });
 
   return tx;
@@ -66,7 +64,6 @@ export const withdraw = async (
   amount: number,
   memo: string | undefined,
   recipient: string,
-  onTxFullFilled?: (success: boolean) => void,
 ) => {
   const signer = provider.getSigner();
   const safe = PoolSafe__factory.connect(pool.contract_address, signer);
@@ -104,7 +101,6 @@ export const withdraw = async (
 
   tx.wait().then((receipt) => {
     onTransactionComplete(receipt, pool.chain_id);
-    onTxFullFilled?.(receipt.status === 1);
   });
 
   return tx;

@@ -1,20 +1,21 @@
 import {
-    Button,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay,
-    Text,
-    useToast
+  Button,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  useToast
 } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import { ContractTransaction } from 'ethers';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { useNotifyTransaction } from '../../hooks/useNotifyTransaction';
 import { usePool } from '../../hooks/usePool';
 import { addAdmin, removeAdmin } from '../../services/poolsService';
 import { AddressLookup } from '../../types';
@@ -43,6 +44,7 @@ export const SetAdminModal = ({
   const { pool } = usePool();
   const { provider } = useWeb3React();
   const toast = useToast();
+  const { notify } = useNotifyTransaction();
 
   const filteredLookups =
     operation === 'add'
@@ -56,15 +58,10 @@ export const SetAdminModal = ({
         if (operation === 'add') tx = await addAdmin(pool, user, provider as Web3Provider);
         else tx = await removeAdmin(pool, user, provider as Web3Provider);
         if (tx) {
+          notify(tx, 'add' ? `Add ${user.name} as an admin` : `Remove ${user.name} as an admin `);
+
           tx.wait().then(
             (r) => {
-              toast.update(r.transactionHash, {
-                title: `${user.name} was ${operation === 'add' ? 'added' : 'Removed'} as an admin`,
-                status: 'success',
-                duration: 5000,
-                isClosable: true,
-              });
-
               onTxSuccess?.();
             },
             () => {
@@ -72,19 +69,6 @@ export const SetAdminModal = ({
             },
           );
           onClose(tx.hash);
-
-          toast({
-            id: tx.hash,
-            title: 'Admin operation Submitted',
-            description:
-              operation === 'add'
-                ? `Adding ${user.name} as an admin is pending`
-                : `Removal of ${user.name} as an admin is pending`,
-            status: 'info',
-            duration: null,
-            isClosable: false,
-            position: 'bottom-right',
-          });
         }
         methods.reset();
       } catch (e: any) {

@@ -11,6 +11,7 @@ import { SelectCategoryField } from '../components/Input/SelectCategoryField';
 import { SelectUserField } from '../components/Input/SelectUserField';
 import { TextAreaMemoField } from '../components/Input/TextAreaMemoField';
 import { TransactionSubmittedModal } from '../components/Modals/TransactionSubmittedModal';
+import { useNotifyTransaction } from '../hooks/useNotifyTransaction';
 import { usePool } from '../hooks/usePool';
 import { getAddressBalance } from '../services/blockchainServices';
 import { getAllCategories } from '../services/categoriesService';
@@ -38,8 +39,9 @@ export const WithdrawPage = () => {
     onOpen: onOpenTransactionConfirmationn,
     onClose: onCloseTransactionConfirmation,
   } = useDisclosure();
+  const { notify } = useNotifyTransaction();
 
-  const methods = useForm<WithdrawFormValue>();
+  const methods = useForm<WithdrawFormValue>(); 
 
   const token = pool?.token;
 
@@ -73,35 +75,9 @@ export const WithdrawPage = () => {
         amount,
         memo,
         user.address,
-        (success) => {
-          if (success)
-            toast.update(tx.hash, {
-              title: 'Transaction Completed',
-              description: `Your withdrawal of ${amount} ${token.symbol} to ${user.name} is completed`,
-              status: 'success',
-              duration: 5000,
-              isClosable: true,
-            });
-          else
-            toast.update(tx.hash, {
-              title: 'Transaction Failed',
-              description: `Your withdrawal of ${amount} ${token.symbol} to ${user.name} failed`,
-              status: 'error',
-              duration: 5000,
-              isClosable: true,
-            });
-        },
       );
 
-      toast({
-        id: tx.hash,
-        title: 'Withdrawal Submitted',
-        description: `Your Withdrawal of ${amount} ${token.symbol} to ${user.name} is pending`,
-        status: 'info',
-        duration: null,
-        isClosable: false,
-        position: 'bottom-right',
-      });
+      notify(tx, `Withdrawal of ${amount} ${token.symbol} to ${user.name} `);
 
       setLastTxHash(tx.hash);
       onOpenTransactionConfirmationn();

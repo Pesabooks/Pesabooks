@@ -1,4 +1,9 @@
-import { Button, Container, Heading, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Button,
+  Container,
+  Heading, useDisclosure,
+  useToast
+} from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import React, { useEffect, useState } from 'react';
@@ -12,6 +17,7 @@ import { TextAreaMemoField } from '../components/Input/TextAreaMemoField';
 import { ApproveTokenModal } from '../components/Modals/ApproveTokenModal';
 import { TransactionSubmittedModal } from '../components/Modals/TransactionSubmittedModal';
 import { useAuth } from '../hooks/useAuth';
+import { useNotifyTransaction } from '../hooks/useNotifyTransaction';
 import { usePool } from '../hooks/usePool';
 import { approveToken, getAddressBalance, isTokenApproved } from '../services/blockchainServices';
 import { getAllCategories } from '../services/categoriesService';
@@ -33,6 +39,7 @@ export const DepositPage = () => {
   const { user } = useAuth();
   const toast = useToast();
   const methods = useForm<DepositFormValue>();
+  const { notify } = useNotifyTransaction();
 
   const {
     isOpen: isOpenApproveToken,
@@ -98,6 +105,7 @@ export const DepositPage = () => {
       if (!tokenApproved) {
         onOpenApproveToken();
       } else {
+
         const tx = await deposit(
           user.id,
           provider as Web3Provider,
@@ -105,35 +113,9 @@ export const DepositPage = () => {
           category.id,
           amount,
           memo,
-          (success) => {
-            if (success)
-              toast.update(tx.hash, {
-                title: 'Transaction Completed',
-                description: `Your Deposit of ${amount} ${token.symbol} is completed`,
-                status: 'success',
-                duration: 5000,
-                isClosable: true,
-              });
-            else
-              toast.update(tx.hash, {
-                title: 'Transaction failed',
-                description: `Your Deposit of ${amount} ${token.symbol} failed`,
-                status: 'error',
-                duration: 5000,
-                isClosable: true,
-              });
-          },
         );
 
-        toast({
-          id: tx.hash,
-          title: 'Deposit Submitted',
-          description: `Your Deposit of ${amount} ${token.symbol} is pending`,
-          status: 'info',
-          duration: null,
-          isClosable: false,
-          position: 'bottom-right',
-        });
+        notify(tx, `Deposit of ${amount} ${token.symbol}`);
 
         setLastTxHash(tx.hash);
         onOpenTransactionConfirmationn();
@@ -162,7 +144,6 @@ export const DepositPage = () => {
           </CardHeader>
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(submit)}>
-
               <SelectCategoryField mb="4" categories={categories} />
 
               <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
