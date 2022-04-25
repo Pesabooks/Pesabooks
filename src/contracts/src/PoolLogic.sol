@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.4;
 
+import "./Constants.sol";
 import "./IPoolSafe.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
@@ -37,7 +38,7 @@ contract PoolLogic {
             address(poolSafe),
             amount
         );
-        poolSafe.relayCall(data);
+        poolSafe.relayCall(Constants.POOL_LOGIC_ADDRESS, data);
     }
 
     function executeDeposit(
@@ -64,7 +65,7 @@ contract PoolLogic {
             to,
             amount
         );
-        poolSafe.relayCall(data);
+        poolSafe.relayCall(Constants.POOL_LOGIC_ADDRESS, data);
     }
 
     function executeWithdraw(

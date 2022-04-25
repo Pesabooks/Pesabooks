@@ -10,5 +10,5 @@ interface IPoolSafe is IAccessControlEnumerable {
 
     function balance(IERC20 token) external view returns (uint256);
 
-    function relayCall(bytes calldata data) external;
+    function relayCall(string memory addrNameInRegistry, bytes calldata data) external;
 }

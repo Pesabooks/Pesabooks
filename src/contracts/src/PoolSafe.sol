@@ -58,8 +58,8 @@ contract PoolSafe is IPoolSafe, AccessControlEnumerable {
         return admins;
     }
 
-    function relayCall(bytes calldata data) external {
-        (bool success, ) = registry.getAddress(Constants.POOL_LOGIC_ADDRESS).delegatecall(data);
+    function relayCall(string memory addrNameInRegistry, bytes calldata data) external {
+        (bool success, ) = registry.getAddress(addrNameInRegistry).delegatecall(data);
         require(success);
     }
 }

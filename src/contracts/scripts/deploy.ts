@@ -1,29 +1,22 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-import { ethers } from "hardhat";
+import {ethers} from 'hardhat';
+import {Constants} from '../Constants';
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+  // Deploy Pool Logic Contract
 
-  // We get the contract to deploy
-  const MockTether = await ethers.getContractFactory("MockTether");
-  const tether = await MockTether.deploy();
+  const poolLogicFactory = await ethers.getContractFactory('PoolLogic');
+  const logic = await poolLogicFactory.deploy();
+  await logic.deployed();
 
-  await tether.deployed();
+  console.log('PoolLogic deployed to:', logic.address);
 
-  console.log("MockTether deployed to:", tether.address);
+  const RegistryFactory = await ethers.getContractFactory('Registry');
+  const registry = await RegistryFactory.deploy(Constants.POOL_LOGIC_ADDRESS, logic.address);
+  await registry.deployed();
+
+  console.log('Registry deployed to:', registry.address);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
