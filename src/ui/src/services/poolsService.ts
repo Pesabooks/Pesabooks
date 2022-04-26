@@ -107,5 +107,5 @@ export const getAdminAddresses = async (pool: Pool) => {
   const provider = defaultProvider(pool.chain_id);
 
   const poolContract = await getPoolContract(pool.contract_address, provider);
-  return poolContract.getAdmins();
+  return await poolContract.getAdmins();
 };
