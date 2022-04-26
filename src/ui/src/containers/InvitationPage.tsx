@@ -83,11 +83,21 @@ export const InvitationPage = () => {
             </Text>
 
             <Flex>
-              <Button onClick={() => navigate(`/auth/signup?returnUrl=${location.pathname}`)}>
+              <Button
+                onClick={() =>
+                  navigate(
+                    `/auth/signup?returnUrl=${location.pathname}&email=${invitation?.email}&name=${invitation?.invited_by}`,
+                  )
+                }
+              >
                 Create a new account
               </Button>
               <Spacer />
-              <Button onClick={() => navigate(`/auth/signin?returnUrl=${location.pathname}`)}>
+              <Button
+                onClick={() =>
+                  navigate(`/auth/signin?returnUrl=${location.pathname}&email=${invitation?.email}`)
+                }
+              >
                 {' '}
                 Login as an Existing User
               </Button>

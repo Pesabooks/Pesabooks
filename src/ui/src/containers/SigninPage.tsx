@@ -3,7 +3,8 @@ import {
   Flex,
   FormControl,
   FormErrorMessage,
-  FormLabel, Input,
+  FormLabel,
+  Input,
   Link,
   Text,
   useColorModeValue,
@@ -31,6 +32,7 @@ export const SignInPage = () => {
   let auth = useAuth();
   let [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') ?? '/';
+  const email = searchParams.get('email') ?? '';
 
   let signIn = async (values: SigninFormValue) => {
     try {
@@ -50,7 +52,7 @@ export const SignInPage = () => {
     handleSubmit,
     register,
     formState: { errors, isSubmitting },
-  } = useForm<SigninFormValue>();
+  } = useForm<SigninFormValue>({ defaultValues: { email } });
 
   return (
     <>

@@ -34,6 +34,8 @@ export const SignUpPage = () => {
   const toast = useToast();
   let [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') ?? '/';
+  const email = searchParams.get('email') ?? '';
+  const name = searchParams.get('name') ?? '';
 
   let signUp = async (values: SignupFormValue) => {
     try {
@@ -55,7 +57,7 @@ export const SignUpPage = () => {
     handleSubmit,
     register,
     formState: { errors, isSubmitting },
-  } = useForm<SignupFormValue>();
+  } = useForm<SignupFormValue>({ defaultValues: { name, email } });
 
   return (
     <>
@@ -78,7 +80,7 @@ export const SignUpPage = () => {
               Sign Up
             </Text>
 
-            <FormControl isInvalid={!!errors.name}>
+            <FormControl isInvalid={!!errors.name}  mb="24px">
               <FormLabel htmlFor="name" ms="4px" fontSize="sm" fontWeight="normal">
                 Name
               </FormLabel>
@@ -90,13 +92,13 @@ export const SignUpPage = () => {
                 borderRadius="15px"
                 type="text"
                 placeholder="Your full name"
-                mb="24px"
+               
                 size="lg"
               />
               <FormErrorMessage>{errors.name && 'Name is required'}</FormErrorMessage>
             </FormControl>
 
-            <FormControl isInvalid={!!errors.email}>
+            <FormControl isInvalid={!!errors.email}  mb="24px">
               <FormLabel htmlFor="email" ms="4px" fontSize="sm" fontWeight="normal">
                 Email address
               </FormLabel>
@@ -107,14 +109,13 @@ export const SignUpPage = () => {
                 ms="4px"
                 borderRadius="15px"
                 placeholder="Your email address"
-                mb="24px"
                 size="lg"
                 {...register('email', { required: true })}
               />
               <FormErrorMessage> {errors.email && 'Email is required'}</FormErrorMessage>
             </FormControl>
 
-            <FormControl isInvalid={!!errors.password}>
+            <FormControl isInvalid={!!errors.password}  mb="24px">
               <FormLabel htmlFor="password" ms="4px" fontSize="sm" fontWeight="normal">
                 Password
               </FormLabel>
@@ -125,7 +126,6 @@ export const SignUpPage = () => {
                 borderRadius="15px"
                 type="password"
                 placeholder="Your password"
-                mb="24px"
                 size="lg"
                 {...register('password', { required: true })}
               />
