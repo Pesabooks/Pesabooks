@@ -86,7 +86,7 @@ export const InvitationPage = () => {
               <Button
                 onClick={() =>
                   navigate(
-                    `/auth/signup?returnUrl=${location.pathname}&email=${invitation?.email}&name=${invitation?.invited_by}`,
+                    `/auth/signup?returnUrl=${location.pathname}&email=${invitation?.email}&name=${invitation?.name}`,
                   )
                 }
               >
