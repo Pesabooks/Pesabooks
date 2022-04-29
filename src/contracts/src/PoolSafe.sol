@@ -12,7 +12,7 @@ contract PoolSafe is IPoolSafe, AccessControlEnumerable {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     IERC20 public immutable token;
-    Registry internal registry;
+    Registry public immutable registry;
 
     bytes32 public constant MEMBER_ROLE = keccak256("MEMBER_ROLE");
 
