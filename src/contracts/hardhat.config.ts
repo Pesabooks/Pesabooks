@@ -22,7 +22,16 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
-  solidity: '0.8.9',
+  solidity: {
+    compilers: [
+      {
+        version: '0.7.5',
+      },
+      {
+        version: '0.8.9',
+      },
+    ],
+  },
   paths: {
     sources: './src',
   },
@@ -38,8 +47,11 @@ const config: HardhatUserConfig = {
       url: process.env.POLYGON_MAINNET_URL || '',
       accounts: process.env.DEVOPS_PRIVATE_KEY !== undefined ? [process.env.DEVOPS_PRIVATE_KEY] : [],
     },
-    forking: {
-      url: process.env.MAINNET_FORK_URL || '',
+    ropsten: {
+      url: process.env.ROPSTEN_URL || '',
+      accounts: {
+        mnemonic: process.env.TEST_MNEMONIC_PHRASE || '',
+      },
     },
   },
   gasReporter: {

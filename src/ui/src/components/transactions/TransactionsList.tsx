@@ -19,7 +19,7 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
 
     <Flex direction="column" w="100%">
       {transactions.map(
-        ({ transfer_from, transfer_to, created_at, amount, type, category }, key) => {
+        ({ transfer_from, transfer_to, created_at, amount, type, category, metadata }, key) => {
           const isDeposit = type === 'deposit';
           const isWithdrawal = type === 'withdrawal';
 
@@ -66,7 +66,7 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
                 color={isDeposit ? 'green.400' : isWithdrawal ? 'red.400' : ''}
               >
                 <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                  {isWithdrawal && '-'} {amount}
+                  {isWithdrawal && '-'} {amount} {metadata?.token?.symbol}
                 </Text>
 
                 <Text

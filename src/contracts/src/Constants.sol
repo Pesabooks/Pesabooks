@@ -2,5 +2,5 @@
 pragma solidity ^0.8.9;
 
 library Constants {
-    string public constant POOL_LOGIC_ADDRESS = "PoolLogicAddress";
+    string public constant CONTROLLER_ADDRESS = "ControllerAddress";
 }

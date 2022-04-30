@@ -141,9 +141,9 @@ export const TransactionsTable = ({
         }) => {
           switch (original.type) {
             case 'deposit':
-              return <Text color="green">{value}</Text>;
+              return <Text color="green">{value} {original.metadata?.token?.symbol}</Text>;
             case 'withdrawal':
-              return <Text color="red">{value}</Text>;
+              return <Text color="red">- {value} {original.metadata?.token?.symbol}</Text>;
             default:
               return <Text>{value}</Text>;
           }

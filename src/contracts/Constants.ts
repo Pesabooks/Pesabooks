@@ -1,3 +1,3 @@
 export const Constants = {
-  POOL_LOGIC_ADDRESS: 'PoolLogicAddress',
+  CONTROLLER_ADDRESS: 'ControllerAddress',
 };

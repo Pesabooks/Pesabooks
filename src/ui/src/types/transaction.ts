@@ -17,4 +17,26 @@ export interface Transaction extends Entity {
   type: 'deposit' | 'withdrawal' | 'transfer';
   posting?: boolean;
   pool_id: number;
+  metadata: TransferData;
+}
+
+interface TransferData {
+  transfer_from: string;
+  transfer_to: string;
+  token: Token;
+  amount: number;
+}
+
+// interface SwapData {
+//   srcToken: Token;
+//   destToken: Token;
+//   srcAmount: number;
+//   destAmount: number;
+// }
+
+interface Token {
+  address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
 }

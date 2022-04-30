@@ -26,7 +26,7 @@ export const networks: { [chainId: number]: Network } = {
     },
     blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
     isTest: true,
-    registryAddress: '0x0d3ED482F98050eC6F71E7560b22d2cB74baB06C',
+    registryAddress: '0x2549a1d70165d71B86D71537ccF7506181FB37c1',
   },
   137: {
     chainId: '0x89',
@@ -39,7 +39,7 @@ export const networks: { [chainId: number]: Network } = {
     },
     blockExplorerUrls: ['https://polygonscan.com/'],
     isTest: false,
-    registryAddress: '0x0d3ED482F98050eC6F71E7560b22d2cB74baB06C',
+    registryAddress: '0x8d618a58967ebBb421D848640A1D2886336484d3',
   },
 };
 

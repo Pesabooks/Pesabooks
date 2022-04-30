@@ -3,21 +3,21 @@ import {Constants} from '../Constants';
 import {Registry__factory} from '../typechain';
 
 async function main() {
-  // Deploy Pool Logic Contract
+  // Deploy Pool Controller Contract
   const [owner] = await ethers.getSigners();
 
-  const poolLogicFactory = await ethers.getContractFactory('PoolLogic');
-  const logic = await poolLogicFactory.deploy();
-  await logic.deployed();
+  const controllerFactory = await ethers.getContractFactory('Controller');
+  const controller = await controllerFactory.deploy();
+  await controller.deployed();
 
-  console.log('PoolLogic deployed to:', logic.address);
+  console.log('Controller deployed to:', controller.address);
 
   const RegistryFactory = await ethers.getContractFactory('Registry');
   const registry = await Registry__factory.connect('0x0d3ED482F98050eC6F71E7560b22d2cB74baB06C', owner);
 
-  await registry.update(Constants.POOL_LOGIC_ADDRESS, logic.address);
+  await registry.addOrUpdate(Constants.CONTROLLER_ADDRESS, controller.address);
 
-  console.log('Registry updated.', `{${Constants.POOL_LOGIC_ADDRESS}: ${logic.address}}`);
+  console.log('Registry updated.', `{${Constants.CONTROLLER_ADDRESS}: ${controller.address}}`);
 }
 
 main().catch((error) => {

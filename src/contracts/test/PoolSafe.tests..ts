@@ -4,10 +4,10 @@ import {ethers} from 'hardhat';
 import {Constants} from '../Constants';
 // eslint-disable-next-line node/no-missing-import
 import {
+  Controller,
+  Controller__factory,
   MockTether,
   MockTether__factory,
-  PoolLogic,
-  PoolLogic__factory,
   PoolSafe,
   PoolSafeFactory,
   PoolSafeFactory__factory,
@@ -18,7 +18,7 @@ import {
 
 let tether: MockTether;
 let poolSafeFactory: PoolSafeFactory;
-let poolLogic: PoolLogic;
+let controller: Controller;
 let registry: Registry;
 let owner: SignerWithAddress;
 let addr1: SignerWithAddress;
@@ -33,14 +33,14 @@ beforeEach(async () => {
   tether = await tetherFactory.deploy();
   await tether.deployed();
 
-  // Deploy poolLogic
-  const logicFactory = new PoolLogic__factory(owner);
-  poolLogic = await logicFactory.deploy();
-  await poolLogic.deployed();
+  // Deploy controller
+  const controllerFactory = new Controller__factory(owner);
+  controller = await controllerFactory.deploy();
+  await controller.deployed();
 
   // Deploy Proxy
   const registryFactory = new Registry__factory(owner);
-  registry = await registryFactory.deploy(Constants.POOL_LOGIC_ADDRESS, poolLogic.address);
+  registry = await registryFactory.deploy(Constants.CONTROLLER_ADDRESS, controller.address);
   await registry.deployed();
 
   // Deploy PoolSafe Factory
@@ -90,7 +90,7 @@ describe('PoolSafe Contract', function () {
     });
   });
 
-  describe('Add Admin', function () {
+  describe('', function () {
     let poolSafe: PoolSafe;
     beforeEach(async () => {
       // Deploy PoolSafe
@@ -99,52 +99,59 @@ describe('PoolSafe Contract', function () {
       await poolSafe.deployed();
     });
 
-    it('Should set address as admin', async function () {
-      assert((await poolSafe.hasRole(await poolSafe.DEFAULT_ADMIN_ROLE(), addr1.address)) === false);
+    describe('Add Admin', function () {
+      it('Should set address as admin', async function () {
+        assert((await poolSafe.hasRole(await poolSafe.DEFAULT_ADMIN_ROLE(), addr1.address)) === false);
 
-      await (await poolSafe.addAdmin(addr1.address)).wait();
+        await (await poolSafe.addAdmin(addr1.address)).wait();
 
-      expect(await poolSafe.hasRole(await poolSafe.DEFAULT_ADMIN_ROLE(), addr1.address)).to.equal(true);
-      expect(await poolSafe.getAdmins()).to.contain(addr1.address);
+        expect(await poolSafe.hasRole(await poolSafe.DEFAULT_ADMIN_ROLE(), addr1.address)).to.equal(true);
+        expect(await poolSafe.getAdmins()).to.contain(addr1.address);
+      });
+
+      it('Should failed without admin privilege', async function () {
+        await expect(poolSafe.connect(addr1).addAdmin(addr1.address)).to.be.revertedWith(
+          'Operation require admin privilige',
+        );
+      });
+
+      it('Should failed if already admin ', async function () {
+        await expect(poolSafe.addAdmin(owner.address)).to.be.reverted;
+      });
     });
 
-    it('Should failed without admin privilege', async function () {
-      await expect(poolSafe.connect(addr1).addAdmin(addr1.address)).to.be.revertedWith(
-        'Operation require admin privilige',
-      );
+    describe('Remove Admin', function () {
+      it('Should remove address as admin', async function () {
+        await (await poolSafe.addAdmin(addr1.address)).wait();
+        assert((await poolSafe.hasRole(await poolSafe.DEFAULT_ADMIN_ROLE(), addr1.address)) === true);
+
+        await (await poolSafe.removeAdmin(addr1.address)).wait();
+
+        expect(await poolSafe.hasRole(await poolSafe.DEFAULT_ADMIN_ROLE(), addr1.address)).to.equal(false);
+        expect(await poolSafe.getAdmins()).to.not.contain(addr1.address);
+      });
+
+      it('Should failed when remove himself', async function () {
+        await expect(poolSafe.removeAdmin(owner.address)).to.be.revertedWith('Cannot self revoke right');
+      });
+      it('Should failed without admin privilege', async function () {
+        await expect(poolSafe.connect(addr1).removeAdmin(addr1.address)).to.be.revertedWith(
+          'Operation require admin privilige',
+        );
+      });
     });
 
-    it('Should failed if already admin ', async function () {
-      await expect(poolSafe.addAdmin(owner.address)).to.be.reverted;
-    });
-  });
+    describe('RelayCall', function () {
+      let data;
 
-  describe('Remove Admin', function () {
-    let poolSafe: PoolSafe;
-    beforeEach(async () => {
-      // Deploy PoolSafe
-      const PoolFactory = new PoolSafe__factory(owner);
-      poolSafe = await PoolFactory.deploy(tether.address, registry.address);
-      await poolSafe.deployed();
-    });
+      beforeEach(async () => {
+        const iface = Controller__factory.createInterface();
+        data = iface.encodeFunctionData('deposit', [tether.address, owner.address, 1000]);
+      });
 
-    it('Should remove address as admin', async function () {
-      await (await poolSafe.addAdmin(addr1.address)).wait();
-      assert((await poolSafe.hasRole(await poolSafe.DEFAULT_ADMIN_ROLE(), addr1.address)) === true);
-
-      await (await poolSafe.removeAdmin(addr1.address)).wait();
-
-      expect(await poolSafe.hasRole(await poolSafe.DEFAULT_ADMIN_ROLE(), addr1.address)).to.equal(false);
-      expect(await poolSafe.getAdmins()).to.not.contain(addr1.address);
-    });
-
-    it('Should failed when remove himself', async function () {
-      await expect(poolSafe.removeAdmin(owner.address)).to.be.revertedWith('Cannot self revoke right');
-    });
-    it('Should failed without admin privilege', async function () {
-      await expect(poolSafe.connect(addr1).removeAdmin(addr1.address)).to.be.revertedWith(
-        'Operation require admin privilige',
-      );
+      it('Should failed when called by non controller', async function () {
+        await expect(poolSafe.relayCall(Constants.CONTROLLER_ADDRESS, data)).to.be.revertedWith('Unauthorized sender');
+      });
     });
   });
 });

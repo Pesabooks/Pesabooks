@@ -2,16 +2,16 @@ import {ethers} from 'hardhat';
 import {Constants} from '../Constants';
 
 async function main() {
-  // Deploy Pool Logic Contract
+  // Deploy Pool Controller Contract
 
-  const poolLogicFactory = await ethers.getContractFactory('PoolLogic');
-  const logic = await poolLogicFactory.deploy();
-  await logic.deployed();
+  const controllerFactory = await ethers.getContractFactory('Controller');
+  const controller = await controllerFactory.deploy();
+  await controller.deployed();
 
-  console.log('PoolLogic deployed to:', logic.address);
+  console.log('Controller deployed to:', controller.address);
 
   const RegistryFactory = await ethers.getContractFactory('Registry');
-  const registry = await RegistryFactory.deploy(Constants.POOL_LOGIC_ADDRESS, logic.address);
+  const registry = await RegistryFactory.deploy(Constants.CONTROLLER_ADDRESS, controller.address);
   await registry.deployed();
 
   console.log('Registry deployed to:', registry.address);

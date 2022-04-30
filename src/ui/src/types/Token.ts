@@ -6,4 +6,5 @@ export interface Token {
   image: string;
   active: boolean;
   chain_id: number;
+  decimals: number;
 }

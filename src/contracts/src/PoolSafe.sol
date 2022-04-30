@@ -27,6 +27,17 @@ contract PoolSafe is IPoolSafe, AccessControlEnumerable {
         _;
     }
 
+    modifier onlyController() {
+        require(registry.getAddress(Constants.CONTROLLER_ADDRESS) == msg.sender, "Unauthorized sender");
+        _;
+    }
+
+    modifier onlyValidAddress(string memory addrNameInRegistry) {
+        address callee = registry.getAddress(addrNameInRegistry);
+        require(callee != address(0x0), "Invalid address");
+        _;
+    }
+
     function balance(IERC20 _token) public view returns (uint256) {
         return _token.balanceOf(address(this));
     }
@@ -58,7 +69,11 @@ contract PoolSafe is IPoolSafe, AccessControlEnumerable {
         return admins;
     }
 
-    function relayCall(string memory addrNameInRegistry, bytes calldata data) external {
+    function relayCall(string memory addrNameInRegistry, bytes calldata data)
+        external
+        onlyController
+        onlyValidAddress(addrNameInRegistry)
+    {
         (bool success, ) = registry.getAddress(addrNameInRegistry).delegatecall(data);
         require(success);
     }

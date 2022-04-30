@@ -6,7 +6,7 @@ import { networks } from '../data/networks';
 import { handleSupabaseError, transationsTable } from '../supabase';
 import { AddressLookup, Pool } from '../types';
 import { Transaction } from '../types/transaction';
-import { defaultProvider, getPoolLogicContract, getTokenContract } from './blockchainServices';
+import { defaultProvider, getControllerContract, getTokenContract } from './blockchainServices';
 
 export const deposit = async (
   user_id: string,
@@ -16,16 +16,19 @@ export const deposit = async (
   amount: number,
   memo: string | undefined,
 ) => {
+  const { token } = pool;
+  if (token == null) throw new Error();
+
   const signer = provider.getSigner();
   const signerAddress = await signer.getAddress();
   const safe = PoolSafe__factory.connect(pool.contract_address, signer);
-  const poolLogic = await getPoolLogicContract(pool.chain_id, signer);
+  const controller = await getControllerContract(pool.chain_id, signer);
 
   const tokenAddress = await safe.token();
   const tokenContract = getTokenContract(defaultProvider(pool.chain_id), tokenAddress);
   const decimals = await tokenContract.decimals();
 
-  const tx = await poolLogic.deposit(
+  const tx = await controller.deposit(
     safe.address,
     tokenAddress,
     ethers.utils.parseUnits(amount.toString(), decimals),
@@ -44,6 +47,17 @@ export const deposit = async (
     transfer_to: pool.contract_address,
     status: 0,
     pool_id: pool.id,
+    metadata: {
+      transfer_from: signerAddress,
+      transfer_to: pool.contract_address,
+      token: {
+        address: token.address,
+        symbol: token.symbol,
+        name: token.name,
+        decimals: token.decimals,
+      },
+      amount: amount,
+    },
   };
 
   const { error } = await transationsTable().insert(transaction);
@@ -65,16 +79,19 @@ export const withdraw = async (
   memo: string | undefined,
   recipient: string,
 ) => {
+  const { token } = pool;
+  if (token == null) throw new Error();
+
   const signer = provider.getSigner();
   const safe = PoolSafe__factory.connect(pool.contract_address, signer);
-  const poolLogic = await getPoolLogicContract(pool.chain_id, signer);
+  const controlller = await getControllerContract(pool.chain_id, signer);
 
   const tokenAddress = pool.token?.address ?? '';
 
   const tokenContract = getTokenContract(defaultProvider(pool.chain_id), tokenAddress);
   const decimals = await tokenContract.decimals();
 
-  const tx = await poolLogic.withdraw(
+  const tx = await controlller.withdraw(
     safe.address,
     tokenAddress,
     recipient,
@@ -94,6 +111,17 @@ export const withdraw = async (
     transfer_to: recipient,
     status: 0,
     pool_id: pool.id,
+    metadata: {
+      transfer_from: pool.contract_address,
+      transfer_to: recipient,
+      token: {
+        address: token.address,
+        symbol: token.symbol,
+        name: token.name,
+        decimals: token.decimals,
+      },
+      amount: amount,
+    },
   };
 
   const { error } = await transationsTable().insert(transaction);

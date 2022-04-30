@@ -1,8 +1,8 @@
 import { JsonRpcProvider, Web3Provider } from '@ethersproject/providers';
 import {
+  Controller__factory,
   ERC20,
   ERC20__factory,
-  PoolLogic__factory,
   PoolSafe__factory,
   Registry__factory,
 } from '@pesabooks/contracts/typechain';
@@ -20,15 +20,15 @@ export const getTokenContract = (provider: JsonRpcProvider, address: string): ER
   return ERC20__factory.connect(address, provider);
 };
 
-export const getPoolLogicContract = async (
+export const getControllerContract = async (
   chainId: number,
   signerOrPovider: JsonRpcProvider | Signer,
 ) => {
   const registryAddress = networks[chainId].registryAddress;
 
   const registry = await Registry__factory.connect(registryAddress, signerOrPovider);
-  const logicAddress = await registry.getAddress('PoolLogicAddress');
-  return PoolLogic__factory.connect(logicAddress, signerOrPovider);
+  const controllerAddress = await registry.getAddress('ControllerAddress');
+  return Controller__factory.connect(controllerAddress, signerOrPovider);
 };
 
 export const getPoolContract = (

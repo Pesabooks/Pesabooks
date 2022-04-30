@@ -3,17 +3,17 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Registry is Ownable {
-    mapping(string => address) public addresses;
+    mapping(string => address) public authorizedAddresses;
 
     constructor(string memory name, address initAddr) {
-        addresses[name] = initAddr;
+        authorizedAddresses[name] = initAddr;
     }
 
-    function update(string memory name, address newAddress) external onlyOwner {
-        addresses[name] = newAddress;
+    function addOrUpdate(string memory name, address newAddress) external onlyOwner {
+        authorizedAddresses[name] = newAddress;
     }
 
     function getAddress(string memory name) public view returns (address) {
-        return addresses[name];
+        return authorizedAddresses[name];
     }
 }
