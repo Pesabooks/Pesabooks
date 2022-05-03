@@ -1,21 +1,18 @@
 import { AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import {
-  Button,
-  Icon,
-  Link,
+  Button, Link,
   Menu,
   MenuButton,
   MenuDivider,
   MenuItem,
-  MenuList,
-  Text
+  MenuList
 } from '@chakra-ui/react';
 import React from 'react';
-import { MdOutlineBubbleChart } from 'react-icons/md';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { updateLastPool } from '../../services/profilesService';
 import { Pool } from '../../types';
+import { Logo } from './Logo';
 
 interface PoolSelectorMenuProps {
   pool: Pool | undefined;
@@ -69,11 +66,7 @@ export const PoolSelectorMenu = ({ pool, pools }: PoolSelectorMenuProps) => {
         alignItems="center"
         fontSize="11px"
       >
-        <Icon as={MdOutlineBubbleChart} w="32px" h="32px" me="10px" />
-
-        <Text fontSize="sm" mt="3px" casing="uppercase">
-          Pesabooks
-        </Text>
+        <Logo theme='light'/>
       </Link>
     );
   }

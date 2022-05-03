@@ -12,12 +12,12 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { FaExchangeAlt, FaHome, FaUsers } from 'react-icons/fa';
-import { MdOutlineBubbleChart } from 'react-icons/md';
 import { Link as reactRouterLink, NavLink, useLocation } from 'react-router-dom';
 import { Network } from '../../data/networks';
 import { usePool } from '../../hooks/usePool';
 import { getNetwork } from '../../services/blockchainServices';
 import { IconBox } from '../Icons';
+import { Logo } from './Logo';
 import { Separator } from './Separator';
 import { SidebarHelp } from './SidebarHelp';
 
@@ -40,7 +40,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
   let activeColor = useColorModeValue('gray.700', 'white');
   let inactiveColor = useColorModeValue('gray.400', 'gray.400');
   let sidebarActiveShadow = '0px 7px 11px rgba(0, 0, 0, 0.04)';
-  let {pool} = usePool();
+  let { pool } = usePool();
   const [network, setNetwork] = useState<Network>();
 
   useEffect(() => {
@@ -165,11 +165,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
           alignItems="center"
           fontSize="11px"
         >
-          <Icon as={MdOutlineBubbleChart} w="32px" h="32px" me="10px" />
-
-          <Text fontSize="sm" mt="3px" casing="uppercase">
-            Pesabooks
-          </Text>
+          <Logo />
         </Link>
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
@@ -203,7 +199,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
           <>{createLinks(routes(`${pool?.id}`))}</>
         </Box>
       </Stack>
-     {network?.isTest && <SidebarHelp></SidebarHelp>}
+      {network?.isTest && <SidebarHelp></SidebarHelp>}
     </Box>
   );
 };

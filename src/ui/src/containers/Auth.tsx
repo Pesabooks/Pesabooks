@@ -1,7 +1,7 @@
-import { Box, Flex, Icon, Text } from '@chakra-ui/react';
+import { Box, Flex, Text } from '@chakra-ui/react';
 import React from 'react';
-import { MdOutlineBubbleChart } from 'react-icons/md';
 import { Outlet } from 'react-router-dom';
+import { Logo } from '../components/Layout/Logo';
 
 export const Auth = () => {
   return (
@@ -31,10 +31,7 @@ export const Auth = () => {
         mb="30px"
       >
         <Flex justifyContent="start" alignItems="center">
-          <Icon as={MdOutlineBubbleChart} w="32px" h="32px" me="10px" />
-          <Text fontSize="4xl" color="white" fontWeight="bold">
-            Pesabooks
-          </Text>
+          <Logo theme="light" />
         </Flex>
         <Text
           fontSize="md"
