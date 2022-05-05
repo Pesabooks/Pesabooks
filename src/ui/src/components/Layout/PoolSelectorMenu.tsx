@@ -66,7 +66,7 @@ export const PoolSelectorMenu = ({ pool, pools }: PoolSelectorMenuProps) => {
         alignItems="center"
         fontSize="11px"
       >
-        <Logo theme='light'/>
+        <Logo />
       </Link>
     );
   }
