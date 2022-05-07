@@ -1,9 +1,4 @@
-import {
-  Button,
-  Container,
-  Heading, useDisclosure,
-  useToast
-} from '@chakra-ui/react';
+import { Button, Container, Heading, useDisclosure, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import React, { useEffect, useState } from 'react';
@@ -20,7 +15,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useNotifyTransaction } from '../hooks/useNotifyTransaction';
 import { usePool } from '../hooks/usePool';
 import { approveToken, getAddressBalance, isTokenApproved } from '../services/blockchainServices';
-import { getAllCategories } from '../services/categoriesService';
+import { getActiveCategories } from '../services/categoriesService';
 import { deposit } from '../services/transactionsServices';
 import { Category } from '../types';
 
@@ -62,7 +57,7 @@ export const DepositPage = () => {
   }
 
   useEffect(() => {
-    getAllCategories(pool.id).then((categories) => setCategories(categories ?? []));
+    getActiveCategories(pool.id, 'deposit').then((categories) => setCategories(categories ?? []));
   }, [methods, pool]);
 
   useEffect(() => {
@@ -105,7 +100,6 @@ export const DepositPage = () => {
       if (!tokenApproved) {
         onOpenApproveToken();
       } else {
-
         const tx = await deposit(
           user.id,
           provider as Web3Provider,

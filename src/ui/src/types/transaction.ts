@@ -1,6 +1,7 @@
 import { Category } from './Category';
 import { Entity } from './Entity';
 
+export type TransactionType = 'deposit' | 'withdrawal';
 export interface Transaction extends Entity {
   from: string;
   to: string;
@@ -14,7 +15,7 @@ export interface Transaction extends Entity {
   memo?: string;
   hash: string;
   status: number;
-  type: 'deposit' | 'withdrawal' | 'transfer';
+  type: TransactionType;
   posting?: boolean;
   pool_id: number;
   metadata: TransferData;

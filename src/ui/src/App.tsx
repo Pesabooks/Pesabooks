@@ -16,6 +16,9 @@ import { HomePage } from './containers/HomePage';
 import { InvitationPage } from './containers/InvitationPage';
 import { MembersPage } from './containers/MembersPage';
 import { NotFound } from './containers/NotFound';
+import { CategoriesPage } from './containers/settings/CategoriesPage';
+import { OverviewPage } from './containers/settings/OverviewPage';
+import { SettingsPage } from './containers/settings/SettingsPage';
 import { SignInPage } from './containers/SigninPage';
 import { SignUpPage } from './containers/SignupPage';
 import { TransactionsPage } from './containers/TransactionsPage';
@@ -68,6 +71,10 @@ function App() {
                     <Route path="members" element={<MembersPage />} />
                     <Route path="deposit" element={<DepositPage />} />
                     <Route path="withdraw" element={<WithdrawPage />} />
+                    <Route path="settings" element={<SettingsPage />}>
+                      <Route index element={<OverviewPage />} />
+                      <Route path="categories" element={<CategoriesPage />} />
+                    </Route>
                   </Route>
                 </Route>
               </Routes>

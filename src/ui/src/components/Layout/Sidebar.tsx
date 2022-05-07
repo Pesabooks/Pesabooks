@@ -12,6 +12,7 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { FaExchangeAlt, FaHome, FaUsers } from 'react-icons/fa';
+import { IoSettingsSharp } from 'react-icons/io5';
 import { Link as reactRouterLink, NavLink, useLocation } from 'react-router-dom';
 import { Network } from '../../data/networks';
 import { usePool } from '../../hooks/usePool';
@@ -40,7 +41,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
   let activeColor = useColorModeValue('gray.700', 'white');
   let inactiveColor = useColorModeValue('gray.400', 'gray.400');
   let sidebarActiveShadow = '0px 7px 11px rgba(0, 0, 0, 0.04)';
-  let { pool } = usePool();
+  let { pool, isAdmin } = usePool();
   const [network, setNetwork] = useState<Network>();
 
   useEffect(() => {
@@ -54,9 +55,10 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
   };
 
   const createLinks = (routes: RouteInstance[]) => {
-    // Chakra Color Mode
+  
 
     return routes.map((prop, key) => {
+      if (prop.admin && !isAdmin) return null;
       return (
         <NavLink key={key} to={prop.path} onClick={onClose}>
           {activeRoute(prop.path) === 'active' ? (
@@ -196,7 +198,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
 
       <Stack direction="column" mb="40px">
         <Box>
-          <>{createLinks(routes(`${pool?.id}`))}</>
+          <>{createLinks(routes)}</>
         </Box>
       </Stack>
       {network?.isTest && <SidebarHelp></SidebarHelp>}
@@ -208,22 +210,29 @@ interface RouteInstance {
   path: string;
   name: string;
   icon: any;
+  admin?: boolean;
 }
 
-const routes = (pool_id: string | undefined): RouteInstance[] => [
+const routes = [
   {
-    path: `/pool/${pool_id}`,
+    path: `./`,
     name: 'Dashboard',
     icon: <Icon as={FaHome} color="inherit" />,
   },
   {
-    path: `/pool/${pool_id}/members`,
+    path: `./members`,
     name: 'Members',
     icon: <Icon as={FaUsers} color="inherit" />,
   },
   {
-    path: `/pool/${pool_id}/transactions`,
+    path: `./transactions`,
     name: 'Transactions',
     icon: <Icon as={FaExchangeAlt} color="inherit" />,
+  },
+  {
+    path: `./settings`,
+    name: 'Settings',
+    icon: <Icon as={IoSettingsSharp} color="inherit" />,
+    admin: true,
   },
 ];

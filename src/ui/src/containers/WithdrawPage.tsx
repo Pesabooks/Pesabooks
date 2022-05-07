@@ -14,7 +14,7 @@ import { TransactionSubmittedModal } from '../components/Modals/TransactionSubmi
 import { useNotifyTransaction } from '../hooks/useNotifyTransaction';
 import { usePool } from '../hooks/usePool';
 import { getAddressBalance } from '../services/blockchainServices';
-import { getAllCategories } from '../services/categoriesService';
+import { getActiveCategories } from '../services/categoriesService';
 import { getAddressLookUp } from '../services/poolsService';
 import { withdraw } from '../services/transactionsServices';
 import { AddressLookup, Category } from '../types';
@@ -41,7 +41,7 @@ export const WithdrawPage = () => {
   } = useDisclosure();
   const { notify } = useNotifyTransaction();
 
-  const methods = useForm<WithdrawFormValue>(); 
+  const methods = useForm<WithdrawFormValue>();
 
   const token = pool?.token;
 
@@ -52,7 +52,9 @@ export const WithdrawPage = () => {
   useEffect(() => {
     getAddressLookUp(pool.id, 'user').then(setUsers);
 
-    getAllCategories(pool.id).then((categories) => setCategories(categories ?? []));
+    getActiveCategories(pool.id, 'withdrawal').then((categories) =>
+      setCategories(categories ?? []),
+    );
   }, [methods, pool]);
 
   useEffect(() => {

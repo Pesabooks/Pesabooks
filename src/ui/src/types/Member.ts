@@ -6,4 +6,5 @@ export interface Member {
   pool_id: number;
   pool?: Pool;
   active: boolean;
+  role: 'admin' | 'member';
 }

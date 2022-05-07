@@ -12,3 +12,13 @@ export const getMembers = async (pool_id: number) => {
   handleSupabaseError(error);
   return data;
 };
+
+export const isMemberAdmin = async (userId: string, pool_id: number) => {
+  const { data, error } = await membersTable()
+    .select()
+    .eq('user_id', userId)
+    .eq('pool_id', pool_id);
+
+  handleSupabaseError(error);
+  return data?.[0].role === 'admin';
+};
