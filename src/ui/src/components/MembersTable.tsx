@@ -76,6 +76,7 @@ export const MembersTable = ({
                 email={member.user?.email}
                 active={member.active}
                 status={member.active ? 'active' : 'inactive'}
+                role={member.role}
                 isInvitation={false}
                 id={member.user_id}
                 isAdmin={isAdmin(member.user_id)}
@@ -113,6 +114,7 @@ interface TableRowProps {
   id: string;
   onRemove?: (id: string) => void;
   isAdmin: boolean;
+  role?: string;
 }
 
 const TableRow = ({
@@ -124,6 +126,7 @@ const TableRow = ({
   id,
   isAdmin,
   onRemove,
+  role,
 }: TableRowProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
   let bgStatus = useColorModeValue('gray.400', '#1a202c');
@@ -157,12 +160,10 @@ const TableRow = ({
         </Text>
       </Td>
       <Td>
-        {isAdmin && (
-          <Flex align="center">
-            <Icon as={FaUserShield} color="green.400" w="24px" h="24px" me="6px" />
-            <Text>Admin</Text>
-          </Flex>
-        )}
+        <Flex align="center">
+          {isAdmin && <Icon as={FaUserShield} color="green.400" w="24px" h="24px" me="6px" />}
+          <Text>{role}</Text>
+        </Flex>
       </Td>
       <Td>
         <Badge bg={bgStatus} color={colorStatus} fontSize="16px" p="3px 10px" borderRadius="8px">

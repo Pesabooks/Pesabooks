@@ -14,6 +14,7 @@ export const getActiveInvitations = async (pool_id: number) => {
 export const getInvitation = async (inviation_id: string) => {
   const { data, error } = await invitationsTable()
     .select('*, pool:pool_id(name), created_by:created_by_id(name)')
+    .eq('active', true)
     .eq('id', inviation_id);
   handleSupabaseError(error);
 

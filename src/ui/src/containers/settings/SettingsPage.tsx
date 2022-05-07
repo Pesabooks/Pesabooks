@@ -28,7 +28,7 @@ const NavLink = ({ title, link }: { title: string; link: string }) => {
       _active={{
         boxShadow: !!match ? '0px 2px 5.5px rgba(0, 0, 0, 0.06)' : 'none',
       }}
-      onClick={() => navigate(`/pool/34/settings/${link}`)}
+      onClick={() => navigate(`${link}`)}
     >
       <Text color={textColor} fontSize="xs" fontWeight="bold">
         {title}
