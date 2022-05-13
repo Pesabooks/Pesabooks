@@ -153,6 +153,7 @@ export const getAllTransactions = async (pool_id: number, filter?: Filter<Transa
   );
 
   query = (filter ? filter(query) : query).filter('pool_id', 'eq', pool_id);
+  query = query.filter('status', 'neq', -1);
   const { data, error } = await query;
 
   handleSupabaseError(error);
@@ -175,11 +176,15 @@ export const geTransactionById = async (txId: number) => {
 export const refreshTransaction = async (chain_id: number, txHash: string) => {
   const provider = defaultProvider(chain_id);
   var tx = await provider.getTransaction(txHash);
-  let timestamp;
-  if (tx?.blockNumber) timestamp = (await provider.getBlock(tx.blockNumber)).timestamp;
-  await transationsTable()
-    .update({ status: tx.blockNumber ? 1 : 0, timestamp })
-    .eq('hash', txHash);
+  await tx.wait().then(
+    async (receipt) => {
+      let timestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
+      await transationsTable().update({ status: 1, timestamp }).eq('hash', txHash);
+    },
+    async () => {
+      await transationsTable().update({ status: -1 }).eq('hash', txHash);
+    },
+  );
 };
 
 export const updateTransactionCategory = async (id: number, category_id: number) => {

@@ -141,9 +141,17 @@ export const TransactionsTable = ({
         }) => {
           switch (original.type) {
             case 'deposit':
-              return <Text color="green">{value} {original.metadata?.token?.symbol}</Text>;
+              return (
+                <Text color="green">
+                  {value} {original.metadata?.token?.symbol}
+                </Text>
+              );
             case 'withdrawal':
-              return <Text color="red">- {value} {original.metadata?.token?.symbol}</Text>;
+              return (
+                <Text color="red">
+                  - {value} {original.metadata?.token?.symbol}
+                </Text>
+              );
             default:
               return <Text>{value}</Text>;
           }
@@ -156,6 +164,8 @@ export const TransactionsTable = ({
           switch (value) {
             case 0:
               return <Badge colorScheme="yellow">Pending</Badge>;
+            case -1:
+              return <Badge colorScheme="red">Failed</Badge>;
             default:
               return null;
           }
@@ -171,7 +181,7 @@ export const TransactionsTable = ({
         }) => {
           return (
             <Flex>
-              {original.status === 0 && (
+             {original.status === 0 && (
                 <RefreshTransactionButton chainId={pool.chain_id} transactionHash={original.hash} />
               )}
               <ViewReceiptButton chainId={pool.chain_id} transactionHash={original.hash} />
