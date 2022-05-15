@@ -30,7 +30,7 @@ export const networks: { [chainId: number]: Network } = {
   },
   137: {
     chainId: '0x89',
-    rpcUrls: ['https://polygon-rpc.com/'],
+    rpcUrls: ['https://rpc.ankr.com/polygon'],
     chainName: 'Polygon Mainnet',
     nativeCurrency: {
       name: 'MATIC',
