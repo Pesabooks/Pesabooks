@@ -1,4 +1,4 @@
-import { JsonRpcProvider, Web3Provider } from '@ethersproject/providers';
+import { JsonRpcProvider, JsonRpcSigner } from '@ethersproject/providers';
 import {
   Controller__factory,
   ERC20,
@@ -16,8 +16,8 @@ export const defaultProvider = (chain_id: number) => {
   return new ethers.providers.JsonRpcProvider(url);
 };
 
-export const getTokenContract = (provider: JsonRpcProvider, address: string): ERC20 => {
-  return ERC20__factory.connect(address, provider);
+export const getTokenContract = (chainId: number, address: string): ERC20 => {
+  return ERC20__factory.connect(address, defaultProvider(chainId));
 };
 
 export const getControllerContract = async (
@@ -43,7 +43,7 @@ export const getAddressBalance = async (
   tokenAddress: string,
   accountAddress: string,
 ): Promise<number> => {
-  const tokenContract = getTokenContract(defaultProvider(chain_id), tokenAddress);
+  const tokenContract = getTokenContract(chain_id, tokenAddress);
   const balance = await tokenContract.balanceOf(accountAddress);
   const decimals = await tokenContract.decimals();
 
@@ -52,25 +52,25 @@ export const getAddressBalance = async (
 };
 
 export const isTokenApproved = async (
-  provider: Web3Provider,
+  chainId: number,
+  address: string,
   tokenAddress: string,
   poolAddress: string,
   amount: number,
 ) => {
-  const tokenContract = getTokenContract(provider, tokenAddress);
-  const signer = provider.getSigner();
-  const allowance = await tokenContract.allowance(await signer.getAddress(), poolAddress);
+  const tokenContract = getTokenContract(chainId, tokenAddress);
+  const allowance = await tokenContract.allowance(address, poolAddress);
   const approved = allowance.gte(BigNumber.from(amount));
   return approved;
 };
 
 export async function approveToken(
-  provider: Web3Provider,
+  chainId: number,
+  signer: JsonRpcSigner,
   tokenAddress: string,
   poolAddress: string,
 ) {
-  const signer = provider.getSigner();
-  const tokenContract = getTokenContract(provider, tokenAddress);
+  const tokenContract = getTokenContract(chainId, tokenAddress);
   const totalSupply = await tokenContract.totalSupply();
-  await (await tokenContract.connect(signer).approve(poolAddress, totalSupply)).wait();
+  return await tokenContract.connect(signer).approve(poolAddress, totalSupply);
 }

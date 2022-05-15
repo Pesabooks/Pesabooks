@@ -1,4 +1,4 @@
-import { Web3Provider } from '@ethersproject/providers';
+import { JsonRpcSigner } from '@ethersproject/providers';
 import { PoolSafe__factory } from '@pesabooks/contracts/typechain';
 import { ContractReceipt, ethers } from 'ethers';
 import { Filter } from 'react-supabase';
@@ -10,7 +10,7 @@ import { defaultProvider, getControllerContract, getTokenContract } from './bloc
 
 export const deposit = async (
   user_id: string,
-  provider: Web3Provider,
+  signer: JsonRpcSigner,
   pool: Pool,
   category_id: number,
   amount: number,
@@ -19,13 +19,12 @@ export const deposit = async (
   const { token } = pool;
   if (token == null) throw new Error();
 
-  const signer = provider.getSigner();
   const signerAddress = await signer.getAddress();
   const safe = PoolSafe__factory.connect(pool.contract_address, signer);
   const controller = await getControllerContract(pool.chain_id, signer);
 
   const tokenAddress = await safe.token();
-  const tokenContract = getTokenContract(defaultProvider(pool.chain_id), tokenAddress);
+  const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
   const decimals = await tokenContract.decimals();
 
   const tx = await controller.deposit(
@@ -72,7 +71,7 @@ export const deposit = async (
 
 export const withdraw = async (
   user: AddressLookup,
-  provider: Web3Provider,
+  signer: JsonRpcSigner,
   pool: Pool,
   category_id: number,
   amount: number,
@@ -82,13 +81,12 @@ export const withdraw = async (
   const { token } = pool;
   if (token == null) throw new Error();
 
-  const signer = provider.getSigner();
   const safe = PoolSafe__factory.connect(pool.contract_address, signer);
   const controlller = await getControllerContract(pool.chain_id, signer);
 
   const tokenAddress = pool.token?.address ?? '';
 
-  const tokenContract = getTokenContract(defaultProvider(pool.chain_id), tokenAddress);
+  const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
   const decimals = await tokenContract.decimals();
 
   const tx = await controlller.withdraw(

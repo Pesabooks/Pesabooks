@@ -59,7 +59,7 @@ export type Filter<Data> = (query: PostgrestFilterBuilder<Data>) => PostgrestFil
 export function useTransactions(
   pool_id: number,
   filter?: Filter<Transaction>,
-  config?: { useRealTime?: boolean },
+  config?: { useRealTime?: boolean; includeFailedTx?: boolean },
 ): { transactions: Transaction[]; loading: boolean; error: any } {
   const [{ transactions, loading, error }, dispatch] = useReducer(reducer, initialState);
 

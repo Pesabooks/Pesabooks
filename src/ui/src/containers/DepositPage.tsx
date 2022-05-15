@@ -1,4 +1,12 @@
-import { Button, Container, Heading, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Button,
+  Container,
+  Flex,
+  Heading,
+  Spacer,
+  useDisclosure,
+  useToast
+} from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import React, { useEffect, useState } from 'react';
@@ -35,6 +43,10 @@ export const DepositPage = () => {
   const toast = useToast();
   const methods = useForm<DepositFormValue>();
   const { notify } = useNotifyTransaction();
+  const [tokenApproved, setTokenApproved] = useState(false);
+
+  const watchedAmount = methods.watch('amount');
+  const signer = (provider as Web3Provider)?.getSigner();
 
   const {
     isOpen: isOpenApproveToken,
@@ -58,14 +70,13 @@ export const DepositPage = () => {
 
   useEffect(() => {
     getActiveCategories(pool.id, 'deposit').then((categories) => setCategories(categories ?? []));
-  }, [methods, pool]);
+  }, [pool]);
 
   useEffect(() => {
     const getBalance = async () => {
-      if (provider) {
-        const address = await (provider as Web3Provider).getSigner().getAddress();
+      if (account) {
         if (pool?.token) {
-          const balance = await getAddressBalance(pool.chain_id, pool.token.address, address);
+          const balance = await getAddressBalance(pool.chain_id, pool.token.address, account);
           setBalance(balance);
         }
       }
@@ -74,11 +85,35 @@ export const DepositPage = () => {
     getBalance();
   }, [provider, pool, account]);
 
+  useEffect(() => {
+    const getApproval = async () => {
+      if (isNaN(watchedAmount) || watchedAmount <= 0) {
+        setTokenApproved(false);
+      } else if (account) {
+        const isApproved = await isTokenApproved(
+          pool.chain_id,
+          account,
+          token.address,
+          pool.contract_address,
+          watchedAmount,
+        );
+        setTokenApproved(isApproved);
+      }
+    };
+    getApproval();
+  }, [pool.contract_address, token.address, watchedAmount, isApproving, pool.chain_id, account]);
+
   const approve = async () => {
     if (!provider) return;
     try {
       setIsApproving(true);
-      await approveToken(provider as Web3Provider, token.address, pool.contract_address);
+
+      const tx = await approveToken(pool.chain_id, signer, token.address, pool.contract_address);
+
+      notify(tx, `Allow ${token.symbol}`);
+
+      await tx.wait();
+
       onCloseApproveToken();
     } finally {
       setIsApproving(false);
@@ -91,31 +126,14 @@ export const DepositPage = () => {
     const { amount, memo, category } = formValue;
 
     try {
-      const tokenApproved = await isTokenApproved(
-        provider as Web3Provider,
-        token.address,
-        pool.contract_address,
-        amount,
-      );
-      if (!tokenApproved) {
-        onOpenApproveToken();
-      } else {
-        const tx = await deposit(
-          user.id,
-          provider as Web3Provider,
-          pool,
-          category.id,
-          amount,
-          memo,
-        );
+      const tx = await deposit(user.id, signer, pool, category.id, amount, memo);
 
-        notify(tx, `Deposit of ${amount} ${token.symbol}`);
+      notify(tx, `Deposit of ${amount} ${token.symbol}`);
 
-        setLastTxHash(tx.hash);
-        onOpenTransactionConfirmationn();
+      setLastTxHash(tx.hash);
+      onOpenTransactionConfirmationn();
 
-        methods.reset();
-      }
+      methods.reset();
     } catch (e: any) {
       toast({
         title: e.message,
@@ -145,9 +163,22 @@ export const DepositPage = () => {
               <TextAreaMemoField mb="4" />
 
               {isActive ? (
-                <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
-                  Deposit
-                </Button>
+                <Flex mt={4}>
+                  <Button
+                    disabled={isNaN(watchedAmount) || tokenApproved}
+                    onClick={onOpenApproveToken}
+                  >
+                    Approve
+                  </Button>
+                  <Spacer />
+                  <Button
+                    disabled={!tokenApproved}
+                    isLoading={methods.formState.isSubmitting}
+                    type="submit"
+                  >
+                    Deposit
+                  </Button>
+                </Flex>
               ) : (
                 <ConnectWalletButton mt={4} chainId={pool.chain_id} />
               )}

@@ -7,6 +7,7 @@ export const getActiveCategories = async (pool_id: number, transactionType: Tran
     .select()
     .filter(transactionType, 'eq', true)
     .order('id')
+    .eq('active', true)
     .eq('pool_id', pool_id);
 
   handleSupabaseError(error);

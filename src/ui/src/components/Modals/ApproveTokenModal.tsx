@@ -34,7 +34,7 @@ export const ApproveTokenModal = ({
           <Text>
             Your account contract require you to send an approval transaction before depositing.
           </Text>
-          <Text mt={4}>This is necessary only once</Text>
+          <Text mt={4}>This is necessary only once.</Text>
         </ModalBody>
 
         <ModalFooter>
