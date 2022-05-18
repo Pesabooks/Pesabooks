@@ -1,4 +1,4 @@
-import { Flex, Text } from '@chakra-ui/react';
+import { Badge, Flex, HStack, Text } from '@chakra-ui/react';
 import { AddressLookup, Transaction } from '../../types';
 import { TransactionIcon } from './TransactionIcon';
 
@@ -18,11 +18,10 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
     // <Card my="24px" ms={{ lg: '24px' }}>
 
     <Flex direction="column" w="100%">
-      {transactions.map(({ created_at, type, category, metadata }, key) => {
+      {transactions.map(({ created_at, type, category, metadata, status }, key) => {
         const isDeposit = type === 'deposit';
         const isWithdrawal = type === 'withdrawal';
 
-       
         return (
           <Flex key={key} my="1rem" justifyContent="space-between">
             <Flex alignItems="center">
@@ -43,22 +42,25 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
               </Flex>
             </Flex>
 
-            <Flex
-              direction="column"
-              color={isDeposit ? 'green.400' : isWithdrawal ? 'red.400' : ''}
-            >
-              <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                {isWithdrawal && '-'} {metadata.amount} {metadata?.token?.symbol}
-              </Text>
-
-              <Text
-                fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }}
-                color="gray.400"
-                fontWeight="semibold"
+            <HStack>
+              {status === 'pending' && <Badge colorScheme="yellow">Pending</Badge>}
+              <Flex
+                direction="column"
+                color={isDeposit ? 'green.400' : isWithdrawal ? 'red.400' : ''}
               >
-                {created_at ? new Date(created_at).toLocaleDateString() : ''}
-              </Text>
-            </Flex>
+                <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
+                  {isWithdrawal && '-'} {metadata.amount} {metadata?.token?.symbol}
+                </Text>
+
+                <Text
+                  fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }}
+                  color="gray.400"
+                  fontWeight="semibold"
+                >
+                  {created_at ? new Date(created_at).toLocaleDateString() : ''}
+                </Text>
+              </Flex>
+            </HStack>
           </Flex>
         );
       })}

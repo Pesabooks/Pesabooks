@@ -13,12 +13,6 @@ export const getCurrentUserProfile = async () => {
   return data?.[0];
 };
 
-export const getUserLastAddress = async (pool_id: number, user_id: string) => {
-  const { data, error } = await supabase.rpc('get_user_last_address', { pool_id, user_id });
-  handleSupabaseError(error);
-  return data;
-};
-
 export const getAllUsers = async (pool_id: number) => {
   const { data, error } = await supabase.rpc<Profile>('get_pool_users', { pool_id });
   handleSupabaseError(error);
