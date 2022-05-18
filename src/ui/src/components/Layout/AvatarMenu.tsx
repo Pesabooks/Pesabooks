@@ -4,7 +4,8 @@ import {
   Box,
   Button,
   Center,
-  Flex, Menu,
+  Flex,
+  Menu,
   MenuButton,
   MenuDivider,
   MenuItem,
@@ -15,24 +16,15 @@ import {
   useColorMode
 } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { getConnectorName } from '../../connectors';
-import { Network } from '../../data/networks';
 import { useAuth } from '../../hooks/useAuth';
-import { getNetwork } from '../../services/blockchainServices';
 import { WalletAddress } from '../WalletAddress';
 
 export const AvatarMenu = () => {
   const { toggleColorMode } = useColorMode();
   const { user, signOut } = useAuth();
   const { account, connector, chainId } = useWeb3React();
-  const [netWork, setNetWork] = useState<Network>();
-
-  useEffect(() => {
-    if (chainId) {
-      setNetWork(getNetwork(chainId));
-    }
-  }, [chainId]);
 
   return (
     <Menu>
@@ -53,7 +45,7 @@ export const AvatarMenu = () => {
                 {chainId && <WalletAddress chainId={chainId} address={account} />}
               </Flex>
             )}
-          </Center> 
+          </Center>
 
           <MenuDivider />
           {account && (
