@@ -70,7 +70,7 @@ export const WithdrawPage = () => {
     const { amount, memo, user, category } = formValue;
 
     try {
-      const tx = await withdraw(user, signer, pool, category.id, amount, memo, user.address);
+      const tx = await withdraw(signer, pool, category.id, amount, memo, user.address);
 
       notify(tx, `Withdrawal of ${amount} ${token.symbol} to ${user.name} `);
 

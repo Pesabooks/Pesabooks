@@ -1,5 +1,5 @@
 import { createClient, PostgrestError } from '@supabase/supabase-js';
-import { Category, Invitation, Pool, Profile, Token, Transaction } from './types';
+import { Category, Invitation, Pool, Profile, Token, Transaction, TransactionQueue } from './types';
 import { Member } from './types/Member';
 
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -17,6 +17,7 @@ export const tokensTable = () => supabase.from<Token>('tokens');
 export const categoriesTable = () => supabase.from<Category>('categories');
 export const membersTable = () => supabase.from<Member>('members');
 export const invitationsTable = () => supabase.from<Invitation>('invitations');
+export const transationsQueueTable = () => supabase.from<TransactionQueue>('transactions_queue');
 
 export const handleSupabaseError = (error: PostgrestError | null) => {
   if (error) {

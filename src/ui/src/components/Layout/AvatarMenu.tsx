@@ -1,12 +1,10 @@
-import { ExternalLinkIcon, MoonIcon, SunIcon } from '@chakra-ui/icons';
+import { MoonIcon, SunIcon } from '@chakra-ui/icons';
 import {
   Avatar,
   Box,
   Button,
   Center,
-  Flex,
-  Link,
-  Menu,
+  Flex, Menu,
   MenuButton,
   MenuDivider,
   MenuItem,
@@ -22,7 +20,7 @@ import { getConnectorName } from '../../connectors';
 import { Network } from '../../data/networks';
 import { useAuth } from '../../hooks/useAuth';
 import { getNetwork } from '../../services/blockchainServices';
-import { shortenAddress } from '../../utils';
+import { WalletAddress } from '../WalletAddress';
 
 export const AvatarMenu = () => {
   const { toggleColorMode } = useColorMode();
@@ -46,16 +44,16 @@ export const AvatarMenu = () => {
           <Center flexDirection="column">
             <p>{user?.name}</p>
             {account && (
-              <Link isExternal href={netWork?.blockExplorerUrls[0] + 'address/' + account}>
-                <Avatar bg="white"
+              <Flex gap={2}>
+                <Avatar
+                  bg="white"
                   size="xs"
                   src={`${process.env.PUBLIC_URL}/images/wallet/${getConnectorName(connector)}.png`}
                 />{' '}
-                {shortenAddress(account)}
-                <ExternalLinkIcon mx="3px" />
-              </Link>
+                {chainId && <WalletAddress chainId={chainId} address={account} />}
+              </Flex>
             )}
-          </Center>
+          </Center> 
 
           <MenuDivider />
           {account && (

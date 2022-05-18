@@ -2,21 +2,15 @@ import { Category } from './Category';
 import { Entity } from './Entity';
 
 export type TransactionType = 'deposit' | 'withdrawal';
+export type TransactionStatus = 'completed' | 'failed' | 'pending';
 export interface Transaction extends Entity {
-  from: string;
-  to: string;
-  transfer_from: string;
-  transfer_to: string;
-  user_id: string;
   timestamp?: number;
   category_id: number;
   category?: Category;
-  amount: number;
   memo?: string;
   hash: string;
-  status: number;
+  status: TransactionStatus;
   type: TransactionType;
-  posting?: boolean;
   pool_id: number;
   metadata: TransferData;
 }

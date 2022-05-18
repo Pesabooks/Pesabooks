@@ -43,7 +43,7 @@ export const createNewPool = async (
   const poolSafe = await factory.deploy(token.address, registryAddress);
   await poolSafe.deployed();
 
-  const { data, error } = await supabase.rpc<number>('create_pool2', {
+  const { data, error } = await supabase.rpc<number>('create_pool', {
     chain_id: chainId,
     name: name,
     description: description ?? '',

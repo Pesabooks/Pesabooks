@@ -22,7 +22,7 @@ export const TransactionsPage = () => {
   }, []);
 
   const { transactions, loading: txsLoading } = useTransactions(pool.id, filter, {
-    useRealTime: false,
+    useRealTime: true,
   });
 
   useEffect(() => {

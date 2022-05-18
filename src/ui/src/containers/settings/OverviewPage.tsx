@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react';
 import React from 'react';
 import { Card, CardBody, CardHeader } from '../../components/Card';
+import { WalletAddress } from '../../components/WalletAddress';
 import { usePool } from '../../hooks/usePool';
 import { updatePoolInformation } from '../../services/poolsService';
 
@@ -98,6 +99,11 @@ export const OverviewPage = () => {
               <EditableTextarea />
               <EditableControls />
             </Editable>
+          </HStack>
+
+          <HStack>
+            <Text w="200px">Address:</Text>
+            {pool && <WalletAddress chainId={pool?.chain_id} address={pool?.contract_address} />}
           </HStack>
         </Stack>
       </CardBody>

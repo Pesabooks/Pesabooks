@@ -14,13 +14,13 @@ import {
   Tr
 } from '@chakra-ui/react';
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { Cell, Column, useSortBy, useTable } from 'react-table';
+import { Cell, CellProps, Column, useSortBy, useTable } from 'react-table';
 import { updateTransactionCategory } from '../../services/transactionsServices';
-import { AddressLookup, Category, Pool } from '../../types';
-import { Transaction } from '../../types/transaction';
+import { AddressLookup, Category, Pool, Transaction, TransactionStatus } from '../../types';
 import { RefreshTransactionButton } from '../Buttons/RefreshTransactionButton';
 import { ViewReceiptButton } from '../Buttons/ViewReceiptButton';
 import Loading from '../Loading';
+import { TransactionIcon } from './TransactionIcon';
 
 interface TransactionsTableProps {
   pool: Pool;
@@ -78,6 +78,48 @@ const CategoryCell = ({
   );
 };
 
+const TransactionCell = ({
+  transaction,
+  addressLookups,
+}: {
+  transaction: Transaction;
+  addressLookups: AddressLookup[];
+}) => {
+  const { type, created_at } = transaction;
+  const date = new Date(created_at);
+
+  const getAddressName = (address: string) => {
+    if (!address) return null;
+
+    return (
+      addressLookups.find((a) => a.address.toLowerCase() === address.toLowerCase())?.name ?? address
+    );
+  };
+
+  const renderLabel = () => {
+    switch (type) {
+      case 'deposit':
+        return `From ${getAddressName(transaction.metadata.transfer_from)}`;
+      case 'withdrawal':
+        return `To ${getAddressName(transaction.metadata.transfer_to)}`;
+    }
+  };
+
+  return (
+    <Flex alignItems="center">
+      <TransactionIcon type={type} />
+      <Flex direction="column">
+        <Text fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
+          {renderLabel()}
+        </Text>
+        <Text fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }} color="gray.400" fontWeight="semibold">
+          {date.toLocaleDateString()} {date.toLocaleTimeString()}
+        </Text>
+      </Flex>
+    </Flex>
+  );
+};
+
 export const TransactionsTable = ({
   pool,
   transactions,
@@ -86,59 +128,49 @@ export const TransactionsTable = ({
   categories,
 }: TransactionsTableProps) => {
   const columns = useMemo(() => {
-    const getAddressName = (address: string) => {
-      return (
-        addressLookups.find((a) => a.address.toLowerCase() === address.toLowerCase())?.name ??
-        address
-      );
-    };
+    const columns: Column[] = [
+      {
+        Header: '',
+        accessor: 'icon',
+        Cell: ({ cell: { value, row } }: CellProps<Transaction>) => (
+          <TransactionCell transaction={row.original} addressLookups={addressLookups} />
+        ),
+      },
+      // {
+      //   Header: 'Date',
+      //   accessor: 'created_at',
+      //   Cell: ({ cell: { value } }) => {
+      //     const date = new Date(value);
+      //     return (
+      //       <span>
+      //         {date.toLocaleDateString()} {date.toLocaleTimeString()}
+      //       </span>
+      //     );
+      //   },
+      // },
 
-    const columns: Column<Transaction>[] = [
-      {
-        Header: 'Date',
-        accessor: 'created_at',
-        Cell: ({ cell: { value } }) => {
-          const date = new Date(value);
-          return (
-            <span>
-              {date.toLocaleDateString()} {date.toLocaleTimeString()}
-            </span>
-          );
-        },
-      },
-      {
-        Header: 'Type',
-        accessor: 'type',
-      },
-      {
-        Header: 'From',
-        accessor: 'transfer_from',
-        Cell: ({ cell: { value } }) => <span>{getAddressName(value)}</span>,
-      },
-      {
-        Header: 'To',
-        accessor: 'transfer_to',
-        Cell: ({ cell: { value } }) => <span>{getAddressName(value)}</span>,
-      },
       {
         Header: 'Category',
         accessor: 'category',
-        Cell: ({ cell }) => <CategoryCell categories={categories} {...cell} />,
+        Cell: ({ cell }: CellProps<Transaction>) => (
+          <CategoryCell categories={categories} {...cell} />
+        ),
       },
       {
-        Header: 'Description',
+        Header: 'Memo',
         accessor: 'memo',
       },
       {
         Header: 'Amount',
-        accessor: 'amount',
+
+        accessor: 'metadata.amount',
         isNumeric: true,
         Cell: ({
           cell: {
             value,
             row: { original },
           },
-        }) => {
+        }: CellProps<Transaction>) => {
           switch (original.type) {
             case 'deposit':
               return (
@@ -160,11 +192,11 @@ export const TransactionsTable = ({
       {
         Header: '',
         accessor: 'status',
-        Cell: ({ cell: { value } }) => {
+        Cell: ({ cell: { value } }: CellProps<Transaction, TransactionStatus>) => {
           switch (value) {
-            case 0:
+            case 'pending':
               return <Badge colorScheme="yellow">Pending</Badge>;
-            case -1:
+            case 'failed':
               return <Badge colorScheme="red">Failed</Badge>;
             default:
               return null;
@@ -178,10 +210,10 @@ export const TransactionsTable = ({
           cell: {
             row: { original },
           },
-        }) => {
+        }: CellProps<Transaction>) => {
           return (
             <Flex>
-             {original.status === 0 && (
+              {original.status === 'pending' && (
                 <RefreshTransactionButton chainId={pool.chain_id} transactionHash={original.hash} />
               )}
               <ViewReceiptButton chainId={pool.chain_id} transactionHash={original.hash} />
@@ -193,8 +225,10 @@ export const TransactionsTable = ({
     return columns;
   }, [addressLookups, categories, pool.chain_id]);
 
-  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } =
-    useTable<Transaction>({ columns, data: transactions }, useSortBy);
+  const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
+    { columns, data: transactions },
+    useSortBy,
+  );
 
   return (
     <>

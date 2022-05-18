@@ -126,7 +126,7 @@ export const DepositPage = () => {
     const { amount, memo, category } = formValue;
 
     try {
-      const tx = await deposit(user.id, signer, pool, category.id, amount, memo);
+      const tx = await deposit( signer, pool, category.id, amount, memo);
 
       notify(tx, `Deposit of ${amount} ${token.symbol}`);
 
