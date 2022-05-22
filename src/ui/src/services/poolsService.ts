@@ -79,15 +79,10 @@ export const getAddressLookUp = async (
   return data ?? [];
 };
 
-export const isSignerAnAdmin = async (pool: Pool, provider: Web3Provider) => {
-  if (!provider) return false;
+export const isSignerAnAdmin = async (pool: Pool, address: string) => {
+  const poolContract = await getPoolContract(pool.contract_address, defaultProvider(pool.chain_id));
 
-  const signer = provider.getSigner();
-
-  const signerAddress = await signer.getAddress();
-  const poolContract = await getPoolContract(pool.contract_address, provider);
-
-  return poolContract.isAdmin(signerAddress);
+  return poolContract.isAdmin(address);
 };
 
 export const addAdmin = async (pool: Pool, address: AddressLookup, provider: Web3Provider) => {

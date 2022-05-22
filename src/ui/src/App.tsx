@@ -21,6 +21,7 @@ import { DashboardPage } from './routes/dashboard/DashboardPage';
 import { HomePage } from './routes/home/HomePage';
 import { MembersPage } from './routes/members/MembersPage';
 import { NotFound } from './routes/notfound/NotFound';
+import { AdminsPage } from './routes/settings/container/AdminsPage';
 import { CategoriesPage } from './routes/settings/container/CategoriesPage';
 import { OverviewPage } from './routes/settings/container/OverviewPage';
 import { SettingsPage } from './routes/settings/container/SettingsPage';
@@ -74,6 +75,7 @@ function App() {
                     <Route path="settings" element={<SettingsPage />}>
                       <Route index element={<OverviewPage />} />
                       <Route path="categories" element={<CategoriesPage />} />
+                      <Route path="admins" element={<AdminsPage />} />
                     </Route>
                   </Route>
                 </Route>

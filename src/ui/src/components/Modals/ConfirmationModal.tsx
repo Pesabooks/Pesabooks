@@ -1,12 +1,12 @@
 import {
-    Button,
-    Modal,
-    ModalBody,
-    ModalContent,
-    ModalFooter,
-    ModalOverlay,
-    Spacer,
-    useDisclosure
+  Button,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalOverlay,
+  Spacer,
+  useDisclosure,
 } from '@chakra-ui/react';
 import React, { forwardRef, Ref, useImperativeHandle, useState } from 'react';
 
@@ -16,7 +16,7 @@ export interface ConfirmationRef {
 
 export interface ConfirmationModalProps {
   ref: Ref<ConfirmationRef>;
-  afterClosed: (confirmed: boolean, data?: unknown) => void;
+  afterClosed: (confirmed: boolean, data?: any) => void | Promise<void>;
 }
 
 export const ConfirmationModal = forwardRef(

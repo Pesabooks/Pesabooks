@@ -17,7 +17,7 @@ export interface Network {
 export const networks: { [chainId: number]: Network } = {
   80001: {
     chainId: '0x13881',
-    rpcUrls: ['https://rpc-mumbai.maticvigil.com'],
+    rpcUrls: ['https://matic-mumbai.chainstacklabs.com'],
     chainName: 'Polygon Testnet Mumbai',
     nativeCurrency: {
       name: 'tMATIC',

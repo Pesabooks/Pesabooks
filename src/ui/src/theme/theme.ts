@@ -19,6 +19,7 @@ const config: ThemeConfig = {
 };
 
 export default extendTheme(
+  { config },
   { breakpoints }, // Breakpoints
   globalStyles,
   font, // Global styles
@@ -33,5 +34,4 @@ export default extendTheme(
   PanelContentComponent, // Panel Content component
   PanelContainerComponent, // Panel Container component
   withDefaultColorScheme({ colorScheme: 'teal' }),
-  config,
 );

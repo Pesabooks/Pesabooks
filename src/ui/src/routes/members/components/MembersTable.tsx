@@ -7,7 +7,6 @@ import { MemberTableRow } from './MemberTableRow';
 interface MembersTableProps {
   members: Member[];
   lookups: AddressLookup[];
-  adminAddresses: string[];
   invitations: Invitation[];
   onRevoke: (id: string) => void;
   onAddAdmin?: (id: string) => void;
@@ -18,18 +17,8 @@ export const MembersTable = ({
   invitations,
   onRevoke,
   isLoading,
-  adminAddresses,
   lookups,
 }: MembersTableProps) => {
-  const isAdmin = (userId: string) => {
-    const userAddresses = lookups.filter((l) => l.id === userId).map((l) => l.address);
-    for (const address of userAddresses) {
-      if (adminAddresses.find((a) => a === address)) {
-        return true;
-      }
-    }
-    return false;
-  };
   return (
     <>
       <Table variant="simple">
@@ -58,7 +47,6 @@ export const MembersTable = ({
                 role={member.role}
                 isInvitation={false}
                 id={member.user_id}
-                isAdmin={isAdmin(member.user_id)}
               />
             );
           })}
@@ -73,7 +61,6 @@ export const MembersTable = ({
                 isInvitation={true}
                 id={invitation.id}
                 onRemove={onRevoke}
-                isAdmin={false}
               />
             );
           })}

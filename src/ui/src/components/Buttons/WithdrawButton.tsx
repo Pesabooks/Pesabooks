@@ -8,13 +8,9 @@ export const WithdrawButton = () => {
   const isAdmin = useIsAdmin();
   const navigate = useNavigate();
 
-
-
   return isAdmin ? (
     <>
-      <Button onClick={() => navigate(`/pool/${pool?.id}/withdraw`)} >
-        Withdraw
-      </Button>
+      <Button onClick={() => navigate(`/pool/${pool?.id}/withdraw`)}>Withdraw</Button>
     </>
   ) : null;
 };

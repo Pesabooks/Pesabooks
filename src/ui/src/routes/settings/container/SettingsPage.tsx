@@ -4,6 +4,7 @@ import { Outlet, useMatch, useNavigate, useResolvedPath } from 'react-router-dom
 
 const Links = [
   { title: 'Overview', uri: './' },
+  { title: 'Administrators', uri: './admins' },
   { title: 'Categories', uri: './categories' },
 ];
 

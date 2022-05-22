@@ -7,7 +7,7 @@ import {
   activateCategory,
   addCategory,
   editCategory,
-  getAllCategories
+  getAllCategories,
 } from '../../../services/categoriesService';
 import { Category } from '../../../types';
 import { CategoriesTable } from '../components/CategoriesTable';
@@ -29,8 +29,6 @@ export const CategoriesPage = () => {
   }, [getCategories]);
 
   const confirmationRef = useRef<ConfirmationRef>(null);
-
-
 
   const confirmDeactivation = useCallback((categoryId: number) => {
     confirmationRef.current?.open('Are you sure you want to deactivate?', categoryId);
@@ -69,8 +67,7 @@ export const CategoriesPage = () => {
     }
   };
 
-  const onDeactivate = async (confirmed: boolean, data: unknown) => {
-    const categoryId = data as number;
+  const onDeactivate = async (confirmed: boolean, categoryId: number) => {
     if (confirmed) {
       await activateCategory(categoryId, false);
       await getCategories();
