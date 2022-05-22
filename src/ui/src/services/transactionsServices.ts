@@ -1,5 +1,5 @@
 import { JsonRpcSigner } from '@ethersproject/providers';
-import { PoolSafe__factory } from '@pesabooks/contracts/typechain';
+import { ERC20__factory, PoolSafe__factory } from '@pesabooks/contracts/typechain';
 import { ContractReceipt, ethers } from 'ethers';
 import { Filter } from 'react-supabase';
 import { networks } from '../data/networks';
@@ -20,11 +20,7 @@ export const deposit = async (
 
   const from = (await signer.getAddress()).toLowerCase();
   const to = pool.contract_address.toLowerCase();
-  const safe = PoolSafe__factory.connect(pool.contract_address, signer);
-  const controller = await getControllerContract(pool.chain_id, signer);
-
-  const tokenAddress = await safe.token();
-  const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
+  const tokenContract = ERC20__factory.connect(token.address, signer);
   const decimals = await tokenContract.decimals();
 
   const transaction: Partial<Transaction> = {
@@ -54,9 +50,8 @@ export const deposit = async (
   handleSupabaseError(queuingEror);
   const queuedTransactionId = queuedTransactions?.[0].id ?? 0;
 
-  const tx = await controller.deposit(
-    safe.address,
-    tokenAddress,
+  const tx = await tokenContract.transfer(
+    pool.contract_address,
     ethers.utils.parseUnits(amount.toString(), decimals),
   );
 

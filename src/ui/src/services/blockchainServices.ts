@@ -68,9 +68,9 @@ export async function approveToken(
   chainId: number,
   signer: JsonRpcSigner,
   tokenAddress: string,
-  poolAddress: string,
+  spender: string,
 ) {
   const tokenContract = getTokenContract(chainId, tokenAddress);
   const totalSupply = await tokenContract.totalSupply();
-  return await tokenContract.connect(signer).approve(poolAddress, totalSupply);
+  return await tokenContract.connect(signer).approve(spender, totalSupply);
 }
