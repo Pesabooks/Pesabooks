@@ -1,24 +1,21 @@
 import {
   Box,
   BoxProps,
-  Button,
   CloseButton,
   Flex,
   Icon,
   Link,
-  Stack,
-  Text,
-  useColorModeValue
+  Stack
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { FaExchangeAlt, FaHome, FaUsers } from 'react-icons/fa';
 import { IoSettingsSharp } from 'react-icons/io5';
-import { Link as reactRouterLink, NavLink, useLocation } from 'react-router-dom';
+import { Link as reactRouterLink, NavLink } from 'react-router-dom';
 import { Network } from '../../data/networks';
 import { usePool } from '../../hooks/usePool';
 import { getNetwork } from '../../services/blockchainServices';
-import { IconBox } from '../Icons';
 import { Logo } from './Logo';
+import { NavLinkButton } from './NavLinkButton';
 import { Separator } from './Separator';
 import { SidebarHelp } from './SidebarHelp';
 
@@ -27,20 +24,12 @@ interface SidebarProps extends BoxProps {
 }
 
 export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
-  // to check for active links and opened collapses
-  let location = useLocation();
-
   // this is for the rest of the collapses
   let sidebarBg = 'none';
   let sidebarRadius = '0px';
   let sidebarMargins = '0px';
   sidebarRadius = '16px';
   sidebarMargins = '16px 0px 16px 16px';
-  let activeBg = useColorModeValue('white', 'gray.700');
-  let inactiveBg = useColorModeValue('white', 'gray.700');
-  let activeColor = useColorModeValue('gray.700', 'white');
-  let inactiveColor = useColorModeValue('gray.400', 'gray.400');
-  let sidebarActiveShadow = '0px 7px 11px rgba(0, 0, 0, 0.04)';
   let { pool, isAdmin } = usePool();
   const [network, setNetwork] = useState<Network>();
 
@@ -50,103 +39,12 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
     }
   }, [pool]);
 
-  const activeRoute = (routeName: string) => {
-    return location.pathname === routeName ? 'active' : '';
-  };
-
   const createLinks = (routes: RouteInstance[]) => {
-  
-
     return routes.map((prop, key) => {
       if (prop.admin && !isAdmin) return null;
       return (
         <NavLink key={key} to={prop.path} onClick={onClose}>
-          {activeRoute(prop.path) === 'active' ? (
-            <Button
-              boxSize="initial"
-              justifyContent="flex-start"
-              alignItems="center"
-              boxShadow={sidebarActiveShadow}
-              bg={activeBg}
-              mb={{
-                xl: '12px',
-              }}
-              mx={{
-                xl: 'auto',
-              }}
-              ps={{
-                sm: '10px',
-                xl: '16px',
-              }}
-              py="12px"
-              borderRadius="15px"
-              _hover={{}}
-              w="100%"
-              _active={{
-                bg: 'inherit',
-                transform: 'none',
-                borderColor: 'transparent',
-              }}
-              _focus={{
-                boxShadow: '0px 7px 11px rgba(0, 0, 0, 0.04)',
-              }}
-            >
-              <Flex>
-                {typeof prop.icon === 'string' ? (
-                  <Icon>{prop.icon}</Icon>
-                ) : (
-                  <IconBox bg="teal.300" color="white" h="30px" w="30px" me="12px">
-                    {prop.icon}
-                  </IconBox>
-                )}
-                <Text color={activeColor} my="auto" fontSize="sm">
-                  {prop.name}
-                </Text>
-              </Flex>
-            </Button>
-          ) : (
-            <Button
-              boxSize="initial"
-              justifyContent="flex-start"
-              alignItems="center"
-              bg="transparent"
-              mb={{
-                xl: '12px',
-              }}
-              mx={{
-                xl: 'auto',
-              }}
-              py="12px"
-              ps={{
-                sm: '10px',
-                xl: '16px',
-              }}
-              borderRadius="15px"
-              _hover={{}}
-              w="100%"
-              _active={{
-                bg: 'inherit',
-                transform: 'none',
-                borderColor: 'transparent',
-              }}
-              _focus={{
-                boxShadow: 'none',
-              }}
-            >
-              <Flex>
-                {typeof prop.icon === 'string' ? (
-                  <Icon>{prop.icon}</Icon>
-                ) : (
-                  <IconBox bg={inactiveBg} color="teal.300" h="30px" w="30px" me="12px">
-                    {prop.icon}
-                  </IconBox>
-                )}
-                <Text color={inactiveColor} my="auto" fontSize="sm">
-                  {prop.name}
-                </Text>
-              </Flex>
-            </Button>
-          )}
+          <NavLinkButton {...prop} />
         </NavLink>
       );
     });
@@ -206,7 +104,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
   );
 };
 
-interface RouteInstance {
+export interface RouteInstance {
   path: string;
   name: string;
   icon: any;
