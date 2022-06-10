@@ -1,3 +1,4 @@
+import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 import { createClient, PostgrestError } from '@supabase/supabase-js';
 import { Category, Invitation, Pool, Profile, Token, Transaction, TransactionQueue } from './types';
 import { Member } from './types/Member';
@@ -9,6 +10,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase configs are missing');
 }
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+export type Filter<Data> = (query: PostgrestFilterBuilder<Data>) => PostgrestFilterBuilder<Data>;
 
 export const profilesTable = () => supabase.from<Profile>('profiles');
 export const transationsTable = () => supabase.from<Transaction>('transactions');

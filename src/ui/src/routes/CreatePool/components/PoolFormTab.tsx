@@ -8,15 +8,13 @@ import {
   Input,
   Stack,
   Text,
-  Textarea,
-  useColorModeValue
+  Textarea
 } from '@chakra-ui/react';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
 import { useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { Token } from '../../../types';
-
 
 interface PoolFormTabProps {
   chainId: number;
@@ -48,8 +46,6 @@ const IconOption = (props: OptionProps<Token, boolean, GroupBase<Token>>) => {
   );
 };
 export const PoolFormTab = ({ chainId, tokens, onCreate, loading, onPrev }: PoolFormTabProps) => {
-  const bgPrevButton = useColorModeValue('gray.100', 'gray.100');
-
   const submit = (values: CreatePoolFormValue) => {
     onCreate(values);
   };
@@ -132,32 +128,25 @@ export const PoolFormTab = ({ chainId, tokens, onCreate, loading, onPrev }: Pool
               />
             </Stack>
 
-            <Flex justify="space-between" mt={4}>
+            <Flex justify="space-between" mt="28px">
               <Button
-                variant="no-hover"
-                bg={bgPrevButton}
+                variant="outline"
                 alignSelf="flex-end"
-                mt="24px"
                 w={{ sm: '75px', lg: '100px' }}
                 h="35px"
                 onClick={onPrev}
                 isLoading={loading}
               >
-                <Text fontSize="xs" color="gray.700" fontWeight="bold">
-                  PREV
-                </Text>
+                Prev
               </Button>
               <Button
                 alignSelf="flex-end"
-                mt="24px"
                 w={{ sm: '75px', lg: '100px' }}
                 h="35px"
                 isLoading={loading}
                 type="submit"
               >
-                <Text fontSize="xs" color="#fff" fontWeight="bold">
-                  CREATE
-                </Text>
+                Create
               </Button>
             </Flex>
           </Flex>

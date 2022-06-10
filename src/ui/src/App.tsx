@@ -20,6 +20,7 @@ import { CreatePoolPage } from './routes/CreatePool/CreatePoolPage';
 import { DashboardPage } from './routes/dashboard/DashboardPage';
 import { HomePage } from './routes/home/HomePage';
 import { MembersPage } from './routes/members/MembersPage';
+import { MigrationPage } from './routes/migration/MigrationPage';
 import { NotFound } from './routes/notfound/NotFound';
 import { AdminsPage } from './routes/settings/container/AdminsPage';
 import { CategoriesPage } from './routes/settings/container/CategoriesPage';
@@ -77,6 +78,7 @@ function App() {
                       <Route path="categories" element={<CategoriesPage />} />
                       <Route path="admins" element={<AdminsPage />} />
                     </Route>
+                    <Route path="migration" element={<MigrationPage />} />
                   </Route>
                 </Route>
               </Routes>

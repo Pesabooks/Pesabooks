@@ -68,11 +68,6 @@ export const MemberTableRow = ({
         </Text>
       </Td>
       <Td>
-        <Flex align="center">
-          <Text>{role}</Text>
-        </Flex>
-      </Td>
-      <Td>
         <Badge bg={bgStatus} color={colorStatus} fontSize="16px" p="3px 10px" borderRadius="8px">
           {status}
         </Badge>

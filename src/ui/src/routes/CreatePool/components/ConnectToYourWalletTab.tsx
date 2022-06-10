@@ -1,10 +1,8 @@
-import { Box, Button, Flex, Text, useColorModeValue } from '@chakra-ui/react';
+import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { ConnectWalletButton } from '../../../components/Buttons/ConnectWalletButton';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { ConnectedChain } from '../../../components/ConnectedChain';
-
-
 
 interface ConnectToYourWalletTabProps {
   onNext: () => void;
@@ -17,7 +15,6 @@ export const ConnectToYourWalletTab = ({
   onPrev,
   chainId,
 }: ConnectToYourWalletTabProps) => {
-  const bgPrevButton = useColorModeValue('gray.100', 'gray.100');
   const { chainId: connectedChainId } = useWeb3React();
   const connected = chainId === connectedChainId;
   return (
@@ -51,33 +48,18 @@ export const ConnectToYourWalletTab = ({
           ) : (
             <ConnectWalletButton chainId={chainId} w="200px" alignSelf="center" />
           )}
-          <Flex justify="space-between">
+          <Flex justify="space-between" mt="24px">
             <Button
-              variant="no-hover"
-              bg={bgPrevButton}
+              variant="outline"
               alignSelf="flex-end"
-              mt="24px"
               w={{ sm: '75px', lg: '100px' }}
               h="35px"
               onClick={onPrev}
             >
-              <Text fontSize="xs" color="gray.700" fontWeight="bold">
-                PREV
-              </Text>
+              Prev
             </Button>
-            <Button
-              variant="no-hover"
-              bg="linear-gradient(81.62deg, #313860 2.25%, #151928 79.87%)"
-              alignSelf="flex-end"
-              mt="24px"
-              w={{ sm: '75px', lg: '100px' }}
-              h="35px"
-              onClick={onNext}
-              disabled={!connected}
-            >
-              <Text fontSize="xs" color="#fff" fontWeight="bold">
-                NEXT
-              </Text>
+            <Button w={{ sm: '75px', lg: '100px' }} h="35px" onClick={onNext} disabled={!connected}>
+              Next
             </Button>
           </Flex>
         </Flex>

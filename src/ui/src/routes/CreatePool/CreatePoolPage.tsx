@@ -1,20 +1,10 @@
-import {
-  Flex,
-  Icon,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-  useColorModeValue,
-  useToast
-} from '@chakra-ui/react';
+import { Container, Flex, Text, useToast } from '@chakra-ui/react';
 import type { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
-import { useEffect, useRef, useState } from 'react';
+import { Step, Steps, useSteps } from 'chakra-ui-steps';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { BsCircleFill } from 'react-icons/bs';
+import { FaEdit, FaEthereum, FaWallet } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
 import { Navbar } from '../../components/Layout/Navbar';
 import { createNewPool } from '../../services/poolsService';
@@ -22,28 +12,21 @@ import { getAllTokens } from '../../services/tokensService';
 import { Token } from '../../types';
 import { ChooseNetworkTab } from './components/ChooseNetworkTab';
 import { ConnectToYourWalletTab } from './components/ConnectToYourWalletTab';
+import { CreatingPool } from './components/CreatingPool';
 import { CreatePoolFormValue, PoolFormTab } from './components/PoolFormTab';
 
 export const CreatePoolPage = () => {
   const [tokens, setTokens] = useState<Token[]>([]);
   const navigate = useNavigate();
-  const { provider, chainId: connectedChainId } = useWeb3React();
+  const { provider } = useWeb3React();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
-  const textColor = useColorModeValue('gray.700', 'white');
-
-  const [activeBullets, setActiveBullets] = useState({
-    network: true,
-    account: false,
-    address: false,
-  });
-
   const [chainId, setChainId] = useState<number | null>(null);
 
-  const networkTab = useRef<HTMLButtonElement>(null);
-  const connectTab = useRef<HTMLButtonElement>(null);
-  const poolTab = useRef<HTMLButtonElement>(null);
+  const { nextStep, prevStep, setStep, activeStep } = useSteps({
+    initialStep: 0,
+  });
 
   const createPool = async (values: CreatePoolFormValue) => {
     setLoading(true);
@@ -51,6 +34,7 @@ export const CreatePoolPage = () => {
     try {
       const { name, description, token } = values;
 
+      nextStep();
       const pool_id = await createNewPool(
         provider as Web3Provider,
         name,
@@ -60,14 +44,15 @@ export const CreatePoolPage = () => {
       );
 
       navigate(`/pool/${pool_id}`);
-    } catch (e) {
-      const message = e instanceof Error ? e.message : null;
+    } catch (e :any) {
+    
       toast({
-        title: message,
+        title: e.message,
         status: 'error',
         isClosable: true,
       });
       setLoading(false);
+      setStep(steps.length - 1);
       throw e;
     }
   };
@@ -75,6 +60,28 @@ export const CreatePoolPage = () => {
   useEffect(() => {
     getAllTokens().then(setTokens);
   }, []);
+
+  const netWorkTab = <ChooseNetworkTab onNext={nextStep} onSelect={setChainId} chainId={chainId} />;
+
+  const connectTab2 = chainId ? (
+    <ConnectToYourWalletTab chainId={chainId} onNext={nextStep} onPrev={prevStep} />
+  ) : null;
+
+  const infoTab = chainId ? (
+    <PoolFormTab
+      chainId={chainId}
+      tokens={tokens}
+      onCreate={createPool}
+      loading={loading}
+      onPrev={prevStep}
+    ></PoolFormTab>
+  ) : null;
+
+  const steps = [
+    { label: 'Select a network', content: netWorkTab, icon: FaEthereum },
+    { label: 'Connect your wallet', content: connectTab2, icon: FaWallet },
+    { label: 'Group information', content: infoTab, icon: FaEdit },
+  ];
 
   return (
     <>
@@ -89,186 +96,16 @@ export const CreatePoolPage = () => {
           </Text>
           <Text color="gray.400" fontWeight="normal" fontSize={{ sm: 'sm', md: 'lg' }}></Text>
         </Flex>
-        <Tabs variant="unstyled" mt="24px" display="flex" flexDirection="column">
-          <TabList display="flex" alignSelf="center" justifySelf="center">
-            <Tab
-              ref={networkTab}
-              _focus={{}}
-              w={{ sm: '120px', md: '250px', lg: '300px' }}
-              onClick={() =>
-                setActiveBullets({
-                  network: true,
-                  account: false,
-                  address: false,
-                })
-              }
-            >
-              <Flex
-                direction="column"
-                justify="center"
-                align="center"
-                position="relative"
-                _before={{
-                  content: "''",
-                  width: { sm: '145px', md: '275px', lg: '345px' },
-                  height: '3px',
-                  bg: activeBullets.account ? textColor : 'gray.200',
-                  left: { sm: '12px', md: '50px' },
-                  top: { sm: activeBullets.network ? '6px' : '4px', md: '' },
-                  position: 'absolute',
-                  bottom: activeBullets.network ? '40px' : '38px',
-                  zIndex: -1,
-                  transition: 'all .3s ease',
-                }}
-              >
-                <Icon
-                  as={BsCircleFill}
-                  color={activeBullets.network ? textColor : 'gray.300'}
-                  w={activeBullets.network ? '16px' : '12px'}
-                  h={activeBullets.network ? '16px' : '12px'}
-                  mb="8px"
-                />
-                <Text
-                  color={activeBullets.network ? { textColor } : 'gray.300'}
-                  fontWeight={activeBullets.network ? 'bold' : 'normal'}
-                  display={{ sm: 'none', md: 'block' }}
-                  fontSize="sm"
-                >
-                  select a network
-                </Text>
-              </Flex>
-            </Tab>
-            <Tab
-              isDisabled={!chainId}
-              ref={connectTab}
-              _focus={{}}
-              w={{ sm: '120px', md: '250px', lg: '300px' }}
-              onClick={() =>
-                setActiveBullets({
-                  network: true,
-                  account: true,
-                  address: false,
-                })
-              }
-            >
-              <Flex
-                direction="column"
-                justify="center"
-                align="center"
-                position="relative"
-                _before={{
-                  content: "''",
-                  width: { sm: '140px', md: '270px', lg: '320px' },
-                  height: '3px',
-                  bg: activeBullets.address ? textColor : 'gray.200',
-                  left: { sm: '12px', md: '28px' },
-                  top: { sm: activeBullets.account ? '6px' : '4px', md: '' },
-                  position: 'absolute',
-                  bottom: activeBullets.account ? '40px' : '38px',
-                  zIndex: -1,
-                  transition: 'all .3s ease',
-                }}
-              >
-                <Icon
-                  as={BsCircleFill}
-                  color={activeBullets.account ? textColor : 'gray.300'}
-                  w={activeBullets.account ? '16px' : '12px'}
-                  h={activeBullets.account ? '16px' : '12px'}
-                  mb="8px"
-                />
-                <Text
-                  color={activeBullets.account ? { textColor } : 'gray.300'}
-                  fontWeight={activeBullets.account ? 'bold' : 'normal'}
-                  transition="all .3s ease"
-                  fontSize="sm"
-                  _hover={{ color: textColor }}
-                  display={{ sm: 'none', md: 'block' }}
-                >
-                  Connect wallet
-                </Text>
-              </Flex>
-            </Tab>
-            <Tab
-              isDisabled={chainId !== connectedChainId}
-              ref={poolTab}
-              _focus={{}}
-              w={{ sm: '120px', md: '250px', lg: '300px' }}
-              onClick={() =>
-                setActiveBullets({
-                  network: true,
-                  account: true,
-                  address: true,
-                })
-              }
-            >
-              <Flex
-                direction="column"
-                justify="center"
-                align="center"
-                position="relative"
-                _before={{
-                  content: "''",
-                  width: { sm: '120px', md: '250px', lg: '320px' },
-                  height: '3px',
-                  // bg: activeBullets.profile ? textColor : "gray.200",
-                  left: { sm: '12px', md: '32px' },
-                  top: { sm: activeBullets.address ? '6px' : '4px', md: '' },
-                  position: 'absolute',
-                  bottom: activeBullets.address ? '40px' : '38px',
-                  zIndex: -1,
-                  transition: 'all .3s ease',
-                }}
-              >
-                <Icon
-                  as={BsCircleFill}
-                  color={activeBullets.address ? textColor : 'gray.300'}
-                  w={activeBullets.address ? '16px' : '12px'}
-                  h={activeBullets.address ? '16px' : '12px'}
-                  mb="8px"
-                />
-                <Text
-                  color={activeBullets.address ? { textColor } : 'gray.300'}
-                  fontWeight={activeBullets.address ? 'bold' : 'normal'}
-                  transition="all .3s ease"
-                  fontSize="sm"
-                  _hover={{ color: textColor }}
-                  display={{ sm: 'none', md: 'block' }}
-                >
-                  Info
-                </Text>
-              </Flex>
-            </Tab>
-          </TabList>
-          <TabPanels mt="24px" maxW={{ md: '90%', lg: '100%' }} mx="auto">
-            <TabPanel w={{ sm: '330px', md: '700px', lg: '850px' }} mx="auto">
-              <ChooseNetworkTab
-                onNext={() => connectTab?.current?.click()}
-                onSelect={setChainId}
-                chainId={chainId}
-              />
-            </TabPanel>
-            <TabPanel w={{ sm: '330px', md: '700px', lg: '850px' }} mx="auto">
-              {chainId && (
-                <ConnectToYourWalletTab
-                  chainId={chainId}
-                  onNext={() => poolTab?.current?.click()}
-                  onPrev={() => networkTab?.current?.click()}
-                />
-              )}
-            </TabPanel>
-            <TabPanel w={{ sm: '330px', md: '700px', lg: '850px' }} mx="auto">
-              {chainId && (
-                <PoolFormTab
-                  chainId={chainId}
-                  tokens={tokens}
-                  onCreate={createPool}
-                  loading={loading}
-                  onPrev={() => connectTab?.current?.click()}
-                ></PoolFormTab>
-              )}
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+        <Container flexDir="column" maxW="2xl">
+          <Steps activeStep={activeStep} orientation="vertical">
+            {steps.map(({ label, content, icon }) => (
+              <Step label={label} key={label} icon={icon}>
+                {content}
+              </Step>
+            ))}
+          </Steps>
+          {activeStep === steps.length && <CreatingPool />}
+        </Container>
       </Flex>
     </>
   );

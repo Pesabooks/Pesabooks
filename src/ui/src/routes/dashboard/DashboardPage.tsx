@@ -6,8 +6,8 @@ import { usePool } from '../../hooks/usePool';
 import { useTransactions } from '../../hooks/useTransactions';
 import { getAddressLookUp } from '../../services/poolsService';
 import { AddressLookup } from '../../types';
+import { AssetsCard } from './components/AssetsCard';
 import BalanceCard from './components/BalanceCard';
-import { BalancesPerMonth } from './components/BalancePerMonth';
 import { TotalPerCategory } from './components/TotalPerCategory';
 import { TransactionsList } from './components/TransactionsList';
 import { TransactionsPerMonth } from './components/TransactionsPerMonth';
@@ -61,7 +61,8 @@ export const DashboardPage = () => {
             </Flex>
           </CardBody>
         </Card>
-        <BalancesPerMonth pool_id={pool.id} />
+        {/* <BalancesPerMonth pool_id={pool.id} /> */}
+        <AssetsCard/>
       </Grid>
 
       <Grid

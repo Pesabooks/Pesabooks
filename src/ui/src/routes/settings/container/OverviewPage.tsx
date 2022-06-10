@@ -1,18 +1,15 @@
-import { CheckIcon, CloseIcon, EditIcon } from '@chakra-ui/icons';
 import {
-  ButtonGroup,
   Editable,
   EditableInput,
   EditablePreview,
   EditableTextarea,
-  HStack,
-  IconButton,
-  Stack,
-  Text,
-  useEditableControls
+  HStack, Stack,
+  Text
 } from '@chakra-ui/react';
 import React from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
+import { EditableControls } from '../../../components/Editable/EditableControls';
+import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
 import { WalletAddress } from '../../../components/WalletAddress';
 import { usePool } from '../../../hooks/usePool';
 import { updatePoolInformation } from '../../../services/poolsService';
@@ -22,33 +19,7 @@ export interface UpdatePoolFormValue {
   description?: string;
 }
 
-const EditableControls1 = () => {
-  const { isEditing, getEditButtonProps } = useEditableControls();
-  return !isEditing ? (
-    <IconButton
-      variant="ghost"
-      aria-label=""
-      size="sm"
-      icon={<EditIcon />}
-      {...getEditButtonProps()}
-    />
-  ) : null;
-};
 
-const EditableControls = () => {
-  const { isEditing, getSubmitButtonProps, getCancelButtonProps } = useEditableControls();
-
-  return isEditing ? (
-    <ButtonGroup justifyContent="end" size="xs" w="full" spacing={2} mt={2}>
-      <IconButton aria-label="Save modification" icon={<CheckIcon />} {...getSubmitButtonProps()} />
-      <IconButton
-        aria-label="Cancel modification"
-        icon={<CloseIcon boxSize={3} />}
-        {...getCancelButtonProps()}
-      />
-    </ButtonGroup>
-  ) : null;
-};
 
 export const OverviewPage = () => {
   const { pool, refresh } = usePool();
@@ -78,7 +49,7 @@ export const OverviewPage = () => {
               onSubmit={(val) => submit({ name: val })}
             >
               <HStack>
-                <EditablePreview /> <EditableControls1 />
+                <EditablePreview /> <TriggerEditableControls />
               </HStack>
               <EditableInput />
               <EditableControls />
@@ -94,7 +65,7 @@ export const OverviewPage = () => {
               onSubmit={(val) => submit({ description: val })}
             >
               <HStack>
-                <EditablePreview /> <EditableControls1 />
+                <EditablePreview /> <TriggerEditableControls />
               </HStack>
               <EditableTextarea />
               <EditableControls />
@@ -102,8 +73,8 @@ export const OverviewPage = () => {
           </HStack>
 
           <HStack>
-            <Text w="200px">Address:</Text>
-            {pool && <WalletAddress chainId={pool?.chain_id} address={pool?.contract_address} />}
+            <Text w="200px">Safe Address:</Text>
+            {pool && <WalletAddress chainId={pool?.chain_id} address={pool?.gnosis_safe_address} type="address" />}
           </HStack>
         </Stack>
       </CardBody>

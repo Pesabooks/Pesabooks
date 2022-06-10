@@ -42,7 +42,7 @@ export const AvatarMenu = () => {
                   size="xs"
                   src={`${process.env.PUBLIC_URL}/images/wallet/${getConnectorName(connector)}.png`}
                 />{' '}
-                {chainId && <WalletAddress chainId={chainId} address={account} />}
+                {chainId && <WalletAddress chainId={chainId} address={account} type="address" />}
               </Flex>
             )}
           </Center>

@@ -12,8 +12,6 @@ import { networks } from '../data/networks';
 export const getNetwork = (chain_id: number) => networks[chain_id];
 
 export const defaultProvider = (chain_id: number) => {
-  console.log(process.env.REACT_APP_INFURA_KEY);
-
   return new ethers.providers.InfuraProvider(chain_id, process.env.REACT_APP_INFURA_KEY);
 };
 

@@ -9,6 +9,10 @@ export interface Pool extends Entity {
   token?: Token;
   chain_id: number;
   active: boolean;
+  /**
+   * @deprecated The method should not be used
+   */
   contract_address: string;
+  gnosis_safe_address: string;
   members?: Profile[];
 }

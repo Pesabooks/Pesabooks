@@ -1,14 +1,9 @@
-import { Button, Flex, Text, useDisclosure } from '@chakra-ui/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Flex, Text, useDisclosure } from '@chakra-ui/react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
-import { ConfirmationModal, ConfirmationRef } from '../../../components/Modals/ConfirmationModal';
+import { ButtonWithConnectedWallet } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
-import {
-  activateCategory,
-  addCategory,
-  editCategory,
-  getAllCategories,
-} from '../../../services/categoriesService';
+import { addCategory, editCategory, getAllCategories } from '../../../services/categoriesService';
 import { Category } from '../../../types';
 import { CategoriesTable } from '../components/CategoriesTable';
 import { CategoryModal } from '../components/CategoryModal';
@@ -17,7 +12,6 @@ export const CategoriesPage = () => {
   const { pool } = usePool();
   const [categories, setCategories] = useState<Category[]>([]);
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [isSaving, setIsSaving] = useState(false);
 
   const getCategories = useCallback(() => {
@@ -28,49 +22,19 @@ export const CategoriesPage = () => {
     getCategories();
   }, [getCategories]);
 
-  const confirmationRef = useRef<ConfirmationRef>(null);
-
-  const confirmDeactivation = useCallback((categoryId: number) => {
-    confirmationRef.current?.open('Are you sure you want to deactivate?', categoryId);
+  const onEditCategory = useCallback(async (categoryId: number, category: Partial<Category>) => {
+    await editCategory(categoryId, category);
   }, []);
 
-  const onActivate = useCallback(
-    async (categoryId: number) => {
-      await activateCategory(categoryId, true);
-      await getCategories();
-    },
-    [getCategories],
-  );
 
-  const onEditCategory = useCallback(
-    (category: Category) => {
-      setSelectedCategory(category);
-      onOpen();
-    },
-    [onOpen],
-  );
-
-  function onAddCategory() {
-    setSelectedCategory(undefined);
-    onOpen();
-  }
-
-  const addorEditCategory = async (category: Category) => {
+  const onAddCategory = async (category: Category) => {
     try {
       setIsSaving(true);
-      if (category.id) await editCategory(category.id, category);
-      else if (pool) await addCategory(pool.id, category);
+      if (pool) await addCategory(pool.id, category);
       onClose();
       await getCategories();
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const onDeactivate = async (confirmed: boolean, categoryId: number) => {
-    if (confirmed) {
-      await activateCategory(categoryId, false);
-      await getCategories();
     }
   };
 
@@ -82,18 +46,13 @@ export const CategoriesPage = () => {
             <Text fontSize="lg" fontWeight="bold">
               Categories
             </Text>
-            <Button size="sm" onClick={onAddCategory}>
+            <ButtonWithConnectedWallet onlyAdmin={true} size="sm" onClick={onOpen}>
               Add Category
-            </Button>
+            </ButtonWithConnectedWallet>
           </Flex>
         </CardHeader>
         <CardBody>
-          <CategoriesTable
-            categories={categories}
-            onEdit={onEditCategory}
-            onActivate={onActivate}
-            onDeactivate={confirmDeactivation}
-          ></CategoriesTable>
+          <CategoriesTable categories={categories} onEdit={onEditCategory}></CategoriesTable>
         </CardBody>
       </Card>
       {isOpen && (
@@ -101,11 +60,9 @@ export const CategoriesPage = () => {
           isOpen={isOpen}
           onClose={onClose}
           isSaving={isSaving}
-          onSave={addorEditCategory}
-          category={selectedCategory}
+          onSave={onAddCategory}
         />
       )}
-      <ConfirmationModal ref={confirmationRef} afterClosed={onDeactivate} />
     </>
   );
 };

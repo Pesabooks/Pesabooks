@@ -1,10 +1,4 @@
-import {
-  Button,
-  Container,
-  Heading,
-  useDisclosure,
-  useToast,
-} from '@chakra-ui/react';
+import { Button, Container, Heading, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
@@ -16,14 +10,11 @@ import { InputAmountField } from '../../../components/Input/InputAmountField';
 import { SelectCategoryField } from '../../../components/Input/SelectCategoryField';
 import { TransactionSubmittedModal } from '../../../components/Modals/TransactionSubmittedModal';
 import { useAuth } from '../../../hooks/useAuth';
-import { useNotifyTransaction } from '../../../hooks/useNotifyTransaction';
 import { usePool } from '../../../hooks/usePool';
-import {
-  getAddressBalance,
-} from '../../../services/blockchainServices';
-import { getActiveCategories } from '../../../services/categoriesService';
+import { getAddressBalance } from '../../../services/blockchainServices';
+import { getAllCategories } from '../../../services/categoriesService';
 import { deposit } from '../../../services/transactionsServices';
-import { Category } from '../../../types';
+import { Category, Transaction } from '../../../types';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 
 interface DepositFormValue {
@@ -34,22 +25,15 @@ interface DepositFormValue {
 
 export const DepositPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [lastTxHash, setLastTxHash] = useState('');
+  const [lastTx, setLastTx] = useState<Transaction>();
   const { provider, isActive, account } = useWeb3React();
   const { pool } = usePool();
   const [balance, setBalance] = useState<number>(0);
   const { user } = useAuth();
   const toast = useToast();
   const methods = useForm<DepositFormValue>();
-  const { notify } = useNotifyTransaction();
 
   const signer = (provider as Web3Provider)?.getSigner();
-
-  const {
-    isOpen: isOpenTransactionConfirmation,
-    onOpen: onOpenTransactionConfirmationn,
-    onClose: onCloseTransactionConfirmation,
-  } = useDisclosure();
 
   const token = pool?.token;
 
@@ -58,7 +42,9 @@ export const DepositPage = () => {
   }
 
   useEffect(() => {
-    getActiveCategories(pool.id, 'deposit').then((categories) => setCategories(categories ?? []));
+    getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
+      setCategories(categories ?? []),
+    );
   }, [pool]);
 
   useEffect(() => {
@@ -81,13 +67,7 @@ export const DepositPage = () => {
 
     try {
       const tx = await deposit(signer, pool, category.id, amount, memo);
-
-      notify(tx, `Deposit of ${amount} ${token.symbol}`);
-
-      setLastTxHash(tx.hash);
-      onOpenTransactionConfirmationn();
-
-      methods.reset();
+      setLastTx(tx);
     } catch (e: any) {
       toast({
         title: e.message,
@@ -98,45 +78,47 @@ export const DepositPage = () => {
     }
   };
 
+  const FormCard = (
+    <Card>
+      <CardHeader p="6px 0px 32px 0px">
+        <Heading size="lg">Deposit</Heading>
+      </CardHeader>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(submit)}>
+          <SelectCategoryField mb="4" categories={categories} />
+
+          <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
+
+          <TextAreaMemoField mb="4" />
+
+          {isActive ? (
+            <Button isLoading={methods.formState.isSubmitting} type="submit">
+              Deposit
+            </Button>
+          ) : (
+            <ConnectWalletButton mt={4} chainId={pool.chain_id} />
+          )}
+        </form>
+      </FormProvider>
+    </Card>
+  );
+
   return (
     <>
       <Helmet>
         <title>Deposit | {pool?.name}</title>
       </Helmet>
       <Container mt={20}>
-        <Card>
-          <CardHeader p="6px 0px 32px 0px">
-            <Heading size="lg">Deposit</Heading>
-          </CardHeader>
-          <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(submit)}>
-              <SelectCategoryField mb="4" categories={categories} />
-
-              <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
-
-              <TextAreaMemoField mb="4" />
-
-              {isActive ? (
-                <Button isLoading={methods.formState.isSubmitting} type="submit">
-                  Deposit
-                </Button>
-              ) : (
-                <ConnectWalletButton mt={4} chainId={pool.chain_id} />
-              )}
-            </form>
-          </FormProvider>
-        </Card>
+        {lastTx ? (
+          <TransactionSubmittedModal
+            description="Your Deposit is submitted"
+            chainId={pool.chain_id}
+            transaction={lastTx}
+          />
+        ) : (
+          FormCard
+        )}
       </Container>
-
-      {isOpenTransactionConfirmation && (
-        <TransactionSubmittedModal
-          isOpen={isOpenTransactionConfirmation}
-          onClose={onCloseTransactionConfirmation}
-          description="Your Deposit is submitted"
-          chainId={pool.chain_id}
-          hash={lastTxHash}
-        />
-      )}
     </>
   );
 };

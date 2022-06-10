@@ -1,50 +1,29 @@
 import { categoriesTable, handleSupabaseError } from '../supabase';
 import { Category } from '../types';
-import { TransactionType } from '../types/transaction';
 
-export const getActiveCategories = async (pool_id: number, transactionType: TransactionType) => {
-  const { data, error } = await categoriesTable()
-    .select()
-    .filter(transactionType, 'eq', true)
-    .order('id')
-    .eq('active', true)
-    .eq('pool_id', pool_id);
+export const getAllCategories = async (pool_id: number, options?: { activeOnly: boolean }) => {
+  let query = categoriesTable().select().order('id').eq('pool_id', pool_id);
 
-  handleSupabaseError(error);
-  return data ?? [];
-};
+  if (options?.activeOnly) {
+    query = query.order('active', { ascending: false });
+  }
 
-export const getAllCategories = async (pool_id: number) => {
-  const { data, error } = await categoriesTable()
-    .select()
-    .order('active', { ascending: false })
-    .order('id')
-    .eq('pool_id', pool_id);
+  const { data, error } = await query;
 
   handleSupabaseError(error);
   return data ?? [];
 };
 
-export const editCategory = async (
-  id: number,
-  { name, description, deposit, withdrawal }: Partial<Category>,
-) => {
-  const { error } = await categoriesTable()
-    .update({ name, description, deposit, withdrawal })
-    .eq('id', id);
+export const editCategory = async (id: number, category: Partial<Category>) => {
+  const { error } = await categoriesTable().update(category).eq('id', id);
 
   handleSupabaseError(error);
 };
 
-export const addCategory = async (
-  pool_id: number,
-  { name, description, deposit, withdrawal }: Partial<Category>,
-) => {
+export const addCategory = async (pool_id: number, { name, description }: Partial<Category>) => {
   const { error } = await categoriesTable().insert({
     name,
     description,
-    deposit,
-    withdrawal,
     pool_id,
   });
 

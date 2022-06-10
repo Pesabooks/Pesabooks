@@ -1,5 +1,5 @@
 import { Box, Icon } from '@chakra-ui/react';
-import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
+import { FiArrowDownLeft, FiArrowUpRight, FiUserPlus, FiUsers, FiUserX } from 'react-icons/fi';
 import { TransactionType } from '../types';
 
 export const TransactionIcon = ({ type }: { type: TransactionType }) => {
@@ -7,10 +7,28 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
   const isWithdrawal = type === 'withdrawal';
 
   let logo;
-  if (isDeposit) {
-    logo = FaArrowUp;
-  } else {
-    logo = FaArrowDown;
+  switch (type) {
+    case 'deposit':
+      logo = FiArrowDownLeft;
+      break;
+    case 'withdrawal':
+      logo = FiArrowUpRight;
+      break;
+    case 'addOwner':
+      logo = FiUserPlus;
+      break;
+    case 'removeOwner':
+      logo = FiUserX;
+      break;
+    case 'swapOwner':
+      logo = FiUsers;
+      break;
+    // case 'swap':
+    //   logo = BiTransfer;
+    //   break;
+
+    default:
+      break;
   }
 
   return (

@@ -1,6 +1,6 @@
 import { Flex, Icon, SimpleGrid, Text } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { FaArrowDown, FaArrowUp, FaExchangeAlt } from 'react-icons/fa';
+import { FaArrowDown, FaArrowUp } from 'react-icons/fa';
 import { IconBox } from '../../../components/Icons';
 import { supabase } from '../../../supabase';
 import { Pool } from '../../../types';
@@ -31,7 +31,7 @@ export const TransactionsStats = ({ pool }: { pool: Pool }) => {
           32,984
         </Text>
       </Flex> */}
-      <Flex direction="column">
+      {/* <Flex direction="column">
         <Flex alignItems="center">
           <IconBox h={'30px'} w={'30px'} me="6px">
             <Icon as={FaExchangeAlt} h={'15px'} w={'15px'} />
@@ -48,7 +48,7 @@ export const TransactionsStats = ({ pool }: { pool: Pool }) => {
         <Text fontSize="lg" fontWeight="bold" mb="6px" my="6px">
           {state.count}
         </Text>
-      </Flex>
+      </Flex> */}
       <Flex direction="column">
         <Flex alignItems="center">
           <IconBox h={'30px'} w={'30px'} me="6px">

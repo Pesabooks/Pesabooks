@@ -1,20 +1,25 @@
 import { useWeb3React } from '@web3-react/core';
-import { useEffect, useState } from 'react';
-import { isSignerAnAdmin } from '../services/poolsService';
+import { useEffect, useMemo, useState } from 'react';
+import { compareAddress } from '../utils';
 import { usePool } from './usePool';
 
 export const useIsAdmin = (): boolean => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const { pool } = usePool();
+  const { pool, safeAdmins } = usePool();
 
-  const { provider, isActive, chainId, account } = useWeb3React();
+  const { isActive, chainId, account } = useWeb3React();
 
-  const connected = isActive && pool?.chain_id === chainId;
+  const connected = useMemo(
+    () => isActive && pool?.chain_id === chainId,
+    [chainId, isActive, pool?.chain_id],
+  );
 
   useEffect(() => {
-    if (pool && connected && account) isSignerAnAdmin(pool, account).then(setIsAdmin);
-    else setIsAdmin(false);
-  }, [provider, pool, connected, account]);
+    if (connected && account) {
+      const itIs = !!safeAdmins?.find((a) => compareAddress(a, account));
+      setIsAdmin(itIs);
+    } else setIsAdmin(false);
+  }, [connected, account, safeAdmins]);
 
   return isAdmin;
 };

@@ -2,8 +2,7 @@ import { Flex } from '@chakra-ui/react';
 import React from 'react';
 import { usePool } from '../../hooks/usePool';
 import { ConnectWalletButton } from '../Buttons/ConnectWalletButton';
-import { DepositButton } from '../Buttons/DepositButton';
-import { WithdrawButton } from '../Buttons/WithdrawButton';
+import { NewTransactionMenu } from '../NewTransactionMenu';
 
 export const BottomSheet = () => {
   const { pool } = usePool();
@@ -19,8 +18,7 @@ export const BottomSheet = () => {
       gap={2}
       display={{ sm: 'flex', xl: 'none' }}
     >
-      <DepositButton />
-      <WithdrawButton />
+      <NewTransactionMenu />
       {pool && <ConnectWalletButton chainId={pool?.chain_id} />}
     </Flex>
   );

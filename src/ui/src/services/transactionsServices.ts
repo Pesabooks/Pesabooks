@@ -1,12 +1,28 @@
 import { JsonRpcSigner } from '@ethersproject/providers';
-import { ERC20__factory, PoolSafe__factory } from '@pesabooks/contracts/typechain';
-import { ContractReceipt, ethers } from 'ethers';
+import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types';
+import { ERC20__factory } from '@pesabooks/contracts/typechain';
+import { ContractReceipt, ContractTransaction, ethers, Signer } from 'ethers';
 import { Filter } from 'react-supabase';
 import { networks } from '../data/networks';
 import { handleSupabaseError, transationsQueueTable, transationsTable } from '../supabase';
-import { Pool } from '../types';
+import { AddressLookup, Pool } from '../types';
 import { Transaction } from '../types/transaction';
-import { defaultProvider, getControllerContract, getTokenContract } from './blockchainServices';
+import { checksummed } from '../utils';
+import { notifyTransaction } from '../utils/notification';
+import { defaultProvider, getTokenContract } from './blockchainServices';
+import {
+  confirmSafeTransaction,
+  createSafeRejectionTransaction,
+  createSafeTransaction,
+  executeSafeTransaction,
+  executeSafeTransactionByHash,
+  getAddOwnerTx,
+  getRemoveOwnerTx,
+  getSafeTransaction,
+  getSafeTransactionHash,
+  getSafeTreshold,
+  proposeSafeTransaction,
+} from './gnosisServices';
 
 export const deposit = async (
   signer: JsonRpcSigner,
@@ -18,8 +34,10 @@ export const deposit = async (
   const { token } = pool;
   if (token == null) throw new Error();
 
-  const from = (await signer.getAddress()).toLowerCase();
-  const to = pool.contract_address.toLowerCase();
+  const from = checksummed(await signer.getAddress());
+  const to = checksummed(pool.gnosis_safe_address);
+  const tokenAddress = checksummed(token?.address);
+
   const tokenContract = ERC20__factory.connect(token.address, signer);
   const decimals = await tokenContract.decimals();
 
@@ -34,10 +52,11 @@ export const deposit = async (
       transfer_from: from,
       transfer_to: to,
       token: {
-        address: token.address.toLowerCase(),
+        address: tokenAddress,
         symbol: token.symbol,
         name: token.name,
         decimals: token.decimals,
+        image: `${process.env.PUBLIC_URL}/${token.image}`,
       },
       amount: amount,
     },
@@ -50,14 +69,14 @@ export const deposit = async (
   handleSupabaseError(queuingEror);
   const queuedTransactionId = queuedTransactions?.[0].id ?? 0;
 
-  const tx = await tokenContract.transfer(
-    pool.contract_address,
-    ethers.utils.parseUnits(amount.toString(), decimals),
-  );
+  const tx = await tokenContract.transfer(to, ethers.utils.parseUnits(amount.toString(), decimals));
+
+  //notifyTransaction(tx, `Deposit of ${amount} ${token.symbol}`);
+  notifyTransaction(pool.chain_id, tx.hash);
 
   transaction.hash = tx.hash;
 
-  const { error } = await transationsTable().insert(transaction);
+  const { data, error } = await transationsTable().insert({ ...transaction, hash: tx.hash });
   handleSupabaseError(error);
   await deleteQueuedTransaction(queuedTransactionId);
 
@@ -68,7 +87,7 @@ export const deposit = async (
     () => onTransactionFailed(tx.hash),
   );
 
-  return tx;
+  return data?.[0];
 };
 
 export const withdraw = async (
@@ -77,17 +96,14 @@ export const withdraw = async (
   category_id: number,
   amount: number,
   memo: string | undefined,
-  recipient: string,
-) => {
+  user: AddressLookup,
+): Promise<Transaction | undefined> => {
   const { token } = pool;
   if (token == null) throw new Error();
 
-  const safe = PoolSafe__factory.connect(pool.contract_address, signer);
-  const controlller = await getControllerContract(pool.chain_id, signer);
-
-  const tokenAddress = token?.address?.toLowerCase() ?? '';
-  const from = pool.contract_address?.toLowerCase();
-  const to = recipient.toLowerCase();
+  const tokenAddress = checksummed(token?.address);
+  const from = checksummed(pool.gnosis_safe_address);
+  const to = checksummed(user.address);
 
   const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
   const decimals = await tokenContract.decimals();
@@ -96,7 +112,6 @@ export const withdraw = async (
     memo: memo,
     type: 'withdrawal',
     category_id: category_id,
-    status: 'pending',
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
@@ -107,46 +122,210 @@ export const withdraw = async (
         symbol: token.symbol,
         name: token.name,
         decimals: token.decimals,
+        image: `${process.env.PUBLIC_URL}/${token.image}`,
       },
       amount: amount,
     },
   };
 
-  const { data: queuedTransactions, error: queuingEror } = await transationsQueueTable().insert({
-    pool_id: pool.id,
-    transaction: transaction,
-  });
-  handleSupabaseError(queuingEror);
-  const queuedTransactionId = queuedTransactions?.[0].id ?? 0;
-
-  const tx = await controlller.withdraw(
-    safe.address,
-    tokenAddress,
-    recipient,
-    ethers.utils.parseUnits(amount.toString(), decimals),
-  );
-
-  transaction.hash = tx.hash;
-
-  const { error } = await transationsTable().insert(transaction);
-  handleSupabaseError(error);
-  await deleteQueuedTransaction(queuedTransactionId);
-
-  tx.wait().then(
-    (receipt) => {
-      onTransactionComplete(receipt, pool.chain_id);
+  const safeTransaction = await createSafeTransaction(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address,
+    {
+      to: checksummed(tokenAddress),
+      value: '0',
+      data: ERC20__factory.createInterface().encodeFunctionData('transfer', [
+        to,
+        ethers.utils.parseUnits(amount.toString(), decimals),
+      ]),
     },
-    () => onTransactionFailed(tx.hash),
   );
+
+  return submitTransaction(signer, pool, transaction, safeTransaction);
+};
+
+export const addAdmin = async (
+  signer: JsonRpcSigner,
+  pool: Pool,
+  user: AddressLookup,
+  treshold: number,
+): Promise<Transaction | undefined> => {
+  const transaction: Partial<Transaction> = {
+    type: 'addOwner',
+    pool_id: pool.id,
+    timestamp: Math.floor(new Date().valueOf() / 1000),
+    metadata: {
+      address: user.address,
+      user_id: user.id,
+      treshold: treshold,
+    },
+  };
+
+  const safeTransaction = await getAddOwnerTx(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address,
+    checksummed(user.address),
+    treshold,
+  );
+
+  return submitTransaction(signer, pool, transaction, safeTransaction);
+};
+
+export const removeAdmin = async (
+  signer: JsonRpcSigner,
+  pool: Pool,
+  user: AddressLookup,
+  treshold: number,
+): Promise<Transaction | undefined> => {
+  const transaction: Partial<Transaction> = {
+    type: 'removeOwner',
+    pool_id: pool.id,
+    timestamp: Math.floor(new Date().valueOf() / 1000),
+    metadata: {
+      address: user.address,
+      user_id: user.id,
+      treshold: treshold,
+    },
+  };
+
+  const safeTransaction = await getRemoveOwnerTx(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address,
+    checksummed(user.address),
+    treshold,
+  );
+
+  return submitTransaction(signer, pool, transaction, safeTransaction);
+};
+
+const submitTransaction = async (
+  signer: Signer,
+  pool: Pool,
+  transaction: Partial<Transaction>,
+  safeTransaction: SafeTransaction,
+) => {
+  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address);
+
+  if (treshold > 1) {
+    const safeTxHash = await proposeSafeTransaction(
+      signer,
+      pool.chain_id,
+      pool.gnosis_safe_address,
+      safeTransaction,
+    );
+    const { data } = await transationsTable().insert({
+      ...transaction,
+      safeTxHash,
+      safeNonce: safeTransaction.data.nonce,
+      status: 'awaitingConfirmations',
+    });
+
+    return data?.[0];
+  } else if (treshold === 1) {
+    const safeTxHash = await getSafeTransactionHash(
+      signer,
+      pool.gnosis_safe_address,
+      safeTransaction,
+    );
+    const tx = await executeSafeTransaction(signer, pool.gnosis_safe_address, safeTransaction);
+
+    const { data } = await transationsTable().insert({
+      ...transaction,
+      safeTxHash,
+      safeNonce: safeTransaction.data.nonce,
+      hash: tx?.hash,
+      status: 'pending',
+    });
+    onTransactionExecuted(tx, pool.chain_id, false);
+    return data?.[0];
+  }
+};
+
+export const confirmTransaction = async (
+  signer: Signer,
+  pool: Pool,
+  transactionId: number,
+  safeTxHash: string,
+) => {
+  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address);
+  await confirmSafeTransaction(signer, pool.chain_id, pool.gnosis_safe_address, safeTxHash);
+
+  const safeTransaction = await getSafeTransaction(pool.chain_id, safeTxHash);
+  if (safeTransaction.confirmations?.length === treshold) {
+    await transationsTable().update({ status: 'awaitingExecution' }).eq('id', transactionId);
+  }
+};
+
+export const executeTransaction = async (
+  signer: Signer,
+  pool: Pool,
+  transactionId: number,
+  safeTxHash: string,
+  isRejection = false,
+) => {
+  const tx = await executeSafeTransactionByHash(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address,
+    safeTxHash,
+  );
+
+  onTransactionExecuted(tx, pool.chain_id, isRejection);
+
+  await transationsTable().update({ hash: tx?.hash, status: 'pending' }).eq('id', transactionId);
 
   return tx;
 };
 
-const onTransactionComplete = async (receipt: ContractReceipt, chainId: number) => {
+export const rejectTransaction = async (
+  signer: JsonRpcSigner,
+  pool: Pool,
+  transactionId: number,
+  nonce: number,
+) => {
+  const safeTransaction = await createSafeRejectionTransaction(
+    signer,
+    pool.gnosis_safe_address,
+    nonce,
+  );
+
+  const safeTxHash = await proposeSafeTransaction(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address,
+    safeTransaction,
+  );
+
+  await transationsTable().update({ rejectSafeTxHash: safeTxHash }).eq('id', transactionId);
+};
+
+const onTransactionExecuted = async (
+  tx: ContractTransaction | undefined,
+  chainId: number,
+  isRejection: boolean,
+) => {
+  if (tx) notifyTransaction(chainId, tx.hash);
+
+  tx?.wait().then(
+    (receipt) => {
+      onTransactionComplete(receipt, chainId, isRejection);
+    },
+    () => onTransactionFailed(tx.hash),
+  );
+};
+
+const onTransactionComplete = async (
+  receipt: ContractReceipt,
+  chainId: number,
+  isRejection: boolean = false,
+) => {
   if (receipt.blockNumber) {
     const timestamp = (await defaultProvider(chainId).getBlock(receipt.blockNumber)).timestamp;
     const { error } = await transationsTable()
-      .update({ status: 'completed', timestamp })
+      .update({ status: isRejection ? 'rejected' : 'completed', timestamp })
       .eq('hash', receipt.transactionHash);
     if (error) console.error(error);
   }
@@ -177,7 +356,7 @@ export const getAllTransactions = async (pool_id: number, filter?: Filter<Transa
   return data;
 };
 
-export const geTransactionById = async (txId: number) => {
+export const getTransactionById = async (txId: number) => {
   const { data, error } = await transationsTable()
     .select(
       `
@@ -187,20 +366,26 @@ export const geTransactionById = async (txId: number) => {
     )
     .eq('id', txId);
   handleSupabaseError(error);
+
   return data?.[0];
 };
 
 export const refreshTransaction = async (chain_id: number, txHash: string) => {
-  const provider = defaultProvider(chain_id);
-  var tx = await provider.getTransaction(txHash);
-  await tx.wait().then(
-    async (receipt) => await onTransactionComplete(receipt, chain_id),
-    async () => await onTransactionFailed,
-  );
+  //todo
+  // const provider = defaultProvider(chain_id);
+  // var tx = await provider.getTransaction(txHash);
+  // await tx.wait().then(
+  //   async (receipt) => await onTransactionComplete(receipt, chain_id,),
+  //   async () => await onTransactionFailed,
+  // );
 };
 
 export const updateTransactionCategory = async (id: number, category_id: number) => {
   await transationsTable().update({ category_id }).match({ id: id });
+};
+
+export const updateTransactionMemo = async (id: number, memo: string) => {
+  await transationsTable().update({ memo }).match({ id: id });
 };
 
 export const getTxScanLink = (hash: string, chainId: number) => {

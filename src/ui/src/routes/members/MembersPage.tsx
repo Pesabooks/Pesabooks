@@ -1,6 +1,7 @@
-import { Button, Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
+import { Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { ButtonWithConnectedWallet } from '../../components/withConnectedWallet';
 import { useAuth } from '../../hooks/useAuth';
 import { usePool } from '../../hooks/usePool';
 import {
@@ -25,6 +26,8 @@ export const MembersPage = () => {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [lookups, setLookups] = useState<AddressLookup[]>([]);
+
+ 
 
   const loadData = useCallback(async () => {
     try {
@@ -87,7 +90,7 @@ export const MembersPage = () => {
           Members
         </Heading>
         <Spacer />
-        <Button onClick={onOpen}> Invite a member</Button>
+        <ButtonWithConnectedWallet onClick={onOpen} onlyAdmin={true}> Invite a member</ButtonWithConnectedWallet>
       </Flex>
       <MembersTable
         lookups={lookups}

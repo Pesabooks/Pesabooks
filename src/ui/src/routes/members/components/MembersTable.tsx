@@ -28,7 +28,6 @@ export const MembersTable = ({
               Member
             </Th>
             <Th color="gray.400">Email</Th>
-            <Th color="gray.400">Role</Th>
             <Th color="gray.400">Status</Th>
             {/* <Th></Th> */}
             <Th></Th>

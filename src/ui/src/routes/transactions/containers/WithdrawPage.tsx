@@ -1,4 +1,4 @@
-import { Button, Container, Heading, useDisclosure, useToast } from '@chakra-ui/react';
+import { Button, Container, Heading, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
@@ -10,13 +10,12 @@ import { InputAmountField } from '../../../components/Input/InputAmountField';
 import { SelectCategoryField } from '../../../components/Input/SelectCategoryField';
 import { SelectUserField } from '../../../components/Input/SelectUserField';
 import { TransactionSubmittedModal } from '../../../components/Modals/TransactionSubmittedModal';
-import { useNotifyTransaction } from '../../../hooks/useNotifyTransaction';
 import { usePool } from '../../../hooks/usePool';
 import { getAddressBalance } from '../../../services/blockchainServices';
-import { getActiveCategories } from '../../../services/categoriesService';
+import { getAllCategories } from '../../../services/categoriesService';
 import { getAddressLookUp } from '../../../services/poolsService';
 import { withdraw } from '../../../services/transactionsServices';
-import { AddressLookup, Category } from '../../../types';
+import { AddressLookup, Category, Transaction } from '../../../types';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 
 interface WithdrawFormValue {
@@ -33,13 +32,7 @@ export const WithdrawPage = () => {
   const { pool } = usePool();
   const toast = useToast();
   const [balance, setBalance] = useState<number>(0);
-  const [lastTxHash, setLastTxHash] = useState('');
-  const {
-    isOpen: isOpenTransactionConfirmation,
-    onOpen: onOpenTransactionConfirmationn,
-    onClose: onCloseTransactionConfirmation,
-  } = useDisclosure();
-  const { notify } = useNotifyTransaction();
+  const [lastTx, setLastTx] = useState<Transaction>();
 
   const signer = (provider as Web3Provider)?.getSigner();
   const methods = useForm<WithdrawFormValue>();
@@ -53,14 +46,14 @@ export const WithdrawPage = () => {
   useEffect(() => {
     getAddressLookUp(pool.id, 'user').then(setUsers);
 
-    getActiveCategories(pool.id, 'withdrawal').then((categories) =>
+    getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
       setCategories(categories ?? []),
     );
   }, [methods, pool]);
 
   useEffect(() => {
     if (pool) {
-      getAddressBalance(pool.chain_id, token.address, pool.contract_address).then(setBalance);
+      getAddressBalance(pool.chain_id, token.address, pool.gnosis_safe_address).then(setBalance);
     }
   }, [token, pool]);
 
@@ -70,12 +63,9 @@ export const WithdrawPage = () => {
     const { amount, memo, user, category } = formValue;
 
     try {
-      const tx = await withdraw(signer, pool, category.id, amount, memo, user.address);
+      const tx = await withdraw(signer, pool, category.id, amount, memo, user);
 
-      notify(tx, `Withdrawal of ${amount} ${token.symbol} to ${user.name} `);
-
-      setLastTxHash(tx.hash);
-      onOpenTransactionConfirmationn();
+      setLastTx(tx);
 
       methods.reset();
     } catch (e: any) {
@@ -89,6 +79,33 @@ export const WithdrawPage = () => {
     }
   };
 
+  const formCard = (
+    <Card>
+      <CardHeader p="6px 0px 32px 0px">
+        <Heading size="lg">Withdraw</Heading>
+      </CardHeader>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(submit)}>
+          <SelectCategoryField mb="4" categories={categories} />
+
+          <SelectUserField label="To User" mb="4" users={users} />
+
+          <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
+
+          <TextAreaMemoField mb="4" />
+
+          {isActive ? (
+            <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
+              Withdraw
+            </Button>
+          ) : (
+            <ConnectWalletButton mt={4} chainId={pool.chain_id} />
+          )}
+        </form>
+      </FormProvider>
+    </Card>
+  );
+
   return (
     <>
       <Helmet>
@@ -96,40 +113,16 @@ export const WithdrawPage = () => {
       </Helmet>
 
       <Container mt={20}>
-        <Card>
-          <CardHeader p="6px 0px 32px 0px">
-            <Heading size="lg">Withdraw</Heading>
-          </CardHeader>
-          <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(submit)}>
-              <SelectCategoryField mb="4" categories={categories} />
-
-              <SelectUserField label="To User" mb="4" users={users} />
-
-              <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
-
-              <TextAreaMemoField mb="4" />
-
-              {isActive ? (
-                <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
-                  Withdraw
-                </Button>
-              ) : (
-                <ConnectWalletButton mt={4} chainId={pool.chain_id} />
-              )}
-            </form>
-          </FormProvider>
-        </Card>
+        {lastTx ? (
+          <TransactionSubmittedModal
+            description="Your Withdrawal is submitted"
+            chainId={pool.chain_id}
+            transaction={lastTx}
+          />
+        ) : (
+          formCard
+        )}
       </Container>
-      {isOpenTransactionConfirmation && (
-        <TransactionSubmittedModal
-          isOpen={isOpenTransactionConfirmation}
-          onClose={onCloseTransactionConfirmation}
-          description="Your Withdrawal is submitted"
-          chainId={pool.chain_id}
-          hash={lastTxHash}
-        />
-      )}
     </>
   );
 };

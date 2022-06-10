@@ -1,4 +1,5 @@
 import { extendTheme, withDefaultColorScheme, type ThemeConfig } from '@chakra-ui/react';
+import { StepsStyleConfig } from 'chakra-ui-steps';
 import { CardComponent } from './additions/card/Card';
 import { CardBodyComponent } from './additions/card/CardBody';
 import { CardHeaderComponent } from './additions/card/CardHeader';
@@ -12,7 +13,6 @@ import { linkStyles } from './components/link';
 import { breakpoints } from './foundations/breakpoints';
 import { font } from './foundations/fonts';
 import { globalStyles } from './styles';
-
 const config: ThemeConfig = {
   initialColorMode: 'dark',
   useSystemColorMode: false,
@@ -33,5 +33,10 @@ export default extendTheme(
   MainPanelComponent, // Main Panel component
   PanelContentComponent, // Panel Content component
   PanelContainerComponent, // Panel Container component
+  {
+    components: {
+      Steps: StepsStyleConfig,
+    },
+  },
   withDefaultColorScheme({ colorScheme: 'teal' }),
 );

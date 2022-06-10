@@ -1,17 +1,13 @@
 import {
-  Avatar,
-  BoxProps,
-  Flex,
-  FormControl,
+  BoxProps, FormControl,
   FormErrorMessage,
-  FormLabel,
-  Text
+  FormLabel
 } from '@chakra-ui/react';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { AddressLookup } from '../../types';
-import { shortenAddress } from '../../utils/addresses';
+import { UserWalletCard } from '../UserWalletCard';
 
 interface Props extends BoxProps {
   users: AddressLookup[];
@@ -21,13 +17,7 @@ interface Props extends BoxProps {
 const AvatarOption = (props: OptionProps<AddressLookup, boolean, GroupBase<AddressLookup>>) => {
   return (
     <chakraComponents.Option {...props}>
-      <Flex align="center">
-        <Avatar size={'sm'} name={props.data?.name} mr={4} />
-        <Flex direction="column">
-          <Text fontWeight="bold">{props.data.name}</Text>
-          <Text fontSize="sm">{shortenAddress(props.data.address)}</Text>
-        </Flex>
-      </Flex>
+      <UserWalletCard addressLookup={props.data} />
     </chakraComponents.Option>
   );
 };

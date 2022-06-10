@@ -1,155 +1,86 @@
-import { CheckIcon, TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
+import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
 import {
-  Badge,
   chakra,
+  Editable,
+  EditableInput,
+  EditablePreview,
   Flex,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Spacer,
-  Stack,
-  Table,
+  Stack, Table,
   Tbody,
   Td,
   Th,
   Thead,
   Tr
 } from '@chakra-ui/react';
-import React, { useMemo, useState } from 'react';
-import { FiMoreVertical } from 'react-icons/fi';
-import { IoSettingsSharp } from 'react-icons/io5';
+import React from 'react';
 import { Column, useSortBy, useTable } from 'react-table';
+import {
+  SwitchWithConnectedWallet
+} from '../../../components/withConnectedWallet';
 import { Category } from '../../../types';
-
-const ActionCell = ({
-  category,
-  onEdit,
-  onActivate,
-  onDeactivate,
-}: {
-  category: Category;
-  onEdit: () => void;
-  onActivate: () => void;
-  onDeactivate: () => void;
-}) => {
-  const onActivatateOrDeactivate = () => {
-    if (category.active) onDeactivate();
-    else onActivate();
-  };
-  return (
-    <Menu>
-      <MenuButton as={IconButton} aria-label="Options" icon={<FiMoreVertical />} variant="ghost" />
-      <MenuList>
-        <MenuItem onClick={onEdit}>Edit</MenuItem>
-        <MenuItem onClick={onActivatateOrDeactivate}>
-          {category.active ? 'Make inactive' : 'Make active'}
-        </MenuItem>
-      </MenuList>
-    </Menu>
-  );
-};
 
 interface CategoriesTableProps {
   categories: Category[];
-  onEdit: (category: Category) => void;
-  onActivate: (categoryId: number) => void;
-  onDeactivate: (categoryId: number) => void;
+  onEdit: (categoryId: number, category: Partial<Category>) => void;
 }
 
-export const CategoriesTable = ({
-  categories,
-  onEdit,
-  onDeactivate,
-  onActivate,
-}: CategoriesTableProps) => {
-  const [config, setConfig] = useState({ includeInactive: false });
+export const CategoriesTable = ({ categories, onEdit }: CategoriesTableProps) => {
+  const columns: Column<Category>[] = React.useMemo(() => {
+    const onChangeStatus = (categoryId: number, active: boolean) => {
+      onEdit(categoryId, { active });
+    };
 
-  const filteredCategories = useMemo(
-    () => categories?.filter((c) => (config.includeInactive ? true : c.active)),
-    [categories, config.includeInactive],
-  );
+    const onChangeName = (categoryId: number, name: string) => {
+      onEdit(categoryId, { name });
+    };
 
-  const columns: Column<Category>[] = React.useMemo(
-    () => [
+    return [
       {
         Header: 'Name',
         accessor: 'name',
         Cell: ({
           cell: {
             value,
-            row: { original },
-          },
-        }) => (
-          <>
-            {value}
-            {!original.active && (
-              <Badge ml={2} colorScheme="yellow">
-                Inactive
-              </Badge>
-            )}
-          </>
-        ),
-      },
-      {
-        Header: 'Deposit',
-        accessor: 'deposit',
-        Cell: ({ cell: { value } }) => (value ? <CheckIcon /> : null),
-      },
-      {
-        Header: 'Withdrawal',
-        accessor: 'withdrawal',
-        Cell: ({ cell: { value } }) => (value ? <CheckIcon /> : null),
-      },
-      {
-        Header: '',
-        accessor: 'id',
-        Cell: ({
-          cell: {
             row: { original: category },
           },
         }) => (
-          <ActionCell
-            onEdit={() => onEdit(category)}
-            onActivate={() => onActivate(category.id)}
-            onDeactivate={() => onDeactivate(category.id)}
-            category={category}
+          <Flex>
+            <Editable
+              defaultValue={value}
+              onSubmit={(newName) => onChangeName(category.id, newName)}
+            >
+              <EditablePreview />
+              <EditableInput />
+            </Editable>
+          </Flex>
+        ),
+      },
+      {
+        Header: '',
+        accessor: 'active',
+        Cell: ({
+          cell: {
+            value,
+            row: { original: category },
+          },
+        }) => (
+          <SwitchWithConnectedWallet
+            onlyAdmin={true}
+            defaultChecked={value}
+            onChange={(e) => onChangeStatus(category.id, e.target.checked)}
           />
         ),
       },
-    ],
-    [onActivate, onDeactivate, onEdit],
-  );
+    ];
+  }, [onEdit]);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable<Category>(
-    { columns, data: filteredCategories },
+    { columns, data: categories },
     useSortBy,
   );
 
   return (
     <Stack w="100%">
-      <Flex>
-        <Spacer />
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label="Options"
-            icon={<IoSettingsSharp />}
-            variant="ghost"
-          />
-          <MenuList>
-            <MenuItem
-              onClick={() =>
-                setConfig((state) => ({ ...state, includeInactive: !state.includeInactive }))
-              }
-            >
-              {config.includeInactive && <CheckIcon mr={4} />}
-              Include inactive
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      </Flex>
       <Table {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup) => (

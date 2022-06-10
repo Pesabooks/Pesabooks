@@ -1,5 +1,6 @@
 import { Box } from '@chakra-ui/react';
 import { ApexOptions } from 'apexcharts';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
 import { Card } from '../../../components/Card';
@@ -78,8 +79,9 @@ export const TransactionsPerMonth = ({ pool_id }: TransactionsPerMonthProps) => 
 
         if (data) {
           for (const d of data) {
-            deposit.push({ x: d.month, y: d.deposit });
-            withdrawal.push({ x: d.month, y: d.withdrawal });
+            const month = dayjs(d.month).format('MMM YYYY');
+            deposit.push({ x: month, y: d.deposit });
+            withdrawal.push({ x: month, y: d.withdrawal });
           }
         }
 
@@ -99,7 +101,7 @@ export const TransactionsPerMonth = ({ pool_id }: TransactionsPerMonthProps) => 
     <Card p="28px 10px 16px 0px" mb={{ sm: '26px', lg: '0px' }}>
       <Box w="100%" h={{ sm: '300px' }} ps="8px">
         {isLoading ? (
-          <Loading/>
+          <Loading />
         ) : (
           <Chart options={options} series={series} type="bar" width="100%" height="100%" />
         )}

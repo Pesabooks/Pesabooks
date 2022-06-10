@@ -1,13 +1,13 @@
 import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
-import { Badge, chakra, Flex, Table, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react';
+import { chakra, Flex, Table, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { CellProps, Column, useSortBy, useTable } from 'react-table';
 import Loading from '../../../components/Loading';
 import { AddressLookup, Category, Pool, Transaction, TransactionStatus } from '../../../types';
-import { CategoryCell } from './CategoryCell';
+import { getTxAmountDescription } from '../../../utils';
 import { RefreshTransactionButton } from './RefreshTransactionButton';
 import { TransactionCell } from './TransactionCell';
-import { ViewReceiptButton } from './ViewReceiptButton';
+import { TransactionStatusBadge } from './TransactionStatusBadge';
 
 interface TransactionsTableProps {
   pool: Pool;
@@ -15,7 +15,7 @@ interface TransactionsTableProps {
   addressLookups: AddressLookup[];
   loading: boolean;
   categories: Category[];
-  refresh?: () => void;
+  onSelect: (transaction: Transaction) => void;
 }
 
 export const TransactionsTable = ({
@@ -24,9 +24,14 @@ export const TransactionsTable = ({
   addressLookups,
   loading,
   categories,
+  onSelect,
 }: TransactionsTableProps) => {
   const columns = useMemo(() => {
     const columns: Column[] = [
+      {
+        Header: '',
+        accessor: 'safeNonce',
+      },
       {
         Header: '',
         accessor: 'icon',
@@ -46,13 +51,10 @@ export const TransactionsTable = ({
       //     );
       //   },
       // },
-
       {
         Header: 'Category',
         accessor: 'category',
-        Cell: ({ cell }: CellProps<Transaction>) => (
-          <CategoryCell categories={categories} {...cell} />
-        ),
+        Cell: ({ cell: { value } }: CellProps<Transaction, Category>) => <span>{value?.name}</span>,
       },
       {
         Header: 'Memo',
@@ -71,17 +73,9 @@ export const TransactionsTable = ({
         }: CellProps<Transaction>) => {
           switch (original.type) {
             case 'deposit':
-              return (
-                <Text color="green">
-                  {value} {original.metadata?.token?.symbol}
-                </Text>
-              );
+              return <Text color="green">{getTxAmountDescription(original)}</Text>;
             case 'withdrawal':
-              return (
-                <Text color="red">
-                  - {value} {original.metadata?.token?.symbol}
-                </Text>
-              );
+              return <Text color="red">- {getTxAmountDescription(original)}</Text>;
             default:
               return <Text>{value}</Text>;
           }
@@ -90,16 +84,9 @@ export const TransactionsTable = ({
       {
         Header: '',
         accessor: 'status',
-        Cell: ({ cell: { value } }: CellProps<Transaction, TransactionStatus>) => {
-          switch (value) {
-            case 'pending':
-              return <Badge colorScheme="yellow">Pending</Badge>;
-            case 'failed':
-              return <Badge colorScheme="red">Failed</Badge>;
-            default:
-              return null;
-          }
-        },
+        Cell: ({ cell: { value } }: CellProps<Transaction, TransactionStatus>) => (
+          <TransactionStatusBadge type={value} />
+        ),
       },
       {
         Header: '',
@@ -114,14 +101,13 @@ export const TransactionsTable = ({
               {original.status === 'pending' && (
                 <RefreshTransactionButton chainId={pool.chain_id} transactionHash={original.hash} />
               )}
-              <ViewReceiptButton chainId={pool.chain_id} transactionHash={original.hash} />
             </Flex>
           );
         },
       },
     ];
     return columns;
-  }, [addressLookups, categories, pool.chain_id]);
+  }, [addressLookups, pool.chain_id]);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
     { columns, data: transactions },
@@ -158,7 +144,11 @@ export const TransactionsTable = ({
           {rows.map((row) => {
             prepareRow(row);
             return (
-              <Tr {...row.getRowProps()}>
+              <Tr
+                _hover={{ cursor: 'pointer' }}
+                {...row.getRowProps()}
+                onClick={() => onSelect(row.original as Transaction)}
+              >
                 {row.cells.map((cell) => (
                   <Td {...cell.getCellProps()} isNumeric={cell.column.isNumeric}>
                     {cell.render('Cell')}

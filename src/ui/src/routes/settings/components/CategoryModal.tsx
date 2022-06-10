@@ -13,9 +13,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Spacer,
-  Stack,
-  Switch,
-  Textarea
+  Stack, Textarea
 } from '@chakra-ui/react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
@@ -29,13 +27,7 @@ interface CategoryModalProps {
   isSaving: boolean;
 }
 
-export const CategoryModal = ({
-  category,
-  isOpen,
-  onClose,
-  onSave,
-  isSaving,
-}: CategoryModalProps) => {
+export const CategoryModal = ({ isOpen, onClose, onSave, isSaving }: CategoryModalProps) => {
   const submit = (values: Category) => {
     onSave(values);
   };
@@ -44,7 +36,7 @@ export const CategoryModal = ({
     handleSubmit,
     register,
     formState: { errors },
-  } = useForm<Category>({ defaultValues: category });
+  } = useForm<Category>();
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -74,28 +66,16 @@ export const CategoryModal = ({
                     {...register('description')}
                   />
                 </FormControl>
-
-                <FormControl display="flex" alignItems="center">
-                  <Switch id="deposit" {...register('deposit')}  mr="4" />
-                  <FormLabel htmlFor="deposit" mb={0}>
-                    Available for deposit
-                  </FormLabel>
-                </FormControl>
-
-                <FormControl display="flex" alignItems="center">
-                  <Switch id="withdrawal" {...register('withdrawal')} mr="4" />
-                  <FormLabel htmlFor="withdrawal" mb="0">
-                    Available for withdrawal
-                  </FormLabel>
-                </FormControl>
               </Stack>
             </Flex>
           </ModalBody>
 
           <ModalFooter mt={4}>
-              <Button onClick={onClose} variant="outline">Cancel</Button>
-              <Spacer/>
-            <Button  isLoading={isSaving} type="submit">
+            <Button onClick={onClose} variant="outline">
+              Cancel
+            </Button>
+            <Spacer />
+            <Button isLoading={isSaving} type="submit">
               Save
             </Button>
           </ModalFooter>

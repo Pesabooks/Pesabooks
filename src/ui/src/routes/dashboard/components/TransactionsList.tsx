@@ -1,6 +1,9 @@
-import { Badge, Flex, HStack, Text } from '@chakra-ui/react';
+import { Flex, HStack, Text } from '@chakra-ui/react';
 import { TransactionIcon } from '../../../components/TransactionIcon';
 import { AddressLookup, Transaction } from '../../../types';
+import { getTransactonDescription, getTxAmountDescription } from '../../../utils';
+import { formatDate } from '../../../utils/date';
+import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';
 
 interface TransactionsListProps {
   transactions: Transaction[];
@@ -8,15 +11,10 @@ interface TransactionsListProps {
 }
 
 export const TransactionsList = ({ transactions, addressLookups }: TransactionsListProps) => {
-  const getAddressName = (address: string) => {
-    return (
-      addressLookups.find((a) => a.address.toLowerCase() === address.toLowerCase())?.name ?? address
-    );
-  };
-
   return (
     <Flex direction="column" w="100%">
-      {transactions.map(({ created_at, type, category, metadata, status }, key) => {
+      {transactions.map((transaction, key) => {
+        const { created_at, type, category } = transaction;
         const isDeposit = type === 'deposit';
         const isWithdrawal = type === 'withdrawal';
 
@@ -26,9 +24,7 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
               <TransactionIcon type={type} />
               <Flex direction="column">
                 <Text fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                  {type === 'deposit'
-                    ? getAddressName(metadata.transfer_from)
-                    : getAddressName(metadata.transfer_to)}
+                  {getTransactonDescription(transaction, addressLookups)}
                 </Text>
                 <Text
                   fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }}
@@ -41,13 +37,13 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
             </Flex>
 
             <HStack>
-              {status === 'pending' && <Badge colorScheme="yellow">Pending</Badge>}
               <Flex
                 direction="column"
+                alignItems="end"
                 color={isDeposit ? 'green.400' : isWithdrawal ? 'red.400' : ''}
               >
                 <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                  {isWithdrawal && '-'} {metadata.amount} {metadata?.token?.symbol}
+                  {isWithdrawal && '-'} {getTxAmountDescription(transaction)}
                 </Text>
 
                 <Text
@@ -55,9 +51,10 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
                   color="gray.400"
                   fontWeight="semibold"
                 >
-                  {created_at ? new Date(created_at).toLocaleDateString() : ''}
+                  {formatDate(created_at)}
                 </Text>
               </Flex>
+              <TransactionStatusBadge type={transaction.status} iconOnly={true}/>
             </HStack>
           </Flex>
         );

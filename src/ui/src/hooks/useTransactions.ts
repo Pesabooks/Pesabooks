@@ -1,8 +1,7 @@
-import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 import { RealtimeSubscription, SupabaseRealtimePayload } from '@supabase/supabase-js';
 import { useEffect, useReducer } from 'react';
-import { getAllTransactions, geTransactionById } from '../services/transactionsServices';
-import { supabase, transationsTable } from '../supabase';
+import { getAllTransactions, getTransactionById } from '../services/transactionsServices';
+import { Filter, supabase, transationsTable } from '../supabase';
 import { Transaction } from '../types';
 
 type State = {
@@ -30,11 +29,11 @@ const reducer = (state: State, action: Action): State => {
     };
   }
   if (action.type === 'UPDATE') {
-    const { id, status, timestamp } = action.data as Transaction;
+    const t = action.data as Transaction;
     return {
       ...state,
       transactions: state.transactions.map((item) => {
-        return item.id === id ? { ...item, status, timestamp } : item;
+        return item.id === t.id ? t : item;
       }),
     };
   } else if (action.type === 'INSERT') {
@@ -53,8 +52,6 @@ const reducer = (state: State, action: Action): State => {
 
   return state;
 };
-
-export type Filter<Data> = (query: PostgrestFilterBuilder<Data>) => PostgrestFilterBuilder<Data>;
 
 export function useTransactions(
   pool_id: number,
@@ -77,7 +74,7 @@ export function useTransactions(
 
   useEffect(() => {
     const asyncDispatch = (payload: SupabaseRealtimePayload<Transaction>) => {
-      geTransactionById(payload.new.id).then((transation) => {
+      getTransactionById(payload.new.id).then((transation) => {
         dispatch({ type: payload.eventType, data: transation });
       });
     };

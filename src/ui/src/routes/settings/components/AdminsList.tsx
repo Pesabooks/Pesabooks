@@ -1,17 +1,19 @@
 import { DeleteIcon } from '@chakra-ui/icons';
-import { Flex, IconButton, Spacer, Text, Tooltip, useColorModeValue } from '@chakra-ui/react';
+import { Flex, Spacer, Text, Tooltip, useColorModeValue } from '@chakra-ui/react';
 import React from 'react';
 import { WalletAddress } from '../../../components/WalletAddress';
-import { withConnectedWallet } from '../../../components/withConnectedWallet';
+import {
+  IconButtonWithConnectedWallet
+} from '../../../components/withConnectedWallet';
 import { AddressLookup } from '../../../types';
 
 interface AdminsListProps {
+  chainId: number;
   admins: AddressLookup[];
   remove: (address: AddressLookup) => void;
 }
-export const AdminsList = ({ admins, remove }: AdminsListProps) => {
+export const AdminsList = ({ chainId, admins, remove }: AdminsListProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
-  const IconButtonWithConnectedWallet = withConnectedWallet(IconButton, true);
 
   return (
     <Flex direction="column" w="100%">
@@ -22,13 +24,14 @@ export const AdminsList = ({ admins, remove }: AdminsListProps) => {
               <Text fontSize="md" color={textColor} fontWeight="bold">
                 {row.name}
               </Text>
-              <WalletAddress address={row.address} chainId={80001} />
+              <WalletAddress address={row.address} chainId={chainId} type="address" />
             </Flex>
             <Spacer />
 
             <Flex alignItems="center" p="12px">
               <Tooltip label="Remove admin">
                 <IconButtonWithConnectedWallet
+                  onlyAdmin={true}
                   variant="ghost"
                   onClick={() => remove(row)}
                   // isLoading={loading}

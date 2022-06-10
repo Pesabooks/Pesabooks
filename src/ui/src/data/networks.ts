@@ -28,6 +28,19 @@ export const networks: { [chainId: number]: Network } = {
     isTest: true,
     registryAddress: '0x2549a1d70165d71B86D71537ccF7506181FB37c1',
   },
+  4: {
+    chainId: '0x4',
+    rpcUrls: ['https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
+    chainName: 'Rinkeby Testnet',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrls: ['https://rinkeby.etherscan.io/'],
+    isTest: false,
+    registryAddress: '',
+  },
   137: {
     chainId: '0x89',
     rpcUrls: ['https://polygon-rpc.com'],

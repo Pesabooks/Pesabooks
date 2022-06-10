@@ -3,18 +3,19 @@ import { Flex, IconButton, Link, Text, useClipboard } from '@chakra-ui/react';
 import React from 'react';
 import { MdContentCopy } from 'react-icons/md';
 import { networks } from '../data/networks';
-import { shortenAddress } from '../utils';
+import { shortenHash } from '../utils';
 
 interface WalletAddressProps {
   chainId: number;
   address: string;
+  type: 'address' | 'tx';
 }
-export const WalletAddress = ({ chainId, address }: WalletAddressProps) => {
+export const WalletAddress = ({ chainId, address, type }: WalletAddressProps) => {
   const { onCopy } = useClipboard(address);
 
   return (
     <Flex direction="row" alignItems="center">
-      <Text>{shortenAddress(address)}</Text>
+      <Text>{shortenHash(address)}</Text>
       <IconButton
         onClick={onCopy}
         variant="ghost"
@@ -22,7 +23,7 @@ export const WalletAddress = ({ chainId, address }: WalletAddressProps) => {
         size="sm"
         icon={<MdContentCopy />}
       />
-      <Link isExternal href={networks[chainId]?.blockExplorerUrls[0] + 'address/' + address}>
+      <Link isExternal href={networks[chainId]?.blockExplorerUrls[0] + type + '/' + address}>
         <ExternalLinkIcon />
       </Link>
     </Flex>

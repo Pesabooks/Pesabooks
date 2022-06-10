@@ -1,24 +1,23 @@
-import { Button, Flex, Text, useDisclosure, useToast } from '@chakra-ui/react';
+import { Flex, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { ConfirmationModal, ConfirmationRef } from '../../../components/Modals/ConfirmationModal';
-import { withConnectedWallet } from '../../../components/withConnectedWallet';
-import { useNotifyTransaction } from '../../../hooks/useNotifyTransaction';
-import { usePool } from '../../../hooks/usePool';
 import {
-  addAdmin,
-  getAddressLookUp,
-  getAdminAddresses,
-  removeAdmin,
-} from '../../../services/poolsService';
+  ButtonWithConnectedWallet
+} from '../../../components/withConnectedWallet';
+import { usePool } from '../../../hooks/usePool';
+import { getSafeAdmins, getSafeTreshold } from '../../../services/gnosisServices';
+import { getAddressLookUp } from '../../../services/poolsService';
+import { addAdmin, removeAdmin } from '../../../services/transactionsServices';
 import { AddressLookup } from '../../../types';
-import { AddAdminModal } from '../../members/components/addAdminModal';
+import { AddAdminFormValue, AddAdminModal } from '../../members/components/addAdminModal';
 import { AdminsList } from '../components/AdminsList';
 
 export const AdminsPage = () => {
   const [adminAddressess, setAdminAddressess] = useState<string[]>([]);
+  const [currentTreshold, setcurrentTreshold] = useState(0);
   const [lookups, setLookups] = useState<AddressLookup[]>([]);
   const { pool } = usePool();
   const { provider } = useWeb3React();
@@ -27,9 +26,9 @@ export const AdminsPage = () => {
     onClose: onCloseSetAdminModal,
     onOpen: onOpenSetAdminModal,
   } = useDisclosure();
-  const { notify } = useNotifyTransaction();
   const toast = useToast();
   const confirmationRef = useRef<ConfirmationRef>(null);
+  const signer = (provider as Web3Provider)?.getSigner();
 
   const adminsAddressLookup = useMemo(
     () =>
@@ -40,13 +39,17 @@ export const AdminsPage = () => {
   );
 
   const loadAdminAddresses = useCallback(() => {
-    if (pool) getAdminAddresses(pool).then((addresses) => setAdminAddressess(addresses));
-  }, [pool]);
+    if (pool?.chain_id && pool.gnosis_safe_address)
+      getSafeAdmins(pool.chain_id, pool.gnosis_safe_address).then((addresses) =>
+        setAdminAddressess(addresses),
+      );
+  }, [pool?.chain_id, pool?.gnosis_safe_address]);
 
   useEffect(() => {
     if (pool) {
       loadAdminAddresses();
       getAddressLookUp(pool.id, 'user').then(setLookups);
+      getSafeTreshold(pool.chain_id, pool.gnosis_safe_address).then(setcurrentTreshold);
     }
   }, [loadAdminAddresses, pool]);
 
@@ -54,14 +57,12 @@ export const AdminsPage = () => {
     onCloseSetAdminModal();
   };
 
-  const onAddmin = async (user: AddressLookup) => {
+  const onAddmin = async ({ user, treshold }: AddAdminFormValue) => {
     if (pool) {
       try {
-        let tx = await addAdmin(pool, user, provider as Web3Provider);
-        if (tx) {
-          notify(tx, `Add ${user.name} as an admin`);
-
-          tx.wait().then((r) => {
+        let tx = await addAdmin(signer, pool, user, treshold);
+        if (tx?.hash) {
+          (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
             loadAdminAddresses();
           });
 
@@ -78,17 +79,18 @@ export const AdminsPage = () => {
   };
 
   const confirmDeactivation = useCallback((user: AddressLookup) => {
-    confirmationRef.current?.open(`Are you sure you want to remove ${user.name} as an admin?`, user);
+    confirmationRef.current?.open(
+      `Are you sure you want to remove ${user.name} as an admin?`,
+      user,
+    );
   }, []);
 
-  const onRemoveAdmin = async (confirmed: boolean, user: AddressLookup) => {
+  const onRemoveAdmin = async (confirmed: boolean, { user, treshold }: AddAdminFormValue) => {
     if (confirmed && pool) {
       try {
-        let tx = await removeAdmin(pool, user, provider as Web3Provider);
-        if (tx) {
-          notify(tx, `Remove ${user.name} as an admin `);
-
-          tx.wait().then((r) => {
+        let tx = await removeAdmin(signer, pool, user, treshold);
+        if (tx?.hash) {
+          (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
             loadAdminAddresses();
           });
         }
@@ -102,23 +104,39 @@ export const AdminsPage = () => {
     }
   };
 
-  const ButtonwithConnectedWallet = withConnectedWallet(Button, true);
-
   return (
     <>
       <Card>
         <CardHeader mb="40px">
           <Flex justify="space-between" align="center" w="100%">
-            <Text fontSize="lg" fontWeight="bold">
-              Manage Administrators
-            </Text>
-            <ButtonwithConnectedWallet size="sm" onClick={onOpenSetAdminModal}>
+            <Flex direction="column">
+              <Text fontSize="lg" fontWeight="bold" mb="6px">
+                Manage administrators
+              </Text>
+              <Text color="gray.400" fontSize="sm" fontWeight="normal">
+                Add, remove, replace or rename admin
+              </Text>
+              <Text color="gray.400" fontSize="sm" fontWeight="normal">
+                Every transaction requires the confirmation of{' '}
+                <b>
+                  {currentTreshold} out of {adminAddressess.length}
+                </b>{' '}
+                admins
+              </Text>
+            </Flex>
+            <ButtonWithConnectedWallet onlyAdmin={true} size="sm" onClick={onOpenSetAdminModal}>
               Add Admin
-            </ButtonwithConnectedWallet>
+            </ButtonWithConnectedWallet>
           </Flex>
         </CardHeader>
         <CardBody>
-          <AdminsList admins={adminsAddressLookup} remove={confirmDeactivation} />
+          {pool && (
+            <AdminsList
+              chainId={pool.chain_id}
+              admins={adminsAddressLookup}
+              remove={confirmDeactivation}
+            />
+          )}
         </CardBody>
       </Card>
 
@@ -129,6 +147,7 @@ export const AdminsPage = () => {
           lookups={lookups}
           adminAddressess={adminAddressess}
           addAdmin={onAddmin}
+          currenTreshold={currentTreshold}
         />
       )}
       <ConfirmationModal ref={confirmationRef} afterClosed={onRemoveAdmin} />

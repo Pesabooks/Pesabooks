@@ -6,9 +6,8 @@ import { usePool } from '../../hooks/usePool';
 import { getMyPools } from '../../services/poolsService';
 import { Pool } from '../../types';
 import { ConnectWalletButton } from '../Buttons/ConnectWalletButton';
-import { DepositButton } from '../Buttons/DepositButton';
-import { WithdrawButton } from '../Buttons/WithdrawButton';
 import { ConnectedChain } from '../ConnectedChain';
+import { NewTransactionMenu } from '../NewTransactionMenu';
 import { AvatarMenu } from './AvatarMenu';
 import { PoolSelectorMenu } from './PoolSelectorMenu';
 interface NavBarProps extends FlexProps {
@@ -52,8 +51,7 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
 
       <Stack direction={'row'} spacing={7}>
         <Flex gap={7} display={{ sm: 'none', xl: 'flex' }} alignItems="center">
-          <DepositButton />
-          <WithdrawButton />
+          <NewTransactionMenu/>
           {pool && <ConnectWalletButton chainId={pool.chain_id} />}
           {isActive && pool?.chain_id === connectedChainId && <ConnectedChain />}
         </Flex>
