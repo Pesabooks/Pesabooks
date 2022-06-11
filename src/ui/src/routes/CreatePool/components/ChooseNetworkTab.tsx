@@ -19,7 +19,7 @@ interface ChooseNetworkTabProps {
 }
 export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTabProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
-  const includeTestnets = process.env.REACT_APP_INCLUDE_TESTNETS;
+  const includeTestnets = process.env.REACT_APP_INCLUDE_TESTNETS === 'true';
 
   return (
     <Card>

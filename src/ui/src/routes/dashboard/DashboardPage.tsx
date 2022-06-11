@@ -43,7 +43,7 @@ export const DashboardPage = () => {
         <title>Dashboard | {pool?.name}</title>
       </Helmet>
       <SimpleGrid mb={4} columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
-        <BalanceCard chainId={pool.chain_id} token={token} address={pool.contract_address} />
+        <BalanceCard chainId={pool.chain_id} />
       </SimpleGrid>
 
       <Grid
@@ -62,7 +62,7 @@ export const DashboardPage = () => {
           </CardBody>
         </Card>
         {/* <BalancesPerMonth pool_id={pool.id} /> */}
-        <AssetsCard/>
+        <AssetsCard />
       </Grid>
 
       <Grid

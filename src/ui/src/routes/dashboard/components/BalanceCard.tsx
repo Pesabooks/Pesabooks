@@ -7,15 +7,12 @@ import { IconBox } from '../../../components/Icons';
 import Loading from '../../../components/Loading';
 import { usePool } from '../../../hooks/usePool';
 import { getSafeBalance } from '../../../services/gnosisServices';
-import { Token } from '../../../types';
 
 type BalanceCardProps = {
   chainId: number;
-  token: Token;
-  address: string;
 };
 
-const BalanceCard = ({ chainId, token, address }: BalanceCardProps) => {
+const BalanceCard = ({ chainId }: BalanceCardProps) => {
   const { pool } = usePool();
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
