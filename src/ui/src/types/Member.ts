@@ -7,4 +7,5 @@ export interface Member {
   pool?: Pool;
   active: boolean;
   role: 'admin' | 'member';
+  last_viewed_at: Date;
 }

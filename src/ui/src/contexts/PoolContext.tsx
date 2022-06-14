@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { getSafeAdmins } from '../services/gnosisServices';
 import { isMemberAdmin } from '../services/membersService';
 import { getPool } from '../services/poolsService';
+import { membersTable } from '../supabase';
 import { Pool } from '../types';
 
 type PoolContextType = {
@@ -12,7 +13,7 @@ type PoolContextType = {
   error: any;
   refresh: () => void;
   isAdmin: boolean;
-  safeAdmins:string[]
+  safeAdmins: string[];
 };
 
 export const PoolContext = React.createContext<Partial<PoolContextType>>({ loading: true });
@@ -30,6 +31,12 @@ export const PoolProvider = ({ children }: any) => {
     if (pool_id)
       getPool(pool_id)
         .then((p) => {
+          membersTable()
+            .update({ last_viewed_at: new Date() })
+            .eq('user_id', user?.id)
+            .eq('pool_id', pool_id)
+            .then();
+
           setPool(p);
           setLoading(false);
         })
@@ -38,7 +45,7 @@ export const PoolProvider = ({ children }: any) => {
           setError(e);
           setLoading(false);
         });
-  }, [pool_id]);
+  }, [pool_id, user?.id]);
 
   useEffect(() => {
     fetchPool();
@@ -55,7 +62,7 @@ export const PoolProvider = ({ children }: any) => {
 
   const refresh = () => fetchPool();
 
-  const value: PoolContextType = { pool, loading, error, refresh, isAdmin, safeAdmins:safeAdmins };
+  const value: PoolContextType = { pool, loading, error, refresh, isAdmin, safeAdmins: safeAdmins };
 
   return <PoolContext.Provider value={value}>{children}</PoolContext.Provider>;
 };

@@ -1,6 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { handleSupabaseError, poolsTable, supabase } from '../supabase';
-import { AddressLookup, Pool, Token } from '../types';
+import { AddressLookup, Pool, Profile, Token } from '../types';
 import { deploySafe } from './gnosisServices';
 
 export const getPool = async (pool_id: string) => {
@@ -18,11 +18,14 @@ export const getPool = async (pool_id: string) => {
 };
 
 export const getMyPools = async () => {
-  const { data, error } = await poolsTable()
-    .select('*,members:profiles!members(name)')
-    .eq('active', true);
+  const { data, error } = await supabase.rpc<Pool>('get_my_pools');
   handleSupabaseError(error);
+  return data;
+};
 
+export const getPoolMembers = async (pool_id: number) => {
+  const { data, error } = await supabase.rpc<Profile>('get_pool_users', { pool_id });
+  handleSupabaseError(error);
   return data;
 };
 

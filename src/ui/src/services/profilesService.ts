@@ -1,6 +1,5 @@
 import { getCurrentUserId } from '../contexts/AuthContext';
-import { handleSupabaseError, profilesTable, supabase } from '../supabase';
-import { Profile } from '../types';
+import { handleSupabaseError, profilesTable } from '../supabase';
 
 export const getCurrentUserProfile = async () => {
   const currentUserId = getCurrentUserId();
@@ -11,12 +10,6 @@ export const getCurrentUserProfile = async () => {
   handleSupabaseError(error);
 
   return data?.[0];
-};
-
-export const getAllUsers = async (pool_id: number) => {
-  const { data, error } = await supabase.rpc<Profile>('get_pool_users', { pool_id });
-  handleSupabaseError(error);
-  return data;
 };
 
 export const updateLastPool = async (user_id: string, pool_id: number) => {
