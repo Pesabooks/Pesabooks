@@ -14,6 +14,6 @@ export const compareAddress = (address1: string | undefined, address2: string | 
   return checksummed(address1) === checksummed(address2);
 };
 
-export const mathAddress = (addresses: AddressLookup[], address: string) => {
+export const mathAddress = (addresses: AddressLookup[], address: string | undefined) => {
   return addresses.find((a) => compareAddress(a.address, address));
 };

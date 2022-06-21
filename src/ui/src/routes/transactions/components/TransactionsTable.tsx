@@ -98,8 +98,8 @@ export const TransactionsTable = ({
         }: CellProps<Transaction>) => {
           return (
             <Flex>
-              {original.status === 'pending' && (
-                <RefreshTransactionButton chainId={pool.chain_id} transactionHash={original.hash} />
+              {original.status === 'pending' && original.hash && (
+                <RefreshTransactionButton chainId={pool.chain_id} transaction={original} />
               )}
             </Flex>
           );

@@ -90,6 +90,51 @@ export const deposit = async (
   return data?.[0];
 };
 
+export const depositWithCard = async (
+  pool: Pool,
+  rampId: string,
+  rampPurchaseViewToken: string | undefined,
+  category_id: number | undefined,
+  memo: string | undefined,
+  amount: number,
+  finalTxHash: string | undefined,
+) => {
+  const { token } = pool;
+  if (token == null) throw new Error();
+
+  const transaction: Partial<Transaction> = {
+    memo: memo,
+    type: 'deposit',
+    category_id: category_id,
+    status: 'pending',
+    pool_id: pool.id,
+    timestamp: Math.floor(new Date().valueOf() / 1000),
+    metadata: {
+      ramp_id: rampId,
+      ramp_purchase_view_token: rampPurchaseViewToken,
+      transfer_to: checksummed(pool.gnosis_safe_address),
+      token: {
+        address: checksummed(token.address),
+        symbol: token.symbol,
+        name: token.name,
+        decimals: token.decimals,
+        image: `${process.env.PUBLIC_URL}/${token.image}`,
+      },
+      amount: amount,
+    },
+    hash: finalTxHash,
+  };
+
+  const { data, error } = await transationsTable().insert(transaction);
+  handleSupabaseError(error);
+
+  if (finalTxHash) {
+    notifyTransaction(pool.chain_id, finalTxHash);
+  }
+
+  return data?.[0];
+};
+
 export const withdraw = async (
   signer: JsonRpcSigner,
   pool: Pool,
@@ -218,8 +263,8 @@ const submitTransaction = async (
     );
     const { data } = await transationsTable().insert({
       ...transaction,
-      safeTxHash,
-      safeNonce: safeTransaction.data.nonce,
+      safe_tx_hash: safeTxHash,
+      safe_nonce: safeTransaction.data.nonce,
       status: 'awaitingConfirmations',
     });
 
@@ -234,8 +279,8 @@ const submitTransaction = async (
 
     const { data } = await transationsTable().insert({
       ...transaction,
-      safeTxHash,
-      safeNonce: safeTransaction.data.nonce,
+      safe_tx_hash: safeTxHash,
+      safe_nonce: safeTransaction.data.nonce,
       hash: tx?.hash,
       status: 'pending',
     });
@@ -299,7 +344,7 @@ export const rejectTransaction = async (
     safeTransaction,
   );
 
-  await transationsTable().update({ rejectSafeTxHash: safeTxHash }).eq('id', transactionId);
+  await transationsTable().update({ reject_safe_tx_hash: safeTxHash }).eq('id', transactionId);
 };
 
 const onTransactionExecuted = async (
@@ -343,7 +388,8 @@ export const getAllTransactions = async (pool_id: number, filter?: Filter<Transa
   let query = transationsTable().select(
     `
     *,
-    category:category_id(id, name)
+    category:category_id(id, name),
+    created_by:profiles(id,name,email)
   `,
   );
 
@@ -361,7 +407,8 @@ export const getTransactionById = async (txId: number) => {
     .select(
       `
       *,
-      category:category_id(id, name)
+      category:category_id(id, name),
+      created_by:profiles(id,name,email)
     `,
     )
     .eq('id', txId);
@@ -370,14 +417,13 @@ export const getTransactionById = async (txId: number) => {
   return data?.[0];
 };
 
-export const refreshTransaction = async (chain_id: number, txHash: string) => {
-  //todo
-  // const provider = defaultProvider(chain_id);
-  // var tx = await provider.getTransaction(txHash);
-  // await tx.wait().then(
-  //   async (receipt) => await onTransactionComplete(receipt, chain_id,),
-  //   async () => await onTransactionFailed,
-  // );
+export const refreshTransaction = async (chain_id: number, t: Transaction) => {
+  const provider = defaultProvider(chain_id);
+  var tx = await provider.getTransaction(t.hash);
+  await tx.wait().then(
+    async (receipt) => await onTransactionComplete(receipt, chain_id),
+    async () => await onTransactionFailed,
+  );
 };
 
 export const updateTransactionCategory = async (id: number, category_id: number) => {

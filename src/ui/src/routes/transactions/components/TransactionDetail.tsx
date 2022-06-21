@@ -1,6 +1,7 @@
 import {
   Alert,
-  AlertIcon, Drawer,
+  AlertIcon,
+  Drawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
@@ -23,15 +24,13 @@ import {
 import type { Web3Provider } from '@ethersproject/providers';
 import { SafeMultisigTransactionResponse } from '@gnosis.pm/safe-service-client';
 import { useWeb3React } from '@web3-react/core';
-import React, { forwardRef, Ref, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, Ref, useEffect, useImperativeHandle, useState } from 'react';
 import { EditableControls } from '../../../components/Editable/EditableControls';
 import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
 import Loading from '../../../components/Loading';
 import { UserWalletCard } from '../../../components/UserWalletCard';
 import { WalletAddress } from '../../../components/WalletAddress';
-import {
-  ButtonWithConnectedWallet
-} from '../../../components/withConnectedWallet';
+import { ButtonWithConnectedWallet } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
 import { getAllCategories } from '../../../services/categoriesService';
 import {
@@ -50,7 +49,7 @@ import {
 } from '../../../services/transactionsServices';
 import { AddressLookup, Category, Transaction } from '../../../types';
 import { TransferData } from '../../../types/transaction';
-import { compareAddress, mathAddress } from '../../../utils';
+import { compareAddress, getTransactionTypeLabel, mathAddress } from '../../../utils';
 import { EditableSelect } from './EditableSelect';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
 import { TransactionTimeline } from './TransactionTimeline';
@@ -94,12 +93,12 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     let safeRejectionTransaction: SafeMultisigTransactionResponse | undefined = undefined;
 
     transaction = await getTransactionById(id);
-    if (pool && transaction?.safeTxHash)
-      safeTransaction = await getSafeTransaction(pool.chain_id, transaction.safeTxHash);
-    if (pool && transaction?.rejectSafeTxHash)
+    if (pool && transaction?.safe_tx_hash)
+      safeTransaction = await getSafeTransaction(pool.chain_id, transaction.safe_tx_hash);
+    if (pool && transaction?.reject_safe_tx_hash)
       safeRejectionTransaction = await getSafeTransaction(
         pool.chain_id,
-        transaction.rejectSafeTxHash,
+        transaction.reject_safe_tx_hash,
       );
 
     setTransactions({ transaction, safeTransaction, safeRejectionTransaction });
@@ -139,13 +138,13 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
   const canExecuteRejection = safeRejectionTransaction?.confirmations?.length === treshold;
 
-  const isNextExecution = currentSafeNonce === transaction?.safeNonce;
+  const isNextExecution = currentSafeNonce === transaction?.safe_nonce;
 
   const approve = async () => {
     if (!pool || !transaction) return;
     try {
       setSubmitting(true);
-      await confirmTransaction(signer, pool, transaction.id, transaction?.safeTxHash);
+      await confirmTransaction(signer, pool, transaction.id, transaction?.safe_tx_hash);
       loadTransaction(transaction.id);
     } finally {
       setSubmitting(false);
@@ -154,7 +153,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
   const execute = async (isRejection: boolean) => {
     if (!pool || !transaction) return;
-    const safeTxHash = isRejection ? transaction?.rejectSafeTxHash : transaction.safeTxHash;
+    const safeTxHash = isRejection ? transaction?.reject_safe_tx_hash : transaction.safe_tx_hash;
 
     try {
       setSubmitting(true);
@@ -176,8 +175,8 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     if (!pool || !safeTransaction || !transaction) return;
     try {
       setSubmitting(true);
-      if (transaction.rejectSafeTxHash) {
-        await confirmTransaction(signer, pool, transaction.id, transaction.rejectSafeTxHash);
+      if (transaction.reject_safe_tx_hash) {
+        await confirmTransaction(signer, pool, transaction.id, transaction.reject_safe_tx_hash);
       } else {
         await rejectTransaction(signer, pool, transaction.id, safeTransaction?.nonce);
       }
@@ -216,17 +215,22 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
         ) : (
           <DrawerBody>
             <Flex direction="column" gap={4}>
-              <TxPropertyBox label="Type" value={transaction?.type} />
+              <TxPropertyBox label="Type" value={getTransactionTypeLabel(transaction?.type)} />
 
               <Flex gap={4}>
                 {transaction?.type === 'deposit' && (
                   <TxPropertyBox label="From" flex="1">
-                    <UserWalletCard
-                      addressLookup={mathAddress(
-                        addressLookups,
-                        (transaction?.metadata as TransferData)?.transfer_from,
-                      )}
-                    />
+                    {!!(transaction?.metadata as TransferData)?.transfer_from && (
+                      <UserWalletCard
+                        addressLookup={mathAddress(
+                          addressLookups,
+                          (transaction?.metadata as TransferData)?.transfer_from,
+                        )}
+                      />
+                    )}
+
+                    {(transaction?.metadata as TransferData)?.ramp_id &&
+                      transaction.created_by?.name}
                   </TxPropertyBox>
                 )}
 

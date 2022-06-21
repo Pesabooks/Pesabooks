@@ -2,21 +2,22 @@ import { RepeatIcon } from '@chakra-ui/icons';
 import { IconButton, Tooltip } from '@chakra-ui/react';
 import { useState } from 'react';
 import { refreshTransaction } from '../../../services/transactionsServices';
+import { Transaction } from '../../../types';
 
 interface RefreshTransactionButtonProps {
   chainId: number;
-  transactionHash: string;
+  transaction: Transaction;
 }
 export const RefreshTransactionButton = ({
   chainId,
-  transactionHash,
+  transaction,
 }: RefreshTransactionButtonProps) => {
   const [loading, setLoading] = useState(false);
 
   const refresh = async () => {
     setLoading(true);
     try {
-      await refreshTransaction(chainId, transactionHash);
+      await refreshTransaction(chainId, transaction);
     } finally {
       setLoading(false);
     }

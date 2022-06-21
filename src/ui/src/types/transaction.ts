@@ -10,14 +10,14 @@ export type TransactionStatus =
   | 'failed'
   | 'rejected';
 export interface Transaction extends Entity {
-  safeNonce?: number;
+  safe_nonce?: number;
   timestamp?: number;
   category_id?: number;
   category?: Category;
   memo?: string;
   hash: string;
-  safeTxHash: string;
-  rejectSafeTxHash: string;
+  safe_tx_hash: string;
+  reject_safe_tx_hash: string;
   status: TransactionStatus;
   type: TransactionType;
   pool_id: number;
@@ -25,10 +25,12 @@ export interface Transaction extends Entity {
 }
 
 export interface TransferData {
-  transfer_from: string;
+  transfer_from?: string;
   transfer_to: string;
   token: Token;
   amount: number;
+  ramp_id?: string;
+  ramp_purchase_view_token?: string;
 }
 
 export interface AddOwnerData {

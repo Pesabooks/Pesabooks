@@ -1,5 +1,5 @@
 import { Heading, Text } from '@chakra-ui/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
@@ -55,11 +55,11 @@ export const TransactionsPage = () => {
     t.status === 'awaitingConfirmations' || t.status === 'awaitingExecution';
 
   const compare = (t1: Transaction, t2: Transaction) => {
-    if (!t1.safeNonce || !t2.safeNonce) return 0;
-    if (t1.safeNonce < t2.safeNonce) {
+    if (!t1.safe_nonce || !t2.safe_nonce) return 0;
+    if (t1.safe_nonce < t2.safe_nonce) {
       return -1;
     }
-    if (t1.safeNonce > t2.safeNonce) {
+    if (t1.safe_nonce > t2.safe_nonce) {
       return 1;
     }
     return 0;

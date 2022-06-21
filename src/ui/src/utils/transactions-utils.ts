@@ -1,7 +1,7 @@
 import { AddressLookup, Transaction } from '../types';
-import { AddOwnerData, TransferData } from '../types/transaction';
+import { AddOwnerData, TransactionType, TransferData } from '../types/transaction';
 
-export const getAddressName = (address: string, addressLookups: AddressLookup[]) => {
+export const getAddressName = (address: string | undefined, addressLookups: AddressLookup[]) => {
   if (!address) return null;
 
   return (
@@ -14,11 +14,25 @@ export const getTransactonDescription = (transaction: Transaction, addresses: Ad
 
   switch (type) {
     case 'deposit':
-      return `From ${getAddressName((metadata as TransferData).transfer_from, addresses)}`;
+      if ((metadata as TransferData)?.ramp_id) return transaction.created_by?.name;
+      else return `From ${getAddressName((metadata as TransferData).transfer_from, addresses)}`;
     case 'withdrawal':
       return `To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
     case 'addOwner':
       return `add ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
+  }
+};
+
+export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
+  if (type === undefined) return;
+
+  switch (type) {
+    case 'deposit':
+      return 'Deposit';
+    case 'withdrawal':
+      return 'Withdrawal';
+    case 'addOwner':
+      return 'Add owner';
   }
 };
 
