@@ -3,7 +3,8 @@ import {
   Flex,
   FormControl,
   FormErrorMessage,
-  FormLabel, InputGroup,
+  FormLabel,
+  InputGroup,
   InputRightAddon,
   NumberInput,
   NumberInputField,
@@ -13,11 +14,12 @@ import {
 import { useFormContext } from 'react-hook-form';
 
 interface InputAmountFieldProps extends BoxProps {
-  balance: number;
+  balance?: number;
   symbol: string;
 }
 
-export const validateAmount = (value: number, balance: number) => {
+export const validateAmount = (value: number, balance: number|undefined) => {
+  if (balance === undefined) return true;
   return value <= balance;
 };
 
@@ -40,9 +42,10 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
         <FormLabel htmlFor="amount">Amount</FormLabel>
         <Spacer />
         <Flex align="center" gap={1}>
-          <Text fontSize='sm'>Balance:  {balance} {symbol}</Text>
+         {balance!==undefined && <Text fontSize="sm">
+            Balance: {balance} {symbol}
+          </Text>}
           {/* <Icon as={FaWallet} h={'12px'} w={'12px'} /> */}
-        
         </Flex>
       </Flex>
 
