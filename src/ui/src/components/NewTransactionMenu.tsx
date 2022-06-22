@@ -28,9 +28,9 @@ export const NewTransactionMenu = () => {
         <MenuItem icon={<DepositLogo />} onClick={() => navigate(`/pool/${pool?.id}/deposit`)}>
           Deposit
         </MenuItem>
-        <MenuItem icon={<DepositLogo />} onClick={() => navigate(`/pool/${pool?.id}/ramp`)}>
+        {/* <MenuItem icon={<DepositLogo />} onClick={() => navigate(`/pool/${pool?.id}/ramp`)}>
           Deposit with Card
-        </MenuItem>
+        </MenuItem> */}
         <MenuItem
           icon={<WithdrawLogo />}
           onClick={() => navigate(`/pool/${pool?.id}/withdraw`)}
