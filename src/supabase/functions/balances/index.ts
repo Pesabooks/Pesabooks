@@ -21,7 +21,7 @@ serve(async (req) => {
     }
     const jsonResponse = await fetch(
       `https://api.covalenthq.com/v1/${pool.chain_id}/address/${
-        pool.contract_address
+        pool.gnosis_safe_address
       }/balances_v2/?quote-currency=CAD&format=JSON&nft=false&no-nft-fetch=false&key=${Deno.env.get("COVALENT_KEY")}`
     );
     const { data: balances, error: covError, error_message } = await jsonResponse.json();

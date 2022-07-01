@@ -1,7 +1,15 @@
+import { Token as ParaswapToken } from 'paraswap';
 import { Category } from './Category';
 import { Entity } from './Entity';
 
-export type TransactionType = 'deposit' | 'withdrawal' | 'addOwner' | 'removeOwner' | 'swapOwner';
+export type TransactionType =
+  | 'deposit'
+  | 'withdrawal'
+  | 'addOwner'
+  | 'removeOwner'
+  | 'swapOwner'
+  | 'unlockToken'
+  | 'swap';
 export type TransactionStatus =
   | 'awaitingConfirmations'
   | 'awaitingExecution'
@@ -21,7 +29,7 @@ export interface Transaction extends Entity {
   status: TransactionStatus;
   type: TransactionType;
   pool_id: number;
-  metadata: TransferData | AddOwnerData;
+  metadata: TransferData | AddOwnerData | SwapData;
 }
 
 export interface TransferData {
@@ -39,12 +47,17 @@ export interface AddOwnerData {
   treshold: number;
 }
 
-// interface SwapData {
-//   srcToken: Token;
-//   destToken: Token;
-//   srcAmount: number;
-//   destAmount: number;
-// }
+export interface SwapData {
+  src_token: ParaswapToken;
+  src_usd: string;
+  src_amount: string;
+  dest_token: ParaswapToken;
+  dest_amount: string;
+  dest_usd: string;
+  slippage: number;
+  gas_cost: string;
+  gas_cost_usd: string;
+}
 
 interface Token {
   address: string;

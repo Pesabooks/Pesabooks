@@ -1,18 +1,26 @@
 import { Box, Icon } from '@chakra-ui/react';
-import { FiArrowDownLeft, FiArrowUpRight, FiUserPlus, FiUsers, FiUserX } from 'react-icons/fi';
+import { BiTransfer } from 'react-icons/bi';
+import {
+  FiArrowDownLeft,
+  FiArrowUpRight,
+  FiUnlock,
+  FiUserPlus,
+  FiUsers,
+  FiUserX
+} from 'react-icons/fi';
 import { TransactionType } from '../types';
 
 export const TransactionIcon = ({ type }: { type: TransactionType }) => {
-  const isDeposit = type === 'deposit';
-  const isWithdrawal = type === 'withdrawal';
-
   let logo;
+  let color = 'gray.400';
   switch (type) {
     case 'deposit':
       logo = FiArrowDownLeft;
+      color = 'green.400';
       break;
     case 'withdrawal':
       logo = FiArrowUpRight;
+      color = 'red.400';
       break;
     case 'addOwner':
       logo = FiUserPlus;
@@ -23,9 +31,13 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
     case 'swapOwner':
       logo = FiUsers;
       break;
-    // case 'swap':
-    //   logo = BiTransfer;
-    //   break;
+    case 'unlockToken':
+      logo = FiUnlock;
+      color = 'green.400';
+      break;
+    case 'swap':
+      logo = BiTransfer;
+      break;
 
     default:
       break;
@@ -35,7 +47,7 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
     <Box
       me="12px"
       borderRadius="50%"
-      color={isDeposit ? 'green.400' : isWithdrawal ? 'red.400' : 'gray.400'}
+      color={color}
       border="1px solid"
       display="flex"
       alignItems="center"

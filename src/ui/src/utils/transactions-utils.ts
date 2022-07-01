@@ -1,5 +1,6 @@
+import { ethers } from 'ethers';
 import { AddressLookup, Transaction } from '../types';
-import { AddOwnerData, TransactionType, TransferData } from '../types/transaction';
+import { AddOwnerData, SwapData, TransactionType, TransferData } from '../types/transaction';
 
 export const getAddressName = (address: string | undefined, addressLookups: AddressLookup[]) => {
   if (!address) return null;
@@ -20,6 +21,16 @@ export const getTransactonDescription = (transaction: Transaction, addresses: Ad
       return `To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
     case 'addOwner':
       return `add ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
+    case 'unlockToken':
+      return `unlock token ${(metadata as any).token.symbol}`;
+    case 'swap':
+      const swapData = metadata as SwapData;
+      const fromAmout = ethers.utils.formatUnits(swapData.src_amount, swapData.src_token.decimals);
+      const toAmout = (+ethers.utils.formatUnits(
+        swapData.dest_amount,
+        swapData.dest_token.decimals,
+      )).toFixed(5);
+      return `Swap ${fromAmout} ${swapData.src_token.symbol} for ${toAmout} ${swapData.dest_token.symbol}  `;
   }
 };
 
@@ -33,6 +44,10 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
       return 'Withdrawal';
     case 'addOwner':
       return 'Add owner';
+    case 'unlockToken':
+      return 'Unlock Token';
+    case 'swap':
+      return 'Swap Token';
   }
 };
 

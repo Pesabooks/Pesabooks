@@ -292,3 +292,24 @@ export const getSafeBalances = async (chainId: number, safeAddress: string) => {
     (b) => b.balance !== '0',
   );
 };
+
+export const estimateSafeTransaction = async (
+  chainId: number,
+  safeAddress: string,
+  safeTxHash: string,
+) => {
+  const ethAdapter = getDefaultEthersAdapter(chainId);
+
+  const safeService = getServiceClient(ethAdapter, chainId);
+
+  const transaction = await safeService.getTransaction(safeTxHash);
+
+  const reponse = await safeService.estimateSafeTransaction(safeAddress, {
+    operation: transaction.operation,
+    value: transaction.value,
+    to: transaction.to,
+    data: transaction.data,
+  });
+
+  return reponse.safeTxGas;
+};

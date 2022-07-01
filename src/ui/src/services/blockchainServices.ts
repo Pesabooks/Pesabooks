@@ -1,4 +1,4 @@
-import { JsonRpcProvider, JsonRpcSigner } from '@ethersproject/providers';
+import { JsonRpcProvider } from '@ethersproject/providers';
 import {
   Controller__factory,
   ERC20,
@@ -6,7 +6,7 @@ import {
   PoolSafe__factory,
   Registry__factory,
 } from '@pesabooks/contracts/typechain';
-import { BigNumber, ethers, Signer } from 'ethers';
+import { ethers, Signer } from 'ethers';
 import { networks } from '../data/networks';
 
 export const getNetwork = (chain_id: number) => networks[chain_id];
@@ -50,26 +50,16 @@ export const getAddressBalance = async (
   return Number.parseFloat(formattedBalance);
 };
 
-export const isTokenApproved = async (
-  chainId: number,
-  address: string,
-  tokenAddress: string,
-  poolAddress: string,
-  amount: number,
+export const onTransactionComplete = async (
+  chain_id: number,
+  hash: string,
+  onComplete: Function,
+  onFailed?: Function,
 ) => {
-  const tokenContract = getTokenContract(chainId, tokenAddress);
-  const allowance = await tokenContract.allowance(address, poolAddress);
-  const approved = allowance.gte(BigNumber.from(amount));
-  return approved;
+  const provider = defaultProvider(chain_id);
+  var tx = await provider.getTransaction(hash);
+  await tx.wait().then(
+    () => onComplete(),
+    () => onFailed?.(),
+  );
 };
-
-export async function approveToken(
-  chainId: number,
-  signer: JsonRpcSigner,
-  tokenAddress: string,
-  spender: string,
-) {
-  const tokenContract = getTokenContract(chainId, tokenAddress);
-  const totalSupply = await tokenContract.totalSupply();
-  return await tokenContract.connect(signer).approve(spender, totalSupply);
-}

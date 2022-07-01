@@ -6,14 +6,15 @@ import {
   ModalFooter,
   ModalOverlay,
   Spacer,
-  useDisclosure,
+  useDisclosure
 } from '@chakra-ui/react';
-import React, { forwardRef, Ref, useImperativeHandle, useState } from 'react';
+import { forwardRef, Ref, useImperativeHandle, useState } from 'react';
 
 export interface ConfirmationRef {
   open: (message: string, data?: unknown) => void;
 }
 
+//todo: use https://chakra-ui.com/docs/components/alert-dialog instead
 export interface ConfirmationModalProps {
   ref: Ref<ConfirmationRef>;
   afterClosed: (confirmed: boolean, data?: any) => void | Promise<void>;

@@ -1,12 +1,14 @@
 import { JsonRpcSigner } from '@ethersproject/providers';
 import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
-import { ContractReceipt, ContractTransaction, ethers, Signer } from 'ethers';
+import { BigNumber, ContractReceipt, ContractTransaction, ethers, Signer } from 'ethers';
+import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
+import { OptimalRate } from 'paraswap-core';
 import { Filter } from 'react-supabase';
 import { networks } from '../data/networks';
 import { handleSupabaseError, transationsQueueTable, transationsTable } from '../supabase';
 import { AddressLookup, Pool } from '../types';
-import { Transaction } from '../types/transaction';
+import { SwapData, Transaction } from '../types/transaction';
 import { checksummed } from '../utils';
 import { notifyTransaction } from '../utils/notification';
 import { defaultProvider, getTokenContract } from './blockchainServices';
@@ -246,6 +248,84 @@ export const removeAdmin = async (
   return submitTransaction(signer, pool, transaction, safeTransaction);
 };
 
+export const approveToken = async (
+  signer: JsonRpcSigner,
+  pool: Pool,
+  amount: number | undefined,
+  proxyContract: string,
+  token: ParaswapToken,
+): Promise<Transaction | undefined> => {
+  const tokenContract = getTokenContract(pool.chain_id, token.address);
+  const decimals = await tokenContract.decimals();
+  const maxAllowance = BigNumber.from('2').pow(BigNumber.from('256').sub(BigNumber.from('1')));
+
+  const transaction: Partial<Transaction> = {
+    type: 'unlockToken',
+    pool_id: pool.id,
+    timestamp: Math.floor(new Date().valueOf() / 1000),
+    metadata: {
+      token: token,
+      amount,
+    } as any,
+  };
+
+  const safeTransaction = await createSafeTransaction(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address,
+    {
+      to: checksummed(token.address),
+      value: '0',
+      data: ERC20__factory.createInterface().encodeFunctionData('approve', [
+        checksummed(proxyContract),
+        amount ? ethers.utils.parseUnits(amount.toString(), decimals) : maxAllowance,
+      ]),
+    },
+  );
+
+  return submitTransaction(signer, pool, transaction, safeTransaction);
+};
+
+export const swapTokens = async (
+  signer: JsonRpcSigner,
+  pool: Pool,
+  paraswapTx: ParaswapTransaction,
+  tokenFrom: ParaswapToken,
+  tokenTo: ParaswapToken,
+  slippage: number,
+  priceRoute: OptimalRate,
+): Promise<Transaction | undefined> => {
+  const transaction: Partial<Transaction> = {
+    type: 'swap',
+    pool_id: pool.id,
+    timestamp: Math.floor(new Date().valueOf() / 1000),
+    metadata: {
+      src_token: tokenFrom,
+      src_usd: priceRoute.srcUSD,
+      src_amount: priceRoute.srcAmount,
+      dest_token: tokenTo,
+      dest_amount: priceRoute.destAmount,
+      dest_usd: priceRoute.destUSD,
+      slippage,
+      gas_cost: priceRoute.gasCost,
+      gas_cost_usd: priceRoute.gasCostUSD,
+    } as SwapData,
+  };
+
+  const safeTransaction = await createSafeTransaction(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address,
+    {
+      to: checksummed(paraswapTx.to),
+      value: paraswapTx.value,
+      data: paraswapTx.data,
+    },
+  );
+
+  return submitTransaction(signer, pool, transaction, safeTransaction);
+};
+
 const submitTransaction = async (
   signer: Signer,
   pool: Pool,
@@ -309,7 +389,7 @@ export const executeTransaction = async (
   pool: Pool,
   transactionId: number,
   safeTxHash: string,
-  isRejection = false,
+  isRejection: boolean,
 ) => {
   const tx = await executeSafeTransactionByHash(
     signer,
@@ -436,4 +516,15 @@ export const updateTransactionMemo = async (id: number, memo: string) => {
 
 export const getTxScanLink = (hash: string, chainId: number) => {
   return `${networks[chainId].blockExplorerUrls[0]}tx/${hash}`;
+};
+
+export const getPendingTokenUnlockingTxCount = async (pool: Pool, symbol: string) => {
+  const { data } = await transationsTable()
+    .select()
+    .eq('pool_id', pool.id)
+    .eq('type', 'unlockToken')
+    .in('status', ['awaitingConfirmations', 'awaitingExecution'])
+    //@ts-ignore
+    .eq('metadata->token->>symbol', symbol);
+  return data?.length || 0;
 };

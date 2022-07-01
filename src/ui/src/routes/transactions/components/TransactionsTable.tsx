@@ -30,7 +30,7 @@ export const TransactionsTable = ({
     const columns: Column[] = [
       {
         Header: '',
-        accessor: 'safeNonce',
+        accessor: 'safe_nonce',
       },
       {
         Header: '',

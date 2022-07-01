@@ -1,21 +1,20 @@
 import { Box, Flex, Img, Text } from '@chakra-ui/react';
-import { SafeBalanceUsdResponse } from '@gnosis.pm/safe-service-client';
 import { ethers } from 'ethers';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
 import { usePool } from '../../../hooks/usePool';
-import { getSafeBalances } from '../../../services/gnosisServices';
+import { BalancesReponse, getBalances } from '../../../services/covalentServices';
 
 export const AssetsCard = () => {
   const { pool } = usePool();
   const [isLoading, setIsLoading] = useState(true);
-  const [balances, setBalances] = useState<SafeBalanceUsdResponse[]>([]);
+  const [balances, setBalances] = useState<BalancesReponse[]>([]);
 
   useEffect(() => {
     if (pool) {
-      getSafeBalances(pool.chain_id, pool.gnosis_safe_address).then((balances) => {
-        setBalances(balances);
+      getBalances(pool.id).then((balances) => {
+        setBalances(balances ?? []);
         setIsLoading(false);
       });
     }
@@ -36,17 +35,17 @@ export const AssetsCard = () => {
         ) : (
           balances.map((balance, index) => {
             return (
-              <Flex key={index} justifyContent="space-between" px={2}>
+              <Flex key={index} justifyContent="space-between" px={2} mb={4}>
                 <Flex alignItems="center" gap={2}>
-                  <Img w="30px" h="30px" src={balance.token?.logoUri} />
+                  <Img w="30px" h="30px" src={balance.logo_url} />
                   <Text fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                    {balance.token?.symbol}
+                    {balance.contract_ticker_symbol}
                   </Text>
                 </Flex>
 
                 <Flex direction="column" alignItems="end">
                   <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                    {ethers.utils.formatUnits(balance.balance, balance.token?.decimals)}
+                    { (+ethers.utils.formatUnits(balance.balance, balance.contract_decimals)).toPrecision(5)}
                   </Text>
 
                   <Text
@@ -54,7 +53,7 @@ export const AssetsCard = () => {
                     color="gray.400"
                     fontWeight="semibold"
                   >
-                    $ {balance.fiatBalance}
+                    $ {balance.quote} 
                   </Text>
                 </Flex>
               </Flex>
