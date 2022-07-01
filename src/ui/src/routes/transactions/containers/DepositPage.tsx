@@ -38,8 +38,6 @@ export const DepositPage = () => {
   const confirmationRef = useRef<TransactionSubmittedModalRef>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const signer = (provider as Web3Provider)?.getSigner();
-
   const token = pool?.token;
 
   if (!token || !user) {
@@ -72,7 +70,7 @@ export const DepositPage = () => {
     const { amount, memo, category } = formValue;
 
     try {
-      const tx = await deposit(signer, pool, category.id, amount, memo);
+      const tx = await deposit(provider as Web3Provider, pool, category.id, amount, memo);
       confirmationRef.current?.open(tx);
       methods.reset();
     } catch (e: any) {

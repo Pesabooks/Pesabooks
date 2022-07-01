@@ -6,7 +6,7 @@ import { CardBody } from '../../../components/Card/CardBody';
 import { IconBox } from '../../../components/Icons';
 import Loading from '../../../components/Loading';
 import { usePool } from '../../../hooks/usePool';
-import { getSafeBalance } from '../../../services/gnosisServices';
+import { getTotalBalance } from '../../../services/covalentServices';
 
 type BalanceCardProps = {
   chainId: number;
@@ -19,14 +19,14 @@ const BalanceCard = ({ chainId }: BalanceCardProps) => {
 
   useEffect(() => {
     const getBalance = async () => {
-      if (!pool?.gnosis_safe_address) return;
-      const balance = await getSafeBalance(chainId, pool?.gnosis_safe_address);
-      setBalance(balance);
+      if (!pool?.id) return;
+      const balance = await getTotalBalance(pool?.id);
+      setBalance(balance ?? 0);
       setLoading(false);
     };
 
     getBalance();
-  }, [chainId, pool?.gnosis_safe_address]);
+  }, [pool?.id]);
 
   return (
     <Card minH="83px">
@@ -37,7 +37,7 @@ const BalanceCard = ({ chainId }: BalanceCardProps) => {
               Balance
             </StatLabel>
             <Flex>
-              {loading ? <Loading size="md" /> : <StatNumber fontSize="lg">$ {balance}</StatNumber>}
+              {loading ? <Loading size="md" /> : <StatNumber fontSize="lg">$ {balance.toFixed(2)}</StatNumber>}
             </Flex>
           </Stat>
           <IconBox h={'45px'} w={'45px'}>

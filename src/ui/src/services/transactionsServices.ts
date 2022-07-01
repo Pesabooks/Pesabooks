@@ -1,4 +1,4 @@
-import { JsonRpcSigner } from '@ethersproject/providers';
+import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
 import { BigNumber, ContractReceipt, ContractTransaction, ethers, Signer } from 'ethers';
@@ -27,7 +27,7 @@ import {
 } from './gnosisServices';
 
 export const deposit = async (
-  signer: JsonRpcSigner,
+  provider: Web3Provider,
   pool: Pool,
   category_id: number,
   amount: number,
@@ -35,6 +35,7 @@ export const deposit = async (
 ) => {
   const { token } = pool;
   if (token == null) throw new Error();
+  const signer = provider.getSigner();
 
   const from = checksummed(await signer.getAddress());
   const to = checksummed(pool.gnosis_safe_address);
@@ -71,9 +72,13 @@ export const deposit = async (
   handleSupabaseError(queuingEror);
   const queuedTransactionId = queuedTransactions?.[0].id ?? 0;
 
-  const tx = await tokenContract.transfer(to, ethers.utils.parseUnits(amount.toString(), decimals));
+  const _amount = ethers.utils.parseUnits(amount.toString(), decimals);
 
-  //notifyTransaction(tx, `Deposit of ${amount} ${token.symbol}`);
+  const gasLimit = await tokenContract.estimateGas.transfer(to, _amount);
+  const gasPrice = await provider.getGasPrice();
+
+  const tx = await tokenContract.transfer(to, _amount, { gasLimit: gasLimit, gasPrice: gasPrice });
+
   notifyTransaction(pool.chain_id, tx.hash);
 
   transaction.hash = tx.hash;

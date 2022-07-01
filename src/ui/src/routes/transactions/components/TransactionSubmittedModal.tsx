@@ -81,7 +81,7 @@ export const TransactionSubmittedModal = forwardRef(
                 )}
                 {transaction?.hash && chainId && (
                   <Link href={getTxScanLink(transaction.hash, chainId)} isExternal>
-                    <Button variant="outline" rightIcon={<ExternalLinkIcon />}>
+                    <Button variant="outline" rightIcon={<ExternalLinkIcon />}  w="100%">
                       View Receipt
                     </Button>
                   </Link>
