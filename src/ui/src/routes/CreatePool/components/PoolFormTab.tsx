@@ -73,9 +73,9 @@ export const PoolFormTab = ({ chainId, tokens, onCreate, loading, onPrev }: Pool
           w="80%"
           mx="auto"
         >
-          <Text fontSize="lg" fontWeight="bold" mb="4px">
+          {/* <Text fontSize="lg" fontWeight="bold" mb="4px">
             Group info
-          </Text>
+          </Text> */}
         </Flex>
       </CardHeader>
       <CardBody flexDirection="column">
@@ -128,7 +128,7 @@ export const PoolFormTab = ({ chainId, tokens, onCreate, loading, onPrev }: Pool
               />
             </Stack>
 
-            <Flex justify="space-between" mt="28px">
+            <Flex justify="space-between" mt="100px">
               <Button
                 variant="outline"
                 alignSelf="flex-end"

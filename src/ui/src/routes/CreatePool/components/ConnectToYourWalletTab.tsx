@@ -28,9 +28,9 @@ export const ConnectToYourWalletTab = ({
           w="80%"
           mx="auto"
         >
-          <Text fontSize="lg" fontWeight="bold" mb="4px">
+          {/* <Text fontSize="lg" fontWeight="bold" mb="4px">
             Connect to your wallet
-          </Text>
+          </Text> */}
           <Text color="gray.400" fontWeight="normal" fontSize="sm">
             To create a new group, a smart contract need to be deployed on chain. To interact with
             Pesabooks, please connect to your wallet
@@ -46,7 +46,7 @@ export const ConnectToYourWalletTab = ({
               <ConnectedChain />
             </Box>
           ) : (
-            <ConnectWalletButton chainId={chainId} w="200px" alignSelf="center" />
+            <ConnectWalletButton chainId={chainId}  alignSelf="center" />
           )}
           <Flex justify="space-between" mt="24px">
             <Button

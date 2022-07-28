@@ -43,8 +43,8 @@ export const networks: { [chainId: number]: Network } = {
   },
   137: {
     chainId: '0x89',
-    rpcUrls: ['https://polygon-rpc.com'],
-    chainName: 'Polygon Mainnet',
+    rpcUrls: ['https://polygon-rpc.com', 'https://rpc.ankr.com/polygon'],
+    chainName: 'Polygon',
     nativeCurrency: {
       name: 'MATIC',
       symbol: 'MATIC',
@@ -53,6 +53,23 @@ export const networks: { [chainId: number]: Network } = {
     blockExplorerUrls: ['https://polygonscan.com/'],
     isTest: false,
     registryAddress: '0x8d618a58967ebBb421D848640A1D2886336484d3',
+  },
+  56: {
+    chainId: '0x38',
+    rpcUrls: [
+      'https://bsc-dataseed.binance.org',
+      'https://bsc-dataseed1.defibit.io',
+      'https://bsc-dataseed1.ninicoin.io',
+    ],
+    chainName: 'BNB Smart Chain',
+    nativeCurrency: {
+      name: 'BNB',
+      symbol: 'BNB',
+      decimals: 18,
+    },
+    blockExplorerUrls: ['https://bscscan.com/'],
+    isTest: false,
+    registryAddress: '',
   },
 };
 

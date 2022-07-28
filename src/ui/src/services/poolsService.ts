@@ -1,6 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { handleSupabaseError, poolsTable, supabase } from '../supabase';
-import { AddressLookup, Pool, Profile, Token } from '../types';
+import { handleSupabaseError, poolsTable, supabase, transationsTable } from '../supabase';
+import { AddressLookup, Pool, Profile, Token, Transaction } from '../types';
 import { deploySafe } from './gnosisServices';
 
 export const getPool = async (pool_id: string) => {
@@ -36,9 +36,11 @@ export const createNewPool = async (
   token: Token,
   chainId: number,
 ) => {
-  const gnosis_address = await deploySafe(provider);
+  const signer = provider.getSigner();
+  const gnosis_address = await deploySafe(signer);
+  const signer_address = await signer.getAddress();
 
-  const { data, error } = await supabase.rpc<number>('create_pool', {
+  const { data: poolId, error } = await supabase.rpc<number>('create_pool', {
     chain_id: chainId,
     name: name,
     description: description ?? '',
@@ -48,7 +50,18 @@ export const createNewPool = async (
 
   handleSupabaseError(error);
 
-  return data;
+  const transaction: Partial<Transaction> = {
+    type: 'createSafe',
+    //@ts-ignore the function return a number, not an array
+    pool_id: poolId,
+    timestamp: Math.floor(new Date().valueOf() / 1000),
+    signer_address,
+    status: 'completed',
+  };
+
+  await transationsTable().insert(transaction);
+
+  return poolId;
 };
 
 export const updatePoolInformation = async (id: number, pool: Partial<Pool>) => {

@@ -1,17 +1,17 @@
 import { Flex, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
+import Loading from '../../../components/Loading';
 import { ConfirmationModal, ConfirmationRef } from '../../../components/Modals/ConfirmationModal';
-import {
-  ButtonWithConnectedWallet
-} from '../../../components/withConnectedWallet';
+import { ButtonWithConnectedWallet } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
 import { getSafeAdmins, getSafeTreshold } from '../../../services/gnosisServices';
 import { getAddressLookUp } from '../../../services/poolsService';
 import { addAdmin, removeAdmin } from '../../../services/transactionsServices';
 import { AddressLookup } from '../../../types';
+import { compareAddress } from '../../../utils';
 import { AddAdminFormValue, AddAdminModal } from '../../members/components/addAdminModal';
 import { AdminsList } from '../components/AdminsList';
 
@@ -29,20 +29,19 @@ export const AdminsPage = () => {
   const toast = useToast();
   const confirmationRef = useRef<ConfirmationRef>(null);
   const signer = (provider as Web3Provider)?.getSigner();
+  const [loading, setLoading] = useState(true);
 
   const adminsAddressLookup = useMemo(
-    () =>
-      lookups.filter(
-        (l) => !!adminAddressess.find((a) => a.toLowerCase() === l.address.toLocaleLowerCase()),
-      ),
+    () => lookups.filter((l) => !!adminAddressess.find((a) => compareAddress(a, l.address))),
     [lookups, adminAddressess],
   );
 
-  const loadAdminAddresses = useCallback(() => {
-    if (pool?.chain_id && pool.gnosis_safe_address)
-      getSafeAdmins(pool.chain_id, pool.gnosis_safe_address).then((addresses) =>
-        setAdminAddressess(addresses),
-      );
+  const loadAdminAddresses = useCallback(async () => {
+    if (pool?.chain_id && pool.gnosis_safe_address) {
+      const addresses = await getSafeAdmins(pool.chain_id, pool.gnosis_safe_address);
+      setAdminAddressess(addresses);
+      setLoading(false);
+    }
   }, [pool?.chain_id, pool?.gnosis_safe_address]);
 
   useEffect(() => {
@@ -130,13 +129,14 @@ export const AdminsPage = () => {
           </Flex>
         </CardHeader>
         <CardBody>
-          {pool && (
+          {!loading && pool && (
             <AdminsList
               chainId={pool.chain_id}
               admins={adminsAddressLookup}
               remove={confirmDeactivation}
             />
           )}
+          {loading && <Loading />}
         </CardBody>
       </Card>
 

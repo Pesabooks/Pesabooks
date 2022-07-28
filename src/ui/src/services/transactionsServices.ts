@@ -36,6 +36,7 @@ export const deposit = async (
   const { token } = pool;
   if (token == null) throw new Error();
   const signer = provider.getSigner();
+  const signer_address = await signer.getAddress();
 
   const from = checksummed(await signer.getAddress());
   const to = checksummed(pool.gnosis_safe_address);
@@ -50,6 +51,7 @@ export const deposit = async (
     category_id: category_id,
     status: 'pending',
     pool_id: pool.id,
+    signer_address,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
       transfer_from: from,
@@ -116,6 +118,7 @@ export const depositWithCard = async (
     status: 'pending',
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
+    signer_address: '',
     metadata: {
       ramp_id: rampId,
       ramp_purchase_view_token: rampPurchaseViewToken,
@@ -338,6 +341,7 @@ const submitTransaction = async (
   safeTransaction: SafeTransaction,
 ) => {
   const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address);
+  const signer_address = await signer.getAddress();
 
   if (treshold > 1) {
     const safeTxHash = await proposeSafeTransaction(
@@ -348,6 +352,7 @@ const submitTransaction = async (
     );
     const { data } = await transationsTable().insert({
       ...transaction,
+      signer_address,
       safe_tx_hash: safeTxHash,
       safe_nonce: safeTransaction.data.nonce,
       status: 'awaitingConfirmations',

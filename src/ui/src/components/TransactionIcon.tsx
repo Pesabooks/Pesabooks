@@ -1,5 +1,6 @@
 import { Box, Icon } from '@chakra-ui/react';
 import { BiTransfer } from 'react-icons/bi';
+import { BsSafe } from 'react-icons/bs';
 import {
   FiArrowDownLeft,
   FiArrowUpRight,
@@ -37,6 +38,9 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
       break;
     case 'swap':
       logo = BiTransfer;
+      break;
+      case 'createSafe':
+      logo = BsSafe;
       break;
 
     default:

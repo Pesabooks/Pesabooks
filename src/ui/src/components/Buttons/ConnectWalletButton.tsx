@@ -8,8 +8,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay,
-  useDisclosure
+  ModalOverlay, useDisclosure
 } from '@chakra-ui/react';
 import { useWeb3React } from '@web3-react/core';
 import { NoMetaMaskError } from '@web3-react/metamask';
@@ -19,6 +18,7 @@ import { useEffect } from 'react';
 import { metaMask } from '../../connectors/metaMask';
 import { walletConnect } from '../../connectors/walletConnect';
 import { getAddChainParameters } from '../../data/networks';
+import { ChainTag } from '../ChainTag';
 import { SelectWalletModal } from '../Modals/SelectWalletModal';
 import { SwitchNetworkModal } from '../Modals/SwithNetworkModal';
 
@@ -73,8 +73,6 @@ export const ConnectWalletButton = ({ chainId, ...buttonProps }: ConnectWalletBu
     }
   }, [error, onOpenInstallMetamaskModal]);
 
-
-  
   return (
     <>
       {!isActive && (
@@ -84,8 +82,8 @@ export const ConnectWalletButton = ({ chainId, ...buttonProps }: ConnectWalletBu
       )}
 
       {isActive && chainId !== connectedChainId && (
-        <Button onClick={onOpenSwitchNetworkModal} {...buttonProps}>
-          Switch Network
+        <Button variant="outline" onClick={onOpenSwitchNetworkModal} {...buttonProps}>
+          Switch wallet to <ChainTag size="lg" variant="ghost" chainId={chainId} />
         </Button>
       )}
 

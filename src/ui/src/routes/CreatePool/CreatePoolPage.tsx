@@ -1,4 +1,5 @@
-import { Container, Flex, Text, useToast } from '@chakra-ui/react';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
+import { Container, Flex, Link, Text, useToast } from '@chakra-ui/react';
 import type { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import { Step, Steps, useSteps } from 'chakra-ui-steps';
@@ -44,8 +45,7 @@ export const CreatePoolPage = () => {
       );
 
       navigate(`/pool/${pool_id}`);
-    } catch (e :any) {
-    
+    } catch (e: any) {
       toast({
         title: e.message,
         status: 'error',
@@ -86,15 +86,27 @@ export const CreatePoolPage = () => {
   return (
     <>
       <Helmet>
-        <title>Create a New Group</title>
+        <title>Create Safe</title>
       </Helmet>
       <Flex direction="column" minH="100vh" align="center" pt={{ sm: '125px', lg: '75px' }}>
         <Navbar />
         <Flex direction="column" textAlign="center" mb={{ sm: '25px', md: '45px' }}>
           <Text fontSize={{ sm: '2xl', md: '3xl', lg: '4xl' }} fontWeight="bold" mb="8px">
-            Create a New Group
+            Create Safe
           </Text>
-          <Text color="gray.400" fontWeight="normal" fontSize={{ sm: 'sm', md: 'lg' }}></Text>
+          <Text color="gray.400" fontWeight="normal" fontSize={{ sm: 'sm', md: 'lg' }}>
+            Setup a new Gnosis safe to get started
+          </Text>
+          <Text as="u">
+            <Link
+              color="gray.400"
+              href="https://help.gnosis-safe.io/en/articles/3876456-what-is-gnosis-safe"
+              isExternal
+              fontSize="sm"
+            >
+              What is a Gnosis Safe? <ExternalLinkIcon mx="2px" />
+            </Link>
+          </Text>
         </Flex>
         <Container flexDir="column" maxW="2xl">
           <Steps activeStep={activeStep} orientation="vertical">

@@ -1,4 +1,4 @@
-import { Web3Provider } from '@ethersproject/providers';
+import { JsonRpcSigner } from '@ethersproject/providers';
 import Safe, { EthSignSignature, SafeAccountConfig, SafeFactory } from '@gnosis.pm/safe-core-sdk';
 import { SafeTransaction, SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
 import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
@@ -40,6 +40,9 @@ const getServiceClient = (ethAdapter: EthersAdapter, chainId: number) => {
     case 137:
       txServiceUrl = 'https://safe-transaction.polygon.gnosis.io/';
       break;
+    case 56:
+      txServiceUrl = 'https://safe-transaction.bsc.gnosis.io/';
+      break;
     default:
       throw new Error();
   }
@@ -47,8 +50,7 @@ const getServiceClient = (ethAdapter: EthersAdapter, chainId: number) => {
   return new SafeServiceClient({ txServiceUrl, ethAdapter });
 };
 
-export const deploySafe = async (provider: Web3Provider) => {
-  const signer = provider.getSigner();
+export const deploySafe = async (signer: JsonRpcSigner) => {
   const signerAddress = await signer.getAddress();
 
   const ethAdapter = getEthersAdapter(signer);
@@ -247,7 +249,8 @@ export const getSafeAdmins = async (chainId: number, safeAddress: string) => {
 
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
 
-  return safeSdk.getOwners();
+  const toto = await safeSdk.getOwners();
+  return toto;
 };
 
 export const getSafeTreshold = async (chainId: number, safeAddress: string) => {

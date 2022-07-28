@@ -3,6 +3,7 @@ import { Category } from './Category';
 import { Entity } from './Entity';
 
 export type TransactionType =
+  | 'createSafe'
   | 'deposit'
   | 'withdrawal'
   | 'addOwner'
@@ -17,7 +18,9 @@ export type TransactionStatus =
   | 'completed'
   | 'failed'
   | 'rejected';
+
 export interface Transaction extends Entity {
+  signer_address: string;
   safe_nonce?: number;
   timestamp?: number;
   category_id?: number;

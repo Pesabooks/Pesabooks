@@ -76,7 +76,8 @@ export const SwapPage = () => {
   const toast = useToast();
 
   useEffect(() => {
-    if (pool?.chain_id && pool?.chain_id === 137) setParaswap(new ParaSwap(pool?.chain_id));
+    if (pool?.chain_id && (pool?.chain_id === 137 || pool?.chain_id === 56))
+      setParaswap(new ParaSwap(pool?.chain_id));
   }, [pool?.chain_id]);
 
   const getBalances = useCallback(() => {
@@ -160,8 +161,6 @@ export const SwapPage = () => {
   const getTokens = useCallback(async (): Promise<
     [defaultTokenFrom: Token, defaultTokenTo: Token] | undefined
   > => {
-    console.log('getTokens');
-
     if (!pool || !paraswap) return;
 
     try {
@@ -256,7 +255,6 @@ export const SwapPage = () => {
   };
 
   const updatePair = (key: 'tokenFrom' | 'tokenTo', token: Token) => {
-    console.log('updatePair');
     if (
       (key === 'tokenFrom' && token.symbol === state.tokenTo?.symbol) ||
       (key === 'tokenTo' && token.symbol === state.tokenFrom?.symbol)
@@ -275,7 +273,6 @@ export const SwapPage = () => {
   };
 
   const getBestPriceDebounced = debounce((value, tokenFrom: Token, tokenTo: Token) => {
-    console.log('getBestPriceDebounced');
     getBestPrice(value, tokenFrom, tokenTo);
   }, 500);
 
@@ -475,7 +472,6 @@ export const SwapPage = () => {
   };
 
   const fillMaxAmount = () => {
-    console.log('fillMaxAmount');
     const balance = getTokenBalance(state.tokenFrom);
 
     if (balance) {

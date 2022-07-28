@@ -31,6 +31,8 @@ export const getTransactonDescription = (transaction: Transaction, addresses: Ad
         swapData.dest_token.decimals,
       )).toFixed(5);
       return `Swap ${fromAmout} ${swapData.src_token.symbol} for ${toAmout} ${swapData.dest_token.symbol}  `;
+    case 'createSafe':
+      return 'Safe Created';
   }
 };
 
@@ -48,6 +50,8 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
       return 'Unlock Token';
     case 'swap':
       return 'Swap Token';
+    case 'createSafe':
+      return 'Safe created';
   }
 };
 

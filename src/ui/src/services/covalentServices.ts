@@ -9,11 +9,9 @@ export const getTotalBalance = async (poolId: number) => {
 };
 
 export const getBalances = async (poolId: number) => {
-  const { data, error } = await supabase.functions.invoke<BalancesReponse[]>('balances', {
+  const { data } = await supabase.functions.invoke<BalancesReponse[]>('balances', {
     body: JSON.stringify({ poolId }),
   });
-
-  console.log(data, error);
 
   return data;
 };

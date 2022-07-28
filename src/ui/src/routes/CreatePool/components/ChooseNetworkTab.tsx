@@ -6,10 +6,8 @@ import {
   Image,
   Spacer,
   Stack,
-  Text,
-  useColorModeValue
+  Text
 } from '@chakra-ui/react';
-import React from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 
 interface ChooseNetworkTabProps {
@@ -18,7 +16,7 @@ interface ChooseNetworkTabProps {
   onSelect: (chainId: number) => void;
 }
 export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTabProps) => {
-  const textColor = useColorModeValue('gray.700', 'white');
+  // const textColor = useColorModeValue('gray.700', 'white');
   const includeTestnets = process.env.REACT_APP_INCLUDE_TESTNETS === 'true';
 
   return (
@@ -32,9 +30,9 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
           w="80%"
           mx="auto"
         >
-          <Text color={textColor} fontSize="lg" fontWeight="bold" mb="4px">
+          {/* <Text color={textColor} fontSize="lg" fontWeight="bold" mb="4px">
             Select a network
-          </Text>
+          </Text> */}
           <Text color="gray.400" fontWeight="normal" fontSize="sm">
             Select network on which to create your group safe.
           </Text>
@@ -69,6 +67,27 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
               Polygon
               <Spacer />
               {chainId === 137 && <CheckIcon />}
+            </Button>
+            <Button
+              variant={chainId === 56 ? 'solid' : 'outline'}
+              size="lg"
+              display="flex"
+              justifyContent="start"
+              onClick={() => onSelect(56)}
+              transition=".5s all ease"
+              _hover={{ opacity: '0.8' }}
+              w="300px"
+            >
+              <Image
+                mr={4}
+                w="40px"
+                height="40px"
+                src={`${process.env.PUBLIC_URL}/images/chains/BNB.png`}
+                alt="polygon"
+              />
+              BNB Smart Chain
+              <Spacer />
+              {chainId === 56 && <CheckIcon />}
             </Button>
             <Text>More coming soon...</Text>
             {includeTestnets && (

@@ -28,10 +28,7 @@ export const TransactionsTable = ({
 }: TransactionsTableProps) => {
   const columns = useMemo(() => {
     const columns: Column[] = [
-      {
-        Header: '',
-        accessor: 'safe_nonce',
-      },
+     
       {
         Header: '',
         accessor: 'icon',
@@ -104,6 +101,9 @@ export const TransactionsTable = ({
             </Flex>
           );
         },
+      }, {
+        Header: '',
+        accessor: 'safe_nonce',
       },
     ];
     return columns;
