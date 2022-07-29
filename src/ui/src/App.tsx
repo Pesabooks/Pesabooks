@@ -5,7 +5,7 @@ import { MetaMask } from '@web3-react/metamask';
 import { WalletConnect } from '@web3-react/walletconnect';
 import { useCallback, useEffect } from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout/Layout';
 import { hooks as metaMaskHooks, metaMask } from './connectors/metaMask';
 import { hooks as walletConnectHooks, walletConnect } from './connectors/walletConnect';
@@ -81,7 +81,8 @@ function App() {
                     </PoolProvider>
                   }
                 >
-                  <Route index element={<DashboardPage />} />
+                  <Route index element={<Navigate replace to="dashboard" />} />
+                  <Route path="dashboard" element={<DashboardPage />} />
                   <Route path="transactions" element={<TransactionsPage />} />
                   <Route path="members" element={<MembersPage />} />
                   <Route path="deposit" element={<DepositPage />} />
