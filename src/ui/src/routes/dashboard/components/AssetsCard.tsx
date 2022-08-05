@@ -1,10 +1,11 @@
 import { Box, Flex, Img, Text } from '@chakra-ui/react';
+import { BalancesReponse } from '@pesabooks/supabase/functions';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
 import { Card, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
 import { usePool } from '../../../hooks/usePool';
-import { BalancesReponse, getBalances } from '../../../services/covalentServices';
+import { getBalances } from '../../../services/covalentServices';
 
 export const AssetsCard = () => {
   const { pool } = usePool();
@@ -45,7 +46,10 @@ export const AssetsCard = () => {
 
                 <Flex direction="column" alignItems="end">
                   <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                    { (+ethers.utils.formatUnits(balance.balance, balance.contract_decimals)).toPrecision(5)}
+                    {(+ethers.utils.formatUnits(
+                      balance.balance,
+                      balance.contract_decimals,
+                    )).toPrecision(5)}
                   </Text>
 
                   <Text
@@ -53,7 +57,7 @@ export const AssetsCard = () => {
                     color="gray.400"
                     fontWeight="semibold"
                   >
-                    $ {balance.quote} 
+                    $ {balance.quote}
                   </Text>
                 </Flex>
               </Flex>

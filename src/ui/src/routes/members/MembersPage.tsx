@@ -1,5 +1,5 @@
 import { Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ButtonWithConnectedWallet } from '../../components/withConnectedWallet';
 import { useAuth } from '../../hooks/useAuth';
@@ -7,7 +7,8 @@ import { usePool } from '../../hooks/usePool';
 import {
   createInvitation,
   getActiveInvitations,
-  revokeInvitation
+  revokeInvitation,
+  sendInvitation
 } from '../../services/invitationService';
 import { getMembers } from '../../services/membersService';
 import { getAddressLookUp } from '../../services/poolsService';
@@ -26,8 +27,6 @@ export const MembersPage = () => {
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [lookups, setLookups] = useState<AddressLookup[]>([]);
-
- 
 
   const loadData = useCallback(async () => {
     try {
@@ -54,7 +53,7 @@ export const MembersPage = () => {
     try {
       await createInvitation(pool, name, email, user);
       toast({
-        title: `Invitation created. Please copy the link and send it to the member`,
+        title: `${name} has been invited to join the group`,
         status: 'success',
         isClosable: true,
       });
@@ -80,6 +79,16 @@ export const MembersPage = () => {
     });
   };
 
+  const resendInvitation = async (invitation_id: string) => {
+    const invitation = invitations.find((i) => i.id === invitation_id);
+    await sendInvitation(invitation!);
+    toast({
+      title: `Invitation sent to ${invitation?.name}`,
+      status: 'success',
+      isClosable: true,
+    });
+  };
+
   return (
     <>
       <Helmet>
@@ -90,13 +99,17 @@ export const MembersPage = () => {
           Members
         </Heading>
         <Spacer />
-        <ButtonWithConnectedWallet onClick={onOpen} onlyAdmin={true}> Invite a member</ButtonWithConnectedWallet>
+        <ButtonWithConnectedWallet onClick={onOpen} onlyAdmin={true}>
+          {' '}
+          Invite a member
+        </ButtonWithConnectedWallet>
       </Flex>
       <MembersTable
         lookups={lookups}
         members={members}
         invitations={invitations}
         onRevoke={revoke}
+        onResendInvitation={resendInvitation}
         isLoading={isLoading}
       ></MembersTable>
       {isOpen && (

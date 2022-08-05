@@ -2,16 +2,15 @@ import {
   Avatar,
   Badge,
   Button,
-  Flex, IconButton,
+  Flex,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
   Td,
   Text,
-  Tr,
-  useClipboard,
-  useColorModeValue
+  Tr, useColorModeValue
 } from '@chakra-ui/react';
 import { FiMoreVertical } from 'react-icons/fi';
 
@@ -23,6 +22,7 @@ interface MembleTableRowProps {
   isInvitation: boolean;
   id: string;
   onRemove?: (id: string) => void;
+  onResendInvitation?: (id: string) => void;
   role?: string;
 }
 
@@ -34,14 +34,12 @@ export const MemberTableRow = ({
   isInvitation,
   id,
   onRemove,
+  onResendInvitation,
   role,
 }: MembleTableRowProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
   let bgStatus = useColorModeValue('gray.400', '#1a202c');
   let colorStatus = useColorModeValue('white', 'gray.400');
-
-  const link = `${window.location.origin}/auth/invitation/${id}`;
-  const { onCopy } = useClipboard(link);
 
   if (isInvitation) {
     bgStatus = 'orange.300';
@@ -72,20 +70,14 @@ export const MemberTableRow = ({
           {status}
         </Badge>
       </Td>
-      {/* <Td>
-          {isInvitation && (
-            <Button colorScheme="teal" variant="link">
-              Resend
-            </Button>
-          )}
-        </Td> */}
       <Td>
         {isInvitation && (
-          <Button colorScheme="teal" variant="link" onClick={onCopy}>
-            Copy Link
+          <Button onClick={() => onResendInvitation?.(id)} colorScheme="teal" variant="link">
+            Resend
           </Button>
         )}
       </Td>
+
       <Td>
         <Menu>
           <MenuButton
@@ -95,7 +87,6 @@ export const MemberTableRow = ({
             variant="ghost"
           />
           <MenuList>
-            {isInvitation && <MenuItem isDisabled>Resend invitation email</MenuItem>}
             <MenuItem isDisabled={!isInvitation} onClick={() => onRemove?.(id)}>
               Remove
             </MenuItem>

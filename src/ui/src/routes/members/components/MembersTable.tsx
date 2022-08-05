@@ -9,6 +9,7 @@ interface MembersTableProps {
   lookups: AddressLookup[];
   invitations: Invitation[];
   onRevoke: (id: string) => void;
+  onResendInvitation: (id: string) => void;
   onAddAdmin?: (id: string) => void;
   isLoading: boolean;
 }
@@ -16,6 +17,7 @@ export const MembersTable = ({
   members,
   invitations,
   onRevoke,
+  onResendInvitation,
   isLoading,
   lookups,
 }: MembersTableProps) => {
@@ -29,7 +31,6 @@ export const MembersTable = ({
             </Th>
             <Th color="gray.400">Email</Th>
             <Th color="gray.400">Status</Th>
-            {/* <Th></Th> */}
             <Th></Th>
             <Th></Th>
           </Tr>
@@ -60,6 +61,7 @@ export const MembersTable = ({
                 isInvitation={true}
                 id={invitation.id}
                 onRemove={onRevoke}
+                onResendInvitation={onResendInvitation}
               />
             );
           })}

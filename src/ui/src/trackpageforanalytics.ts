@@ -9,6 +9,8 @@ export interface AnalyticsData {
 }
 
 const trackPathForAnalytics = (data: AnalyticsData) => {
+  if (process.env.REACT_APP_ENV === 'development') return;
+
   const { path, search } = data;
 
   const parts = path.split('/');

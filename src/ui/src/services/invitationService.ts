@@ -1,3 +1,4 @@
+import { SendInvitationRequest } from '@pesabooks/supabase/functions';
 import { handleSupabaseError, invitationsTable, supabase } from '../supabase';
 import { Invitation, Pool, Profile } from '../types';
 
@@ -50,7 +51,10 @@ export const createInvitation = async (pool: Pool, name: string, email: string, 
   const { data, error } = await invitationsTable().insert(invitation);
   handleSupabaseError(error);
 
-  return data?.[0];
+  const newIinvitation = data?.[0];
+  sendInvitation(newIinvitation!);
+
+  return newIinvitation;
 };
 
 export const acceptInvitation = async (inviation_id: string) => {
@@ -68,4 +72,21 @@ export const revokeInvitation = async (inviration_id: string) => {
     .update({ active: false, status: 'revoked' })
     .eq('id', inviration_id);
   handleSupabaseError(error);
+};
+
+export const sendInvitation = async (invitation: Invitation) => {
+  const body: SendInvitationRequest = {
+    invitee: invitation.name,
+    invitee_email: invitation.email,
+    inviter: invitation.invited_by,
+    group: invitation.pool_name,
+    url: `${window.location.origin}/auth/invitation/${invitation.id}`,
+  };
+  const { error } = await supabase.functions.invoke('send-invitation', {
+    body: JSON.stringify(body),
+  });
+
+  if (error) {
+    console.error(error.message);
+  }
 };
