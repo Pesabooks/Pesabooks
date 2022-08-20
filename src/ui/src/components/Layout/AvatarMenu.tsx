@@ -15,16 +15,21 @@ import {
   Text,
   useColorMode
 } from '@chakra-ui/react';
-import { useWeb3React } from '@web3-react/core';
-import React from 'react';
-import { getConnectorName } from '../../connectors';
-import { useAuth } from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { WalletAddress } from '../WalletAddress';
 
 export const AvatarMenu = () => {
   const { toggleColorMode } = useColorMode();
-  const { user, signOut } = useAuth();
-  const { account, connector, chainId } = useWeb3React();
+  const { account, chainId,signOut,user } = useWeb3Auth();
+  const navigate = useNavigate();
+ 
+
+  const onSignout = () => {
+    signOut?.().finally(() => {
+      navigate('/auth/signin');
+    });
+  };
 
   return (
     <Menu>
@@ -34,23 +39,17 @@ export const AvatarMenu = () => {
       <Portal>
         <MenuList m={0} alignItems={'center'}>
           <Center flexDirection="column">
-            <p>{user?.name}</p>
-            {account && (
-              <Flex gap={2}>
-                <Avatar
-                  bg="white"
-                  size="xs"
-                  src={`${process.env.PUBLIC_URL}/images/wallet/${getConnectorName(connector)}.png`}
-                />{' '}
-                {chainId && <WalletAddress chainId={chainId} address={account} type="address" />}
-              </Flex>
-            )}
+            <p>{user?.email}</p>
+            {account && <WalletAddress chainId={chainId} address={account} type="address" />}
           </Center>
 
           <MenuDivider />
-          {account && (
-            <MenuItem onClick={() => connector.deactivate()}> Disconnect Wallet</MenuItem>
-          )}
+
+          <MenuItem onClick={() => navigate('/wallet')}> My Wallet</MenuItem>
+          {/* <MenuItem onClick={() => navigate('/profile')}> My Profile</MenuItem> */}
+
+          <MenuDivider />
+
           <MenuItem onClick={toggleColorMode} w="100%">
             <Flex w="100%">
               <Box>
@@ -63,7 +62,7 @@ export const AvatarMenu = () => {
               </Box>
             </Flex>
           </MenuItem>
-          <MenuItem onClick={signOut}>Logout</MenuItem>
+          <MenuItem onClick={onSignout}>Sign Out</MenuItem>
         </MenuList>
       </Portal>
     </Menu>

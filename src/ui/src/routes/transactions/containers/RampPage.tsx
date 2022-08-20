@@ -1,8 +1,8 @@
 import { Button, Container, Heading } from '@chakra-ui/react';
 import {
-    RampInstantEvents,
-    RampInstantEventTypes,
-    RampInstantSDK
+  RampInstantEvents,
+  RampInstantEventTypes,
+  RampInstantSDK
 } from '@ramp-network/ramp-instant-sdk';
 import { ethers } from 'ethers';
 import { useEffect, useState } from 'react';
@@ -11,8 +11,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Card, CardHeader } from '../../../components/Card';
 import { InputAmountField } from '../../../components/Input/InputAmountField';
 import { SelectCategoryField } from '../../../components/Input/SelectCategoryField';
-import { useAuth } from '../../../hooks/useAuth';
 import { usePool } from '../../../hooks/usePool';
+import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAllCategories } from '../../../services/categoriesService';
 import { depositWithCard } from '../../../services/transactionsServices';
 import { Category } from '../../../types';
@@ -27,7 +27,7 @@ interface DepositFormValue {
 
 export const RampPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const { user } = useAuth();
+  const { user } = useWeb3Auth();
   const { pool } = usePool();
   const methods = useForm<DepositFormValue>();
 

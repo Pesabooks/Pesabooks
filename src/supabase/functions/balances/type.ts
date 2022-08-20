@@ -1,5 +1,7 @@
 export interface BalanceQuery {
-  poolId: number;
+  chain_id: number;
+  address: string;
+  quote: string;
 }
 
 export interface BalancesReponse {

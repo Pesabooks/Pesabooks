@@ -10,8 +10,9 @@ export const TransactionsStats = ({ pool }: { pool: Pool }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await supabase.rpc('get_transactions_stats', { pool_id: pool.id });
-      setState(data?.[0]);
+      if (!pool.gnosis_safe_address) return;
+      const { data } = await supabase().rpc('get_transactions_stats', { pool_id: pool.id });
+      setState(data?.[0] ?? {});
     };
     fetchData();
   }, [pool]);

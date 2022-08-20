@@ -23,7 +23,6 @@ import {
 } from '@chakra-ui/react';
 import type { Web3Provider } from '@ethersproject/providers';
 import { SafeMultisigTransactionResponse } from '@gnosis.pm/safe-service-client';
-import { useWeb3React } from '@web3-react/core';
 import { ethers } from 'ethers';
 import { forwardRef, Ref, useEffect, useImperativeHandle, useState } from 'react';
 import { EditableControls } from '../../../components/Editable/EditableControls';
@@ -33,14 +32,15 @@ import { UserWalletCard } from '../../../components/UserWalletCard';
 import { WalletAddress } from '../../../components/WalletAddress';
 import { ButtonWithConnectedWallet } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
+import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAllCategories } from '../../../services/categoriesService';
 import {
-  estimateSafeTransaction,
+  estimateSafeTransactionByHash,
   getSafeNonce,
   getSafeTransaction,
   getSafeTreshold
 } from '../../../services/gnosisServices';
-import { getAddressLookUp } from '../../../services/poolsService';
+import { getMembers } from '../../../services/membersService';
 import {
   confirmTransaction,
   executeTransaction,
@@ -49,7 +49,7 @@ import {
   updateTransactionCategory,
   updateTransactionMemo
 } from '../../../services/transactionsServices';
-import { AddressLookup, Category, Transaction } from '../../../types';
+import { Category, Transaction, User } from '../../../types';
 import { SwapData, TransferData } from '../../../types/transaction';
 import { compareAddress, getTransactionTypeLabel, mathAddress } from '../../../utils';
 import { EditableSelect } from './EditableSelect';
@@ -65,7 +65,7 @@ export interface TransactionDetailRef {
 export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDetailRef>) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { pool, safeAdmins } = usePool();
-  const { provider, account } = useWeb3React();
+  const { provider, account } = useWeb3Auth();
   const [loading, setLoading] = useState(true);
   const {
     isOpen: isSubmitting,
@@ -74,7 +74,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   } = useDisclosure();
   const [treshold, setTreshold] = useState(0);
   const [currentSafeNonce, setCurrentSafeNonce] = useState(0);
-  const [addressLookups, setAddressLookups] = useState<AddressLookup[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [transactions, setTransactions] = useState<{
     transaction: Transaction | undefined;
     safeTransaction: SafeMultisigTransactionResponse | undefined;
@@ -114,7 +114,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   useEffect(() => {
     const fetchData = async () => {
       if (pool) {
-        getAddressLookUp(pool.id).then(setAddressLookups);
+        getMembers(pool.id).then(members=>setUsers(members?.map(m=>m.user!)));
         getSafeTreshold(pool.chain_id, pool.gnosis_safe_address).then(setTreshold);
         getSafeNonce(pool.chain_id, pool.gnosis_safe_address).then(setCurrentSafeNonce);
         getAllCategories(pool.id, { activeOnly: true }).then(setCategories);
@@ -164,7 +164,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
     try {
       openSubmitting();
-      await estimateSafeTransaction(pool.chain_id, pool.gnosis_safe_address, safeTxHash);
+      await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address, safeTxHash);
 
       await executeTransaction(signer, pool, transaction.id, safeTxHash, isRejection);
       loadTransaction(transaction.id);
@@ -235,15 +235,15 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                     <TxPropertyBox label="From" flex="1">
                       {!!(transaction?.metadata as TransferData)?.transfer_from && (
                         <UserWalletCard
-                          addressLookup={mathAddress(
-                            addressLookups,
+                          user={mathAddress(
+                            users,
                             (transaction?.metadata as TransferData)?.transfer_from,
                           )}
                         />
                       )}
 
                       {(transaction?.metadata as TransferData)?.ramp_id &&
-                        transaction.created_by?.name}
+                        transaction.user?.name}
                     </TxPropertyBox>
                   )}
 
@@ -305,8 +305,8 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                   {transaction?.type === 'withdrawal' && (
                     <TxPropertyBox label="To" flex="1">
                       <UserWalletCard
-                        addressLookup={mathAddress(
-                          addressLookups,
+                        user={mathAddress(
+                          users,
                           (transaction?.metadata as TransferData)?.transfer_to,
                         )}
                       />
@@ -371,7 +371,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                   isExecuted={isExecuted}
                   executionTimestamp={transaction?.timestamp}
                   submissionDate={safeTransaction?.submissionDate}
-                  addressLookups={addressLookups}
+                  users={users}
                   confirmations={confirmations}
                 />
               )}

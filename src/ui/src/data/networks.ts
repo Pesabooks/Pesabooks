@@ -11,13 +11,28 @@ export interface Network {
   };
   blockExplorerUrls: string[];
   isTest: boolean;
-  registryAddress: string;
+  active: boolean;
+  logoUrl: string;
 }
 
 export const networks: { [chainId: number]: Network } = {
+  1: {
+    chainId: '0x1',
+    rpcUrls: [`https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
+    chainName: 'Ethereum',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    blockExplorerUrls: ['https://etherscan.io/'],
+    isTest: false,
+    active: false,
+    logoUrl: 'images/chains/ethereum.svg',
+  },
   80001: {
     chainId: '0x13881',
-    rpcUrls: ['https://matic-mumbai.chainstacklabs.com'],
+    rpcUrls: [`https://polygon-mumbai.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
     chainName: 'Polygon Testnet Mumbai',
     nativeCurrency: {
       name: 'tMATIC',
@@ -26,11 +41,12 @@ export const networks: { [chainId: number]: Network } = {
     },
     blockExplorerUrls: ['https://mumbai.polygonscan.com/'],
     isTest: true,
-    registryAddress: '0x2549a1d70165d71B86D71537ccF7506181FB37c1',
+    active: false,
+    logoUrl: 'images/chains/polygon-matic-logo.svg',
   },
   4: {
     chainId: '0x4',
-    rpcUrls: ['https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'],
+    rpcUrls: [`https://rinkeby.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
     chainName: 'Rinkeby Testnet',
     nativeCurrency: {
       name: 'Ether',
@@ -38,12 +54,13 @@ export const networks: { [chainId: number]: Network } = {
       decimals: 18,
     },
     blockExplorerUrls: ['https://rinkeby.etherscan.io/'],
-    isTest: false,
-    registryAddress: '',
+    isTest: true,
+    active: true,
+    logoUrl: 'images/chains/ethereum.svg',
   },
   137: {
     chainId: '0x89',
-    rpcUrls: ['https://polygon-rpc.com', 'https://rpc.ankr.com/polygon'],
+    rpcUrls: [`https://polygon-mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
     chainName: 'Polygon',
     nativeCurrency: {
       name: 'MATIC',
@@ -52,7 +69,8 @@ export const networks: { [chainId: number]: Network } = {
     },
     blockExplorerUrls: ['https://polygonscan.com/'],
     isTest: false,
-    registryAddress: '0x8d618a58967ebBb421D848640A1D2886336484d3',
+    active: true,
+    logoUrl: 'images/chains/polygon-matic-logo.svg',
   },
   56: {
     chainId: '0x38',
@@ -69,7 +87,8 @@ export const networks: { [chainId: number]: Network } = {
     },
     blockExplorerUrls: ['https://bscscan.com/'],
     isTest: false,
-    registryAddress: '',
+    active: true,
+    logoUrl: 'images/chains/BNB.png',
   },
 };
 

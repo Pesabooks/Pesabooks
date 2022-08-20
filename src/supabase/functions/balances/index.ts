@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
-import { supabaseClient } from "../_shared/supabaseClient.ts";
+import { BalanceQuery, BalancesReponse } from "./type.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -10,27 +10,19 @@ serve(async (req) => {
   }
 
   try {
-    const { poolId } = await req.json();
+    const { chain_id, address, quote }: BalanceQuery = await req.json();
+    const convalentKey = Deno.env.get("COVALENT_KEY");
 
-    //Get contracts
-    let { data: pools, error } = await supabaseClient.from("pools").select().eq("id", poolId);
-    const pool = pools?.[0];
-
-    if (error) {
-      return new Response(JSON.stringify(error), { status: 400 });
-    }
     const jsonResponse = await fetch(
-      `https://api.covalenthq.com/v1/${pool.chain_id}/address/${
-        pool.gnosis_safe_address
-      }/balances_v2/?quote-currency=USD&format=JSON&nft=false&no-nft-fetch=false&key=${Deno.env.get("COVALENT_KEY")}`
+      `https://api.covalenthq.com/v1/${chain_id}/address/${address}/balances_v2/?quote-currency=${quote}&format=JSON&nft=false&no-nft-fetch=false&key=${convalentKey}`
     );
     const { data: balances, error: covError, error_message } = await jsonResponse.json();
 
     if (covError) {
-      return new Response(JSON.stringify(covError), { status: 400 });
+      throw new Error(error_message);
     }
 
-    const filteredBalances = balances?.items?.filter((b: any) => b.type !== "dust");
+    const filteredBalances: BalancesReponse = balances?.items?.filter((b: BalancesReponse) => b.type !== "dust");
 
     return new Response(JSON.stringify(filteredBalances), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -39,7 +31,7 @@ serve(async (req) => {
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 400,
+      status: 500,
     });
   }
 });

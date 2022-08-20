@@ -1,10 +1,9 @@
 import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
-import { chakra, Flex, Table, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react';
+import { chakra, Flex, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { CellProps, Column, useSortBy, useTable } from 'react-table';
 import Loading from '../../../components/Loading';
-import { AddressLookup, Category, Pool, Transaction, TransactionStatus } from '../../../types';
-import { getTxAmountDescription } from '../../../utils';
+import { Category, Pool, Transaction, TransactionStatus, User } from '../../../types';
 import { RefreshTransactionButton } from './RefreshTransactionButton';
 import { TransactionCell } from './TransactionCell';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
@@ -12,7 +11,7 @@ import { TransactionStatusBadge } from './TransactionStatusBadge';
 interface TransactionsTableProps {
   pool: Pool;
   transactions: Transaction[];
-  addressLookups: AddressLookup[];
+  users: User[];
   loading: boolean;
   categories: Category[];
   onSelect: (transaction: Transaction) => void;
@@ -21,7 +20,7 @@ interface TransactionsTableProps {
 export const TransactionsTable = ({
   pool,
   transactions,
-  addressLookups,
+  users,
   loading,
   categories,
   onSelect,
@@ -33,21 +32,10 @@ export const TransactionsTable = ({
         Header: '',
         accessor: 'icon',
         Cell: ({ cell: { value, row } }: CellProps<Transaction>) => (
-          <TransactionCell transaction={row.original} addressLookups={addressLookups} />
+          <TransactionCell transaction={row.original} users={users} />
         ),
       },
-      // {
-      //   Header: 'Date',
-      //   accessor: 'created_at',
-      //   Cell: ({ cell: { value } }) => {
-      //     const date = new Date(value);
-      //     return (
-      //       <span>
-      //         {date.toLocaleDateString()} {date.toLocaleTimeString()}
-      //       </span>
-      //     );
-      //   },
-      // },
+     
       {
         Header: 'Category',
         accessor: 'category',
@@ -58,26 +46,38 @@ export const TransactionsTable = ({
         accessor: 'memo',
       },
       {
-        Header: 'Amount',
-
-        accessor: 'metadata.amount',
-        isNumeric: true,
-        Cell: ({
-          cell: {
-            value,
-            row: { original },
-          },
-        }: CellProps<Transaction>) => {
-          switch (original.type) {
-            case 'deposit':
-              return <Text color="green">{getTxAmountDescription(original)}</Text>;
-            case 'withdrawal':
-              return <Text color="red">- {getTxAmountDescription(original)}</Text>;
-            default:
-              return <Text>{value}</Text>;
-          }
+        Header: 'Date',
+        accessor: 'created_at',
+        Cell: ({ cell: { value } }) => {
+          const date = new Date(value);
+          return (
+            <span>
+              {date.toLocaleDateString()} {date.toLocaleTimeString()}
+            </span>
+          );
         },
       },
+      // {
+      //   Header: 'Amount',
+
+      //   accessor: 'metadata.amount',
+      //   isNumeric: true,
+      //   Cell: ({
+      //     cell: {
+      //       value,
+      //       row: { original },
+      //     },
+      //   }: CellProps<Transaction>) => {
+      //     switch (original.type) {
+      //       case 'deposit':
+      //         return <Text color="green">{getTxAmountDescription(original)}</Text>;
+      //       case 'withdrawal':
+      //         return <Text color="red">- {getTxAmountDescription(original)}</Text>;
+      //       default:
+      //         return <Text>{value}</Text>;
+      //     }
+      //   },
+      // },
       {
         Header: '',
         accessor: 'status',
@@ -107,7 +107,7 @@ export const TransactionsTable = ({
       },
     ];
     return columns;
-  }, [addressLookups, pool.chain_id]);
+  }, [users, pool.chain_id]);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
     { columns, data: transactions },

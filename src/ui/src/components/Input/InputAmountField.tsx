@@ -18,9 +18,13 @@ interface InputAmountFieldProps extends BoxProps {
   symbol: string;
 }
 
-export const validateAmount = (value: number, balance: number|undefined) => {
+export const validateAmount = (value: number, balance: number | undefined) => {
   if (balance === undefined) return true;
   return value <= balance;
+};
+
+export const vali = (value: number) => {
+  return value > 0;
 };
 
 export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFieldProps) => {
@@ -33,7 +37,10 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
   const amount = register('amount', {
     valueAsNumber: true,
     required: 'Amount is required',
-    validate: { insufficientFunds: (value) => validateAmount(value, balance) },
+    validate: {
+      insufficientFunds: (value) => validateAmount(value, balance),
+      required: (value) => vali(value),
+    },
   });
 
   return (
@@ -42,9 +49,11 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
         <FormLabel htmlFor="amount">Amount</FormLabel>
         <Spacer />
         <Flex align="center" gap={1}>
-         {balance!==undefined && <Text fontSize="sm">
-            Balance: {balance} {symbol}
-          </Text>}
+          {balance !== undefined && (
+            <Text fontSize="sm">
+              Balance: {balance} {symbol}
+            </Text>
+          )}
           {/* <Icon as={FaWallet} h={'12px'} w={'12px'} /> */}
         </Flex>
       </Flex>

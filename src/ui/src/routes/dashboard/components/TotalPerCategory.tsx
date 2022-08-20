@@ -1,5 +1,5 @@
 import { Box, Table, Tbody, Td, Text, Th, Thead, Tr } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Loading from '../../../components/Loading';
 import { supabase } from '../../../supabase';
 import { Pool } from '../../../types';
@@ -21,7 +21,7 @@ export const TotalPerCategory = ({ pool }: TotalPerCategoryProps) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await supabase.rpc<TotalPerCategoryType>('get_total_per_category', {
+        const { data } = await supabase().rpc<TotalPerCategoryType>('get_total_per_category', {
           pool_id: pool.id,
         });
         setData(data ?? []);

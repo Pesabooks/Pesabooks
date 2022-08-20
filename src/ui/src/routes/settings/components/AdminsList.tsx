@@ -1,16 +1,15 @@
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Flex, Spacer, Text, Tooltip, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
 import { WalletAddress } from '../../../components/WalletAddress';
 import {
   IconButtonWithConnectedWallet
 } from '../../../components/withConnectedWallet';
-import { AddressLookup } from '../../../types';
+import { User } from '../../../types';
 
 interface AdminsListProps {
   chainId: number;
-  admins: AddressLookup[];
-  remove: (address: AddressLookup) => void;
+  admins: User[];
+  remove: (address: User) => void;
 }
 export const AdminsList = ({ chainId, admins, remove }: AdminsListProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
@@ -24,7 +23,7 @@ export const AdminsList = ({ chainId, admins, remove }: AdminsListProps) => {
               <Text fontSize="md" color={textColor} fontWeight="bold">
                 {row.name}
               </Text>
-              <WalletAddress address={row.address} chainId={chainId} type="address" />
+              <WalletAddress address={row.wallet} chainId={chainId} type="address" />
             </Flex>
             <Spacer />
 

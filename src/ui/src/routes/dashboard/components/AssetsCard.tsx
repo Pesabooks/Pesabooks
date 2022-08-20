@@ -1,25 +1,14 @@
 import { Box, Flex, Img, Text } from '@chakra-ui/react';
 import { BalancesReponse } from '@pesabooks/supabase/functions';
 import { ethers } from 'ethers';
-import { useEffect, useState } from 'react';
 import { Card, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
-import { usePool } from '../../../hooks/usePool';
-import { getBalances } from '../../../services/covalentServices';
 
-export const AssetsCard = () => {
-  const { pool } = usePool();
-  const [isLoading, setIsLoading] = useState(true);
-  const [balances, setBalances] = useState<BalancesReponse[]>([]);
-
-  useEffect(() => {
-    if (pool) {
-      getBalances(pool.id).then((balances) => {
-        setBalances(balances ?? []);
-        setIsLoading(false);
-      });
-    }
-  }, [pool]);
+interface AssetsCardProps {
+  balances: BalancesReponse[];
+  loading: boolean;
+}
+export const AssetsCard = ({ balances, loading }: AssetsCardProps) => {
 
   return (
     <Card p="28px 10px 16px 0px" mb={{ sm: '26px', lg: '0px' }}>
@@ -31,7 +20,7 @@ export const AssetsCard = () => {
         </Flex>
       </CardHeader>
       <Box w="100%" h={{ sm: '300px' }} ps="8px">
-        {isLoading ? (
+        {loading ? (
           <Loading />
         ) : (
           balances.map((balance, index) => {

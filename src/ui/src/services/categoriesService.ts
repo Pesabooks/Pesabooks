@@ -1,7 +1,7 @@
 import { categoriesTable, handleSupabaseError } from '../supabase';
 import { Category } from '../types';
 
-export const getAllCategories = async (pool_id: number, options?: { activeOnly: boolean }) => {
+export const getAllCategories = async (pool_id: string, options?: { activeOnly: boolean }) => {
   let query = categoriesTable().select().order('id').eq('pool_id', pool_id);
 
   if (options?.activeOnly) {
@@ -20,7 +20,7 @@ export const editCategory = async (id: number, category: Partial<Category>) => {
   handleSupabaseError(error);
 };
 
-export const addCategory = async (pool_id: number, { name, description }: Partial<Category>) => {
+export const addCategory = async (pool_id: string, { name, description }: Partial<Category>) => {
   const { error } = await categoriesTable().insert({
     name,
     description,

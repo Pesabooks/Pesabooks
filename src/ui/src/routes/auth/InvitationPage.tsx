@@ -11,7 +11,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { acceptInvitation, getInvitation } from '../../services/invitationService';
 import { Invitation } from '../../types';
 
@@ -19,7 +19,7 @@ export const InvitationPage = () => {
   const [loading, setLoading] = useState(false);
   let location = useLocation();
   let navigate = useNavigate();
-  let auth = useAuth();
+  let {isAuthenticated} = useWeb3Auth();
   let { invitation_id } = useParams();
   const [invitation, setInvitation] = useState<Invitation | undefined>();
   const toast = useToast();
@@ -75,7 +75,7 @@ export const InvitationPage = () => {
           </Text>
         </Stack>
 
-        {!auth.authenticated && (
+        {!isAuthenticated && (
           <Stack>
             <Text mt={4}>
               {' '}
@@ -105,7 +105,7 @@ export const InvitationPage = () => {
           </Stack>
         )}
 
-        {auth.authenticated && (
+        {isAuthenticated && (
           <Stack align="center">
             <Button onClick={() => onJoin()} isLoading={loading}>
               Join Now

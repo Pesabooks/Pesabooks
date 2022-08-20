@@ -7,9 +7,8 @@ import {
   MenuItem,
   MenuList
 } from '@chakra-ui/react';
-import React from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
+import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { updateLastPool } from '../../services/profilesService';
 import { Pool } from '../../types';
 import { Logo } from './Logo';
@@ -20,10 +19,10 @@ interface PoolSelectorMenuProps {
 }
 
 export const PoolSelectorMenu = ({ pool, pools }: PoolSelectorMenuProps) => {
-  const { user } = useAuth();
+  const { user } = useWeb3Auth();
   const navigate = useNavigate();
 
-  const selectPool = async (pool_id: number) => {
+  const selectPool = async (pool_id: string) => {
     if (user) await updateLastPool(user.id, pool_id);
     window.location.replace(`/pool/${pool_id}`);
   };

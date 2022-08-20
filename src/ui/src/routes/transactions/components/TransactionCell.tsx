@@ -1,28 +1,27 @@
 import { Flex, Text } from '@chakra-ui/react';
 import { TransactionIcon } from '../../../components/TransactionIcon';
-import { AddressLookup, Transaction } from '../../../types';
-import { getTransactonDescription } from '../../../utils';
+import { Transaction, User } from '../../../types';
+import { getTransactionDescription } from '../../../utils';
 
 export const TransactionCell = ({
   transaction,
-  addressLookups,
+  users,
 }: {
   transaction: Transaction;
-  addressLookups: AddressLookup[];
+  users: User[];
 }) => {
-  const { type, created_at } = transaction;
-  const date = new Date(created_at);
+  const { type } = transaction;
 
   return (
     <Flex alignItems="center">
       <TransactionIcon type={type} />
       <Flex direction="column">
         <Text fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-          {getTransactonDescription(transaction, addressLookups)}
+          {getTransactionDescription(transaction, users)}
         </Text>
-        <Text fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }} color="gray.400" fontWeight="semibold">
-          {date.toLocaleDateString()} {date.toLocaleTimeString()}
-        </Text>
+        {/* <Text fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }} color="gray.400" fontWeight="semibold">
+          {getTransactionTypeLabel(type)}
+        </Text> */}
       </Flex>
     </Flex>
   );

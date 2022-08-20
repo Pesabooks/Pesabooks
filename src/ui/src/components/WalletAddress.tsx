@@ -1,6 +1,5 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import { Flex, IconButton, Link, Text, useClipboard } from '@chakra-ui/react';
-import React from 'react';
 import { MdContentCopy } from 'react-icons/md';
 import { networks } from '../data/networks';
 import { shortenHash } from '../utils';

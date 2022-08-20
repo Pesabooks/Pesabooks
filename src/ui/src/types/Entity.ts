@@ -1,8 +1,10 @@
-import { Profile } from './Profile';
+import { User } from './Profile';
 
-export interface Entity {
-  id: number;
+export interface BaseEntity<T> {
+  id: T;
   created_at: string;
-  created_by_id?: string;
-  created_by?: Profile;
+  user_id?: string;
+  user?: User;
 }
+
+export interface Entity extends BaseEntity<number> {}

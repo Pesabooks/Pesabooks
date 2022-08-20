@@ -1,22 +1,20 @@
 import { Flex, HStack, Text } from '@chakra-ui/react';
+import dayjs from 'dayjs';
 import { TransactionIcon } from '../../../components/TransactionIcon';
-import { AddressLookup, Transaction } from '../../../types';
-import { getTransactonDescription, getTxAmountDescription } from '../../../utils';
-import { formatDate } from '../../../utils/date';
+import { Transaction, User } from '../../../types';
+import { getTransactionDescription, getTxAmountDescription } from '../../../utils';
 import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';
 
 interface TransactionsListProps {
   transactions: Transaction[];
-  addressLookups: AddressLookup[];
+  users: User[];
 }
 
-export const TransactionsList = ({ transactions, addressLookups }: TransactionsListProps) => {
+export const TransactionsList = ({ transactions, users }: TransactionsListProps) => {
   return (
     <Flex direction="column" w="100%">
       {transactions.map((transaction, key) => {
-        const { created_at, type, category } = transaction;
-        const isDeposit = type === 'deposit';
-        const isWithdrawal = type === 'withdrawal';
+        const { created_at, type } = transaction;
 
         return (
           <Flex key={key} my="1rem" justifyContent="space-between">
@@ -24,26 +22,18 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
               <TransactionIcon type={type} />
               <Flex direction="column">
                 <Text fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                  {getTransactonDescription(transaction, addressLookups)}
+                  {getTransactionDescription(transaction, users)}
                 </Text>
-                <Text
-                  fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }}
-                  color="gray.400"
-                  fontWeight="semibold"
-                >
-                  {category?.name}
+                <Text fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }} fontWeight="semibold">
+                  <TransactionStatusBadge type={transaction.status} hideIcon={true} />
                 </Text>
               </Flex>
             </Flex>
 
             <HStack>
-              <Flex
-                direction="column"
-                alignItems="end"
-                color={isDeposit ? 'green.400' : isWithdrawal ? 'red.400' : ''}
-              >
+              <Flex direction="column" alignItems="end">
                 <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                  {isWithdrawal && '-'} {getTxAmountDescription(transaction)}
+                  {getTxAmountDescription(transaction)}
                 </Text>
 
                 <Text
@@ -51,10 +41,9 @@ export const TransactionsList = ({ transactions, addressLookups }: TransactionsL
                   color="gray.400"
                   fontWeight="semibold"
                 >
-                  {formatDate(created_at)}
+                  {dayjs(created_at).fromNow()}
                 </Text>
               </Flex>
-              <TransactionStatusBadge type={transaction.status} iconOnly={true}/>
             </HStack>
           </Flex>
         );

@@ -4,5 +4,5 @@ export interface Category extends Entity {
   name: string;
   description?: string;
   active: boolean;
-  pool_id: number;
+  pool_id: string;
 }

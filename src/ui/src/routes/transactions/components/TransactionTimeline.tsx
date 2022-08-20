@@ -1,14 +1,13 @@
 import { BoxProps, Stack, Text, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
 import { FaBell } from 'react-icons/fa';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { TimelineRow } from '../../../components/TimelineRow';
-import { AddressLookup } from '../../../types';
+import { User } from '../../../types';
 import { getAddressName } from '../../../utils';
 import { formatDate, formatTimestampSeconds } from '../../../utils/date';
 
 interface TransactionTimelineProps extends BoxProps {
-  addressLookups: AddressLookup[];
+  users: User[];
   isExecuted: boolean;
   executionTimestamp: number | undefined;
   submissionDate: string | undefined;
@@ -19,7 +18,7 @@ interface TransactionTimelineProps extends BoxProps {
   }[];
 }
 export const TransactionTimeline = ({
-  addressLookups,
+  users,
   isExecuted,
   executionTimestamp,
   submissionDate,
@@ -44,7 +43,7 @@ export const TransactionTimeline = ({
                 status={confirmation.rejected ? 'rejected' : 'approved'}
                 key={index}
                 logo={FaBell}
-                title={getAddressName(confirmation.owner, addressLookups) ?? ''}
+                title={getAddressName(confirmation.owner, users) ?? ''}
                 date={formatDate(confirmation.submissionDate)}
                 tag={{
                   titleTag: confirmation.rejected ? 'Transaction rejected' : 'Transaction approved',

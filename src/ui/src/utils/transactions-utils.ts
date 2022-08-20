@@ -1,38 +1,41 @@
-import { ethers } from 'ethers';
-import { AddressLookup, Transaction } from '../types';
+import { formatBigNumber } from '../bignumber-utils';
+import { Transaction, User } from '../types';
 import { AddOwnerData, SwapData, TransactionType, TransferData } from '../types/transaction';
+import { compareAddress } from './addresses';
 
-export const getAddressName = (address: string | undefined, addressLookups: AddressLookup[]) => {
+export const getAddressName = (address: string | undefined, users: User[]) => {
   if (!address) return null;
 
-  return (
-    addressLookups.find((a) => a.address.toLowerCase() === address.toLowerCase())?.name ?? address
-  );
+  const user = users.find((a) => compareAddress(a.wallet, address));
+
+  return user?.name ?? address;
 };
 
-export const getTransactonDescription = (transaction: Transaction, addresses: AddressLookup[]) => {
+export const getTransactionDescription = (transaction: Transaction, addresses: User[]) => {
   const { type, metadata } = transaction;
 
   switch (type) {
     case 'deposit':
-      if ((metadata as TransferData)?.ramp_id) return transaction.created_by?.name;
-      else return `From ${getAddressName((metadata as TransferData).transfer_from, addresses)}`;
+      if ((metadata as TransferData)?.ramp_id) return transaction.user?.name;
+      else
+        return `Received ${getTxAmountDescription(transaction)} From ${getAddressName(
+          (metadata as TransferData).transfer_from,
+          addresses,
+        )}`;
     case 'withdrawal':
-      return `To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
+      return `Sent ${getTxAmountDescription(transaction)} To ${getAddressName(
+        (metadata as TransferData).transfer_to,
+        addresses,
+      )}`;
     case 'addOwner':
       return `add ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
     case 'unlockToken':
       return `unlock token ${(metadata as any).token.symbol}`;
     case 'swap':
       const swapData = metadata as SwapData;
-      const fromAmout = ethers.utils.formatUnits(swapData.src_amount, swapData.src_token.decimals);
-      const toAmout = (+ethers.utils.formatUnits(
-        swapData.dest_amount,
-        swapData.dest_token.decimals,
-      )).toFixed(5);
-      return `Swap ${fromAmout} ${swapData.src_token.symbol} for ${toAmout} ${swapData.dest_token.symbol}  `;
+      return `Trade  ${swapData.src_token.symbol} for  ${swapData.dest_token.symbol}  `;
     case 'createSafe':
-      return 'Safe Created';
+      return 'Create Safe';
   }
 };
 
@@ -51,13 +54,23 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
     case 'swap':
       return 'Swap Token';
     case 'createSafe':
-      return 'Safe created';
+      return 'Create group safe';
   }
 };
 
 export const getTxAmountDescription = ({ type, metadata }: Transaction) => {
   if (type === 'deposit' || type === 'withdrawal') {
-    return `${(metadata as TransferData).amount} ${(metadata as TransferData)?.token?.symbol}`;
+    const transferAmout = `${(metadata as TransferData).amount} ${
+      (metadata as TransferData)?.token?.symbol
+    }`;
+    if (type === 'withdrawal') return `- ${transferAmout}`;
+    return transferAmout;
+  }
+  if (type === 'swap') {
+    const swapData = metadata as SwapData;
+    return `${formatBigNumber(swapData.src_amount, swapData.src_token.decimals)} ${
+      swapData.src_token.symbol
+    }`;
   }
 
   return;

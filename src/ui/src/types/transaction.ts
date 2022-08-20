@@ -20,7 +20,6 @@ export type TransactionStatus =
   | 'rejected';
 
 export interface Transaction extends Entity {
-  signer_address: string;
   safe_nonce?: number;
   timestamp?: number;
   category_id?: number;
@@ -31,7 +30,7 @@ export interface Transaction extends Entity {
   reject_safe_tx_hash: string;
   status: TransactionStatus;
   type: TransactionType;
-  pool_id: number;
+  pool_id: string;
   metadata: TransferData | AddOwnerData | SwapData;
 }
 

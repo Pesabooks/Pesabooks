@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useWeb3Auth } from '../hooks/useWeb3Auth';
 import { getSafeAdmins } from '../services/gnosisServices';
 import { isMemberAdmin } from '../services/membersService';
 import { getPool } from '../services/poolsService';
@@ -16,10 +16,17 @@ type PoolContextType = {
   safeAdmins: string[];
 };
 
-export const PoolContext = React.createContext<Partial<PoolContextType>>({ loading: true });
+export const PoolContext = React.createContext<PoolContextType>({
+  loading: true,
+  refresh: () => {},
+  isAdmin: false,
+  safeAdmins: [],
+  error: {},
+  pool:undefined
+});
 
 export const PoolProvider = ({ children }: any) => {
-  const { user } = useAuth();
+  const { user, setChainId } = useWeb3Auth();
   const [pool, setPool] = useState<Pool>();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,6 +45,7 @@ export const PoolProvider = ({ children }: any) => {
             .then();
 
           setPool(p);
+          if (p?.chain_id) setChainId(p.chain_id);
           setLoading(false);
         })
         .catch((e) => {
@@ -45,7 +53,7 @@ export const PoolProvider = ({ children }: any) => {
           setError(e);
           setLoading(false);
         });
-  }, [pool_id, user?.id]);
+  }, [pool_id, setChainId, user?.id]);
 
   useEffect(() => {
     fetchPool();

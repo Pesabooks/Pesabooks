@@ -7,6 +7,9 @@ export const linkStyles = {
             textDecoration: 'none',
           },
         },
+        decoration: {
+          textDecoration: 'underline',
+        },
       },
       // 3. We can add a new visual variant
       decoration: 'none',

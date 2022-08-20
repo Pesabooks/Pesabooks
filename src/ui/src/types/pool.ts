@@ -1,8 +1,8 @@
-import { Entity } from './Entity';
-import { Profile } from './Profile';
+import { BaseEntity } from './Entity';
+import { User } from './Profile';
 import { Token } from './Token';
 
-export interface Pool extends Entity {
+export interface Pool extends BaseEntity<string> {
   name: string;
   description?: string;
   token_id: number;
@@ -10,5 +10,5 @@ export interface Pool extends Entity {
   chain_id: number;
   active: boolean;
   gnosis_safe_address: string;
-  members?: Profile[];
+  members?: User[];
 }

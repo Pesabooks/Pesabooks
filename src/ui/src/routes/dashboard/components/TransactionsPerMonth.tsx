@@ -62,7 +62,7 @@ const options: ApexOptions = {
   colors: ['#4FD1C5', '#f44336'],
 };
 interface TransactionsPerMonthProps {
-  pool_id: number;
+  pool_id: string;
 }
 
 export const TransactionsPerMonth = ({ pool_id }: TransactionsPerMonthProps) => {
@@ -72,7 +72,7 @@ export const TransactionsPerMonth = ({ pool_id }: TransactionsPerMonthProps) => 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await supabase.rpc('get_transactions_per_month', { pool_id });
+        const { data } = await supabase().rpc('get_transactions_per_month', { pool_id });
 
         const deposit = [];
         const withdrawal = [];

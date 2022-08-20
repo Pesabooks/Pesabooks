@@ -10,8 +10,6 @@ const apiKey = Deno.env.get("SENDGRID_API_KEY");
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    console.log("OPTIONS called");
-
     return new Response("ok", { headers: corsHeaders });
   }
 

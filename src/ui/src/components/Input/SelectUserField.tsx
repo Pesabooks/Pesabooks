@@ -1,23 +1,19 @@
-import {
-  BoxProps, FormControl,
-  FormErrorMessage,
-  FormLabel
-} from '@chakra-ui/react';
+import { BoxProps, FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/react';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
-import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { AddressLookup } from '../../types';
+import { User } from '../../types';
+import { shortenHash } from '../../utils';
 import { UserWalletCard } from '../UserWalletCard';
 
 interface Props extends BoxProps {
-  users: AddressLookup[];
+  users: User[];
   label?: string;
 }
 
-const AvatarOption = (props: OptionProps<AddressLookup, boolean, GroupBase<AddressLookup>>) => {
+const AvatarOption = (props: OptionProps<User, boolean, GroupBase<User>>) => {
   return (
     <chakraComponents.Option {...props}>
-      <UserWalletCard addressLookup={props.data} />
+      <UserWalletCard user={props.data} />
     </chakraComponents.Option>
   );
 };
@@ -43,8 +39,8 @@ export const SelectUserField = ({ users, label, ...boxProps }: Props) => {
             onBlur={onBlur}
             value={value}
             options={users}
-            getOptionValue={(profile: AddressLookup) => profile.address}
-            getOptionLabel={(profile: AddressLookup) => profile.name}
+            getOptionValue={(profile: User) => profile.wallet}
+            getOptionLabel={(profile: User) => profile.name ?? shortenHash(profile.wallet)}
             components={{ Option: AvatarOption }}
           />
 

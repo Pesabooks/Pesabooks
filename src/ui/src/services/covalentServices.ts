@@ -1,18 +1,14 @@
-import { BalancesReponse } from '@pesabooks/supabase/functions';
+import { BalanceQuery, BalancesReponse } from '@pesabooks/supabase/functions';
 import { supabase } from '../supabase';
 
-export const getTotalBalance = async (poolId: number) => {
-  const { data } = await supabase.functions.invoke<BalancesReponse[]>('balances', {
-    body: JSON.stringify({ poolId }),
+export const getBalances = async (chain_id: number, address: string) => {
+  const body: BalanceQuery = { chain_id, address, quote: 'USD' };
+  const { data, error } = await supabase().functions.invoke<BalancesReponse[]>('balances', {
+    body: JSON.stringify(body),
   });
 
-  return data?.reduce((balance, resp) => balance + resp.quote, 0);
-};
-
-export const getBalances = async (poolId: number) => {
-  const { data } = await supabase.functions.invoke<BalancesReponse[]>('balances', {
-    body: JSON.stringify({ poolId }),
-  });
+  if (error) throw error;
+  if (!Array.isArray(data)) throw new Error(data ?? '');
 
   return data;
 };

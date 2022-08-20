@@ -1,6 +1,6 @@
 import { Box, Flex, Text } from '@chakra-ui/react';
 import { ApexOptions } from 'apexcharts';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Card, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
@@ -61,7 +61,7 @@ const options: ApexOptions = {
   colors: ['#4FD1C5', '#2D3748'],
 };
 interface BalancesPerMonthProps {
-  pool_id: number;
+  pool_id: string;
 }
 
 export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
@@ -71,7 +71,7 @@ export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await supabase.rpc('get_balance_per_month', { pool_id });
+        const { data } = await supabase().rpc('get_balance_per_month', { pool_id });
 
         setSeries([{ name: 'Balance', data: data?.map((d) => ({ x: d.month, y: d.balance })) }]);
       } finally {

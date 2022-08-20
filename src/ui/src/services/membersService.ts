@@ -1,19 +1,19 @@
 import { handleSupabaseError, membersTable } from '../supabase';
 
-export const getMembers = async (pool_id: number) => {
+export const getMembers = async (pool_id: string) => {
   const { data, error } = await membersTable()
     .select(
       `*, 
-    user:profiles(email,name)
+    user:users(*)
     `,
     )
     .eq('pool_id', pool_id);
 
   handleSupabaseError(error);
-  return data;
+  return data ?? [];
 };
 
-export const isMemberAdmin = async (userId: string, pool_id: number) => {
+export const isMemberAdmin = async (userId: string, pool_id: string) => {
   const { data, error } = await membersTable()
     .select()
     .eq('user_id', userId)

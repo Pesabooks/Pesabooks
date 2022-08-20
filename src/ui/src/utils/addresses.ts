@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { AddressLookup } from '../types';
+import { User } from '../types';
 
 export const shortenHash = (address: string): string => {
   if (!address) return '';
@@ -9,11 +9,14 @@ export const shortenHash = (address: string): string => {
 
 export const checksummed = (address: string) => ethers.utils.getAddress(address);
 
-export const compareAddress = (address1: string | undefined, address2: string | undefined) => {
+export const compareAddress = (
+  address1: string | undefined | null,
+  address2: string | undefined | null,
+) => {
   if (!address1 || !address2) return false;
   return checksummed(address1) === checksummed(address2);
 };
 
-export const mathAddress = (addresses: AddressLookup[], address: string | undefined) => {
-  return addresses.find((a) => compareAddress(a.address, address));
+export const mathAddress = (addresses: User[], address: string | undefined) => {
+  return addresses.find((a) => compareAddress(a.wallet, address));
 };

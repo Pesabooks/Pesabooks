@@ -1,16 +1,16 @@
 import { Flex, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
-import { useWeb3React } from '@web3-react/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
 import { ConfirmationModal, ConfirmationRef } from '../../../components/Modals/ConfirmationModal';
 import { ButtonWithConnectedWallet } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
+import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getSafeAdmins, getSafeTreshold } from '../../../services/gnosisServices';
-import { getAddressLookUp } from '../../../services/poolsService';
+import { getMembers } from '../../../services/membersService';
 import { addAdmin, removeAdmin } from '../../../services/transactionsServices';
-import { AddressLookup } from '../../../types';
+import { User } from '../../../types';
 import { compareAddress } from '../../../utils';
 import { AddAdminFormValue, AddAdminModal } from '../../members/components/addAdminModal';
 import { AdminsList } from '../components/AdminsList';
@@ -18,9 +18,9 @@ import { AdminsList } from '../components/AdminsList';
 export const AdminsPage = () => {
   const [adminAddressess, setAdminAddressess] = useState<string[]>([]);
   const [currentTreshold, setcurrentTreshold] = useState(0);
-  const [lookups, setLookups] = useState<AddressLookup[]>([]);
+  const [users, setLookups] = useState<User[]>([]);
   const { pool } = usePool();
-  const { provider } = useWeb3React();
+  const { provider } = useWeb3Auth();
   const {
     isOpen: isOpenSetAdminModal,
     onClose: onCloseSetAdminModal,
@@ -32,8 +32,8 @@ export const AdminsPage = () => {
   const [loading, setLoading] = useState(true);
 
   const adminsAddressLookup = useMemo(
-    () => lookups.filter((l) => !!adminAddressess.find((a) => compareAddress(a, l.address))),
-    [lookups, adminAddressess],
+    () => users.filter((l) => !!adminAddressess.find((a) => compareAddress(a, l.wallet))),
+    [users, adminAddressess],
   );
 
   const loadAdminAddresses = useCallback(async () => {
@@ -47,7 +47,7 @@ export const AdminsPage = () => {
   useEffect(() => {
     if (pool) {
       loadAdminAddresses();
-      getAddressLookUp(pool.id, 'user').then(setLookups);
+      getMembers(pool.id).then(members=>setLookups(members?.map(m=>m.user!)));
       getSafeTreshold(pool.chain_id, pool.gnosis_safe_address).then(setcurrentTreshold);
     }
   }, [loadAdminAddresses, pool]);
@@ -77,7 +77,7 @@ export const AdminsPage = () => {
     }
   };
 
-  const confirmDeactivation = useCallback((user: AddressLookup) => {
+  const confirmDeactivation = useCallback((user: User) => {
     confirmationRef.current?.open(
       `Are you sure you want to remove ${user.name} as an admin?`,
       user,
@@ -144,7 +144,7 @@ export const AdminsPage = () => {
         <AddAdminModal
           isOpen={isOpenSetAdminModal}
           onClose={onAdminAdded}
-          lookups={lookups}
+          users={users}
           adminAddressess={adminAddressess}
           addAdmin={onAddmin}
           currenTreshold={currentTreshold}

@@ -1,8 +1,8 @@
 import { SendInvitationRequest } from '@pesabooks/supabase/functions';
 import { handleSupabaseError, invitationsTable, supabase } from '../supabase';
-import { Invitation, Pool, Profile } from '../types';
+import { Invitation, Pool, User } from '../types';
 
-export const getActiveInvitations = async (pool_id: number) => {
+export const getActiveInvitations = async (pool_id: string) => {
   const { data, error } = await invitationsTable()
     .select()
     .filter('status', 'eq', 'pending')
@@ -22,7 +22,7 @@ export const getInvitation = async (inviation_id: string) => {
   return data?.[0];
 };
 
-export const invitationExists = async (pool_id: number, email: string) => {
+export const invitationExists = async (pool_id: string, email: string) => {
   const { data, error } = await invitationsTable()
     .select('id')
     .eq('pool_id', pool_id)
@@ -34,7 +34,7 @@ export const invitationExists = async (pool_id: number, email: string) => {
   return !!data?.[0];
 };
 
-export const createInvitation = async (pool: Pool, name: string, email: string, user: Profile) => {
+export const createInvitation = async (pool: Pool, name: string, email: string, user: User) => {
   if (await invitationExists(pool.id, email)) {
     throw new Error('An invitation already exists for this email');
   }
@@ -58,7 +58,7 @@ export const createInvitation = async (pool: Pool, name: string, email: string, 
 };
 
 export const acceptInvitation = async (inviation_id: string) => {
-  const { data, error } = await supabase.rpc('accept_invitation', {
+  const { data, error } = await supabase().rpc('accept_invitation', {
     invitation_id: inviation_id,
   });
 
@@ -82,7 +82,7 @@ export const sendInvitation = async (invitation: Invitation) => {
     group: invitation.pool_name,
     url: `${window.location.origin}/auth/invitation/${invitation.id}`,
   };
-  const { error } = await supabase.functions.invoke('send-invitation', {
+  const { error } = await supabase().functions.invoke('send-invitation', {
     body: JSON.stringify(body),
   });
 

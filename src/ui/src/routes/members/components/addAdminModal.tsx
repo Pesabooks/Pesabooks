@@ -15,29 +15,29 @@ import {
   Select,
   Text
 } from '@chakra-ui/react';
-import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SelectUserField } from '../../../components/Input/SelectUserField';
-import { AddressLookup } from '../../../types';
+import { User } from '../../../types';
+import { compareAddress } from '../../../utils';
 
 export interface AddAdminModalProps {
   isOpen: boolean;
   onClose: (hash?: string) => void;
-  lookups: AddressLookup[];
+  users: User[];
   adminAddressess: string[];
   addAdmin: (admin: AddAdminFormValue) => Promise<void>;
   currenTreshold: number;
 }
 
 export interface AddAdminFormValue {
-  user: AddressLookup;
+  user: User;
   treshold: number;
 }
 
 export const AddAdminModal = ({
   isOpen,
   onClose,
-  lookups,
+  users,
   adminAddressess,
   addAdmin,
   currenTreshold,
@@ -46,10 +46,9 @@ export const AddAdminModal = ({
     defaultValues: { treshold: currenTreshold },
   });
 
-  const filteredLookups = lookups?.filter(
-    (l) => !adminAddressess.find((a) => a.toLowerCase() === l.address.toLowerCase()),
+  const filteredUsers = users?.filter(
+    (l) => !adminAddressess.find((a) => compareAddress(a, l.wallet)),
   );
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -58,7 +57,7 @@ export const AddAdminModal = ({
         <ModalCloseButton />
         <ModalBody>
           <FormProvider {...methods}>
-            <SelectUserField label="Select a member" mb="8" users={filteredLookups} />
+            <SelectUserField label="Select a member" mb="8" users={filteredUsers} />
 
             <FormControl isInvalid={!!methods.formState.errors.treshold} isRequired>
               <FormLabel htmlFor="category">New Threshold</FormLabel>

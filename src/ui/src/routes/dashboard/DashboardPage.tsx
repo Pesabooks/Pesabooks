@@ -1,11 +1,13 @@
 import { Flex, Grid, SimpleGrid, Text } from '@chakra-ui/react';
+import { BalancesReponse } from '@pesabooks/supabase/functions';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardBody, CardHeader } from '../../components/Card';
 import { usePool } from '../../hooks/usePool';
 import { useTransactions } from '../../hooks/useTransactions';
-import { getAddressLookUp } from '../../services/poolsService';
-import { AddressLookup } from '../../types';
+import { getBalances } from '../../services/covalentServices';
+import { getMembers } from '../../services/membersService';
+import { User } from '../../types';
 import { AssetsCard } from './components/AssetsCard';
 import BalanceCard from './components/BalanceCard';
 import { TotalPerCategory } from './components/TotalPerCategory';
@@ -15,7 +17,9 @@ import { TransactionsStats } from './components/TransactionsStats';
 
 export const DashboardPage = () => {
   const { pool } = usePool();
-  const [addressLookups, setAddressLookups] = useState<AddressLookup[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [balances, setBalances] = useState<BalancesReponse[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const token = pool?.token;
   if (!token) {
@@ -32,7 +36,15 @@ export const DashboardPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      getAddressLookUp(pool.id).then(setAddressLookups);
+      try {
+        await getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user!)));
+
+        await getBalances(pool.chain_id, pool.gnosis_safe_address).then((balances) => {
+          setBalances(balances ?? []);
+        });
+      } finally {
+        setLoading(false);
+      }
     };
     fetchData();
   }, [pool]);
@@ -43,7 +55,7 @@ export const DashboardPage = () => {
         <title>Dashboard | {pool?.name}</title>
       </Helmet>
       <SimpleGrid mb={4} columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
-        <BalanceCard chainId={pool.chain_id} />
+        <BalanceCard />
       </SimpleGrid>
 
       <Grid
@@ -61,8 +73,8 @@ export const DashboardPage = () => {
             </Flex>
           </CardBody>
         </Card>
-        {/* <BalancesPerMonth pool_id={pool.id} /> */}
-        <AssetsCard />
+
+        <AssetsCard balances={balances} loading={loading} />
       </Grid>
 
       <Grid
@@ -89,10 +101,7 @@ export const DashboardPage = () => {
             </Text>
           </CardHeader>
           <CardBody>
-            <TransactionsList
-              transactions={transactions}
-              addressLookups={addressLookups}
-            ></TransactionsList>
+            <TransactionsList transactions={transactions} users={users}></TransactionsList>
           </CardBody>
         </Card>
       </Grid>

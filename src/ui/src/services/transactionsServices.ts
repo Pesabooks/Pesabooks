@@ -6,8 +6,8 @@ import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'para
 import { OptimalRate } from 'paraswap-core';
 import { Filter } from 'react-supabase';
 import { networks } from '../data/networks';
-import { handleSupabaseError, transationsQueueTable, transationsTable } from '../supabase';
-import { AddressLookup, Pool } from '../types';
+import { handleSupabaseError, transationsTable } from '../supabase';
+import { Pool, User } from '../types';
 import { SwapData, Transaction } from '../types/transaction';
 import { checksummed } from '../utils';
 import { notifyTransaction } from '../utils/notification';
@@ -36,7 +36,6 @@ export const deposit = async (
   const { token } = pool;
   if (token == null) throw new Error();
   const signer = provider.getSigner();
-  const signer_address = await signer.getAddress();
 
   const from = checksummed(await signer.getAddress());
   const to = checksummed(pool.gnosis_safe_address);
@@ -51,7 +50,6 @@ export const deposit = async (
     category_id: category_id,
     status: 'pending',
     pool_id: pool.id,
-    signer_address,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
       transfer_from: from,
@@ -67,13 +65,6 @@ export const deposit = async (
     },
   };
 
-  const { data: queuedTransactions, error: queuingEror } = await transationsQueueTable().insert({
-    pool_id: pool.id,
-    transaction: transaction,
-  });
-  handleSupabaseError(queuingEror);
-  const queuedTransactionId = queuedTransactions?.[0].id ?? 0;
-
   const _amount = ethers.utils.parseUnits(amount.toString(), decimals);
 
   const gasLimit = await tokenContract.estimateGas.transfer(to, _amount);
@@ -87,7 +78,6 @@ export const deposit = async (
 
   const { data, error } = await transationsTable().insert({ ...transaction, hash: tx.hash });
   handleSupabaseError(error);
-  await deleteQueuedTransaction(queuedTransactionId);
 
   tx.wait().then(
     (receipt) => {
@@ -118,7 +108,6 @@ export const depositWithCard = async (
     status: 'pending',
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
-    signer_address: '',
     metadata: {
       ramp_id: rampId,
       ramp_purchase_view_token: rampPurchaseViewToken,
@@ -151,14 +140,14 @@ export const withdraw = async (
   category_id: number,
   amount: number,
   memo: string | undefined,
-  user: AddressLookup,
+  user: User,
 ): Promise<Transaction | undefined> => {
   const { token } = pool;
   if (token == null) throw new Error();
 
   const tokenAddress = checksummed(token?.address);
   const from = checksummed(pool.gnosis_safe_address);
-  const to = checksummed(user.address);
+  const to = checksummed(user.wallet);
 
   const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
   const decimals = await tokenContract.decimals();
@@ -203,7 +192,7 @@ export const withdraw = async (
 export const addAdmin = async (
   signer: JsonRpcSigner,
   pool: Pool,
-  user: AddressLookup,
+  user: User,
   treshold: number,
 ): Promise<Transaction | undefined> => {
   const transaction: Partial<Transaction> = {
@@ -211,7 +200,7 @@ export const addAdmin = async (
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
-      address: user.address,
+      address: user.wallet,
       user_id: user.id,
       treshold: treshold,
     },
@@ -221,7 +210,7 @@ export const addAdmin = async (
     signer,
     pool.chain_id,
     pool.gnosis_safe_address,
-    checksummed(user.address),
+    checksummed(user.wallet),
     treshold,
   );
 
@@ -231,7 +220,7 @@ export const addAdmin = async (
 export const removeAdmin = async (
   signer: JsonRpcSigner,
   pool: Pool,
-  user: AddressLookup,
+  user: User,
   treshold: number,
 ): Promise<Transaction | undefined> => {
   const transaction: Partial<Transaction> = {
@@ -239,7 +228,7 @@ export const removeAdmin = async (
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
-      address: user.address,
+      address: user.wallet,
       user_id: user.id,
       treshold: treshold,
     },
@@ -249,7 +238,7 @@ export const removeAdmin = async (
     signer,
     pool.chain_id,
     pool.gnosis_safe_address,
-    checksummed(user.address),
+    checksummed(user.wallet),
     treshold,
   );
 
@@ -341,7 +330,6 @@ const submitTransaction = async (
   safeTransaction: SafeTransaction,
 ) => {
   const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address);
-  const signer_address = await signer.getAddress();
 
   if (treshold > 1) {
     const safeTxHash = await proposeSafeTransaction(
@@ -352,7 +340,6 @@ const submitTransaction = async (
     );
     const { data } = await transationsTable().insert({
       ...transaction,
-      signer_address,
       safe_tx_hash: safeTxHash,
       safe_nonce: safeTransaction.data.nonce,
       status: 'awaitingConfirmations',
@@ -470,16 +457,12 @@ const onTransactionFailed = async (txHash: string) => {
   await transationsTable().update({ status: 'failed' }).eq('hash', txHash);
 };
 
-const deleteQueuedTransaction = (id: number) => {
-  return transationsQueueTable().delete().eq('id', id);
-};
-
-export const getAllTransactions = async (pool_id: number, filter?: Filter<Transaction>) => {
+export const getAllTransactions = async (pool_id: string, filter?: Filter<Transaction>) => {
   let query = transationsTable().select(
     `
     *,
     category:category_id(id, name),
-    created_by:profiles(id,name,email)
+    user:users(id,name,email)
   `,
   );
 
@@ -498,7 +481,7 @@ export const getTransactionById = async (txId: number) => {
       `
       *,
       category:category_id(id, name),
-      created_by:profiles(id,name,email)
+      user:users(id,name,email)
     `,
     )
     .eq('id', txId);
@@ -528,10 +511,10 @@ export const getTxScanLink = (hash: string, chainId: number) => {
   return `${networks[chainId].blockExplorerUrls[0]}tx/${hash}`;
 };
 
-export const getPendingTokenUnlockingTxCount = async (pool: Pool, symbol: string) => {
+export const getPendingTokenUnlockingTxCount = async (pool_id: string, symbol: string) => {
   const { data } = await transationsTable()
     .select()
-    .eq('pool_id', pool.id)
+    .eq('pool_id', pool_id)
     .eq('type', 'unlockToken')
     .in('status', ['awaitingConfirmations', 'awaitingExecution'])
     //@ts-ignore

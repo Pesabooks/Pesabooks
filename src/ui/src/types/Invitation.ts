@@ -2,7 +2,7 @@ export interface Invitation {
   id: string;
   name: string;
   email: string;
-  pool_id: number;
+  pool_id: string;
   pool_name: string;
   role: 'admin' | 'member';
   active: boolean;

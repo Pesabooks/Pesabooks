@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getAddressBalance } from '../services/blockchainServices';
 
-export const useBalance = (
+export const useTokenBalance = (
   chainId: number,
   tokenAddress: string,
   userOrContractAddress: string,

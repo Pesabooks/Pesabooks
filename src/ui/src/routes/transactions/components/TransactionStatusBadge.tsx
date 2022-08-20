@@ -1,15 +1,16 @@
-import { Flex, Icon, Tooltip } from '@chakra-ui/react';
-import React from 'react';
+import { Flex, Icon, Text, Tooltip } from '@chakra-ui/react';
 import { BsClockHistory } from 'react-icons/bs';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { TransactionStatus } from '../../../types';
 
 export const TransactionStatusBadge = ({
   type,
-  iconOnly,
+  hideIcon,
+  hideText,
 }: {
   type: TransactionStatus;
-  iconOnly?: boolean;
+  hideIcon?: boolean;
+  hideText?: boolean;
 }) => {
   let color;
   let text;
@@ -52,12 +53,14 @@ export const TransactionStatusBadge = ({
 
   return (
     <Flex align="center">
-      <Tooltip label={text}>
-        <span>
-          <Icon as={logo} color={color} w="24px" h="24px" me="6px" />
-        </span>
-      </Tooltip>
-      {!iconOnly ? text : null}
+      {!hideIcon && (
+        <Tooltip label={text}>
+          <span>
+            <Icon as={logo} color={color} w="24px" h="24px" me="6px" />
+          </span>
+        </Tooltip>
+      )}
+      {!hideText && <Text color={color}>{text}</Text>}
     </Flex>
   );
 };

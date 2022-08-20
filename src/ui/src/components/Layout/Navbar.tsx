@@ -1,11 +1,9 @@
 import { HamburgerIcon } from '@chakra-ui/icons';
 import { Flex, FlexProps, IconButton, Stack } from '@chakra-ui/react';
-import { useWeb3React } from '@web3-react/core';
 import { useEffect, useState } from 'react';
 import { usePool } from '../../hooks/usePool';
 import { getMyPools } from '../../services/poolsService';
 import { Pool } from '../../types';
-import { ConnectWalletButton } from '../Buttons/ConnectWalletButton';
 import { ConnectedChain } from '../ConnectedChain';
 import { NewTransactionMenu } from '../NewTransactionMenu';
 import { AvatarMenu } from './AvatarMenu';
@@ -16,7 +14,6 @@ interface NavBarProps extends FlexProps {
 
 export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
   const { pool } = usePool();
-  const { isActive, chainId: connectedChainId } = useWeb3React();
   const [myPools, setMyPools] = useState<Pool[]>([]);
 
   useEffect(() => {
@@ -51,9 +48,8 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
 
       <Stack direction={'row'} spacing={7}>
         <Flex gap={7} display={{ sm: 'none', xl: 'flex' }} alignItems="center">
-          <NewTransactionMenu/>
-          {pool && <ConnectWalletButton chainId={pool.chain_id} />}
-          {isActive && pool?.chain_id === connectedChainId && <ConnectedChain />}
+          <NewTransactionMenu />
+          <ConnectedChain />
         </Flex>
         <AvatarMenu />
       </Stack>

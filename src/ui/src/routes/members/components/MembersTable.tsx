@@ -1,26 +1,29 @@
 import { Table, Tbody, Th, Thead, Tr } from '@chakra-ui/react';
 import Loading from '../../../components/Loading';
-import { AddressLookup, Invitation } from '../../../types';
-import { Member } from '../../../types/Member';
+import { Invitation, Member } from '../../../types';
+import { compareAddress } from '../../../utils';
 import { MemberTableRow } from './MemberTableRow';
 
 interface MembersTableProps {
   members: Member[];
-  lookups: AddressLookup[];
   invitations: Invitation[];
   onRevoke: (id: string) => void;
   onResendInvitation: (id: string) => void;
   onAddAdmin?: (id: string) => void;
   isLoading: boolean;
+  adminAddresses: string[];
 }
 export const MembersTable = ({
   members,
   invitations,
   onRevoke,
   onResendInvitation,
+  adminAddresses,
   isLoading,
-  lookups,
 }: MembersTableProps) => {
+  const isAdmin = (wallet: string | undefined) =>
+    wallet ? !!adminAddresses.find((a) => compareAddress(a, wallet)) : false;
+
   return (
     <>
       <Table variant="simple">
@@ -29,7 +32,8 @@ export const MembersTable = ({
             <Th pl="0px" color="gray.400">
               Member
             </Th>
-            <Th color="gray.400">Email</Th>
+            <Th color="gray.400">Wallet</Th>
+            <Th color="gray.400">role</Th>
             <Th color="gray.400">Status</Th>
             <Th></Th>
             <Th></Th>
@@ -41,12 +45,13 @@ export const MembersTable = ({
               <MemberTableRow
                 key={member.user_id}
                 name={member.user?.name}
-                email={member.user?.email}
+                wallet={member.user?.wallet}
                 active={member.active}
                 status={member.active ? 'active' : 'inactive'}
                 role={member.role}
                 isInvitation={false}
                 id={member.user_id}
+                isAdmin={isAdmin(member.user?.wallet)}
               />
             );
           })}
@@ -54,14 +59,14 @@ export const MembersTable = ({
             return (
               <MemberTableRow
                 key={invitation.id}
-                name={invitation.name}
-                email={invitation.email}
+                name={invitation.name} 
                 active={invitation.active}
                 status="invited"
                 isInvitation={true}
                 id={invitation.id}
                 onRemove={onRevoke}
                 onResendInvitation={onResendInvitation}
+                isAdmin={false}
               />
             );
           })}

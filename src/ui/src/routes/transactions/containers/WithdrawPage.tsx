@@ -1,20 +1,22 @@
 import { Button, Container, Heading, useDisclosure, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
-import { useWeb3React } from '@web3-react/core';
 import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FormProvider, useForm } from 'react-hook-form';
-import { ConnectWalletButton } from '../../../components/Buttons/ConnectWalletButton';
 import { Card, CardHeader } from '../../../components/Card';
 import { InputAmountField } from '../../../components/Input/InputAmountField';
 import { SelectCategoryField } from '../../../components/Input/SelectCategoryField';
 import { SelectUserField } from '../../../components/Input/SelectUserField';
 import { usePool } from '../../../hooks/usePool';
+import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAddressBalance } from '../../../services/blockchainServices';
 import { getAllCategories } from '../../../services/categoriesService';
-import { getAddressLookUp } from '../../../services/poolsService';
+import { getMembers } from '../../../services/membersService';
 import { withdraw } from '../../../services/transactionsServices';
-import { AddressLookup, Category } from '../../../types';
+import { Category, User } from '../../../types';
+import {
+  ConfirmTransactionRef, ReviewTransactionModal
+} from '../components/ReviewTransactionModal';
 import { SubmittingTransactionModal } from '../components/SubmittingTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 import {
@@ -22,21 +24,22 @@ import {
   TransactionSubmittedModalRef
 } from '../components/TransactionSubmittedModal';
 
-interface WithdrawFormValue {
+export interface WithdrawFormValue {
   amount: number;
   memo?: string;
-  user: AddressLookup;
+  user: User;
   category: Category;
 }
 
 export const WithdrawPage = () => {
-  const [users, setUsers] = useState<AddressLookup[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const { provider, isActive } = useWeb3React();
+  const { provider } = useWeb3Auth();
   const { pool } = usePool();
   const toast = useToast();
   const [balance, setBalance] = useState<number>(0);
   const confirmationRef = useRef<TransactionSubmittedModalRef>(null);
+  const confirmTxRef = useRef<ConfirmTransactionRef>(null);
 
   const signer = (provider as Web3Provider)?.getSigner();
   const methods = useForm<WithdrawFormValue>();
@@ -49,7 +52,7 @@ export const WithdrawPage = () => {
   }
 
   useEffect(() => {
-    getAddressLookUp(pool.id, 'user').then(setUsers);
+    getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user!)));
 
     getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
       setCategories(categories ?? []),
@@ -62,8 +65,19 @@ export const WithdrawPage = () => {
     }
   }, [token, pool]);
 
-  const submit = async (formValue: WithdrawFormValue) => {
-    if (!provider) return;
+  const confirmTx = (formValue: WithdrawFormValue) => {
+    const { amount, user } = formValue;
+    confirmTxRef.current?.open(
+      `Withdraw ${amount} ${pool.token?.symbol} to ${user.wallet}`,
+      'withdrawal',
+      formValue,
+      onWithDraw,
+    );
+  };
+
+  const onWithDraw = async (confirmed: boolean, formValue: WithdrawFormValue) => {
+    if (!provider || !confirmed) return;
+
     onOpen();
 
     const { amount, memo, user, category } = formValue;
@@ -100,7 +114,7 @@ export const WithdrawPage = () => {
             <Heading size="lg">Withdraw</Heading>
           </CardHeader>
           <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(submit)}>
+            <form onSubmit={methods.handleSubmit(confirmTx)}>
               <SelectCategoryField mb="4" categories={categories} />
 
               <SelectUserField label="To User" mb="4" users={users} />
@@ -109,19 +123,16 @@ export const WithdrawPage = () => {
 
               <TextAreaMemoField mb="4" />
 
-              {isActive ? (
-                <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
-                  Withdraw
-                </Button>
-              ) : (
-                <ConnectWalletButton mt={4} chainId={pool.chain_id} />
-              )}
+              <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
+                Review
+              </Button>
             </form>
           </FormProvider>
         </Card>
       </Container>
       <TransactionSubmittedModal ref={confirmationRef} chainId={pool?.chain_id} />
       <SubmittingTransactionModal type="deposit" isOpen={isOpen} onClose={onClose} />
+      <ReviewTransactionModal ref={confirmTxRef} />
     </>
   );
 };

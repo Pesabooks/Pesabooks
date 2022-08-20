@@ -1,25 +1,20 @@
-import { useWeb3React } from '@web3-react/core';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { compareAddress } from '../utils';
 import { usePool } from './usePool';
+import { useWeb3Auth } from './useWeb3Auth';
 
 export const useIsAdmin = (): boolean => {
   const [isAdmin, setIsAdmin] = useState(false);
-  const { pool, safeAdmins } = usePool();
+  const { safeAdmins } = usePool();
 
-  const { isActive, chainId, account } = useWeb3React();
-
-  const connected = useMemo(
-    () => isActive && pool?.chain_id === chainId,
-    [chainId, isActive, pool?.chain_id],
-  );
+  const { account } = useWeb3Auth();
 
   useEffect(() => {
-    if (connected && account) {
+    if (account) {
       const itIs = !!safeAdmins?.find((a) => compareAddress(a, account));
       setIsAdmin(itIs);
     } else setIsAdmin(false);
-  }, [connected, account, safeAdmins]);
+  }, [account, safeAdmins]);
 
   return isAdmin;
 };

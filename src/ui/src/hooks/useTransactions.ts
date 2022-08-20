@@ -54,7 +54,7 @@ const reducer = (state: State, action: Action): State => {
 };
 
 export function useTransactions(
-  pool_id: number,
+  pool_id: string,
   filter?: Filter<Transaction>,
   config?: { useRealTime?: boolean; includeFailedTx?: boolean },
 ): { transactions: Transaction[]; loading: boolean; error: any } {
@@ -90,7 +90,7 @@ export function useTransactions(
         .subscribe();
     }
     return () => {
-      if (sub) supabase.removeSubscription(sub);
+      if (sub) supabase().removeSubscription(sub);
     }; // clean up
   }, [config?.useRealTime, loading, pool_id]);
 

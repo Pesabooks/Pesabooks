@@ -1,6 +1,7 @@
-export interface Profile {
+export interface User {
   id: string;
   name: string;
   email: string;
-  last_pool_id?: number;
+  wallet: string;
+  last_pool_id?: string;
 }

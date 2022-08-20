@@ -9,11 +9,12 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout/Layout';
 import { hooks as metaMaskHooks, metaMask } from './connectors/metaMask';
 import { hooks as walletConnectHooks, walletConnect } from './connectors/walletConnect';
-import { AuthProvider } from './contexts/AuthContext';
 import { PoolProvider } from './contexts/PoolContext';
+import { Web3AuthProvider } from './contexts/Web3AuthProvider';
 import { AuthGuard } from './guards/authGuard';
 import { PoolGuard } from './guards/poolGuard';
 import { Auth } from './routes/auth/Auth';
+import { CallbackPage } from './routes/auth/CallbackPage';
 import { InvitationPage } from './routes/auth/InvitationPage';
 import { SignInPage } from './routes/auth/SigninPage';
 import { SignUpPage } from './routes/auth/SignupPage';
@@ -22,6 +23,7 @@ import { DashboardPage } from './routes/dashboard/DashboardPage';
 import { HomePage } from './routes/home/HomePage';
 import { MembersPage } from './routes/members/MembersPage';
 import { NotFound } from './routes/notfound/NotFound';
+import { ProfilePage } from './routes/profile';
 import { AdminsPage } from './routes/settings/container/AdminsPage';
 import { CategoriesPage } from './routes/settings/container/CategoriesPage';
 import { OverviewPage } from './routes/settings/container/OverviewPage';
@@ -31,9 +33,11 @@ import { RampPage } from './routes/transactions/containers/RampPage';
 import { SwapPage } from './routes/transactions/containers/SwapPage';
 import { TransactionsPage } from './routes/transactions/containers/TransactionsPage';
 import { WithdrawPage } from './routes/transactions/containers/WithdrawPage';
+import { WalletPage } from './routes/wallet/WalletPage';
 import theme from './theme/theme';
 import trackPathForAnalytics from './trackpageforanalytics';
 
+// to delete
 const connectors: [MetaMask | WalletConnect, Web3ReactHooks][] = [
   [metaMask, metaMaskHooks],
   [walletConnect, walletConnectHooks],
@@ -57,19 +61,22 @@ function App() {
         <meta name="description" content="A crypto-powered financial platform for saving clubs" />
       </Helmet>
       <ChakraProvider theme={theme}>
-        <Web3ReactProvider connectors={connectors}>
-          <AuthProvider>
+        <Web3AuthProvider>
+          <Web3ReactProvider connectors={connectors}>
             <Routes>
               <Route path="*" element={<NotFound />} />
               <Route path="/auth" element={<Auth />}>
                 <Route path="signin" element={<SignInPage />} />
                 <Route path="signup" element={<SignUpPage />} />
+                <Route path="callback" element={<CallbackPage />} />
                 <Route path="invitation/:invitation_id" element={<InvitationPage />} />
               </Route>
               <Route element={<AuthGuard />}>
                 <Route path="/new-pool" element={<CreatePoolPage />} />
 
                 <Route path="/" element={<HomePage />} />
+                <Route path="/wallet" element={<WalletPage />} />
+                <Route path="/profile" element={<ProfilePage />}></Route>
 
                 <Route
                   path="/pool/:pool_id"
@@ -97,8 +104,8 @@ function App() {
                 </Route>
               </Route>
             </Routes>
-          </AuthProvider>
-        </Web3ReactProvider>
+          </Web3ReactProvider>
+        </Web3AuthProvider>
       </ChakraProvider>
     </HelmetProvider>
   );

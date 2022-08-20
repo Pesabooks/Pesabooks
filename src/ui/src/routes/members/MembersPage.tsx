@@ -2,8 +2,8 @@ import { Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ButtonWithConnectedWallet } from '../../components/withConnectedWallet';
-import { useAuth } from '../../hooks/useAuth';
 import { usePool } from '../../hooks/usePool';
+import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import {
   createInvitation,
   getActiveInvitations,
@@ -11,28 +11,25 @@ import {
   sendInvitation
 } from '../../services/invitationService';
 import { getMembers } from '../../services/membersService';
-import { getAddressLookUp } from '../../services/poolsService';
-import { AddressLookup, Invitation } from '../../types';
+import { Invitation } from '../../types';
 import { Member } from '../../types/Member';
 import { InviteMemberFormValue, InviteMemberModal } from './components/InviteMemberModal';
 import { MembersTable } from './components/MembersTable';
 
 export const MembersPage = () => {
-  const { user } = useAuth();
+  const { user } = useWeb3Auth();
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const { pool } = usePool();
+  const { pool, safeAdmins } = usePool();
   const { isOpen, onClose, onOpen } = useDisclosure();
 
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [lookups, setLookups] = useState<AddressLookup[]>([]);
 
   const loadData = useCallback(async () => {
     try {
       if (pool) {
         const members = await getMembers(pool.id);
-        getAddressLookUp(pool.id, 'user').then(setLookups);
         const activeInvitations = await getActiveInvitations(pool.id);
         setMembers(members ?? []);
         setInvitations(activeInvitations ?? []);
@@ -105,7 +102,7 @@ export const MembersPage = () => {
         </ButtonWithConnectedWallet>
       </Flex>
       <MembersTable
-        lookups={lookups}
+        adminAddresses={safeAdmins}
         members={members}
         invitations={invitations}
         onRevoke={revoke}

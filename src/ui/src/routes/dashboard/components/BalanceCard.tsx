@@ -6,27 +6,26 @@ import { CardBody } from '../../../components/Card/CardBody';
 import { IconBox } from '../../../components/Icons';
 import Loading from '../../../components/Loading';
 import { usePool } from '../../../hooks/usePool';
-import { getTotalBalance } from '../../../services/covalentServices';
+import { getBalances } from '../../../services/covalentServices';
 
-type BalanceCardProps = {
-  chainId: number;
-};
-
-const BalanceCard = ({ chainId }: BalanceCardProps) => {
+const BalanceCard = () => {
   const { pool } = usePool();
   const [balance, setBalance] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getBalance = async () => {
-      if (!pool?.id) return;
-      const balance = await getTotalBalance(pool?.id);
-      setBalance(balance ?? 0);
-      setLoading(false);
+      try {
+        if (!pool?.id) return;
+        const balances = await getBalances(pool?.chain_id, pool.gnosis_safe_address);
+        setBalance(balances?.reduce((balance, resp) => balance + resp.quote, 0) ?? 0);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getBalance();
-  }, [pool?.id]);
+  }, [pool?.chain_id, pool?.gnosis_safe_address, pool?.id]);
 
   return (
     <Card minH="83px">
@@ -37,7 +36,11 @@ const BalanceCard = ({ chainId }: BalanceCardProps) => {
               Balance
             </StatLabel>
             <Flex>
-              {loading ? <Loading size="md" /> : <StatNumber fontSize="lg">$ {balance.toFixed(2)}</StatNumber>}
+              {loading ? (
+                <Loading size="md" />
+              ) : (
+                <StatNumber fontSize="lg">$ {balance.toFixed(2)}</StatNumber>
+              )}
             </Flex>
           </Stat>
           <IconBox h={'45px'} w={'45px'}>
