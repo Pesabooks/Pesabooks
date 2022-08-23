@@ -39,9 +39,11 @@ export const DashboardPage = () => {
       try {
         await getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user!)));
 
-        await getBalances(pool.chain_id, pool.gnosis_safe_address).then((balances) => {
-          setBalances(balances ?? []);
-        });
+        if (pool.gnosis_safe_address) {
+          await getBalances(pool.chain_id, pool.gnosis_safe_address).then((balances) => {
+            setBalances(balances ?? []);
+          });
+        }
       } finally {
         setLoading(false);
       }

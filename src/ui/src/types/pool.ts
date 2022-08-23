@@ -9,6 +9,7 @@ export interface Pool extends BaseEntity<string> {
   token?: Token;
   chain_id: number;
   active: boolean;
+  //todo: make nullable
   gnosis_safe_address: string;
   members?: User[];
 }

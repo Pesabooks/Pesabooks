@@ -31,8 +31,8 @@ export interface IWeb3AuthContext {
   user: User | null | undefined;
   chainId: number;
   signOut: () => Promise<void>;
-  signUp: (name: string, email: string, password: string) => void;
-  signIn: (email: string, password: string) => void;
+  signUp: (name: string, email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   isAuthenticated: boolean;
   setChainId: (chainId: number) => void;
 }

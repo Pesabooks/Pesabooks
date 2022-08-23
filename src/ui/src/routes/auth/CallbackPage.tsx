@@ -1,4 +1,5 @@
-import { Box } from '@chakra-ui/layout';
+import { Text } from '@chakra-ui/layout';
+import { Flex } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { GetAccessTokenRequest, GetAccessTokenResponse } from '@pesabooks/supabase/functions';
 import { useEffect } from 'react';
@@ -54,8 +55,9 @@ export const CallbackPage = () => {
   }, [web3Auth, isInitialised, navigate]);
 
   return (
-    <Box w="100%">
+    <Flex w="100%" direction="column" textAlign="center" gap={10}>
       <Loading />
-    </Box>
+      <Text>Initializing...</Text>
+    </Flex>
   );
 };

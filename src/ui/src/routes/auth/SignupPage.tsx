@@ -15,6 +15,7 @@ import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
+import { isUserExistsInOldDatabase } from '../../services/auth-migration-service';
 import { setTypedStorageItem } from '../../utils/storage-utils';
 
 interface SignupFormValue {
@@ -37,12 +38,17 @@ export const SignUpPage = () => {
   const name = searchParams.get('name') ?? '';
 
   let submit = async (values: SignupFormValue) => {
-    setTypedStorageItem('redirect_url', returnUrl)
-    try {
-      const { name, email, password } = values;
-      await signUp?.(name, email, password);
+    setTypedStorageItem('redirect_url', returnUrl);
+    const { name, email, password } = values;
 
-     
+    try {
+      //migration
+      if (process.env.REACT_APP_ENV === 'prod') {
+        const userAlreadyExist = await isUserExistsInOldDatabase(email);
+        if (userAlreadyExist) throw new Error('Email already in use');
+      }
+
+      await signUp?.(name, email, password);
     } catch (e) {
       const message = e instanceof Error ? e.message : null;
       toast({
@@ -126,9 +132,14 @@ export const SignUpPage = () => {
               type="password"
               placeholder="Your password"
               size="lg"
-              {...register('password', { required: true })}
+              {...register('password', { required: true, minLength: 6 })}
             />
-            <FormErrorMessage>{errors.password && 'Password is required'}</FormErrorMessage>
+            <FormErrorMessage>
+              {errors.password?.type === 'required' && 'Password is required'}
+            </FormErrorMessage>
+            <FormErrorMessage>
+              {errors.password?.type === 'minLength' && 'Password should be 6 characters minimum'}
+            </FormErrorMessage>
           </FormControl>
 
           <Button

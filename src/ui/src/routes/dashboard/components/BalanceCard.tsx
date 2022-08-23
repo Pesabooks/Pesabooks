@@ -16,7 +16,7 @@ const BalanceCard = () => {
   useEffect(() => {
     const getBalance = async () => {
       try {
-        if (!pool?.id) return;
+        if (!pool?.id || !pool.gnosis_safe_address) return;
         const balances = await getBalances(pool?.chain_id, pool.gnosis_safe_address);
         setBalance(balances?.reduce((balance, resp) => balance + resp.quote, 0) ?? 0);
       } finally {

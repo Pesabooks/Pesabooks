@@ -15,6 +15,7 @@ import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
+import { logInAndReturnUser, migrateUSer } from '../../services/auth-migration-service';
 import { setTypedStorageItem } from '../../utils/storage-utils';
 
 interface SigninFormValue {
@@ -30,16 +31,24 @@ export const SignInPage = () => {
   let [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') ?? '/';
   const toast = useToast();
-  const {signIn} = useWeb3Auth()
+  const { signIn, signUp } = useWeb3Auth();
 
   const email = searchParams.get('email') ?? '';
 
   let submit = async (values: SigninFormValue) => {
+    const { email, password } = values;
     try {
-      const { email, password } = values;
-      setTypedStorageItem('redirect_url', returnUrl)
-      await signIn( email, password );
-    } catch {
+      setTypedStorageItem('redirect_url', returnUrl);
+      await signIn(email, password);
+    } catch (e: any) {
+      if (process.env.REACT_APP_ENV === 'prod' && e.code === 'auth/user-not-found') {
+        //migrate user if exis in old Database
+        const user = await logInAndReturnUser(email, password);
+        if (user) {
+          await signUp(user.name, email, password).then(() => migrateUSer(user.id));
+        }
+      }
+
       toast({
         title: 'Your login is invalid. Please try again.',
         status: 'error',
