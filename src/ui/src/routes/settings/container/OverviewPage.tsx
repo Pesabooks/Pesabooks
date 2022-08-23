@@ -6,7 +6,6 @@ import {
   HStack, Stack,
   Text
 } from '@chakra-ui/react';
-import React from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { EditableControls } from '../../../components/Editable/EditableControls';
 import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
@@ -72,10 +71,10 @@ export const OverviewPage = () => {
             </Editable>
           </HStack>
 
-          <HStack>
+          {pool?.gnosis_safe_address && <HStack>
             <Text w="200px">Safe Address:</Text>
-            {pool && <WalletAddress chainId={pool?.chain_id} address={pool?.gnosis_safe_address} type="address" />}
-          </HStack>
+            {pool && <WalletAddress chainId={pool?.chain_id} address={pool.gnosis_safe_address} type="address" />}
+          </HStack>}
         </Stack>
       </CardBody>
     </Card>

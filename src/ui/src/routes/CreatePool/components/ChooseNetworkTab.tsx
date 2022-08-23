@@ -34,7 +34,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
             Select a network
           </Text> */}
           <Text color="gray.400" fontWeight="normal" fontSize="sm">
-            Select network on which to create your group safe.
+            Select network on which to create your group wallet.
           </Text>
         </Flex>
       </CardHeader>

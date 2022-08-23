@@ -2,7 +2,7 @@ import { CheckIcon, CloseIcon, EditIcon } from '@chakra-ui/icons';
 import { ButtonGroup, Flex, IconButton, Select, SelectProps, Spacer } from '@chakra-ui/react';
 import { useState } from 'react';
 import {
-  IconButtonWithConnectedWallet
+  IconButtonWithAdmingRights
 } from '../../../components/withConnectedWallet';
 
 interface EditableSelectProps extends SelectProps {
@@ -31,8 +31,7 @@ export const EditableSelect = ({ options, defaultValue, onSelect }: EditableSele
         <Flex>
           {options.find((o) => o.value.toString() === value?.toString())?.name}
           <Spacer />
-          <IconButtonWithConnectedWallet
-            onlyAdmin={true}
+          <IconButtonWithAdmingRights
             onClick={() => setIsEditing(true)}
             variant="ghost"
             aria-label=""

@@ -1,9 +1,19 @@
-import { Alert, AlertIcon, Button, useDisclosure, useToast } from '@chakra-ui/react';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
+import {
+  Alert,
+  AlertDescription,
+  Button,
+  Link,
+  Text,
+  useDisclosure,
+  useToast
+} from '@chakra-ui/react';
 import { useRef } from 'react';
 import { usePool } from '../hooks/usePool';
 import { useWeb3Auth } from '../hooks/useWeb3Auth';
 import {
-  ConfirmTransactionRef, ReviewTransactionModal
+  ConfirmTransactionRef,
+  ReviewTransactionModal
 } from '../routes/transactions/components/ReviewTransactionModal';
 import { SubmittingTransactionModal } from '../routes/transactions/components/SubmittingTransactionModal';
 import { deployNewSafe } from '../services/poolsService';
@@ -16,7 +26,7 @@ export const CreateTeamSafe = () => {
   const toast = useToast();
 
   const confirmTx = () => {
-    confirmTxRef.current?.open(`Create team safe`, 'createSafe', null, onDeployNewSafe);
+    confirmTxRef.current?.open(`Create group wallet`, 'createSafe', null, onDeployNewSafe);
   };
 
   const onDeployNewSafe = async (confirmed: boolean) => {
@@ -42,20 +52,39 @@ export const CreateTeamSafe = () => {
   return (
     <>
       {!pool?.gnosis_safe_address && (
-        <Button w="100%" variant="ghost" color="white" onClick={confirmTx}>
-          <Alert status="warning" justifyContent="center">
-            <AlertIcon />
-            Create team safe
-          </Alert>
-        </Button>
+        <Alert
+          status="warning"
+          variant="subtle"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="center"
+          textAlign="center"
+          height="150px"
+        >
+          <Button mb={4} variant="outline" onClick={confirmTx}>
+            Create Group Wallet
+          </Button>
+          <AlertDescription maxWidth="sm">Setup a new Gnosis safe to get started</AlertDescription>
+          <Text as="u">
+            <Link
+              color="gray.400"
+              href="https://help.gnosis-safe.io/en/articles/3876456-what-is-gnosis-safe"
+              isExternal
+              fontSize="sm"
+            >
+              What is a Gnosis Safe? <ExternalLinkIcon mx="2px" />
+            </Link>
+          </Text>
+        </Alert>
       )}
+
       <SubmittingTransactionModal
         type="createSafe"
         isOpen={isOpen}
         onClose={onClose}
-        description="Wait while the group safe is created"
+        description="Wait while the group wallet is created"
       />
-      <ReviewTransactionModal ref={confirmTxRef}  />
+      <ReviewTransactionModal ref={confirmTxRef} />
     </>
   );
 };

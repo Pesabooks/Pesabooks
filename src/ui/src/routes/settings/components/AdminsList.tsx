@@ -2,7 +2,7 @@ import { DeleteIcon } from '@chakra-ui/icons';
 import { Flex, Spacer, Text, Tooltip, useColorModeValue } from '@chakra-ui/react';
 import { WalletAddress } from '../../../components/WalletAddress';
 import {
-  IconButtonWithConnectedWallet
+  IconButtonWithAdmingRights
 } from '../../../components/withConnectedWallet';
 import { User } from '../../../types';
 
@@ -29,8 +29,7 @@ export const AdminsList = ({ chainId, admins, remove }: AdminsListProps) => {
 
             <Flex alignItems="center" p="12px">
               <Tooltip label="Remove admin">
-                <IconButtonWithConnectedWallet
-                  onlyAdmin={true}
+                <IconButtonWithAdmingRights
                   variant="ghost"
                   onClick={() => remove(row)}
                   // isLoading={loading}

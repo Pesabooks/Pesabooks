@@ -61,7 +61,7 @@ export const WithdrawPage = () => {
 
   useEffect(() => {
     if (pool) {
-      getAddressBalance(pool.chain_id, token.address, pool.gnosis_safe_address).then(setBalance);
+      getAddressBalance(pool.chain_id, token.address, pool.gnosis_safe_address!).then(setBalance);
     }
   }, [token, pool]);
 

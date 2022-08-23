@@ -1,12 +1,6 @@
 import { Button, Stack, Text, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
 import { Outlet, useMatch, useNavigate, useResolvedPath } from 'react-router-dom';
-
-const Links = [
-  { title: 'Overview', uri: './' },
-  { title: 'Administrators', uri: './admins' },
-  { title: 'Categories', uri: './categories' },
-];
+import { usePool } from '../../../hooks/usePool';
 
 const NavLink = ({ title, link }: { title: string; link: string }) => {
   const bgActiveButton = useColorModeValue('#fff', 'gray.700');
@@ -39,6 +33,7 @@ const NavLink = ({ title, link }: { title: string; link: string }) => {
 };
 
 export const SettingsPage = () => {
+  const { pool } = usePool();
   return (
     <>
       <Stack
@@ -47,9 +42,9 @@ export const SettingsPage = () => {
         w={{ sm: '100%', lg: '' }}
         mb="24px"
       >
-        {Links.map((link, index) => (
-          <NavLink key={index} title={link.title} link={link.uri} />
-        ))}
+        <NavLink title="Overview" link="./" />
+        {pool?.gnosis_safe_address && <NavLink title="Administrators" link="./admins" />}
+        <NavLink title="Categories" link="./categories" />
       </Stack>
       {<Outlet />}
     </>

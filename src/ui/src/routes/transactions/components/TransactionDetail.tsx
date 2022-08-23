@@ -1,6 +1,7 @@
 import {
   Alert,
   AlertIcon,
+  Button,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -30,7 +31,7 @@ import { TriggerEditableControls } from '../../../components/Editable/TriggerEdi
 import Loading from '../../../components/Loading';
 import { UserWalletCard } from '../../../components/UserWalletCard';
 import { WalletAddress } from '../../../components/WalletAddress';
-import { ButtonWithConnectedWallet } from '../../../components/withConnectedWallet';
+import { ButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAllCategories } from '../../../services/categoriesService';
@@ -115,8 +116,8 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     const fetchData = async () => {
       if (pool) {
         getMembers(pool.id).then(members=>setUsers(members?.map(m=>m.user!)));
-        getSafeTreshold(pool.chain_id, pool.gnosis_safe_address).then(setTreshold);
-        getSafeNonce(pool.chain_id, pool.gnosis_safe_address).then(setCurrentSafeNonce);
+        getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!).then(setTreshold);
+        getSafeNonce(pool.chain_id, pool.gnosis_safe_address!).then(setCurrentSafeNonce);
         getAllCategories(pool.id, { activeOnly: true }).then(setCategories);
       }
     };
@@ -164,7 +165,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
     try {
       openSubmitting();
-      await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address, safeTxHash);
+      await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address!, safeTxHash);
 
       await executeTransaction(signer, pool, transaction.id, safeTxHash, isRejection);
       loadTransaction(transaction.id);
@@ -396,8 +397,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                       </Text>
 
                       {!canExecuteRejection && (
-                        <ButtonWithConnectedWallet
-                          onlyAdmin={true}
+                        <ButtonWithAdmingRights
                           colorScheme="red"
                           mr={8}
                           onClick={reject}
@@ -405,17 +405,17 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                           w={150}
                         >
                           Reject
-                        </ButtonWithConnectedWallet>
+                        </ButtonWithAdmingRights>
                       )}
                       {canExecuteRejection && (
-                        <ButtonWithConnectedWallet
+                        <Button
                           colorScheme="red"
                           onClick={() => execute(true)}
                           w={160}
                           disabled={!isNextExecution}
                         >
                           Execute Rejection
-                        </ButtonWithConnectedWallet>
+                        </Button>
                       )}
                     </VStack>
 
@@ -424,23 +424,22 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                         {safeTransaction?.confirmations?.length ?? 0}/{treshold} Approved
                       </Text>
                       {!canExecute && (
-                        <ButtonWithConnectedWallet
-                          onlyAdmin={true}
+                        <ButtonWithAdmingRights
                           disabled={!isAdmin || hasApproved}
                           onClick={approve}
                           w={150}
                         >
                           Approve
-                        </ButtonWithConnectedWallet>
+                        </ButtonWithAdmingRights>
                       )}
                       {canExecute && (
-                        <ButtonWithConnectedWallet
+                        <Button
                           onClick={() => execute(false)}
                           w={150}
                           disabled={!isNextExecution}
                         >
                           Execute
-                        </ButtonWithConnectedWallet>
+                        </Button>
                       )}
                     </VStack>
                   </HStack>

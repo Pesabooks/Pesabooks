@@ -36,6 +36,7 @@ import { SelectParaswapToken } from '../components/SelectParaswapToken';
 
 const DEFAULT_ALLOWED_SLIPPAGE = 0.01; //1%
 const DEFAULT_AMOUNT = '1';
+const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
 interface IState {
   error?: string | React.ReactElement;
@@ -190,9 +191,7 @@ export const SwapCard = ({
 
       const tokenFrom = tokens.find((t) => compareAddress(t.address, defaultTokenAddress));
 
-      const tokenTo = tokens.find((t) =>
-        compareAddress(t.address, '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'),
-      );
+      const tokenTo = tokens.find((t) => compareAddress(t.address, NATIVE_TOKEN_ADDRESS));
 
       setState((prevState) => ({
         ...prevState,
@@ -306,8 +305,6 @@ export const SwapCard = ({
     return numericPrice.toFixed(2);
   };
 
- 
-
   const getTokenBalance = (token: Token | undefined) => {
     const balance = formatBigNumber(
       state.balances?.find((b) => compareAddress(b.contract_address, token?.address))?.balance,
@@ -323,15 +320,21 @@ export const SwapCard = ({
 
       try {
         const { balance } =
-          (state.balances || []).find((t: any) => t.symbol === state.tokenFrom?.symbol) || {};
+          state?.balances?.find((t) =>
+            compareAddress(t.contract_address, state.tokenFrom?.address),
+          ) || {};
 
         const paraswapProxy = await paraswap?.getTokenTransferProxy();
-        const allowance = await getTokenAllowance(
-          chain_id,
-          state.tokenFrom.address,
-          address,
-          paraswapProxy as string,
-        );
+
+        let allowance: BigNumber | null = null;
+        if (!compareAddress(state.tokenFrom.address, NATIVE_TOKEN_ADDRESS)) {
+          allowance = await getTokenAllowance(
+            chain_id,
+            state.tokenFrom.address,
+            address,
+            paraswapProxy as string,
+          );
+        }
 
         if (!state.srcAmount || isNaN(+state.srcAmount)) {
           setState((prevState) => ({

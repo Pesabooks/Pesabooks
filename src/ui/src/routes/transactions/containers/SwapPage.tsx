@@ -126,7 +126,7 @@ export const SwapPage = () => {
       <Container mt={20}>
         {pool && (
           <SwapCard
-            address={pool.gnosis_safe_address}
+            address={pool.gnosis_safe_address!}
             chain_id={pool.chain_id}
             pool_id={pool.id}
             defaultTokenAddress={pool.token?.address}

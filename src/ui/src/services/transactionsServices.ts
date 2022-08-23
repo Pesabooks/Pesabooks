@@ -38,7 +38,7 @@ export const deposit = async (
   const signer = provider.getSigner();
 
   const from = checksummed(await signer.getAddress());
-  const to = checksummed(pool.gnosis_safe_address);
+  const to = checksummed(pool.gnosis_safe_address!);
   const tokenAddress = checksummed(token?.address);
 
   const tokenContract = ERC20__factory.connect(token.address, signer);
@@ -111,7 +111,7 @@ export const depositWithCard = async (
     metadata: {
       ramp_id: rampId,
       ramp_purchase_view_token: rampPurchaseViewToken,
-      transfer_to: checksummed(pool.gnosis_safe_address),
+      transfer_to: checksummed(pool.gnosis_safe_address!),
       token: {
         address: checksummed(token.address),
         symbol: token.symbol,
@@ -146,7 +146,7 @@ export const withdraw = async (
   if (token == null) throw new Error();
 
   const tokenAddress = checksummed(token?.address);
-  const from = checksummed(pool.gnosis_safe_address);
+  const from = checksummed(pool.gnosis_safe_address!);
   const to = checksummed(user.wallet);
 
   const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
@@ -175,7 +175,7 @@ export const withdraw = async (
   const safeTransaction = await createSafeTransaction(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address,
+    pool.gnosis_safe_address!,
     {
       to: checksummed(tokenAddress),
       value: '0',
@@ -209,7 +209,7 @@ export const addAdmin = async (
   const safeTransaction = await getAddOwnerTx(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address,
+    pool.gnosis_safe_address!,
     checksummed(user.wallet),
     treshold,
   );
@@ -237,7 +237,7 @@ export const removeAdmin = async (
   const safeTransaction = await getRemoveOwnerTx(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address,
+    pool.gnosis_safe_address!,
     checksummed(user.wallet),
     treshold,
   );
@@ -269,7 +269,7 @@ export const approveToken = async (
   const safeTransaction = await createSafeTransaction(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address,
+    pool.gnosis_safe_address!,
     {
       to: checksummed(token.address),
       value: '0',
@@ -312,7 +312,7 @@ export const swapTokens = async (
   const safeTransaction = await createSafeTransaction(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address,
+    pool.gnosis_safe_address!,
     {
       to: checksummed(paraswapTx.to),
       value: paraswapTx.value,
@@ -329,13 +329,13 @@ const submitTransaction = async (
   transaction: Partial<Transaction>,
   safeTransaction: SafeTransaction,
 ) => {
-  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address);
+  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
 
   if (treshold > 1) {
     const safeTxHash = await proposeSafeTransaction(
       signer,
       pool.chain_id,
-      pool.gnosis_safe_address,
+      pool.gnosis_safe_address!,
       safeTransaction,
     );
     const { data } = await transationsTable().insert({
@@ -349,10 +349,10 @@ const submitTransaction = async (
   } else if (treshold === 1) {
     const safeTxHash = await getSafeTransactionHash(
       signer,
-      pool.gnosis_safe_address,
+      pool.gnosis_safe_address!,
       safeTransaction,
     );
-    const tx = await executeSafeTransaction(signer, pool.gnosis_safe_address, safeTransaction);
+    const tx = await executeSafeTransaction(signer, pool.gnosis_safe_address!, safeTransaction);
 
     const { data } = await transationsTable().insert({
       ...transaction,
@@ -372,8 +372,8 @@ export const confirmTransaction = async (
   transactionId: number,
   safeTxHash: string,
 ) => {
-  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address);
-  await confirmSafeTransaction(signer, pool.chain_id, pool.gnosis_safe_address, safeTxHash);
+  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
+  await confirmSafeTransaction(signer, pool.chain_id, pool.gnosis_safe_address!, safeTxHash);
 
   const safeTransaction = await getSafeTransaction(pool.chain_id, safeTxHash);
   if (safeTransaction.confirmations?.length === treshold) {
@@ -391,7 +391,7 @@ export const executeTransaction = async (
   const tx = await executeSafeTransactionByHash(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address,
+    pool.gnosis_safe_address!,
     safeTxHash,
   );
 
@@ -410,14 +410,14 @@ export const rejectTransaction = async (
 ) => {
   const safeTransaction = await createSafeRejectionTransaction(
     signer,
-    pool.gnosis_safe_address,
+    pool.gnosis_safe_address!,
     nonce,
   );
 
   const safeTxHash = await proposeSafeTransaction(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address,
+    pool.gnosis_safe_address!,
     safeTransaction,
   );
 

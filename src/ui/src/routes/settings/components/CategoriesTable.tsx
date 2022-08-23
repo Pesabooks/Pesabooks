@@ -15,7 +15,7 @@ import {
 import React from 'react';
 import { Column, useSortBy, useTable } from 'react-table';
 import {
-  SwitchWithConnectedWallet
+  SwitchWithAdmingRights
 } from '../../../components/withConnectedWallet';
 import { Category } from '../../../types';
 
@@ -64,8 +64,7 @@ export const CategoriesTable = ({ categories, onEdit }: CategoriesTableProps) =>
             row: { original: category },
           },
         }) => (
-          <SwitchWithConnectedWallet
-            onlyAdmin={true}
+          <SwitchWithAdmingRights
             defaultChecked={value}
             onChange={(e) => onChangeStatus(category.id, e.target.checked)}
           />

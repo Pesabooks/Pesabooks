@@ -8,27 +8,30 @@ import {
   Tooltip
 } from '@chakra-ui/react';
 import { forwardRef, useMemo } from 'react';
-import { useIsAdmin } from '../hooks/useIsAdmin';
+import { usePool } from '../hooks/usePool';
+import { usePoolAdmins } from '../hooks/usePoolAdmins';
+import { useSafeAdmins } from '../hooks/useSafeAdmins';
 
 type A = {
   onlyAdmin?: boolean;
 };
 
-export function withConnectedWallet<T>(Component: React.ComponentType<T>) {
-  return forwardRef(({ onlyAdmin: requiredAdmin, ...props }: T & A, _) => {
+export function withAdminRight<T>(Component: React.ComponentType<T>) {
+  return forwardRef(({ ...props }: T & A, _) => {
     const componentsProps: any = { ...props };
 
-    const isAdmin = useIsAdmin();
+    const {isAdmin} = usePoolAdmins();
+    const {isSafeAdmin} = useSafeAdmins();
+    const {pool} = usePool()
 
-    const message = useMemo(() => {
-      if (requiredAdmin && !isAdmin) return 'You wallet is not a administrator of the safe';
+    const authorized = useMemo(() => {
+     if (!pool?.gnosis_safe_address) return isAdmin;
+     else return isSafeAdmin
+    }, [isAdmin, isSafeAdmin, pool?.gnosis_safe_address]);
 
-      return null;
-    }, [isAdmin, requiredAdmin]);
-
-    if (message)
+    if (!authorized)
       return (
-        <Tooltip label={message} shouldWrapChildren>
+        <Tooltip label="You are not an administrator" shouldWrapChildren>
           <Component {...componentsProps} isDisabled disabled />
         </Tooltip>
       );
@@ -36,6 +39,6 @@ export function withConnectedWallet<T>(Component: React.ComponentType<T>) {
   });
 }
 
-export const ButtonWithConnectedWallet = withConnectedWallet<ButtonProps>(Button);
-export const SwitchWithConnectedWallet = withConnectedWallet<SwitchProps>(Switch);
-export const IconButtonWithConnectedWallet = withConnectedWallet<IconButtonProps>(IconButton);
+export const ButtonWithAdmingRights = withAdminRight<ButtonProps>(Button);
+export const SwitchWithAdmingRights = withAdminRight<SwitchProps>(Switch);
+export const IconButtonWithAdmingRights = withAdminRight<IconButtonProps>(IconButton);

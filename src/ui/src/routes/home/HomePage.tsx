@@ -1,10 +1,10 @@
 import { Box, Button, Flex, Grid, Icon, Spinner, Text } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { BsPlus } from 'react-icons/bs';
 import { MdSubject } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/Card';
-import { Navbar } from '../../components/Layout/Navbar';
+import { NavbarLight } from '../../components/Layout/NavbarLight';
 import { PoolCard } from '../../components/PoolCard';
 import { getMyPools } from '../../services/poolsService';
 import { Pool } from '../../types';
@@ -22,7 +22,7 @@ export const HomePage = () => {
 
   return (
     <Flex direction="column" align="center" overflow="hidden">
-      <Navbar />
+      <NavbarLight />
       <Box
         position="absolute"
         minH={{ base: '70vh', xl: '50vh' }}

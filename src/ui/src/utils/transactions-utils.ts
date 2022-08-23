@@ -54,7 +54,7 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
     case 'swap':
       return 'Swap Token';
     case 'createSafe':
-      return 'Create group safe';
+      return 'Create group wallet';
   }
 };
 

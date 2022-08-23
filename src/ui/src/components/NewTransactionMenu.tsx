@@ -7,13 +7,13 @@ import {
   BsArrowUpRightCircleFill
 } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
-import { useIsAdmin } from '../hooks/useIsAdmin';
 import { usePool } from '../hooks/usePool';
+import { useSafeAdmins } from '../hooks/useSafeAdmins';
 
 export const NewTransactionMenu = () => {
   const { pool } = usePool();
   const navigate = useNavigate();
-  const isAdmin = useIsAdmin();
+  const {isSafeAdmin} = useSafeAdmins();
 
   const DepositLogo = () => <Icon as={BsArrowDownLeftCircleFill} boxSize={6} color="green.400" />;
   const WithdrawLogo = () => <Icon as={BsArrowUpRightCircleFill} boxSize={6} color="red.400" />;
@@ -36,14 +36,14 @@ export const NewTransactionMenu = () => {
             <MenuItem
               icon={<WithdrawLogo />}
               onClick={() => navigate(`/pool/${pool?.id}/withdraw`)}
-              isDisabled={!isAdmin}
+              isDisabled={!isSafeAdmin}
             >
               Withdraw
             </MenuItem>
             <MenuItem
               icon={<SwapLogo />}
               onClick={() => navigate(`/pool/${pool?.id}/swap`)}
-              isDisabled={!isAdmin}
+              isDisabled={!isSafeAdmin}
             >
               Swap
             </MenuItem>

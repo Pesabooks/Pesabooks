@@ -103,7 +103,7 @@ export const ReviewTransactionModal = forwardRef(
               provider,
               pool?.token?.address,
               depositFormValue.amount,
-              pool?.gnosis_safe_address,
+              pool?.gnosis_safe_address!,
             );
             break;
 
@@ -119,7 +119,7 @@ export const ReviewTransactionModal = forwardRef(
             estimatedFee = await estimateWithdraw(
               provider,
               chainId,
-              pool.gnosis_safe_address,
+              pool.gnosis_safe_address!,
               withdrawFormValue.user.wallet,
               ethers.utils.parseUnits(withdrawFormValue.amount.toString(), pool?.token.decimals),
             );
@@ -129,7 +129,7 @@ export const ReviewTransactionModal = forwardRef(
             estimatedFee = await estimateApprove(
               provider,
               chainId,
-              pool.gnosis_safe_address,
+              pool.gnosis_safe_address!,
               approveArg.paraswapProxy,
             );
             break;

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
 import { ConfirmationModal, ConfirmationRef } from '../../../components/Modals/ConfirmationModal';
-import { ButtonWithConnectedWallet } from '../../../components/withConnectedWallet';
+import { ButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getSafeAdmins, getSafeTreshold } from '../../../services/gnosisServices';
@@ -45,7 +45,7 @@ export const AdminsPage = () => {
   }, [pool?.chain_id, pool?.gnosis_safe_address]);
 
   useEffect(() => {
-    if (pool) {
+    if (pool?.gnosis_safe_address) {
       loadAdminAddresses();
       getMembers(pool.id).then(members=>setLookups(members?.map(m=>m.user!)));
       getSafeTreshold(pool.chain_id, pool.gnosis_safe_address).then(setcurrentTreshold);
@@ -123,9 +123,9 @@ export const AdminsPage = () => {
                 admins
               </Text>
             </Flex>
-            <ButtonWithConnectedWallet onlyAdmin={true} size="sm" onClick={onOpenSetAdminModal}>
+            <ButtonWithAdmingRights size="sm" onClick={onOpenSetAdminModal}>
               Add Admin
-            </ButtonWithConnectedWallet>
+            </ButtonWithAdmingRights>
           </Flex>
         </CardHeader>
         <CardBody>

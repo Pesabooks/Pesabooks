@@ -1,7 +1,7 @@
 import { Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { ButtonWithConnectedWallet } from '../../components/withConnectedWallet';
+import { ButtonWithAdmingRights } from '../../components/withConnectedWallet';
 import { usePool } from '../../hooks/usePool';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import {
@@ -96,10 +96,10 @@ export const MembersPage = () => {
           Members
         </Heading>
         <Spacer />
-        <ButtonWithConnectedWallet onClick={onOpen} onlyAdmin={true}>
+        <ButtonWithAdmingRights onClick={onOpen} >
           {' '}
           Invite a member
-        </ButtonWithConnectedWallet>
+        </ButtonWithAdmingRights>
       </Flex>
       <MembersTable
         adminAddresses={safeAdmins}
