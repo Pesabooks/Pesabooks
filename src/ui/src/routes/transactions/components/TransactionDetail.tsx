@@ -33,6 +33,7 @@ import { UserWalletCard } from '../../../components/UserWalletCard';
 import { WalletAddress } from '../../../components/WalletAddress';
 import { ButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
+import { useSafeAdmins } from '../../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAllCategories } from '../../../services/categoriesService';
 import {
@@ -65,7 +66,8 @@ export interface TransactionDetailRef {
 
 export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDetailRef>) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { pool, safeAdmins } = usePool();
+  const { pool } = usePool();
+  const {safeAdmins} = useSafeAdmins()
   const { provider, account } = useWeb3Auth();
   const [loading, setLoading] = useState(true);
   const {

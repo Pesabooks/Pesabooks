@@ -8,7 +8,7 @@ import {
   useColorModeValue,
   useToast
 } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
@@ -82,7 +82,7 @@ export const InvitationPage = () => {
               To continue, you must either login to your existing account, or create a new one
             </Text>
 
-            <Flex>
+            <Flex gap={4}>
               <Button
                 onClick={() =>
                   navigate(

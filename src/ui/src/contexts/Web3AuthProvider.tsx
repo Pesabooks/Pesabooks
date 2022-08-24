@@ -11,9 +11,10 @@ import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendEmailVerification,
   signInWithEmailAndPassword,
   signOut as FirebaseSignOut,
-  updateProfile,
+  updateProfile as FirebaseUpdateProfile,
   User as FirebaseUser
 } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
@@ -35,6 +36,7 @@ export interface IWeb3AuthContext {
   signIn: (email: string, password: string) => Promise<void>;
   isAuthenticated: boolean;
   setChainId: (chainId: number) => void;
+  updateProfile: (name: string) => Promise<void>;
 }
 
 const web3AuthClientId = process.env.REACT_APP_WEB3AUTH_CLIENT_ID ?? '';
@@ -53,6 +55,7 @@ export const Web3AuthContext = React.createContext<IWeb3AuthContext>({
   signUp: async () => {},
   signOut: async () => {},
   setChainId: async () => {},
+  updateProfile: async (name: string) => {},
   isAuthenticated: false,
   chainId: defaultChain,
 });
@@ -137,8 +140,10 @@ export const Web3AuthProvider = ({ children }: any) => {
 
   const signUp = async (name: string, email: string, password: string) => {
     const { user } = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-    await updateProfile(user, { displayName: name });
+    await FirebaseUpdateProfile(user, { displayName: name });
     await usersTable().insert({ id: user.uid, name, email: user.email! });
+
+    await sendEmailVerification(user);
 
     const fbIdtoken = await user.getIdToken();
     await web3Login(fbIdtoken);
@@ -184,6 +189,14 @@ export const Web3AuthProvider = ({ children }: any) => {
     };
     getAccount();
   }, [provider, isInitialised]);
+
+  const updateProfile = async (name: string) => {
+    const currentUser = firebaseAuth.currentUser;
+    if (currentUser) {
+      await FirebaseUpdateProfile(currentUser, { displayName: name });
+      await usersTable().update({ name }).eq('id', currentUser.uid);
+    }
+  };
 
   useEffect(() => {
     let getUserWithProfile = async (firebaseUser: FirebaseUser | undefined | null) => {
@@ -235,6 +248,7 @@ export const Web3AuthProvider = ({ children }: any) => {
     user,
     account,
     isInitialised,
+    updateProfile,
   };
 
   return <Web3AuthContext.Provider value={contextProvider}>{children}</Web3AuthContext.Provider>;

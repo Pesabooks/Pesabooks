@@ -12,11 +12,16 @@ export const getActiveInvitations = async (pool_id: string) => {
   return data;
 };
 
-export const getInvitation = async (inviation_id: string) => {
-  const { data, error } = await invitationsTable()
-    .select('*, pool:pool_id(name), created_by:created_by_id(name)')
-    .eq('active', true)
-    .eq('id', inviation_id);
+export const getInvitation = async (invitation_id: string) => {
+  const { data, error } = await supabase()
+    .rpc<Invitation>('get_invitation', { invitation_id })
+    .eq('active', true);
+
+  // const { data, error } = await invitationsTable()
+  //   .select('*, pool:pool_id(name), user:user_id(name)')
+  //   .eq('active', true)
+  //   .eq('id', inviation_id);
+
   handleSupabaseError(error);
 
   return data?.[0];

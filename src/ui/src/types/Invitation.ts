@@ -7,6 +7,6 @@ export interface Invitation {
   role: 'admin' | 'member';
   active: boolean;
   status: 'pending' | 'accepted' | 'revoked';
-  created_by_id: string;
+  user_id: string;
   invited_by: string;
 }

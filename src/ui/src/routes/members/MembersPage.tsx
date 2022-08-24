@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ButtonWithAdmingRights } from '../../components/withConnectedWallet';
 import { usePool } from '../../hooks/usePool';
+import { useSafeAdmins } from '../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import {
   createInvitation,
@@ -20,8 +21,9 @@ export const MembersPage = () => {
   const { user } = useWeb3Auth();
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const { pool, safeAdmins } = usePool();
+  const { pool } = usePool();
   const { isOpen, onClose, onOpen } = useDisclosure();
+  const { safeAdmins } = useSafeAdmins();
 
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -96,10 +98,7 @@ export const MembersPage = () => {
           Members
         </Heading>
         <Spacer />
-        <ButtonWithAdmingRights onClick={onOpen} >
-          {' '}
-          Invite a member
-        </ButtonWithAdmingRights>
+        <ButtonWithAdmingRights onClick={onOpen}> Invite a member</ButtonWithAdmingRights>
       </Flex>
       <MembersTable
         adminAddresses={safeAdmins}

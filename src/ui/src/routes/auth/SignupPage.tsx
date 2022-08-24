@@ -15,7 +15,6 @@ import { Helmet } from 'react-helmet-async';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
-import { isUserExistsInOldDatabase } from '../../services/auth-migration-service';
 import { setTypedStorageItem } from '../../utils/storage-utils';
 
 interface SignupFormValue {
@@ -42,12 +41,6 @@ export const SignUpPage = () => {
     const { name, email, password } = values;
 
     try {
-      //migration
-      if (process.env.REACT_APP_ENV === 'prod') {
-        const userAlreadyExist = await isUserExistsInOldDatabase(email);
-        if (userAlreadyExist) throw new Error('Email already in use');
-      }
-
       await signUp?.(name, email, password);
     } catch (e) {
       const message = e instanceof Error ? e.message : null;

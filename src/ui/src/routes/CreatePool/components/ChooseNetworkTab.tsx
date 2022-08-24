@@ -89,7 +89,6 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
               <Spacer />
               {chainId === 56 && <CheckIcon />}
             </Button>
-            <Text>More coming soon...</Text>
             {includeTestnets && (
               <>
                 <Divider />
