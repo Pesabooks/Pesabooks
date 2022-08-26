@@ -25,7 +25,7 @@ import {
 import type { Web3Provider } from '@ethersproject/providers';
 import { SafeMultisigTransactionResponse } from '@gnosis.pm/safe-service-client';
 import { ethers } from 'ethers';
-import { forwardRef, Ref, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { EditableControls } from '../../../components/Editable/EditableControls';
 import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
 import Loading from '../../../components/Loading';
@@ -53,9 +53,15 @@ import {
 } from '../../../services/transactionsServices';
 import { Category, Transaction, User } from '../../../types';
 import { SwapData, TransferData } from '../../../types/transaction';
-import { compareAddress, getTransactionTypeLabel, mathAddress } from '../../../utils';
+import {
+  compareAddress,
+  getTransactionDescription,
+  getTransactionTypeLabel,
+  mathAddress
+} from '../../../utils';
 import { EditableSelect } from './EditableSelect';
-import { SubmittingTransactionModal } from './SubmittingTransactionModal';
+import { ReviewTransactionModal, ReviewTransactionModalRef } from './ReviewTransactionModal';
+import { SubmittingTransactionModal, SubmittingTxModalRef } from './SubmittingTransactionModal';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
 import { TransactionTimeline } from './TransactionTimeline';
 import { TxPropertyBox } from './TxPropertyBox';
@@ -67,14 +73,12 @@ export interface TransactionDetailRef {
 export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDetailRef>) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { pool } = usePool();
-  const {safeAdmins} = useSafeAdmins()
+  const { safeAdmins } = useSafeAdmins();
   const { provider, account } = useWeb3Auth();
   const [loading, setLoading] = useState(true);
-  const {
-    isOpen: isSubmitting,
-    onOpen: openSubmitting,
-    onClose: closeSubmitting,
-  } = useDisclosure();
+  const submittingRef = useRef<SubmittingTxModalRef>(null);
+  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [treshold, setTreshold] = useState(0);
   const [currentSafeNonce, setCurrentSafeNonce] = useState(0);
   const [users, setUsers] = useState<User[]>([]);
@@ -117,7 +121,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   useEffect(() => {
     const fetchData = async () => {
       if (pool) {
-        getMembers(pool.id).then(members=>setUsers(members?.map(m=>m.user!)));
+        getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user!)));
         getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!).then(setTreshold);
         getSafeNonce(pool.chain_id, pool.gnosis_safe_address!).then(setCurrentSafeNonce);
         getAllCategories(pool.id, { activeOnly: true }).then(setCategories);
@@ -153,49 +157,70 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   const approve = async () => {
     if (!pool || !transaction) return;
     try {
-      openSubmitting();
+      setIsSubmitting(true);
+
       await confirmTransaction(signer, pool, transaction.id, transaction?.safe_tx_hash);
       loadTransaction(transaction.id);
+      toast({ title: 'You approved the transaction', status: 'success' });
     } finally {
-      closeSubmitting();
+      setIsSubmitting(false);
     }
   };
 
-  const execute = async (isRejection: boolean) => {
-    if (!pool || !transaction) return;
+  const confirmTx = (isRejection: boolean) => {
+    const message = getTransactionDescription(transaction!, users);
+    const safeTxHash = isRejection ? transaction?.reject_safe_tx_hash : transaction?.safe_tx_hash;
+
+    reviewTxRef.current?.open(message, transaction!.type, isRejection, execute, safeTxHash);
+  };
+
+  const execute = async (confirmed: boolean, isRejection: boolean) => {
+    if (!pool || !transaction || !confirmed) return;
+
     const safeTxHash = isRejection ? transaction?.reject_safe_tx_hash : transaction.safe_tx_hash;
 
     try {
-      openSubmitting();
-      await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address!, safeTxHash);
+      setIsSubmitting(true);
+      submittingRef.current?.open(transaction.type);
+      try {
+        await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address!, safeTxHash);
+      } catch (_) {
+        toast({
+          title:
+            'This transaction will most likely fail. To save gas costs, reject this transaction.',
+          status: 'error',
+          isClosable: true,
+        });
+      }
 
       await executeTransaction(signer, pool, transaction.id, safeTxHash, isRejection);
       loadTransaction(transaction.id);
     } catch (e: any) {
       toast({
-        title:
-          'This transaction will most likely fail. To save gas costs, reject this transaction.',
+        title: e?.message,
         status: 'error',
         isClosable: true,
       });
     } finally {
-      closeSubmitting();
+      submittingRef.current?.close();
+      setIsSubmitting(false);
     }
   };
 
   const reject = async () => {
     if (!pool || !safeTransaction || !transaction) return;
     try {
-      openSubmitting();
-
+      setIsSubmitting(true);
       if (transaction.reject_safe_tx_hash) {
         await confirmTransaction(signer, pool, transaction.id, transaction.reject_safe_tx_hash);
       } else {
         await rejectTransaction(signer, pool, transaction.id, safeTransaction?.nonce);
       }
       loadTransaction(transaction.id);
+      toast({ title: 'You rejected the transaction', status: 'success' });
     } finally {
-      closeSubmitting();
+      submittingRef.current?.close();
+      setIsSubmitting(false);
     }
   };
 
@@ -245,8 +270,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                         />
                       )}
 
-                      {(transaction?.metadata as TransferData)?.ramp_id &&
-                        transaction.user?.name}
+                      {(transaction?.metadata as TransferData)?.ramp_id && transaction.user?.name}
                     </TxPropertyBox>
                   )}
 
@@ -412,7 +436,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                       {canExecuteRejection && (
                         <Button
                           colorScheme="red"
-                          onClick={() => execute(true)}
+                          onClick={() => confirmTx(true)}
                           w={160}
                           disabled={!isNextExecution}
                         >
@@ -436,7 +460,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                       )}
                       {canExecute && (
                         <Button
-                          onClick={() => execute(false)}
+                          onClick={() => confirmTx(false)}
                           w={150}
                           disabled={!isNextExecution}
                         >
@@ -451,7 +475,8 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
           )}
         </DrawerContent>
       </Drawer>
-      <SubmittingTransactionModal type="deposit" isOpen={isSubmitting} onClose={closeSubmitting} />
+      <SubmittingTransactionModal ref={submittingRef} />
+      <ReviewTransactionModal ref={reviewTxRef} />
     </>
   );
 });

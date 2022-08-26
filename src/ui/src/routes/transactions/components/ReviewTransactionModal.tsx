@@ -29,14 +29,19 @@ import { useNativeBalance } from '../../../hooks/useNativeBalance';
 import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import {
+  estimateAddOwner,
   estimateApprove,
+  estimateRemoveOwner,
   estimateSafeCreation,
   estimateSwap,
+  estimateTransaction,
   estimateTransfer,
   estimateWithdraw
 } from '../../../services/estimationService';
 import { TransactionType } from '../../../types';
 import { getTransactionTypeLabel } from '../../../utils';
+import { AddAdminFormValue } from '../../settings/components/addAdminModal';
+import { RemoveAdminFormValue } from '../../settings/components/RemoveAdminModal';
 import { DepositFormValue } from '../containers/DepositPage';
 import { WithdrawFormValue } from '../containers/WithdrawPage';
 import { ApproveArgs, SwapArgs } from './SwapCard';
@@ -44,25 +49,30 @@ import { ApproveArgs, SwapArgs } from './SwapCard';
 type DataType = any | null;
 type callbackfn = (confirmed: boolean, data?: any) => void | Promise<void>;
 
-export interface ConfirmTransactionRef {
+export interface ReviewTransactionModalRef {
   open: (
     message: string,
     type: TransactionType,
     data: DataType | null,
     onConfirm: callbackfn,
+    safeTx?: string,
   ) => void;
 }
 
 export interface ReviewTransactionModalProps {
-  ref: Ref<ConfirmTransactionRef>;
+  ref: Ref<ReviewTransactionModalRef>;
+}
+
+interface State {
+  type: TransactionType;
+  data: DataType;
+  message: string;
 }
 
 export const ReviewTransactionModal = forwardRef(
-  (_: ReviewTransactionModalProps, ref: Ref<ConfirmTransactionRef>) => {
+  (_: ReviewTransactionModalProps, ref: Ref<ReviewTransactionModalRef>) => {
     const { isOpen, onClose, onOpen } = useDisclosure();
-    const [message, setMessage] = useState('');
-    const [data, setData] = useState<DataType>();
-    const [type, setType] = useState<TransactionType>();
+    const [state, setState] = useState<State>();
     const { pool } = usePool();
     const { provider, chainId } = useWeb3Auth();
     const [estimatedFee, setEstimatedFee] = useState('');
@@ -76,12 +86,16 @@ export const ReviewTransactionModal = forwardRef(
     const onConfirmRef = useRef<any>();
 
     useImperativeHandle(ref, () => ({
-      open: (message: string, type: TransactionType, data: DataType, onConfirm) => {
-        setMessage(message);
-        setData(data);
-        setType(type);
+      open: (
+        message: string,
+        type: TransactionType,
+        data: DataType,
+        onConfirm,
+        safeTxHash?: string,
+      ) => {
+        setState({ message, data, type });
         onOpen();
-        estimate(type, data);
+        estimate(type, data, safeTxHash);
         onConfirmRef.current = (confirmed: boolean, data?: any) => onConfirm(confirmed, data);
       },
     }));
@@ -89,54 +103,86 @@ export const ReviewTransactionModal = forwardRef(
     const close = (confirmed: boolean) => {
       onClose();
       setEstimatedFee('');
-      onConfirmRef.current?.(confirmed, data);
+      onConfirmRef.current?.(confirmed, state?.data);
     };
 
-    const estimate = async (type: TransactionType, data: DataType) => {
+    const estimate = async (
+      type: TransactionType,
+      data: DataType,
+      safeTxHash: string | undefined,
+    ) => {
       if (provider && pool?.token?.address) {
         let estimatedFee: BigNumber | undefined;
 
-        switch (type) {
-          case 'deposit':
-            const depositFormValue = data as DepositFormValue;
-            estimatedFee = await estimateTransfer(
-              provider,
-              pool?.token?.address,
-              depositFormValue.amount,
-              pool?.gnosis_safe_address!,
-            );
-            break;
+        if (safeTxHash) {
+          estimatedFee = await estimateTransaction(
+            provider,
+            chainId,
+            pool.gnosis_safe_address!,
+            safeTxHash,
+          );
+        } else {
+          switch (type) {
+            case 'deposit':
+              const depositFormValue = data as DepositFormValue;
+              estimatedFee = await estimateTransfer(
+                provider,
+                pool?.token?.address,
+                depositFormValue.amount,
+                pool?.gnosis_safe_address!,
+              );
+              break;
 
-          case 'createSafe':
-            estimatedFee = await estimateSafeCreation(provider);
-            break;
-          case 'swap':
-            const swapArgs = data as SwapArgs;
-            estimatedFee = await estimateSwap(provider, swapArgs.txParams);
-            break;
-          case 'withdrawal':
-            const withdrawFormValue = data as WithdrawFormValue;
-            estimatedFee = await estimateWithdraw(
-              provider,
-              chainId,
-              pool.gnosis_safe_address!,
-              withdrawFormValue.user.wallet,
-              ethers.utils.parseUnits(withdrawFormValue.amount.toString(), pool?.token.decimals),
-            );
-            break;
-          case 'unlockToken':
-            const approveArg = data as ApproveArgs;
-            estimatedFee = await estimateApprove(
-              provider,
-              chainId,
-              pool.gnosis_safe_address!,
-              approveArg.paraswapProxy,
-            );
-            break;
-          default:
-            break;
+            case 'createSafe':
+              estimatedFee = await estimateSafeCreation(provider);
+              break;
+            case 'swap':
+              const swapArgs = data as SwapArgs;
+              estimatedFee = await estimateSwap(provider, swapArgs.txParams);
+              break;
+            case 'withdrawal':
+              const withdrawFormValue = data as WithdrawFormValue;
+              estimatedFee = await estimateWithdraw(
+                provider,
+                chainId,
+                pool.gnosis_safe_address!,
+                withdrawFormValue.user.wallet,
+                ethers.utils.parseUnits(withdrawFormValue.amount.toString(), pool?.token.decimals),
+              );
+              break;
+            case 'unlockToken':
+              const approveArg = data as ApproveArgs;
+              estimatedFee = await estimateApprove(
+                provider,
+                chainId,
+                pool.gnosis_safe_address!,
+                approveArg.paraswapProxy,
+              );
+              break;
+            case 'addOwner':
+              const addAdminArg = data as AddAdminFormValue;
+              estimatedFee = await estimateAddOwner(
+                provider,
+                pool.chain_id,
+                pool.gnosis_safe_address!,
+                addAdminArg.user.wallet,
+                addAdminArg.threshold,
+              );
+              break;
+            case 'removeOwner':
+              const removeAdminArg = data as RemoveAdminFormValue;
+              estimatedFee = await estimateRemoveOwner(
+                provider,
+                pool.chain_id,
+                pool.gnosis_safe_address!,
+                removeAdminArg.user.wallet,
+                removeAdminArg.threshold,
+              );
+              break;
+            default:
+              break;
+          }
         }
-
         if (estimatedFee) {
           const formattedFee = formatBigNumber(estimatedFee);
           setEstimatedFee(formattedFee?.toString() ?? '');
@@ -157,14 +203,14 @@ export const ReviewTransactionModal = forwardRef(
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader> {getTransactionTypeLabel(type)}</ModalHeader>
+          <ModalHeader> {getTransactionTypeLabel(state?.type)}</ModalHeader>
           <ModalCloseButton />
           <ModalBody mb={50}>
             <Stack gap={5}>
               <Box bg={bgColor} boxShadow={'2xl'} rounded={'lg'} p={6} textAlign={'center'}>
-                <Center>{type && <TransactionIcon type={type} />}</Center>
+                <Center>{state?.type && <TransactionIcon type={state?.type} />}</Center>
                 <Text mt={5} color={txtColor} px={3}>
-                  {message}
+                  {state?.message}
                 </Text>
               </Box>
               <Flex direction="column">
@@ -181,7 +227,7 @@ export const ReviewTransactionModal = forwardRef(
                       {estimatedFee} {network?.nativeCurrency.symbol}
                     </Text>
                   ) : (
-                    <Loading size="sm" thickness='2px'/>
+                    <Loading size="sm" thickness="2px" />
                   )}
                 </Flex>
               </Flex>

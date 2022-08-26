@@ -4,25 +4,26 @@ import {
   AlertDescription,
   Button,
   Link,
-  Text,
-  useDisclosure,
-  useToast
+  Text, useToast
 } from '@chakra-ui/react';
 import { useRef } from 'react';
 import { usePool } from '../hooks/usePool';
 import { useWeb3Auth } from '../hooks/useWeb3Auth';
 import {
-  ConfirmTransactionRef,
-  ReviewTransactionModal
+  ReviewTransactionModal,
+  ReviewTransactionModalRef
 } from '../routes/transactions/components/ReviewTransactionModal';
-import { SubmittingTransactionModal } from '../routes/transactions/components/SubmittingTransactionModal';
+import {
+  SubmittingTransactionModal,
+  SubmittingTxModalRef
+} from '../routes/transactions/components/SubmittingTransactionModal';
 import { deployNewSafe } from '../services/poolsService';
 
 export const CreateTeamSafe = () => {
   const { provider } = useWeb3Auth();
   const { pool, refresh } = usePool();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const confirmTxRef = useRef<ConfirmTransactionRef>(null);
+  const confirmTxRef = useRef<ReviewTransactionModalRef>(null);
+  const submittingRef = useRef<SubmittingTxModalRef>(null);
   const toast = useToast();
 
   const confirmTx = () => {
@@ -32,7 +33,7 @@ export const CreateTeamSafe = () => {
   const onDeployNewSafe = async (confirmed: boolean) => {
     if (confirmed && pool?.id && provider) {
       try {
-        onOpen();
+        submittingRef.current?.open('createSafe', 'Wait while the group wallet is created');
         await deployNewSafe(provider, pool?.id);
         refresh();
       } catch (e: any) {
@@ -44,7 +45,7 @@ export const CreateTeamSafe = () => {
         });
         throw e;
       } finally {
-        onClose();
+        submittingRef.current?.close();
       }
     }
   };
@@ -78,12 +79,7 @@ export const CreateTeamSafe = () => {
         </Alert>
       )}
 
-      <SubmittingTransactionModal
-        type="createSafe"
-        isOpen={isOpen}
-        onClose={onClose}
-        description="Wait while the group wallet is created"
-      />
+      <SubmittingTransactionModal ref={submittingRef} />
       <ReviewTransactionModal ref={confirmTxRef} />
     </>
   );

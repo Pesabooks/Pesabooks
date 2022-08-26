@@ -2,7 +2,7 @@ import { Flex, HStack, Text } from '@chakra-ui/react';
 import dayjs from 'dayjs';
 import { TransactionIcon } from '../../../components/TransactionIcon';
 import { Transaction, User } from '../../../types';
-import { getTransactionDescription, getTxAmountDescription } from '../../../utils';
+import { getTransactionDescription } from '../../../utils';
 import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';
 
 interface TransactionsListProps {
@@ -32,9 +32,9 @@ export const TransactionsList = ({ transactions, users }: TransactionsListProps)
 
             <HStack>
               <Flex direction="column" alignItems="end">
-                <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
+                {/* <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
                   {getTxAmountDescription(transaction)}
-                </Text>
+                </Text> */}
 
                 <Text
                   fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }}

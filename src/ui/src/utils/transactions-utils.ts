@@ -11,12 +11,12 @@ export const getAddressName = (address: string | undefined, users: User[]) => {
   return user?.name ?? address;
 };
 
-export const getTransactionDescription = (transaction: Transaction, addresses: User[]) => {
+export const getTransactionDescription = (transaction: Transaction, addresses: User[]): string => {
   const { type, metadata } = transaction;
 
   switch (type) {
     case 'deposit':
-      if ((metadata as TransferData)?.ramp_id) return transaction.user?.name;
+      if ((metadata as TransferData)?.ramp_id) return transaction.user?.name || '';
       else
         return `Received ${getTxAmountDescription(transaction)} From ${getAddressName(
           (metadata as TransferData).transfer_from,
@@ -29,13 +29,17 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
       )}`;
     case 'addOwner':
       return `add ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
+    case 'removeOwner':
+      return `Remove ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
     case 'unlockToken':
       return `unlock token ${(metadata as any).token.symbol}`;
     case 'swap':
       const swapData = metadata as SwapData;
-      return `Trade  ${swapData.src_token.symbol} for  ${swapData.dest_token.symbol}  `;
+      return `Trade ${getTxAmountDescription(transaction)} for  ${swapData.dest_token.symbol}  `;
     case 'createSafe':
       return 'Create Safe';
+    default:
+      return transaction.type;
   }
 };
 

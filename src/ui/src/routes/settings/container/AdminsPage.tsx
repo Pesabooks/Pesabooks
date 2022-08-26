@@ -3,7 +3,6 @@ import { Web3Provider } from '@ethersproject/providers';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
-import { ConfirmationModal, ConfirmationRef } from '../../../components/Modals/ConfirmationModal';
 import { ButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
@@ -12,12 +11,23 @@ import { getMembers } from '../../../services/membersService';
 import { addAdmin, removeAdmin } from '../../../services/transactionsServices';
 import { User } from '../../../types';
 import { compareAddress } from '../../../utils';
-import { AddAdminFormValue, AddAdminModal } from '../../members/components/addAdminModal';
+import {
+  ReviewTransactionModal,
+  ReviewTransactionModalRef
+} from '../../transactions/components/ReviewTransactionModal';
+import { SubmittingTransactionModal, SubmittingTxModalRef } from '../../transactions/components/SubmittingTransactionModal';
+import { TransactionSubmittedModal, TransactionSubmittedModalRef } from '../../transactions/components/TransactionSubmittedModal';
+import { AddAdminFormValue, AddAdminModal } from '../components/addAdminModal';
 import { AdminsList } from '../components/AdminsList';
+import {
+  RemoveAdminFormValue,
+  RemoveAdminModal,
+  RemoveAdminModalRef
+} from '../components/RemoveAdminModal';
 
 export const AdminsPage = () => {
   const [adminAddressess, setAdminAddressess] = useState<string[]>([]);
-  const [currentTreshold, setcurrentTreshold] = useState(0);
+  const [currentThreshold, setcurrentTreshold] = useState(1);
   const [users, setLookups] = useState<User[]>([]);
   const { pool } = usePool();
   const { provider } = useWeb3Auth();
@@ -27,7 +37,10 @@ export const AdminsPage = () => {
     onOpen: onOpenSetAdminModal,
   } = useDisclosure();
   const toast = useToast();
-  const confirmationRef = useRef<ConfirmationRef>(null);
+  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
+  const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
+  const removeAdminModaldRef = useRef<RemoveAdminModalRef>(null);
+  const submittingRef = useRef<SubmittingTxModalRef>(null);
   const signer = (provider as Web3Provider)?.getSigner();
   const [loading, setLoading] = useState(true);
 
@@ -47,7 +60,7 @@ export const AdminsPage = () => {
   useEffect(() => {
     if (pool?.gnosis_safe_address) {
       loadAdminAddresses();
-      getMembers(pool.id).then(members=>setLookups(members?.map(m=>m.user!)));
+      getMembers(pool.id).then((members) => setLookups(members?.map((m) => m.user!)));
       getSafeTreshold(pool.chain_id, pool.gnosis_safe_address).then(setcurrentTreshold);
     }
   }, [loadAdminAddresses, pool]);
@@ -56,10 +69,19 @@ export const AdminsPage = () => {
     onCloseSetAdminModal();
   };
 
-  const onAddmin = async ({ user, treshold }: AddAdminFormValue) => {
-    if (pool) {
+  const reviewAddAdminTx = (formValue: AddAdminFormValue) => {
+    const { user } = formValue;
+    reviewTxRef.current?.open(`Add ${user.name} as an Admin`, 'addOwner', formValue, onAddmin);
+  };
+
+  const onAddmin = async (confirmed: boolean, { user, threshold: treshold }: AddAdminFormValue) => {
+    if (confirmed && pool) {
       try {
+        submittingRef.current?.open('addOwner')
+
         let tx = await addAdmin(signer, pool, user, treshold);
+        txSubmittedRef.current?.open(tx);
+
         if (tx?.hash) {
           (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
             loadAdminAddresses();
@@ -77,17 +99,27 @@ export const AdminsPage = () => {
     }
   };
 
-  const confirmDeactivation = useCallback((user: User) => {
-    confirmationRef.current?.open(
-      `Are you sure you want to remove ${user.name} as an admin?`,
-      user,
-    );
-  }, []);
+  const onpenRemoveAdmin = (user: User) => {
+    removeAdminModaldRef.current?.open(user, reviewRemoveAdminTx);
+  };
 
-  const onRemoveAdmin = async (confirmed: boolean, { user, treshold }: AddAdminFormValue) => {
+  const reviewRemoveAdminTx = (formValue: RemoveAdminFormValue) => {
+    const { user } = formValue;
+    reviewTxRef.current?.open(
+      `Remove ${user.name} as an Admin`,
+      'removeOwner',
+      formValue,
+      onRemoveAdmin,
+    );
+  };
+
+  const onRemoveAdmin = async (confirmed: boolean, { user, threshold: treshold }: RemoveAdminFormValue) => {
     if (confirmed && pool) {
       try {
+        submittingRef.current?.open('removeOwner')
+
         let tx = await removeAdmin(signer, pool, user, treshold);
+        txSubmittedRef.current?.open(tx);
         if (tx?.hash) {
           (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
             loadAdminAddresses();
@@ -118,7 +150,7 @@ export const AdminsPage = () => {
               <Text color="gray.400" fontSize="sm" fontWeight="normal">
                 Every transaction requires the confirmation of{' '}
                 <b>
-                  {currentTreshold} out of {adminAddressess.length}
+                  {currentThreshold} out of {adminAddressess.length}
                 </b>{' '}
                 admins
               </Text>
@@ -133,7 +165,7 @@ export const AdminsPage = () => {
             <AdminsList
               chainId={pool.chain_id}
               admins={adminsAddressLookup}
-              remove={confirmDeactivation}
+              remove={onpenRemoveAdmin}
             />
           )}
           {loading && <Loading />}
@@ -146,11 +178,14 @@ export const AdminsPage = () => {
           onClose={onAdminAdded}
           users={users}
           adminAddressess={adminAddressess}
-          addAdmin={onAddmin}
-          currenTreshold={currentTreshold}
+          addAdmin={reviewAddAdminTx}
+          currenThreshold={currentThreshold}
         />
       )}
-      <ConfirmationModal ref={confirmationRef} afterClosed={onRemoveAdmin} />
+      <ReviewTransactionModal ref={reviewTxRef} />
+      <RemoveAdminModal ref={removeAdminModaldRef} currentThreshold={currentThreshold} />
+      <TransactionSubmittedModal ref={txSubmittedRef} chainId={pool?.chain_id} />
+      <SubmittingTransactionModal ref={submittingRef} />
     </>
   );
 };

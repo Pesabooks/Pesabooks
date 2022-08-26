@@ -1,4 +1,4 @@
-import { Button, Container, Heading, useDisclosure, useToast } from '@chakra-ui/react';
+import { Button, Container, Heading, useToast } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -11,10 +11,8 @@ import { getAddressBalance } from '../../../services/blockchainServices';
 import { getAllCategories } from '../../../services/categoriesService';
 import { deposit } from '../../../services/transactionsServices';
 import { Category } from '../../../types';
-import {
-  ConfirmTransactionRef, ReviewTransactionModal
-} from '../components/ReviewTransactionModal';
-import { SubmittingTransactionModal } from '../components/SubmittingTransactionModal';
+import { ReviewTransactionModal, ReviewTransactionModalRef } from '../components/ReviewTransactionModal';
+import { SubmittingTransactionModal, SubmittingTxModalRef } from '../components/SubmittingTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 import {
   TransactionSubmittedModal,
@@ -32,11 +30,11 @@ export const DepositPage = () => {
   const { provider, account } = useWeb3Auth();
   const { pool } = usePool();
   const [balance, setBalance] = useState<number>(0);
-  const confirmTxRef = useRef<ConfirmTransactionRef>(null);
+  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
+  const submittingRef = useRef<SubmittingTxModalRef>(null);
   const toast = useToast();
   const methods = useForm<DepositFormValue>();
   const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const token = pool?.token;
 
@@ -65,12 +63,12 @@ export const DepositPage = () => {
 
   const confirmTx = (formValue: DepositFormValue) => {
     const { amount } = formValue;
-    confirmTxRef.current?.open(`Deposit ${amount} ${pool.token?.symbol}`, 'deposit', formValue, onDeposit);
+    reviewTxRef.current?.open(`Deposit ${amount} ${pool.token?.symbol}`, 'deposit', formValue, onDeposit);
   };
 
   const onDeposit = async (confirmed: boolean, formValue: DepositFormValue) => {
     if (!provider || !confirmed) return;
-    onOpen();
+    submittingRef.current?.open('deposit')
 
     const { amount, memo, category } = formValue;
 
@@ -87,7 +85,7 @@ export const DepositPage = () => {
       });
       throw e;
     } finally {
-      onClose();
+      submittingRef.current?.close();
     }
   };
 
@@ -117,8 +115,8 @@ export const DepositPage = () => {
         </Card>
       </Container>
       <TransactionSubmittedModal ref={txSubmittedRef} chainId={pool?.chain_id} />
-      <SubmittingTransactionModal type="deposit" isOpen={isOpen} onClose={onClose} />
-      <ReviewTransactionModal ref={confirmTxRef}  />
+      <SubmittingTransactionModal ref={submittingRef} />
+      <ReviewTransactionModal ref={reviewTxRef}  />
     </>
   );
 };

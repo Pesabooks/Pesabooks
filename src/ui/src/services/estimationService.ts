@@ -2,7 +2,12 @@ import { Web3Provider } from '@ethersproject/providers';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
 import { BigNumber, ethers } from 'ethers';
 import { Transaction as ParaswapTx } from 'paraswap';
-import { estimateSafeTransaction } from './gnosisServices';
+import {
+  estimateSafeTransaction,
+  estimateSafeTransactionByHash,
+  getAddOwnerTx,
+  getRemoveOwnerTx,
+} from './gnosisServices';
 
 const INITIAL_SAFE_CREATION_TX_GAS_COST = 282912;
 
@@ -54,6 +59,57 @@ export const estimateSwap = async (provider: Web3Provider, txParams: ParaswapTx)
     to: txParams.to,
     data: txParams.data,
   });
+
+  return fee(provider, BigNumber.from(gasLimit));
+};
+
+export const estimateAddOwner = async (
+  provider: Web3Provider,
+  chain_id: number,
+  safe_address: string,
+  address: string,
+  treshold: number,
+) => {
+  const signer = provider.getSigner();
+
+  const safeTransaction = await getAddOwnerTx(signer, chain_id, safe_address, address, treshold);
+
+  const gasLimit = await estimateSafeTransaction(chain_id, safe_address, {
+    value: '0',
+    to: safeTransaction.data.to,
+    data: safeTransaction.data.data,
+  });
+
+  return fee(provider, BigNumber.from(gasLimit));
+};
+
+export const estimateRemoveOwner = async (
+  provider: Web3Provider,
+  chain_id: number,
+  safe_address: string,
+  address: string,
+  treshold: number,
+) => {
+  const signer = provider.getSigner();
+
+  const safeTransaction = await getRemoveOwnerTx(signer, chain_id, safe_address, address, treshold);
+
+  const gasLimit = await estimateSafeTransaction(chain_id, safe_address, {
+    value: '0',
+    to: safeTransaction.data.to,
+    data: safeTransaction.data.data,
+  });
+
+  return fee(provider, BigNumber.from(gasLimit));
+};
+
+export const estimateTransaction = async (
+  provider: Web3Provider,
+  chain_id: number,
+  safe_address: string,
+  safeTxHash: string,
+) => {
+  const gasLimit = await estimateSafeTransactionByHash(chain_id, safe_address, safeTxHash);
 
   return fee(provider, BigNumber.from(gasLimit));
 };

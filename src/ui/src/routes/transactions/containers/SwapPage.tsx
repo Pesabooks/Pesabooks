@@ -1,4 +1,4 @@
-import { Container, useDisclosure, useToast } from '@chakra-ui/react';
+import { Container, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { Transaction as ParaswapTx } from 'paraswap';
 import { useRef, useState } from 'react';
@@ -8,11 +8,14 @@ import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { onTransactionComplete } from '../../../services/blockchainServices';
 import { approveToken, swapTokens } from '../../../services/transactionsServices';
-import { TransactionType } from '../../../types';
 import {
-  ConfirmTransactionRef, ReviewTransactionModal
+  ReviewTransactionModal,
+  ReviewTransactionModalRef
 } from '../components/ReviewTransactionModal';
-import { SubmittingTransactionModal } from '../components/SubmittingTransactionModal';
+import {
+  SubmittingTransactionModal,
+  SubmittingTxModalRef
+} from '../components/SubmittingTransactionModal';
 import { ApproveArgs, SwapArgs, SwapCard } from '../components/SwapCard';
 import {
   TransactionSubmittedModal,
@@ -23,13 +26,13 @@ const DEFAULT_ALLOWED_SLIPPAGE = 0.01; //1%
 
 export const SwapPage = () => {
   const { pool } = usePool();
-  const { isOpen: isSubmitting, onOpen, onClose } = useDisclosure();
   const { provider } = useWeb3Auth();
   const signer = (provider as Web3Provider)?.getSigner();
   const confirmationRef = useRef<TransactionSubmittedModalRef>(null);
-  const confirmTxRef = useRef<ConfirmTransactionRef>(null);
+  const confirmTxRef = useRef<ReviewTransactionModalRef>(null);
+  const submittingRef = useRef<SubmittingTxModalRef>(null);
   const toast = useToast();
-  const [type, setType] = useState<TransactionType>('swap');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const confirmApprove = (approveArg: ApproveArgs) => {
     const { tokenFrom } = approveArg;
@@ -45,8 +48,8 @@ export const SwapPage = () => {
     const { paraswapProxy, tokenFrom, callback } = args;
     if (!pool || !confirmed) return;
 
-    setType('unlockToken');
-    onOpen();
+    submittingRef.current?.open('unlockToken');
+    setIsSubmitting(true);
     try {
       const tx = await approveToken(
         signer,
@@ -68,7 +71,8 @@ export const SwapPage = () => {
       });
       throw e;
     } finally {
-      onClose();
+      submittingRef.current?.close();
+      setIsSubmitting(false);
     }
   };
 
@@ -90,8 +94,8 @@ export const SwapPage = () => {
   ) => {
     if (!pool || !confirmed) return;
 
-    setType('swap');
-    onOpen();
+    submittingRef.current?.open('swap');
+    setIsSubmitting(true);
 
     try {
       const tx = await swapTokens(
@@ -114,7 +118,8 @@ export const SwapPage = () => {
         isClosable: true,
       });
     } finally {
-      onClose();
+      submittingRef.current?.close();
+      setIsSubmitting(false);
     }
   };
 
@@ -137,7 +142,7 @@ export const SwapPage = () => {
         )}
       </Container>
       <TransactionSubmittedModal ref={confirmationRef} chainId={pool?.chain_id} />
-      <SubmittingTransactionModal type={type} isOpen={isSubmitting} onClose={onClose} />
+      <SubmittingTransactionModal ref={submittingRef} />
       <ReviewTransactionModal ref={confirmTxRef} />
     </>
   );

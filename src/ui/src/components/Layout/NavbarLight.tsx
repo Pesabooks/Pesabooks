@@ -31,7 +31,7 @@ export const NavbarLight = () => {
         alignItems="center"
         fontSize="11px"
       >
-        <Logo />
+        <Logo theme='dark'/>
       </Link>
 
       <AvatarMenu />

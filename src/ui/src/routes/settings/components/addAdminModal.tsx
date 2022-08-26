@@ -25,13 +25,13 @@ export interface AddAdminModalProps {
   onClose: (hash?: string) => void;
   users: User[];
   adminAddressess: string[];
-  addAdmin: (admin: AddAdminFormValue) => Promise<void>;
-  currenTreshold: number;
+  addAdmin: (admin: AddAdminFormValue) => void;
+  currenThreshold: number;
 }
 
 export interface AddAdminFormValue {
   user: User;
-  treshold: number;
+  threshold: number;
 }
 
 export const AddAdminModal = ({
@@ -40,10 +40,10 @@ export const AddAdminModal = ({
   users,
   adminAddressess,
   addAdmin,
-  currenTreshold,
+  currenThreshold ,
 }: AddAdminModalProps) => {
   const methods = useForm<AddAdminFormValue>({
-    defaultValues: { treshold: currenTreshold },
+    defaultValues: { threshold: currenThreshold },
   });
 
   const filteredUsers = users?.filter(
@@ -59,12 +59,12 @@ export const AddAdminModal = ({
           <FormProvider {...methods}>
             <SelectUserField label="Select a member" mb="8" users={filteredUsers} />
 
-            <FormControl isInvalid={!!methods.formState.errors.treshold} isRequired>
+            <FormControl isInvalid={!!methods.formState.errors.threshold} isRequired>
               <FormLabel htmlFor="category">New Threshold</FormLabel>
               <FormHelperText mb={4}>Any transaction requires the confirmation of:</FormHelperText>
               <HStack gap={4}>
-                <Select w={70} {...methods.register('treshold', { required: true })}>
-                  {[...Array(currenTreshold + 1).keys()]
+                <Select w={70} {...methods.register('threshold', { required: true })}>
+                  {[...Array(currenThreshold + 1).keys()]
                     .map((el) => el + 1)
                     .map((t) => (
                       <option value={t} key={t}>
@@ -72,10 +72,10 @@ export const AddAdminModal = ({
                       </option>
                     ))}
                 </Select>
-                <Text>out of {currenTreshold + 1} admins</Text>
+                <Text>out of {currenThreshold + 1} admins</Text>
               </HStack>
               <FormErrorMessage>
-                {methods.formState.errors.treshold && methods.formState.errors.treshold.message}
+                {methods.formState.errors.threshold && methods.formState.errors.threshold.message}
               </FormErrorMessage>
             </FormControl>
           </FormProvider>
