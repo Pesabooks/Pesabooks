@@ -23,6 +23,7 @@ export function AuthGuard() {
             setIsAuthenticated(false);
           } else setIsAuthenticated(true);
         })
+        .catch((_) => {})
         .finally(() => setLoading(false));
     }
   }, [isInitialised, signOut, web3Auth]);
