@@ -43,7 +43,7 @@ export const CallbackPage = () => {
         }
         setTypedStorageItem('supabase_access_token', data?.access_token ?? '');
 
-        await usersTable().upsert({ id: user_id!, name, wallet: address, email });
+        await usersTable().upsert({ id: user_id!, wallet: address, email });
 
         const returnUrl = getTypedStorageItem('redirect_url') ?? '/';
         navigate(returnUrl);
