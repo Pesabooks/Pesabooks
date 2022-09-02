@@ -21,7 +21,7 @@ export const CallbackPage = () => {
     const handleCallBack = async () => {
       const user_id = getTypedStorageItem('user_id');
       if (isInitialised && web3Auth) {
-        const { idToken, name, email } = await web3Auth.getUserInfo();
+        const { idToken, email } = await web3Auth.getUserInfo();
 
         const provider = new Web3Provider(web3Auth.provider!);
 
