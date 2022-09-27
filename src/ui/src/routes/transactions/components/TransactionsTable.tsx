@@ -1,9 +1,10 @@
 import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
-import { chakra, Flex, Table, Tbody, Td, Th, Thead, Tr } from '@chakra-ui/react';
+import { chakra, Flex, Table, Tbody, Td, Text, Th, Thead, Tooltip, Tr } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { CellProps, Column, useSortBy, useTable } from 'react-table';
 import Loading from '../../../components/Loading';
 import { Category, Pool, Transaction, TransactionStatus, User } from '../../../types';
+import { getTransactionTypeLabel, getTxAmountDescription } from '../../../utils';
 import { RefreshTransactionButton } from './RefreshTransactionButton';
 import { TransactionCell } from './TransactionCell';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
@@ -14,6 +15,7 @@ interface TransactionsTableProps {
   users: User[];
   loading: boolean;
   categories: Category[];
+  showNonce:boolean;
   onSelect: (transaction: Transaction) => void;
 }
 
@@ -24,65 +26,64 @@ export const TransactionsTable = ({
   loading,
   categories,
   onSelect,
+  showNonce
 }: TransactionsTableProps) => {
   const columns = useMemo(() => {
     const columns: Column[] = [
-     
       {
-        Header: '',
+        Header: 'Type',
+        accessor: 'type',
+        Cell: ({ cell: { value, row } }: CellProps<Transaction>) => (
+          <Text>{getTransactionTypeLabel(value)}</Text>
+        ),
+      },
+
+      {
+        Header: 'Description',
         accessor: 'icon',
         Cell: ({ cell: { value, row } }: CellProps<Transaction>) => (
           <TransactionCell transaction={row.original} users={users} />
         ),
       },
-     
+
       {
         Header: 'Category',
         accessor: 'category',
         Cell: ({ cell: { value } }: CellProps<Transaction, Category>) => <span>{value?.name}</span>,
       },
-      {
-        Header: 'Memo',
-        accessor: 'memo',
-      },
+      // {
+      //   Header: 'Memo',
+      //   accessor: 'memo',
+      // },
       {
         Header: 'Date',
         accessor: 'created_at',
         Cell: ({ cell: { value } }) => {
           const date = new Date(value);
           return (
-            <span>
-              {date.toLocaleDateString()} {date.toLocaleTimeString()}
-            </span>
+            <Tooltip label={`${date.toLocaleDateString()} ${date.toLocaleTimeString()}`}>
+              {date.toLocaleDateString()}
+            </Tooltip>
           );
         },
       },
-      // {
-      //   Header: 'Amount',
-
-      //   accessor: 'metadata.amount',
-      //   isNumeric: true,
-      //   Cell: ({
-      //     cell: {
-      //       value,
-      //       row: { original },
-      //     },
-      //   }: CellProps<Transaction>) => {
-      //     switch (original.type) {
-      //       case 'deposit':
-      //         return <Text color="green">{getTxAmountDescription(original)}</Text>;
-      //       case 'withdrawal':
-      //         return <Text color="red">- {getTxAmountDescription(original)}</Text>;
-      //       default:
-      //         return <Text>{value}</Text>;
-      //     }
-      //   },
-      // },
       {
-        Header: '',
+        Header: 'Amount',
+
+        accessor: 'metadata.amount',
+        isNumeric: true,
+        Cell: ({
+          cell: {
+            value,
+            row: { original },
+          },
+        }: CellProps<Transaction>) => <Text>{getTxAmountDescription(original)}</Text>,
+      },
+      {
+        Header: 'Status',
         accessor: 'status',
         Cell: ({ cell: { value } }: CellProps<Transaction, TransactionStatus>) => (
-          <TransactionStatusBadge type={value} />
+          <TransactionStatusBadge type={value} hideIcon={true} />
         ),
       },
       {
@@ -101,13 +102,17 @@ export const TransactionsTable = ({
             </Flex>
           );
         },
-      }, {
-        Header: '',
-        accessor: 'safe_nonce',
       },
     ];
+
+    if (showNonce)
+      columns.push({
+        Header: '',
+        accessor: 'safe_nonce',
+      });
+      
     return columns;
-  }, [users, pool.chain_id]);
+  }, [showNonce, users, pool.chain_id]);
 
   const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable(
     { columns, data: transactions },

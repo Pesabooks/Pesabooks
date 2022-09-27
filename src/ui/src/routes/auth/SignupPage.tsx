@@ -1,6 +1,7 @@
 // Chakra imports
 import {
   Button,
+  Checkbox,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -21,6 +22,7 @@ interface SignupFormValue {
   name: string;
   email: string;
   password: string;
+  agree: boolean;
 }
 
 export const SignUpPage = () => {
@@ -81,7 +83,7 @@ export const SignUpPage = () => {
 
           <FormControl isInvalid={!!errors.name} mb="24px">
             <FormLabel htmlFor="name" ms="4px" fontSize="sm" fontWeight="normal">
-              Name
+              Display Name
             </FormLabel>
             <Input
               id="name"
@@ -90,7 +92,7 @@ export const SignUpPage = () => {
               ms="4px"
               borderRadius="15px"
               type="text"
-              placeholder="Your full name"
+              placeholder="Your display name"
               size="lg"
             />
             <FormErrorMessage>{errors.name && 'Name is required'}</FormErrorMessage>
@@ -132,6 +134,19 @@ export const SignUpPage = () => {
             </FormErrorMessage>
             <FormErrorMessage>
               {errors.password?.type === 'minLength' && 'Password should be 6 characters minimum'}
+            </FormErrorMessage>
+          </FormControl>
+
+          <FormControl  alignItems="center" mb="24px"  isInvalid={!!errors.agree}>
+            <Checkbox id= "agree" {...register('agree', { validate: {required: (value) => value}})}>
+              {' '}
+              I agree to the{' '}
+              <Link variant="decoration" href="https://pesabooks.com/terms" isExternal>
+                Terms and conditions
+              </Link>
+            </Checkbox>
+            <FormErrorMessage>
+              {'You have to agree to the terms and conditions'}
             </FormErrorMessage>
           </FormControl>
 

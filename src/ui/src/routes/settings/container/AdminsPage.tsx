@@ -95,6 +95,8 @@ export const AdminsPage = () => {
           status: 'error',
           isClosable: true,
         });
+      } finally {
+        submittingRef.current?.close()
       }
     }
   };
@@ -131,6 +133,8 @@ export const AdminsPage = () => {
           status: 'error',
           isClosable: true,
         });
+      } finally {
+        submittingRef.current?.close()
       }
     }
   };

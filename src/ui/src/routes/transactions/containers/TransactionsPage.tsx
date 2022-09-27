@@ -82,7 +82,7 @@ export const TransactionsPage = () => {
       <Heading as="h2" mb={4} size="lg">
         Transations
       </Heading>
-      <Card mb={30}>
+     { txQueue.length>0 && <Card mb={30}>
         <CardHeader>
           <Text fontSize="lg" fontWeight="bold">
             Queue
@@ -96,16 +96,17 @@ export const TransactionsPage = () => {
             loading={txsLoading}
             categories={categories}
             onSelect={(t) => openTransactionPane(t.id)}
+            showNonce={true}
           ></TransactionsTable>
         </CardBody>
-      </Card>
+      </Card>}
 
       <Card>
-        <CardHeader>
+        {/* <CardHeader>
           <Text fontSize="lg" fontWeight="bold">
             History
           </Text>
-        </CardHeader>
+        </CardHeader> */}
 
         <Skeleton height="20px" isLoaded={!isLoading}>
           <CardBody>
@@ -116,6 +117,7 @@ export const TransactionsPage = () => {
               loading={txsLoading}
               categories={categories}
               onSelect={(t) => openTransactionPane(t.id)}
+              showNonce={false}
             ></TransactionsTable>
           </CardBody>
         </Skeleton>

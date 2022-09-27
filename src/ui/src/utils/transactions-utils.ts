@@ -18,15 +18,12 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
     case 'deposit':
       if ((metadata as TransferData)?.ramp_id) return transaction.user?.name || '';
       else
-        return `Received ${getTxAmountDescription(transaction)} From ${getAddressName(
+        return `Received From ${getAddressName(
           (metadata as TransferData).transfer_from,
           addresses,
         )}`;
     case 'withdrawal':
-      return `Sent ${getTxAmountDescription(transaction)} To ${getAddressName(
-        (metadata as TransferData).transfer_to,
-        addresses,
-      )}`;
+      return `Sent To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
     case 'addOwner':
       return `add ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
     case 'removeOwner':
@@ -35,7 +32,7 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
       return `unlock token ${(metadata as any).token.symbol}`;
     case 'swap':
       const swapData = metadata as SwapData;
-      return `Trade ${getTxAmountDescription(transaction)} for  ${swapData.dest_token.symbol}  `;
+      return `Trade ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
     case 'createSafe':
       return 'Create Safe';
     default:
@@ -52,13 +49,17 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
     case 'withdrawal':
       return 'Withdrawal';
     case 'addOwner':
-      return 'Add owner';
+      return 'Add admin';
+    case 'removeOwner':
+      return 'Remove admin';
     case 'unlockToken':
       return 'Unlock Token';
     case 'swap':
       return 'Swap Token';
     case 'createSafe':
       return 'Create group wallet';
+    default:
+      return type;
   }
 };
 

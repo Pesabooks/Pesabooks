@@ -2,7 +2,7 @@ import { Flex, HStack, Text } from '@chakra-ui/react';
 import dayjs from 'dayjs';
 import { TransactionIcon } from '../../../components/TransactionIcon';
 import { Transaction, User } from '../../../types';
-import { getTransactionDescription } from '../../../utils';
+import { getTransactionDescription, getTxAmountDescription } from '../../../utils';
 import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';
 
 interface TransactionsListProps {
@@ -24,24 +24,21 @@ export const TransactionsList = ({ transactions, users }: TransactionsListProps)
                 <Text fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
                   {getTransactionDescription(transaction, users)}
                 </Text>
-                <Text fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }} fontWeight="semibold">
-                  <TransactionStatusBadge type={transaction.status} hideIcon={true} />
-                </Text>
+                <Flex gap={2} fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }} fontWeight="semibold">
+                  <Text color="gray.400">{dayjs(created_at).fromNow()}</Text>
+                  <Text color="gray.400"> - </Text>
+
+                  <Text>
+                    <TransactionStatusBadge type={transaction.status} hideIcon={true} />
+                  </Text>
+                </Flex>
               </Flex>
             </Flex>
 
             <HStack>
               <Flex direction="column" alignItems="end">
-                {/* <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
+                <Text align="end" fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
                   {getTxAmountDescription(transaction)}
-                </Text> */}
-
-                <Text
-                  fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }}
-                  color="gray.400"
-                  fontWeight="semibold"
-                >
-                  {dayjs(created_at).fromNow()}
                 </Text>
               </Flex>
             </HStack>
