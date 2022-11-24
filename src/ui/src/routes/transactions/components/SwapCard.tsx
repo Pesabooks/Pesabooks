@@ -24,7 +24,7 @@ import { BigNumber, ethers } from 'ethers';
 import { debounce } from 'lodash';
 import { Address, APIError, ParaSwap, Token, Transaction as ParaswapTx } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaWallet } from 'react-icons/fa';
 import { formatBigNumber } from '../../../bignumber-utils';
 import { Card, CardHeader } from '../../../components/Card';
@@ -113,13 +113,7 @@ export const SwapCard = ({
           status: '',
         }));
 
-        if (
-          !srcAmount ||
-          !BigNumber.from(srcAmount) ||
-          BigNumber.from(srcAmount).lte(0) ||
-          !tokenFrom ||
-          !tokenTo
-        ) {
+        if (!srcAmount || isNaN(+srcAmount) || !tokenFrom || !tokenTo) {
           return;
         }
 
@@ -144,11 +138,20 @@ export const SwapCard = ({
         );
 
         if ((priceRouteOrError as APIError).message) {
-          setState((prevState) => ({
-            ...prevState,
-            error: (priceRouteOrError as APIError).message,
-            loading: false,
-          }));
+          const message = (priceRouteOrError as APIError).message;
+          if (message === 'Invalid Amount') {
+            setState((prevState) => ({
+              ...prevState,
+              validation: 'invalidAmount',
+              loading: false,
+            }));
+          } else {
+            setState((prevState) => ({
+              ...prevState,
+              error: (priceRouteOrError as APIError).message,
+              loading: false,
+            }));
+          }
           return;
         }
 
@@ -169,6 +172,8 @@ export const SwapCard = ({
     },
     [paraswap],
   );
+
+  const getBestPriceDebounced = useMemo(() => debounce(getBestPrice, 700), [getBestPrice]);
 
   const getTokens = useCallback(async (): Promise<
     [defaultTokenFrom: Token, defaultTokenTo: Token] | undefined
@@ -286,10 +291,6 @@ export const SwapCard = ({
       getBestPrice(state.srcAmount, state.tokenFrom, token);
   };
 
-  const getBestPriceDebounced = debounce((value, tokenFrom: Token, tokenTo: Token) => {
-    getBestPrice(value, tokenFrom, tokenTo);
-  }, 500);
-
   const onAmountChange = (value: any) => {
     setState((prevState) => ({
       ...prevState,
@@ -337,10 +338,6 @@ export const SwapCard = ({
         }
 
         if (!state.srcAmount || isNaN(+state.srcAmount)) {
-          setState((prevState) => ({
-            ...prevState,
-            validation: 'invalidAmount',
-          }));
           return;
         }
 
@@ -453,13 +450,13 @@ export const SwapCard = ({
   };
 
   const fillMaxAmount = () => {
-    const balance = getTokenBalance(state.tokenFrom);
+    const balanceBN = state.balances?.find((b) =>
+      compareAddress(b.contract_address, state.tokenFrom?.address),
+    )?.balance;
 
-    if (balance) {
-      setState((prevState) => ({
-        ...prevState,
-        srcAmount: balance,
-      }));
+    if (balanceBN) {
+      const balance = ethers.utils.formatUnits(balanceBN, state.tokenFrom?.decimals!);
+      onAmountChange(balance);
     }
   };
 
@@ -519,6 +516,7 @@ export const SwapCard = ({
 
             <Text color="red.300" fontSize="sm" mt={1}>
               {state.validation === 'insufficientFunds' && 'Insufficient funds'}
+              {state.validation === 'invalidAmount' && 'invalid amount'}
               {state.validation === 'insufficientAllowance' &&
                 `You need to unlock ${state.srcAmount} ${state.tokenFrom?.symbol} before swapping`}
             </Text>
