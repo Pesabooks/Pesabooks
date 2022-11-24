@@ -94,11 +94,11 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
                 <Divider />
                 <Text>Testnets</Text>
                 <Button
-                  variant={chainId === 4 ? 'solid' : 'outline'}
+                  variant={chainId === 5 ? 'solid' : 'outline'}
                   size="lg"
                   display="flex"
                   justifyContent="start"
-                  onClick={() => onSelect(4)}
+                  onClick={() => onSelect(5)}
                   transition=".5s all ease"
                   _hover={{ opacity: '0.8' }}
                 >
@@ -107,11 +107,11 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
                     w="40px"
                     height="40px"
                     src={`${process.env.PUBLIC_URL}/images/chains/ethereum.svg`}
-                    alt="Rinkeby"
+                    alt="Goerli"
                   />
-                  Rinkeby
+                  Goerli
                   <Spacer />
-                  {chainId === 4 && <CheckIcon />}
+                  {chainId === 5 && <CheckIcon />}
                 </Button>
               </>
             )}

@@ -153,7 +153,9 @@ export const Web3AuthProvider = ({ children }: any) => {
     if (!web3Auth) {
       throw new Error('web3auth not initialized yet');
     }
-
+    if (web3Auth.status === 'connected') {
+      await web3Auth.logout();
+    }
     await web3Auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
       relogin: false,
       loginProvider: 'jwt',

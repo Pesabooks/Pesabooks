@@ -175,6 +175,13 @@ export const SwapCard = ({
 
   const getBestPriceDebounced = useMemo(() => debounce(getBestPrice, 700), [getBestPrice]);
 
+  // Stop the invocation of the debounced function after unmounting
+  useEffect(() => {
+    return () => {
+      getBestPriceDebounced.cancel();
+    };
+  }, [getBestPriceDebounced]);
+
   const getTokens = useCallback(async (): Promise<
     [defaultTokenFrom: Token, defaultTokenTo: Token] | undefined
   > => {

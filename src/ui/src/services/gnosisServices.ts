@@ -37,6 +37,9 @@ const getServiceClient = (ethAdapter: EthersAdapter, chainId: number) => {
     case 4:
       txServiceUrl = 'https://safe-transaction.rinkeby.gnosis.io/';
       break;
+    case 5:
+      txServiceUrl = 'https://safe-transaction.goerli.gnosis.io/';
+      break;
     case 137:
       txServiceUrl = 'https://safe-transaction.polygon.gnosis.io/';
       break;
