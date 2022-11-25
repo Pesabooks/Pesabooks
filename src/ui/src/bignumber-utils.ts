@@ -21,5 +21,11 @@ export const formatBigNumber = (
   const formatted = amountN.toFixed(digits);
 
   // if amout is 0.00002391, to fixed(4) will be 0.000. use instead toPrecision
-  return formatted.endsWith('0') ? amountN.toPrecision(digits) : formatted;
+  return Number(formatted.endsWith('0') ? amountN.toPrecision(digits) : formatted);
+};
+
+export const formatCurrency = (amount: number | string, digits = 2) => {
+  const numericAmount = +amount;
+  if (isNaN(numericAmount)) return null;
+  return numericAmount.toFixed(digits);
 };

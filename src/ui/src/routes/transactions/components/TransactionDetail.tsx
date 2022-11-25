@@ -24,8 +24,8 @@ import {
 } from '@chakra-ui/react';
 import type { Web3Provider } from '@ethersproject/providers';
 import { SafeMultisigTransactionResponse } from '@gnosis.pm/safe-service-client';
-import { ethers } from 'ethers';
 import { forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { formatBigNumber } from '../../../bignumber-utils';
 import { EditableControls } from '../../../components/Editable/EditableControls';
 import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
 import Loading from '../../../components/Loading';
@@ -236,8 +236,6 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
   const isExecuted = !!transaction?.hash;
 
-  const format = (amount: string, decimals: number) => ethers.utils.formatUnits(amount, decimals);
-
   return (
     <>
       <Drawer isOpen={isOpen} placement="right" onClose={closeDrawer} size="lg">
@@ -298,7 +296,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                           alt=""
                         />
                         <Text ml="1">
-                          {format(
+                          {formatBigNumber(
                             (transaction?.metadata as SwapData)?.src_amount,
                             (transaction?.metadata as SwapData)?.src_token?.decimals,
                           )}{' '}
@@ -319,7 +317,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                           alt=""
                         />
                         <Text ml="1">
-                          {format(
+                          {formatBigNumber(
                             (transaction?.metadata as SwapData)?.dest_amount,
                             (transaction?.metadata as SwapData)?.dest_token?.decimals,
                           )}{' '}

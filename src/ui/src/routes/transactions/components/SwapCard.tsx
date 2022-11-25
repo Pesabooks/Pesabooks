@@ -26,7 +26,7 @@ import { Address, APIError, ParaSwap, Token, Transaction as ParaswapTx } from 'p
 import { OptimalRate } from 'paraswap-core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaWallet } from 'react-icons/fa';
-import { formatBigNumber } from '../../../bignumber-utils';
+import { formatBigNumber, formatCurrency } from '../../../bignumber-utils';
 import { Card, CardHeader } from '../../../components/Card';
 import { getTokenAllowance } from '../../../services/blockchainServices';
 import { getBalances } from '../../../services/covalentServices';
@@ -307,12 +307,6 @@ export const SwapCard = ({
       getBestPriceDebounced(value, state.tokenFrom, state.tokenTo);
   };
 
-  const formatUsdPrice = (price: string) => {
-    const numericPrice = +price;
-    if (isNaN(numericPrice)) return null;
-    return numericPrice.toFixed(2);
-  };
-
   const getTokenBalance = (token: Token | undefined) => {
     const balance = formatBigNumber(
       state.balances?.find((b) => compareAddress(b.contract_address, token?.address))?.balance,
@@ -555,7 +549,7 @@ export const SwapCard = ({
                 )}
                 {state.priceRoute?.destUSD && (
                   <Text as="i" fontSize="sm">
-                    ~${formatUsdPrice(state.priceRoute.destUSD)}
+                    ~${formatCurrency(state.priceRoute.destUSD)}
                   </Text>
                 )}
               </InputGroup>
@@ -594,7 +588,7 @@ export const SwapCard = ({
               <Text fontSize="sm">Estimated Cost</Text>
               {state.priceRoute?.gasCostUSD && (
                 <Text as="i" fontSize="sm">
-                  ~${formatUsdPrice(state.priceRoute.gasCostUSD)}
+                  ~${formatCurrency(state.priceRoute.gasCostUSD)}
                 </Text>
               )}
             </Flex>

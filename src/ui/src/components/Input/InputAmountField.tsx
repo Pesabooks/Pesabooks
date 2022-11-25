@@ -1,5 +1,6 @@
 import {
   BoxProps,
+  Button,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -11,7 +12,9 @@ import {
   Spacer,
   Text
 } from '@chakra-ui/react';
+import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { FaWallet } from 'react-icons/fa';
 
 interface InputAmountFieldProps extends BoxProps {
   balance?: number;
@@ -28,9 +31,11 @@ export const vali = (value: number) => {
 };
 
 export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFieldProps) => {
+  const [amountValue, setAmountValue] = useState('');
   const {
     register,
     trigger,
+    setValue,
     formState: { errors },
   } = useFormContext();
 
@@ -43,6 +48,12 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
     },
   });
 
+  const fillMaxAmount = () => {
+    setValue(amount.name, balance);
+    setAmountValue(`${balance}`);
+    trigger(amount.name);
+  };
+
   return (
     <FormControl {...boxProps} isInvalid={errors.amount} isRequired>
       <Flex>
@@ -50,16 +61,28 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
         <Spacer />
         <Flex align="center" gap={1}>
           {balance !== undefined && (
-            <Text fontSize="sm">
-              Balance: {balance} {symbol}
-            </Text>
+            <Button
+              onClick={fillMaxAmount}
+              size="xs"
+              colorScheme="white"
+              leftIcon={<FaWallet />}
+              variant="link"
+            >
+              <Text fontSize="sm">
+                Balance: {balance} {symbol}
+              </Text>
+            </Button>
           )}
-          {/* <Icon as={FaWallet} h={'12px'} w={'12px'} /> */}
         </Flex>
       </Flex>
 
       <InputGroup>
-        <NumberInput min={0} w="100%">
+        <NumberInput
+          min={0}
+          w="100%"
+          value={amountValue}
+          onChange={(valueString) => setAmountValue(valueString)}
+        >
           <NumberInputField
             id="amount"
             name={amount.name}
@@ -70,10 +93,6 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
             onBlur={amount.onBlur}
             ref={amount.ref}
           />
-          {/* <NumberInputStepper>
-                            <NumberIncrementStepper />
-                            <NumberDecrementStepper />
-                          </NumberInputStepper> */}
         </NumberInput>
         <InputRightAddon children={symbol} />
       </InputGroup>
