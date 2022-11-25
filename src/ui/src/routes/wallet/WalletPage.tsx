@@ -20,6 +20,7 @@ import {
   useDisclosure
 } from '@chakra-ui/react';
 import { BalancesReponse } from '@pesabooks/supabase/functions';
+import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
@@ -107,12 +108,23 @@ export const WalletPage = () => {
       break;
   }
 
+  const buy = async () => {
+    new RampInstantSDK({
+      hostAppName: 'Pesabooks',
+      hostLogoUrl: 'https://pesabooks.com/assets/img/logo-dark.png',
+      swapAsset,
+      userAddress: account!,
+      userEmailAddress: user?.email,
+      hostApiKey: 'z55qaag34dkgzoh27swvwohebavvnmx9oxyr7bmg',
+    }).show();
+  };
+
   return (
     <>
       <Helmet>
         <title>My Wallet</title>
       </Helmet>
-     
+
       <Flex direction="column" align="center" overflow="hidden" h="100%">
         <Flex
           h={20}
@@ -150,11 +162,9 @@ export const WalletPage = () => {
           </Stack>
         </Flex>
 
-       
         <Heading as="h2" size="lg">
           My Wallet
         </Heading>
-      
 
         <Center py={6}>
           <Flex
@@ -187,13 +197,10 @@ export const WalletPage = () => {
               <Button leftIcon={<FiArrowDownLeft />} onClick={onOpenReceive}>
                 Receive
               </Button>
-              <Link
-                variant="no-decoration"
-                href={`https://buy.ramp.network/?userAddress=${account}&swapAsset=${swapAsset}&userEmailAddress=${user?.email}`}
-                target="_blank"
-              >
-                <Button leftIcon={<FiCreditCard />}>Buy</Button>
-              </Link>
+
+              <Button leftIcon={<FiCreditCard />} onClick={buy}>
+                Buy
+              </Button>
 
               <Button leftIcon={<FiArrowUpRight />} disabled>
                 Send
@@ -206,7 +213,6 @@ export const WalletPage = () => {
         </Center>
       </Flex>
 
-      
       <Container>
         <AssetsCard balances={balances} loading={balancesLoading} />
       </Container>
