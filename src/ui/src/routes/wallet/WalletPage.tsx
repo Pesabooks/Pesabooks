@@ -104,6 +104,9 @@ export const WalletPage = () => {
     case 56:
       swapAsset = 'BSC_BNB,BSC_BUSD';
       break;
+    case 5:
+      swapAsset = 'GOERLI_*';
+      break;
     default:
       break;
   }
@@ -115,7 +118,7 @@ export const WalletPage = () => {
       swapAsset,
       userAddress: account!,
       userEmailAddress: user?.email,
-      hostApiKey: 'z55qaag34dkgzoh27swvwohebavvnmx9oxyr7bmg',
+      hostApiKey: process.env.REACT_APP_RAMP_API_KEY,
     }).show();
   };
 
@@ -183,7 +186,7 @@ export const WalletPage = () => {
               {user?.email}
             </Heading>
             <Box fontWeight={600} color={'gray.500'} mb={4}>
-              {account && <WalletAddress type="address" chainId={4} address={account} />}
+              {account && <WalletAddress type="address" chainId={chainId} address={account} />}
             </Box>
             {balanceLoading ? (
               <Loading />
