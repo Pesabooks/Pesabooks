@@ -2,6 +2,7 @@ interface Schema {
   supabase_access_token: string;
   user_id: string;
   redirect_url: string;
+  emailForSignIn: string;
 }
 
 export const setTypedStorageItem = <T extends keyof Schema>(key: T, value: Schema[T]): void => {

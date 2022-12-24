@@ -1,13 +1,4 @@
-import {
-  Button,
-  Flex,
-  Heading,
-  Spacer,
-  Stack,
-  Text,
-  useColorModeValue,
-  useToast
-} from '@chakra-ui/react';
+import { Box, Button, Heading, Stack, Text, useColorModeValue, useToast } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -19,10 +10,12 @@ export const InvitationPage = () => {
   const [loading, setLoading] = useState(false);
   let location = useLocation();
   let navigate = useNavigate();
-  let {isAuthenticated} = useWeb3Auth();
+  let { isAuthenticated } = useWeb3Auth();
   let { invitation_id } = useParams();
   const [invitation, setInvitation] = useState<Invitation | undefined>();
   const toast = useToast();
+
+  const bgColor = useColorModeValue('white', 'gray.700');
 
   useEffect(() => {
     if (invitation_id) getInvitation(invitation_id).then(setInvitation);
@@ -52,67 +45,61 @@ export const InvitationPage = () => {
         <title>Invitation</title>
       </Helmet>
 
-      <Stack
-        spacing={8}
-        mx={'auto'}
-        maxW={'lg'}
-        py={12}
-        px={6}
-        bg={useColorModeValue('white', 'gray.700')}
-      >
-        <Stack spacing={4}>
-          <Heading fontSize={'2xl'}>
-            {' '}
-            Join{' '}
-            <Text as="span" color={'red'}>
-              {invitation?.pool_name}
-            </Text>{' '}
-            on Pesabooks
-          </Heading>
-          <Text>
-            {invitation?.invited_by} has invited you to join the tontine{' '}
-            <b>{invitation?.pool_name}</b>.
-          </Text>
-        </Stack>
-
-        {!isAuthenticated && (
-          <Stack>
-            <Text mt={4}>
+      {invitation ? (
+        <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6} bg={bgColor}>
+          <Stack spacing={4}>
+            <Heading fontSize={'2xl'}>
               {' '}
-              To continue, you must either login to your existing account, or create a new one
+              Join{' '}
+              <Text as="span" color={'red'}>
+                {invitation?.pool_name}
+              </Text>{' '}
+              on Pesabooks
+            </Heading>
+            <Text>
+              {invitation?.invited_by} has invited you to join the tontine{' '}
+              <b>{invitation?.pool_name}</b>.
             </Text>
-
-            <Flex gap={4}>
-              <Button
-                onClick={() =>
-                  navigate(
-                    `/auth/signup?returnUrl=${location.pathname}&email=${invitation?.email}&name=${invitation?.name}`,
-                  )
-                }
-              >
-                Create a new account
-              </Button>
-              <Spacer />
-              <Button
-                onClick={() =>
-                  navigate(`/auth/signin?returnUrl=${location.pathname}&email=${invitation?.email}`)
-                }
-              >
-                {' '}
-                Login as an Existing User
-              </Button>
-            </Flex>
           </Stack>
-        )}
 
-        {isAuthenticated && (
-          <Stack align="center">
-            <Button onClick={() => onJoin()} isLoading={loading}>
-              Join Now
+          {!isAuthenticated && (
+            <Button
+              onClick={() =>
+                navigate(`/auth/signin?returnUrl=${location.pathname}&email=${invitation?.email}`)
+              }
+            >
+              Login to continue
             </Button>
-          </Stack>
-        )}
-      </Stack>
+          )}
+
+          {isAuthenticated && (
+            <Stack align="center">
+              <Button onClick={() => onJoin()} isLoading={loading}>
+                Join Now
+              </Button>
+            </Stack>
+          )}
+        </Stack>
+      ) : (
+        <Box textAlign="center" py={10} px={6}>
+          <Text fontSize="18px" mt={3} mb={2}>
+            Invitation Not Found
+          </Text>
+          <Text color={'gray.500'} mb={6}>
+            The invitation does not exist or is expired
+          </Text>
+
+          <Button
+            onClick={() => navigate(`/`)}
+            colorScheme="teal"
+            bgGradient="linear(to-r, teal.400, teal.500, teal.600)"
+            color="white"
+            variant="solid"
+          >
+            Go to Home
+          </Button>
+        </Box>
+      )}
     </>
   );
 };

@@ -11,8 +11,7 @@ import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
-  sendEmailVerification,
-  signInWithEmailAndPassword,
+  sendEmailVerification, signInWithEmailLink,
   signOut as FirebaseSignOut,
   updateProfile as FirebaseUpdateProfile,
   User as FirebaseUser
@@ -33,7 +32,7 @@ export interface IWeb3AuthContext {
   chainId: number;
   signOut: () => Promise<void>;
   signUp: (name: string, email: string, password: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
+  signIn: (email: string, emailLink: string) => Promise<void>;
   isAuthenticated: boolean;
   setChainId: (chainId: number) => void;
   updateProfile: (name: string) => Promise<void>;
@@ -130,9 +129,9 @@ export const Web3AuthProvider = ({ children }: any) => {
     init();
   }, [chainId]);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, emailLink: string) => {
     // log in firebase
-    const { user } = await signInWithEmailAndPassword(firebaseAuth, email, password);
+    const { user } = await signInWithEmailLink(firebaseAuth, email, emailLink);
     const fbIdtoken = await user.getIdToken();
 
     await web3Login(fbIdtoken);

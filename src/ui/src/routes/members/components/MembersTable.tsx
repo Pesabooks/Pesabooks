@@ -44,7 +44,7 @@ export const MembersTable = ({
             return (
               <MemberTableRow
                 key={member.user_id}
-                name={member.user?.name}
+                name={member.user?.name ?? member.user?.email}
                 wallet={member.user?.wallet}
                 active={member.active}
                 status={member.active ? 'active' : 'inactive'}
@@ -59,7 +59,7 @@ export const MembersTable = ({
             return (
               <MemberTableRow
                 key={invitation.id}
-                name={invitation.name} 
+                name={invitation.name}
                 active={invitation.active}
                 status="invited"
                 isInvitation={true}
