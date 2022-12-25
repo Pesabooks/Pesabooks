@@ -1,5 +1,5 @@
 import { Box, Button, ButtonGroup, Flex, Grid, Icon, Spinner, Text } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { BsPlus } from 'react-icons/bs';
 import { MdSubject } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
@@ -8,17 +8,22 @@ import { NavbarLight } from '../../components/Layout/NavbarLight';
 import { PoolCard } from '../../components/PoolCard';
 import { getMyPools } from '../../services/poolsService';
 import { Pool } from '../../types';
+import { PendingInvitation } from './components/PendingInvitation';
 
 export const HomePage = () => {
   const [pools, setPools] = useState<Pool[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     getMyPools()
       .then((pools) => setPools(pools ?? []))
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const hasPool = pools?.length > 0;
 
@@ -41,6 +46,8 @@ export const HomePage = () => {
         mx={{ sm: 'auto' }}
         mt={{ sm: '14px' }}
       ></Box>
+      <PendingInvitation onAccepted={loadData} />
+
       {!hasPool && (
         <Flex
           direction="column"

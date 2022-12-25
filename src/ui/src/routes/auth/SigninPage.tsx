@@ -75,7 +75,7 @@ export const SignInPage = () => {
   };
 
   useEffect(() => {
-    const finish = async () => {
+    const completeEmailSignin = async () => {
       const isEmailSignin = isSignInWithEmailLink(firebaseAuth, window.location.href);
       if (!isEmailSignin) {
         setIsLoading(false);
@@ -93,7 +93,7 @@ export const SignInPage = () => {
       }
     };
 
-    finish();
+    completeEmailSignin();
   }, [isInitialised, signIn]);
 
   const {
@@ -235,7 +235,7 @@ export const SignInPage = () => {
         <CheckCircleIcon mb="20px" boxSize={'50px'} color={'green.500'} />
       </Box>
       <Text>
-        A sign-in email with additional instructions was sent to{' '}
+        A sign-in email with additional instructions was sent to
         <b>{getTypedStorageItem('emailForSignIn')}</b>. Check your email to complete sign-in.
       </Text>
     </Flex>

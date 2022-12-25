@@ -17,7 +17,6 @@ import { Auth } from './routes/auth/Auth';
 import { CallbackPage } from './routes/auth/CallbackPage';
 import { InvitationPage } from './routes/auth/InvitationPage';
 import { SignInPage } from './routes/auth/SigninPage';
-import { SignUpPage } from './routes/auth/SignupPage';
 import { CreatePoolPage } from './routes/CreatePool/CreatePoolPage';
 import { DashboardPage } from './routes/dashboard/DashboardPage';
 import { HomePage } from './routes/home/HomePage';
@@ -67,7 +66,6 @@ function App() {
               <Route path="*" element={<NotFound />} />
               <Route path="/auth" element={<Auth />}>
                 <Route path="signin" element={<SignInPage />} />
-                <Route path="signup" element={<SignUpPage />} />
                 <Route path="callback" element={<CallbackPage />} />
                 <Route path="invitation/:invitation_id" element={<InvitationPage />} />
               </Route>

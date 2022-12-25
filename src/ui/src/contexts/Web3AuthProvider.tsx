@@ -9,9 +9,7 @@ import {
 import { Web3AuthCore } from '@web3auth/core';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import {
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  sendEmailVerification, signInWithEmailLink,
+  onAuthStateChanged, signInWithEmailLink,
   signOut as FirebaseSignOut,
   updateProfile as FirebaseUpdateProfile,
   User as FirebaseUser
@@ -31,7 +29,6 @@ export interface IWeb3AuthContext {
   user: User | null | undefined;
   chainId: number;
   signOut: () => Promise<void>;
-  signUp: (name: string, email: string, password: string) => Promise<void>;
   signIn: (email: string, emailLink: string) => Promise<void>;
   isAuthenticated: boolean;
   setChainId: (chainId: number) => void;
@@ -51,7 +48,6 @@ export const Web3AuthContext = React.createContext<IWeb3AuthContext>({
   user: null,
   account: null,
   signIn: async () => {},
-  signUp: async () => {},
   signOut: async () => {},
   setChainId: async () => {},
   updateProfile: async (name: string) => {},
@@ -134,17 +130,6 @@ export const Web3AuthProvider = ({ children }: any) => {
     const { user } = await signInWithEmailLink(firebaseAuth, email, emailLink);
     const fbIdtoken = await user.getIdToken();
 
-    await web3Login(fbIdtoken);
-  };
-
-  const signUp = async (name: string, email: string, password: string) => {
-    const { user } = await createUserWithEmailAndPassword(firebaseAuth, email, password);
-    await FirebaseUpdateProfile(user, { displayName: name });
-    await usersTable().insert({ id: user.uid, name, email: user.email! });
-
-    await sendEmailVerification(user);
-
-    const fbIdtoken = await user.getIdToken();
     await web3Login(fbIdtoken);
   };
 
@@ -240,7 +225,6 @@ export const Web3AuthProvider = ({ children }: any) => {
   const contextProvider: IWeb3AuthContext = {
     web3Auth: web3Auth,
     provider,
-    signUp,
     signIn,
     signOut: logout,
     setChainId: setChainId,

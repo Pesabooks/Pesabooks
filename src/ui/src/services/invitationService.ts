@@ -12,6 +12,16 @@ export const getActiveInvitations = async (pool_id: string) => {
   return data;
 };
 
+export const getActiveInvitationsByEmail = async (email: string) => {
+  const { data, error } = await invitationsTable()
+    .select()
+    .filter('status', 'eq', 'pending')
+    .filter('email', 'eq', email);
+
+  handleSupabaseError(error);
+  return data;
+};
+
 export const getInvitation = async (invitation_id: string) => {
   const { data, error } = await supabase()
     .rpc<Invitation>('get_invitation', { invitation_id })
