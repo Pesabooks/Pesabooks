@@ -15,6 +15,11 @@ import {
   MenuItem,
   MenuList,
   Stack,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
   Text,
   useColorModeValue,
   useDisclosure
@@ -26,6 +31,7 @@ import { Helmet } from 'react-helmet-async';
 import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
 import { formatBigNumber } from '../../bignumber-utils';
+import { Card } from '../../components/Card';
 import { ConnectedChain } from '../../components/ConnectedChain';
 import { AvatarMenu } from '../../components/Layout/AvatarMenu';
 import { Logo } from '../../components/Layout/Logo';
@@ -35,7 +41,7 @@ import { networks } from '../../data/networks';
 import { useNativeBalance } from '../../hooks/useNativeBalance';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { getBalances } from '../../services/covalentServices';
-import { AssetsCard } from '../dashboard/components/AssetsCard';
+import { AssetsList } from '../dashboard/components/AssetsList';
 import { ReceiveModal } from './components/ReceiveModal';
 
 export const NetworkSelectorMenu = () => {
@@ -217,7 +223,24 @@ export const WalletPage = () => {
       </Flex>
 
       <Container>
-        <AssetsCard balances={balances} loading={balancesLoading} />
+        <Card>
+          <Tabs isLazy isFitted>
+            <TabList>
+              <Tab>Assets</Tab>
+              {/* <Tab>Transactions</Tab> */}
+            </TabList>
+            <TabPanels>
+              {/* initially mounted */}
+              <TabPanel>
+                <AssetsList balances={balances} loading={balancesLoading} />
+              </TabPanel>
+              {/* initially not mounted */}
+              <TabPanel>
+                <p>two!</p>
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </Card>
       </Container>
       {account && (
         <ReceiveModal

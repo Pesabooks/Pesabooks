@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
-import { BalanceQuery, BalancesReponse } from "./type.ts";
+import { BalanceQuery } from "./type.ts";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -22,9 +22,7 @@ serve(async (req) => {
       throw new Error(error_message);
     }
 
-    const filteredBalances: BalancesReponse = balances?.items?.filter((b: BalancesReponse) => b.type !== "dust");
-
-    return new Response(JSON.stringify(filteredBalances), {
+    return new Response(JSON.stringify(balances?.items), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

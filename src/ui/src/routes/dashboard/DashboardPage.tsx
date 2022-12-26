@@ -8,7 +8,7 @@ import { useTransactions } from '../../hooks/useTransactions';
 import { getBalances } from '../../services/covalentServices';
 import { getMembers } from '../../services/membersService';
 import { User } from '../../types';
-import { AssetsCard } from './components/AssetsCard';
+import { AssetsList } from './components/AssetsList';
 import BalanceCard from './components/BalanceCard';
 import { TotalPerCategory } from './components/TotalPerCategory';
 import { TransactionsList } from './components/TransactionsList';
@@ -76,7 +76,16 @@ export const DashboardPage = () => {
           </CardBody>
         </Card>
 
-        <AssetsCard balances={balances} loading={loading} />
+        <Card p="28px 10px 16px 0px" mb={{ sm: '26px', lg: '0px' }}>
+          <CardHeader mb="20px" pl="22px">
+            <Flex direction="column" alignSelf="flex-start">
+              <Text fontSize="lg" fontWeight="bold" mb="6px">
+                Assets
+              </Text>
+            </Flex>
+          </CardHeader>
+          <AssetsList balances={balances} loading={loading} />
+        </Card>
       </Grid>
 
       <Grid
