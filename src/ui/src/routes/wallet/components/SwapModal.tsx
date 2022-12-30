@@ -137,7 +137,7 @@ export const SwapModal = ({
       <Modal size="lg" isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Reiceive Funds</ModalHeader>
+          <ModalHeader>Swap</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <SwapCard

@@ -17,7 +17,7 @@ import {
   Spacer,
   Spinner,
   Stack,
-  Text,
+  Text
 } from '@chakra-ui/react';
 import { BigNumber, ethers } from 'ethers';
 import { debounce } from 'lodash';
@@ -95,7 +95,7 @@ export const SwapCard = ({
   }, [chain_id]);
 
   const getBalancesCB = useCallback(() => {
-    if (address && paraswap) {
+    if (address) {
       getBalances(chain_id, address).then((balances) => {
         setState((prevState) => ({
           ...prevState,
@@ -103,7 +103,7 @@ export const SwapCard = ({
         }));
       });
     }
-  }, [address, paraswap, chain_id]);
+  }, [address, chain_id]);
 
   const getBestPrice = useCallback(
     async (srcAmount: string, tokenFrom: Token, tokenTo: Token) => {

@@ -7,7 +7,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Text,
+  Text
 } from '@chakra-ui/react';
 import QRCode from 'qrcode.react';
 import { WalletAddress } from '../../../components/WalletAddress';
@@ -24,7 +24,7 @@ export const ReceiveModal = ({ isOpen, onClose, address, chainId }: ReceiveModal
     <Modal size="lg" isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Reiceive Funds</ModalHeader>
+        <ModalHeader>Receive Funds</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Flex mt={10} direction="column" alignItems="center">

@@ -153,7 +153,7 @@ export const SendModal = ({
       <Modal size="lg" isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Reiceive Funds</ModalHeader>
+          <ModalHeader>Send</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <FormProvider {...methods}>
