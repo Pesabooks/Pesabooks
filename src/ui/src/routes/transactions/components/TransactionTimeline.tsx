@@ -36,7 +36,12 @@ export const TransactionTimeline = ({
       </CardHeader>
       <CardBody px="10px">
         <Stack direction="column">
-          <TimelineRow status="done" logo={FaBell} title="Submitted" date={formatDate(submissionDate)} />
+          <TimelineRow
+            status="done"
+            logo={FaBell}
+            title="Submitted"
+            date={formatDate(submissionDate)}
+          />
           {confirmations.map((confirmation, index) => {
             return (
               <TimelineRow
@@ -57,7 +62,7 @@ export const TransactionTimeline = ({
             logo={FaBell}
             title="Transaction executed"
             description={isExecuted ? '' : 'Can be executed once the threshold is reached'}
-            date={isExecuted? formatTimestampSeconds(executionTimestamp): ""}
+            date={isExecuted ? formatTimestampSeconds(executionTimestamp) : ''}
             last={true}
           />
         </Stack>

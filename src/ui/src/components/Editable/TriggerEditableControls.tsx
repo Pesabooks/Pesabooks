@@ -4,7 +4,7 @@ import { IconButtonWithAdmingRights } from '../withConnectedWallet';
 
 export const TriggerEditableControls = () => {
   const { isEditing, getEditButtonProps } = useEditableControls();
-  
+
   return !isEditing ? (
     <IconButtonWithAdmingRights
       variant="ghost"

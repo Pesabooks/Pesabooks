@@ -6,11 +6,11 @@ interface ConnectedChainProps extends BoxProps {}
 
 export const ConnectedChain = (props: ConnectedChainProps) => {
   const { chainId } = useWeb3Auth();
-  
+
   if (!chainId) return null;
   return (
     <Box {...props}>
       <ChainTag size="lg" variant="outline" chainId={chainId} />
-    </Box> 
+    </Box>
   );
 };

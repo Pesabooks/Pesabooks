@@ -26,7 +26,6 @@ export const CategoriesPage = () => {
     await editCategory(categoryId, category);
   }, []);
 
-
   const onAddCategory = async (category: Category) => {
     try {
       setIsSaving(true);

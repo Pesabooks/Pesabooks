@@ -24,9 +24,12 @@ import {
   useColorModeValue,
   useDisclosure
 } from '@chakra-ui/react';
-import { BalancesReponse } from '@pesabooks/supabase/functions';
-import { RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
-import { useEffect, useState } from 'react';
+import {
+  RampInstantEvents,
+  RampInstantEventTypes,
+  RampInstantSDK
+} from '@ramp-network/ramp-instant-sdk';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
@@ -40,9 +43,18 @@ import { WalletAddress } from '../../components/WalletAddress';
 import { networks } from '../../data/networks';
 import { useNativeBalance } from '../../hooks/useNativeBalance';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
-import { getBalances } from '../../services/covalentServices';
+import { getBalances, TokenBalance } from '../../services/covalentServices';
+import { getAllActivities, purchaseToken } from '../../services/walletServices';
+import { Activity, TokenBase, TransactionType } from '../../types';
 import { AssetsList } from '../dashboard/components/AssetsList';
+import {
+  TransactionSubmittedModal,
+  TransactionSubmittedModalRef
+} from '../transactions/components/TransactionSubmittedModal';
+import { ActivitiesList } from './components/ActivitiesList';
 import { ReceiveModal } from './components/ReceiveModal';
+import { SendModal } from './components/SendModal';
+import { SwapModal } from './components/SwapModal';
 
 export const NetworkSelectorMenu = () => {
   const { setChainId } = useWeb3Auth();
@@ -81,14 +93,19 @@ export const WalletPage = () => {
   const { account, chainId, user } = useWeb3Auth();
   const { balance, loading: balanceLoading } = useNativeBalance();
   const { isOpen: isOpenReceive, onOpen: onOpenReceive, onClose: onCloseReceive } = useDisclosure();
-  const [balances, setBalances] = useState<BalancesReponse[]>([]);
+  const { isOpen: isOpenSend, onOpen: onOpenSend, onClose: onCloseSend } = useDisclosure();
+  const { isOpen: isOpenSwap, onOpen: onOpenSwap, onClose: onCloseSwap } = useDisclosure();
+  const [balances, setBalances] = useState<TokenBalance[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [balancesLoading, setBalancesLoading] = useState(true);
+  const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
 
   const balanceColor = useColorModeValue('gray.700', 'gray.400');
   const network = networks[chainId];
 
-  useEffect(() => {
+  const getData = useCallback(async (chainId, account) => {
     if (account) {
+      setBalancesLoading(true);
       getBalances(chainId, account)
         .then((balances) => {
           setBalances(balances ?? []);
@@ -96,8 +113,16 @@ export const WalletPage = () => {
         .finally(() => {
           setBalancesLoading(false);
         });
+
+      getAllActivities(chainId).then((a) => setActivities(a ?? []));
     }
-  }, [account, chainId]);
+  }, []);
+
+  useEffect(() => {
+    setBalances([]);
+    setActivities([]);
+    getData(chainId, account);
+  }, [account, chainId, getData]);
 
   let swapAsset: string = '';
   switch (chainId) {
@@ -125,8 +150,43 @@ export const WalletPage = () => {
       userAddress: account!,
       userEmailAddress: user?.email,
       hostApiKey: process.env.REACT_APP_RAMP_API_KEY,
-    }).show();
+      webhookStatusUrl: `${process.env.REACT_APP_SUPABASE_FUNCTIONS_URL}/ramp-callback`,
+    })
+      .on<RampInstantEvents>(RampInstantEventTypes.PURCHASE_CREATED, (event) => {
+        const purchase = event.payload?.purchase;
+        const purchaseViewToken = event.payload?.purchaseViewToken;
+        if (!purchase) return;
+        const { id, finalTxHash, receiverAddress, cryptoAmount, asset } = purchase;
+
+        const token: TokenBase = {
+          address: asset.address ?? '',
+          name: asset.name,
+          decimals: asset.decimals,
+          symbol: asset.symbol,
+          image: '',
+          is_native: asset.type === 'NATIVE',
+        };
+
+        purchaseToken(
+          chainId,
+          id,
+          purchaseViewToken,
+          receiverAddress,
+          cryptoAmount,
+          finalTxHash,
+          token,
+        );
+      })
+      .show();
   };
+
+  const onTxSubmitted = useCallback(
+    (type: TransactionType, hash: string) => {
+      txSubmittedRef.current?.open(type, hash);
+      getData(chainId, account);
+    },
+    [account, chainId, getData],
+  );
 
   return (
     <>
@@ -198,7 +258,8 @@ export const WalletPage = () => {
               <Loading />
             ) : (
               <Text textAlign={'center'} color={balanceColor} px={3}>
-                {formatBigNumber(balance)} {network?.nativeCurrency.symbol}
+                {formatBigNumber(balance, network.nativeCurrency.decimals)}{' '}
+                {network?.nativeCurrency.symbol}
               </Text>
             )}
 
@@ -211,10 +272,10 @@ export const WalletPage = () => {
                 Buy
               </Button>
 
-              <Button leftIcon={<FiArrowUpRight />} disabled>
+              <Button leftIcon={<FiArrowUpRight />} onClick={onOpenSend}>
                 Send
               </Button>
-              <Button leftIcon={<FiCreditCard />} disabled>
+              <Button leftIcon={<FiCreditCard />} onClick={onOpenSwap}>
                 Swap
               </Button>
             </ButtonGroup>
@@ -224,10 +285,10 @@ export const WalletPage = () => {
 
       <Container>
         <Card>
-          <Tabs isLazy isFitted>
+          <Tabs isFitted>
             <TabList>
               <Tab>Assets</Tab>
-              {/* <Tab>Transactions</Tab> */}
+              <Tab>Activities</Tab>
             </TabList>
             <TabPanels>
               {/* initially mounted */}
@@ -236,20 +297,47 @@ export const WalletPage = () => {
               </TabPanel>
               {/* initially not mounted */}
               <TabPanel>
-                <p>two!</p>
+                <ActivitiesList activities={activities} />
               </TabPanel>
             </TabPanels>
           </Tabs>
         </Card>
       </Container>
       {account && (
-        <ReceiveModal
-          isOpen={isOpenReceive}
-          onClose={onCloseReceive}
-          address={account}
-          chainId={chainId}
-        />
+        <>
+          {isOpenReceive && (
+            <ReceiveModal
+              isOpen={isOpenReceive}
+              onClose={onCloseReceive}
+              address={account}
+              chainId={chainId}
+            />
+          )}
+
+          {isOpenSwap && (
+            <SwapModal
+              isOpen={isOpenSwap}
+              onClose={onCloseSwap}
+              address={account}
+              chainId={chainId}
+              assets={balances
+                .filter((b: TokenBalance) => b.type !== 'dust')
+                .map((b) => b.token.address)}
+              onTxSubmitted={onTxSubmitted}
+            />
+          )}
+          {isOpenSend && (
+            <SendModal
+              isOpen={isOpenSend}
+              onClose={onCloseSend}
+              chainId={chainId}
+              balances={balances}
+              onTxSubmitted={onTxSubmitted}
+            />
+          )}
+        </>
       )}
+
       <Flex
         direction="column"
         width="100%"
@@ -269,6 +357,7 @@ export const WalletPage = () => {
           </Link>
         </Flex>
       </Flex>
+      <TransactionSubmittedModal ref={txSubmittedRef} chainId={chainId} />
     </>
   );
 };

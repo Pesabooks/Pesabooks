@@ -132,7 +132,7 @@ export const estimateWithdraw = async (
   return fee(provider, BigNumber.from(gasLimit));
 };
 
-const fee = async (provider: Web3Provider, gasLimit: BigNumber) => {
+export const fee = async (provider: Web3Provider, gasLimit: BigNumber) => {
   const feeData = await provider.getFeeData();
 
   if (feeData.maxPriorityFeePerGas) {

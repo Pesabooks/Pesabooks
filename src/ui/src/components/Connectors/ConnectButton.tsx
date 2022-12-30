@@ -3,7 +3,7 @@ import React from 'react';
 
 interface ConnectButtonProps {
   name: string;
-  description:string;
+  description: string;
   onClick: () => void;
 }
 

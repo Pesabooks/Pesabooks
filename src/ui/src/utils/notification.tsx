@@ -4,7 +4,7 @@ import {
   AlertTitle,
   Box,
   createStandaloneToast,
-  Progress
+  Progress,
 } from '@chakra-ui/react';
 import { defaultProvider } from '../services/blockchainServices';
 import theme from '../theme/theme';

@@ -13,7 +13,7 @@ import {
   Portal,
   Spacer,
   Text,
-  useColorMode
+  useColorMode,
 } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
@@ -21,9 +21,8 @@ import { WalletAddress } from '../WalletAddress';
 
 export const AvatarMenu = () => {
   const { toggleColorMode } = useColorMode();
-  const { account, chainId,signOut,user } = useWeb3Auth();
+  const { account, chainId, signOut, user } = useWeb3Auth();
   const navigate = useNavigate();
- 
 
   const onSignout = () => {
     signOut?.().finally(() => {

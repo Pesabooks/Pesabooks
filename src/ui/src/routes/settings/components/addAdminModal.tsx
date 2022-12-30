@@ -13,7 +13,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Select,
-  Text
+  Text,
 } from '@chakra-ui/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SelectUserField } from '../../../components/Input/SelectUserField';
@@ -40,7 +40,7 @@ export const AddAdminModal = ({
   users,
   adminAddressess,
   addAdmin,
-  currenThreshold ,
+  currenThreshold,
 }: AddAdminModalProps) => {
   const methods = useForm<AddAdminFormValue>({
     defaultValues: { threshold: currenThreshold },

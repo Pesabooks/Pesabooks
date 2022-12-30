@@ -15,7 +15,7 @@ interface TransactionsTableProps {
   users: User[];
   loading: boolean;
   categories: Category[];
-  showNonce:boolean;
+  showNonce: boolean;
   onSelect: (transaction: Transaction) => void;
 }
 
@@ -26,7 +26,7 @@ export const TransactionsTable = ({
   loading,
   categories,
   onSelect,
-  showNonce
+  showNonce,
 }: TransactionsTableProps) => {
   const columns = useMemo(() => {
     const columns: Column[] = [
@@ -77,7 +77,9 @@ export const TransactionsTable = ({
             value,
             row: { original },
           },
-        }: CellProps<Transaction>) => <Text>{getTxAmountDescription(original)}</Text>,
+        }: CellProps<Transaction>) => (
+          <Text>{getTxAmountDescription(original.type, original.metadata)}</Text>
+        ),
       },
       {
         Header: 'Status',
@@ -110,7 +112,7 @@ export const TransactionsTable = ({
         Header: '',
         accessor: 'safe_nonce',
       });
-      
+
     return columns;
   }, [showNonce, users, pool.chain_id]);
 

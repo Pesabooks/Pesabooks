@@ -235,7 +235,7 @@ export const SignInPage = () => {
         <CheckCircleIcon mb="20px" boxSize={'50px'} color={'green.500'} />
       </Box>
       <Text>
-        A sign-in email with additional instructions was sent to
+        A sign-in email with additional instructions was sent to{' '}
         <b>{getTypedStorageItem('emailForSignIn')}</b>. Check your email to complete sign-in.
       </Text>
     </Flex>

@@ -14,12 +14,18 @@ import { getAllCategories } from '../../../services/categoriesService';
 import { getMembers } from '../../../services/membersService';
 import { withdraw } from '../../../services/transactionsServices';
 import { Category, User } from '../../../types';
-import { ReviewTransactionModal, ReviewTransactionModalRef } from '../components/ReviewTransactionModal';
-import { SubmittingTransactionModal, SubmittingTxModalRef } from '../components/SubmittingTransactionModal';
+import {
+  ReviewTransactionModal,
+  ReviewTransactionModalRef,
+} from '../components/ReviewTransactionModal';
+import {
+  SubmittingTransactionModal,
+  SubmittingTxModalRef,
+} from '../components/SubmittingTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 import {
   TransactionSubmittedModal,
-  TransactionSubmittedModalRef
+  TransactionSubmittedModalRef,
 } from '../components/TransactionSubmittedModal';
 
 export interface WithdrawFormValue {
@@ -39,7 +45,7 @@ export const WithdrawPage = () => {
   const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
   const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
   const submittingRef = useRef<SubmittingTxModalRef>(null);
-  
+
   const signer = (provider as Web3Provider)?.getSigner();
   const methods = useForm<WithdrawFormValue>();
 
@@ -76,14 +82,14 @@ export const WithdrawPage = () => {
   const onWithDraw = async (confirmed: boolean, formValue: WithdrawFormValue) => {
     if (!provider || !confirmed) return;
 
-    submittingRef.current?.open('withdrawal')
+    submittingRef.current?.open('withdrawal');
 
     const { amount, memo, user, category } = formValue;
 
     try {
       const tx = await withdraw(signer, pool, category.id, amount, memo, user);
 
-      txSubmittedRef.current?.open(tx);
+      if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
 
       methods.reset();
     } catch (e: any) {
@@ -96,7 +102,7 @@ export const WithdrawPage = () => {
 
       throw e;
     } finally {
-      submittingRef.current?.close()
+      submittingRef.current?.close();
     }
   };
 

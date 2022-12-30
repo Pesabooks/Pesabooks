@@ -10,7 +10,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 import { forwardRef, Ref, useImperativeHandle, useState } from 'react';
 import { TransactionType } from '../../../types';

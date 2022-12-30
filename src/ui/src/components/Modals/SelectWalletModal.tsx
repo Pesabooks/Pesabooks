@@ -1,17 +1,18 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons';
 import {
-  Box, Flex,
+  Box,
+  Flex,
   Link,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalHeader,
-  ModalOverlay, Text
+  ModalOverlay,
+  Text
 } from '@chakra-ui/react';
 import { MetaMask } from '@web3-react/metamask';
 import { WalletConnect } from '@web3-react/walletconnect';
-import React from 'react';
 import { ConnectWithMetamask } from '../Connectors/ConnectWithMetamask';
 import { ConnectWithWalletConnect } from '../Connectors/ConnectWithWalletConnect';
 

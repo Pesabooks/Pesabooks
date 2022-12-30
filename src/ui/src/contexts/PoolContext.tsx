@@ -16,7 +16,7 @@ export const PoolContext = React.createContext<PoolContextType>({
   loading: true,
   refresh: () => {},
   error: {},
-  pool:undefined
+  pool: undefined,
 });
 
 export const PoolProvider = ({ children }: any) => {
@@ -50,7 +50,6 @@ export const PoolProvider = ({ children }: any) => {
   useEffect(() => {
     fetchPool();
   }, [fetchPool]);
-
 
   const refresh = () => fetchPool();
 

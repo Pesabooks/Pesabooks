@@ -1,6 +1,7 @@
 import { Token as ParaswapToken } from 'paraswap';
 import { Category } from './Category';
 import { Entity } from './Entity';
+import { TokenBase } from './Token';
 
 export type TransactionType =
   | 'createSafe'
@@ -10,7 +11,10 @@ export type TransactionType =
   | 'removeOwner'
   | 'swapOwner'
   | 'unlockToken'
-  | 'swap';
+  | 'swap'
+  | 'transfer_out'
+  | 'purchase';
+
 export type TransactionStatus =
   | 'awaitingConfirmations'
   | 'awaitingExecution'
@@ -37,8 +41,8 @@ export interface Transaction extends Entity {
 export interface TransferData {
   transfer_from?: string;
   transfer_to: string;
-  token: Token;
-  amount: number;
+  token: TokenBase;
+  amount: number | string;
   ramp_id?: string;
   ramp_purchase_view_token?: string;
 }
@@ -61,10 +65,7 @@ export interface SwapData {
   gas_cost_usd: string;
 }
 
-interface Token {
-  address: string;
-  symbol: string;
-  name: string;
-  decimals: number;
-  image: string;
+export interface UnlockTokenData {
+  token: TokenBase;
+  amount: number;
 }

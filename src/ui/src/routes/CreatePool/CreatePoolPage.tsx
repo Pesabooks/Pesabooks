@@ -31,12 +31,7 @@ export const CreatePoolPage = () => {
       const { name, description, token } = values;
 
       nextStep();
-      const pool_id = await createNewPool(
-        name,
-        description,
-        token,
-        chainId,
-      );
+      const pool_id = await createNewPool(name, description, token, chainId);
 
       navigate(`/pool/${pool_id}`);
     } catch (e: any) {

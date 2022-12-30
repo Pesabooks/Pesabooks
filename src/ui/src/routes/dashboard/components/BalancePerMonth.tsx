@@ -92,7 +92,7 @@ export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
       </CardHeader>
       <Box w="100%" h={{ sm: '300px' }} ps="8px">
         {isLoading ? (
-          <Loading/>
+          <Loading />
         ) : (
           <ReactApexChart
             options={options}

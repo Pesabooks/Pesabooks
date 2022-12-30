@@ -17,9 +17,8 @@ import {
   Spacer,
   Spinner,
   Stack,
-  Text
+  Text,
 } from '@chakra-ui/react';
-import { BalancesReponse } from '@pesabooks/supabase/functions';
 import { BigNumber, ethers } from 'ethers';
 import { debounce } from 'lodash';
 import { Address, APIError, ParaSwap, Token, Transaction as ParaswapTx } from 'paraswap';
@@ -29,7 +28,7 @@ import { FaWallet } from 'react-icons/fa';
 import { formatBigNumber, formatCurrency } from '../../../bignumber-utils';
 import { Card, CardHeader } from '../../../components/Card';
 import { getTokenAllowance } from '../../../services/blockchainServices';
-import { getBalances } from '../../../services/covalentServices';
+import { getBalances, TokenBalance } from '../../../services/covalentServices';
 import { getPendingTokenUnlockingTxCount } from '../../../services/transactionsServices';
 import { compareAddress } from '../../../utils';
 import { SelectParaswapToken } from '../components/SelectParaswapToken';
@@ -47,7 +46,7 @@ interface IState {
   receiver?: Address;
   tokenFrom?: Token;
   tokenTo?: Token;
-  balances?: BalancesReponse[];
+  balances?: TokenBalance[];
   priceRoute?: OptimalRate;
   pendingUnlocking?: boolean;
   validation?: 'insufficientFunds' | 'insufficientAllowance' | 'invalidAmount';
@@ -64,6 +63,7 @@ export interface SwapArgs {
 export interface ApproveArgs {
   paraswapProxy: string;
   tokenFrom: Token;
+  amount: number;
   callback: () => void;
 }
 
@@ -71,7 +71,7 @@ interface SwapCardProps {
   chain_id: number;
   address: string;
   defaultTokenAddress?: string;
-  pool_id: string;
+  pool_id?: string;
   onApproveToken: (approveArgs: ApproveArgs) => void;
   isSubmitting: boolean;
   onSwap: (swapargs: SwapArgs) => void;
@@ -265,8 +265,7 @@ export const SwapCard = ({
   const availableTokens = () => {
     const { tokens, balances } = state;
     return (
-      tokens?.filter((t) => balances?.find((b) => compareAddress(b.contract_address, t.address))) ??
-      []
+      tokens?.filter((t) => balances?.find((b) => compareAddress(b.token.address, t.address))) ?? []
     );
   };
 
@@ -309,7 +308,7 @@ export const SwapCard = ({
 
   const getTokenBalance = (token: Token | undefined) => {
     const balance = formatBigNumber(
-      state.balances?.find((b) => compareAddress(b.contract_address, token?.address))?.balance,
+      state.balances?.find((b) => compareAddress(b.token.address, token?.address))?.balance,
       token?.decimals!,
     );
     if (balance) return balance.toString();
@@ -322,9 +321,8 @@ export const SwapCard = ({
 
       try {
         const { balance } =
-          state?.balances?.find((t) =>
-            compareAddress(t.contract_address, state.tokenFrom?.address),
-          ) || {};
+          state?.balances?.find((t) => compareAddress(t.token.address, state.tokenFrom?.address)) ||
+          {};
 
         const paraswapProxy = await paraswap?.getTokenTransferProxy();
 
@@ -396,6 +394,7 @@ export const SwapCard = ({
     await onApproveToken({
       paraswapProxy: proxyOrError as string,
       tokenFrom: state.tokenFrom,
+      amount: +state.srcAmount,
       callback: getBalancesCB,
     });
 
@@ -452,7 +451,7 @@ export const SwapCard = ({
 
   const fillMaxAmount = () => {
     const balanceBN = state.balances?.find((b) =>
-      compareAddress(b.contract_address, state.tokenFrom?.address),
+      compareAddress(b.token.address, state.tokenFrom?.address),
     )?.balance;
 
     if (balanceBN) {

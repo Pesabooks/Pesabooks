@@ -1,5 +1,4 @@
 import { WalletConnect } from '@web3-react/walletconnect';
-import React from 'react';
 import { walletConnect } from '../../connectors/walletConnect';
 import { ConnectButton } from './ConnectButton';
 

@@ -20,4 +20,5 @@ export interface BalancesReponse {
   quote: number;
   quote_24h?: any;
   nft_data?: any;
+  native_token: boolean;
 }

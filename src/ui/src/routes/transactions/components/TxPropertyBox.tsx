@@ -21,7 +21,8 @@ export const TxPropertyBox = (props: TxPropertyBoxProps) => {
       rounded={'md'}
       border="1px"
       borderColor={borderBg}
-      py={1} px={2}
+      py={1}
+      px={2}
     >
       <Text color="gray.400" fontSize="sm" fontWeight="bold">
         {label}:

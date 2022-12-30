@@ -1,13 +1,5 @@
 import { CheckIcon } from '@chakra-ui/icons';
-import {
-  Button,
-  Divider,
-  Flex,
-  Image,
-  Spacer,
-  Stack,
-  Text
-} from '@chakra-ui/react';
+import { Button, Divider, Flex, Image, Spacer, Stack, Text } from '@chakra-ui/react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 
 interface ChooseNetworkTabProps {

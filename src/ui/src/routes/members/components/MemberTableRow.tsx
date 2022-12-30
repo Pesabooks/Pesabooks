@@ -12,7 +12,7 @@ import {
   Td,
   Text,
   Tr,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { FaUserShield } from 'react-icons/fa';
 import { FiMoreVertical } from 'react-icons/fi';
@@ -42,12 +42,12 @@ export const MemberTableRow = ({
   onRemove,
   onResendInvitation,
   role,
-  isAdmin
+  isAdmin,
 }: MembleTableRowProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
   let bgStatus = useColorModeValue('gray.400', '#1a202c');
   let colorStatus = useColorModeValue('white', 'gray.400');
-  const {pool} = usePool()
+  const { pool } = usePool();
 
   if (isInvitation) {
     bgStatus = 'orange.300';
@@ -63,19 +63,23 @@ export const MemberTableRow = ({
         <Flex align="center" minWidth="100%" flexWrap="nowrap">
           <Avatar name={name} w="50px" borderRadius="12px" me="18px" />
 
-          <Text fontSize="md" color={textColor} fontWeight="bold" >
+          <Text fontSize="md" color={textColor} fontWeight="bold">
             {name}
           </Text>
         </Flex>
       </Td>
-      <Td>{wallet && pool?.chain_id && <WalletAddress chainId={pool.chain_id} address={wallet} type="address" />}</Td>
+      <Td>
+        {wallet && pool?.chain_id && (
+          <WalletAddress chainId={pool.chain_id} address={wallet} type="address" />
+        )}
+      </Td>
 
       <Td>
-          <Flex align="center">
-            {isAdmin && <Icon as={FaUserShield} color="green.400" w="24px" h="24px" me="6px" />}
-            <Text>{role}</Text>
-          </Flex>
-        </Td>
+        <Flex align="center">
+          {isAdmin && <Icon as={FaUserShield} color="green.400" w="24px" h="24px" me="6px" />}
+          <Text>{role}</Text>
+        </Flex>
+      </Td>
 
       <Td>
         <Badge bg={bgStatus} color={colorStatus} fontSize="16px" p="3px 10px" borderRadius="8px">

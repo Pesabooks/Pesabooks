@@ -16,7 +16,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 import { BigNumber, ethers } from 'ethers';
 import { forwardRef, Ref, useImperativeHandle, useRef, useState } from 'react';
@@ -36,7 +36,7 @@ import {
   estimateSwap,
   estimateTransaction,
   estimateTransfer,
-  estimateWithdraw
+  estimateWithdraw,
 } from '../../../services/estimationService';
 import { TransactionType } from '../../../types';
 import { getTransactionTypeLabel } from '../../../utils';
@@ -56,6 +56,13 @@ export interface ReviewTransactionModalRef {
     data: DataType | null,
     onConfirm: callbackfn,
     safeTx?: string,
+  ) => void;
+  openWithEstimate: (
+    message: string,
+    type: TransactionType,
+    data: DataType | null,
+    onConfirm: callbackfn,
+    estimatedFee: BigNumber | undefined,
   ) => void;
 }
 
@@ -86,7 +93,19 @@ export const ReviewTransactionModal = forwardRef(
     const onConfirmRef = useRef<any>();
 
     useImperativeHandle(ref, () => ({
-      open: (
+      openWithEstimate: (
+        message: string,
+        type: TransactionType,
+        data: DataType,
+        onConfirm,
+        estimatedFee: BigNumber | undefined,
+      ) => {
+        setState({ message, data, type });
+        onOpen();
+        checkFunds(estimatedFee);
+        onConfirmRef.current = (confirmed: boolean, data?: any) => onConfirm(confirmed, data);
+      },
+      open: async (
         message: string,
         type: TransactionType,
         data: DataType,
@@ -95,7 +114,8 @@ export const ReviewTransactionModal = forwardRef(
       ) => {
         setState({ message, data, type });
         onOpen();
-        estimate(type, data, safeTxHash);
+        const estimatedFee = await estimate(type, data, safeTxHash);
+        checkFunds(estimatedFee);
         onConfirmRef.current = (confirmed: boolean, data?: any) => onConfirm(confirmed, data);
       },
     }));
@@ -183,12 +203,16 @@ export const ReviewTransactionModal = forwardRef(
               break;
           }
         }
-        if (estimatedFee) {
-          const formattedFee = formatBigNumber(estimatedFee);
-          setEstimatedFee(formattedFee?.toString() ?? '');
+        return estimatedFee;
+      }
+    };
 
-          if (balance.lt(estimatedFee)) setError('insufficientFunds');
-        }
+    const checkFunds = (estimatedFee: BigNumber | undefined) => {
+      if (estimatedFee) {
+        const formattedFee = formatBigNumber(estimatedFee, network.nativeCurrency.decimals);
+        setEstimatedFee(formattedFee?.toString() ?? '');
+
+        if (balance.lt(estimatedFee)) setError('insufficientFunds');
       }
     };
 
@@ -217,7 +241,8 @@ export const ReviewTransactionModal = forwardRef(
                 <Flex justifyContent="space-between">
                   <Text>Pesabooks Wallet:</Text>
                   <Text>
-                    {formatBigNumber(balance)} {network?.nativeCurrency.symbol}
+                    {formatBigNumber(balance, network.nativeCurrency.decimals)}{' '}
+                    {network?.nativeCurrency.symbol}
                   </Text>
                 </Flex>
                 <Flex justifyContent="space-between">

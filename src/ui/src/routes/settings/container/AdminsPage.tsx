@@ -13,16 +13,22 @@ import { User } from '../../../types';
 import { compareAddress } from '../../../utils';
 import {
   ReviewTransactionModal,
-  ReviewTransactionModalRef
+  ReviewTransactionModalRef,
 } from '../../transactions/components/ReviewTransactionModal';
-import { SubmittingTransactionModal, SubmittingTxModalRef } from '../../transactions/components/SubmittingTransactionModal';
-import { TransactionSubmittedModal, TransactionSubmittedModalRef } from '../../transactions/components/TransactionSubmittedModal';
+import {
+  SubmittingTransactionModal,
+  SubmittingTxModalRef,
+} from '../../transactions/components/SubmittingTransactionModal';
+import {
+  TransactionSubmittedModal,
+  TransactionSubmittedModalRef,
+} from '../../transactions/components/TransactionSubmittedModal';
 import { AddAdminFormValue, AddAdminModal } from '../components/addAdminModal';
 import { AdminsList } from '../components/AdminsList';
 import {
   RemoveAdminFormValue,
   RemoveAdminModal,
-  RemoveAdminModalRef
+  RemoveAdminModalRef,
 } from '../components/RemoveAdminModal';
 
 export const AdminsPage = () => {
@@ -77,10 +83,11 @@ export const AdminsPage = () => {
   const onAddmin = async (confirmed: boolean, { user, threshold: treshold }: AddAdminFormValue) => {
     if (confirmed && pool) {
       try {
-        submittingRef.current?.open('addOwner')
+        submittingRef.current?.open('addOwner');
 
         let tx = await addAdmin(signer, pool, user, treshold);
-        txSubmittedRef.current?.open(tx);
+
+        if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
 
         if (tx?.hash) {
           (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
@@ -96,7 +103,7 @@ export const AdminsPage = () => {
           isClosable: true,
         });
       } finally {
-        submittingRef.current?.close()
+        submittingRef.current?.close();
       }
     }
   };
@@ -115,13 +122,16 @@ export const AdminsPage = () => {
     );
   };
 
-  const onRemoveAdmin = async (confirmed: boolean, { user, threshold: treshold }: RemoveAdminFormValue) => {
+  const onRemoveAdmin = async (
+    confirmed: boolean,
+    { user, threshold: treshold }: RemoveAdminFormValue,
+  ) => {
     if (confirmed && pool) {
       try {
-        submittingRef.current?.open('removeOwner')
+        submittingRef.current?.open('removeOwner');
 
         let tx = await removeAdmin(signer, pool, user, treshold);
-        txSubmittedRef.current?.open(tx);
+        if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
         if (tx?.hash) {
           (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
             loadAdminAddresses();
@@ -134,7 +144,7 @@ export const AdminsPage = () => {
           isClosable: true,
         });
       } finally {
-        submittingRef.current?.close()
+        submittingRef.current?.close();
       }
     }
   };

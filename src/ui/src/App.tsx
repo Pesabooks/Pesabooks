@@ -28,7 +28,6 @@ import { CategoriesPage } from './routes/settings/container/CategoriesPage';
 import { OverviewPage } from './routes/settings/container/OverviewPage';
 import { SettingsPage } from './routes/settings/container/SettingsPage';
 import { DepositPage } from './routes/transactions/containers/DepositPage';
-import { RampPage } from './routes/transactions/containers/RampPage';
 import { SwapPage } from './routes/transactions/containers/SwapPage';
 import { TransactionsPage } from './routes/transactions/containers/TransactionsPage';
 import { WithdrawPage } from './routes/transactions/containers/WithdrawPage';
@@ -91,7 +90,6 @@ function App() {
                   <Route path="transactions" element={<TransactionsPage />} />
                   <Route path="members" element={<MembersPage />} />
                   <Route path="deposit" element={<DepositPage />} />
-                  <Route path="ramp" element={<RampPage />} />
                   <Route path="withdraw" element={<WithdrawPage />} />
                   <Route path="swap" element={<SwapPage />} />
                   <Route path="settings" element={<SettingsPage />}>

@@ -19,7 +19,6 @@ Sentry.init({
   enabled: process.env.REACT_APP_ENV !== 'development',
 });
 
-
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>

@@ -1,8 +1,4 @@
-import {
-  Box, Drawer,
-  DrawerContent,
-  useDisclosure
-} from '@chakra-ui/react';
+import { Box, Drawer, DrawerContent, useDisclosure } from '@chakra-ui/react';
 import { Outlet } from 'react-router-dom';
 import { CreateTeamSafe } from '../CreateTeamSafe';
 import { Footer } from './Footer';
@@ -36,8 +32,8 @@ export const Layout = () => {
       >
         <Navbar onOpen={onOpen} />
         <Box ms="auto" me="auto" ps="15px" pe="15px">
-          <CreateTeamSafe/>
-            
+          <CreateTeamSafe />
+
           <Box p="30px 15px" minHeight="calc(100vh - 123px)">
             {<Outlet />}
           </Box>

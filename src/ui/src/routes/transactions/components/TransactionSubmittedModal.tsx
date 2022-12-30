@@ -13,17 +13,17 @@ import {
   Stack,
   Text,
   useColorModeValue,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 import { forwardRef, Ref, useImperativeHandle, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TransactionIcon } from '../../../components/TransactionIcon';
 import { getTxScanLink } from '../../../services/transactionsServices';
-import { Transaction } from '../../../types';
+import { TransactionType } from '../../../types';
 import { getTransactionTypeLabel } from '../../../utils';
 
 export interface TransactionSubmittedModalRef {
-  open: (tx?: Transaction) => void;
+  open: (type: TransactionType, hash: string, internalTxId?: number) => void;
 }
 
 interface TransactionSubmittedModalProps {
@@ -33,11 +33,12 @@ interface TransactionSubmittedModalProps {
 export const TransactionSubmittedModal = forwardRef(
   ({ chainId }: TransactionSubmittedModalProps, ref: Ref<TransactionSubmittedModalRef>) => {
     const { isOpen, onClose, onOpen } = useDisclosure();
-    const [transaction, setTransaction] = useState<Transaction>();
+    const [state, setState] =
+      useState<{ type: TransactionType; internalTxId?: number; hash: string }>();
 
     useImperativeHandle(ref, () => ({
-      open: (tx: Transaction | undefined) => {
-        setTransaction(tx);
+      open: (type: TransactionType, hash: string, internalTxId?: number) => {
+        setState({ type, hash, internalTxId });
         onOpen();
       },
     }));
@@ -60,27 +61,27 @@ export const TransactionSubmittedModal = forwardRef(
           <ModalHeader> Transaction Submitted</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            {transaction && (
+            {state && (
               <Stack gap={5}>
                 <Box bg={bgColor} boxShadow={'2xl'} rounded={'lg'} p={6} textAlign={'center'}>
                   <Center>
-                    <TransactionIcon type={transaction?.type} />
+                    <TransactionIcon type={state?.type} />
                   </Center>
                   <Text mt={5} color={txtColor} px={3}>
-                    {getTransactionTypeLabel(transaction.type)}
+                    {getTransactionTypeLabel(state.type)}
                   </Text>
                 </Box>
 
-                {transaction?.id && (
+                {state?.internalTxId && (
                   <Button
                     variant="outline"
-                    onClick={() => navigate(`../transactions?id=${transaction.id}`)}
+                    onClick={() => navigate(`../transactions?id=${state.internalTxId}`)}
                   >
                     View Transaction
                   </Button>
                 )}
-                {transaction?.hash && chainId && (
-                  <Link href={getTxScanLink(transaction.hash, chainId)} isExternal>
+                {state?.hash && chainId && (
+                  <Link href={getTxScanLink(state.hash, chainId)} isExternal>
                     <Button variant="outline" rightIcon={<ExternalLinkIcon />} w="100%">
                       View Receipt
                     </Button>

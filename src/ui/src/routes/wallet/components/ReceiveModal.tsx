@@ -1,13 +1,13 @@
 import {
-    Box,
-    Flex,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalHeader,
-    ModalOverlay,
-    Text
+  Box,
+  Flex,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Text,
 } from '@chakra-ui/react';
 import QRCode from 'qrcode.react';
 import { WalletAddress } from '../../../components/WalletAddress';
@@ -21,7 +21,7 @@ export interface ReceiveModalProps {
 
 export const ReceiveModal = ({ isOpen, onClose, address, chainId }: ReceiveModalProps) => {
   return (
-    <Modal size="lg" isOpen={isOpen} onClose={onClose}>
+    <Modal size="lg" isOpen={isOpen} onClose={onClose} closeOnOverlayClick={false}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Reiceive Funds</ModalHeader>

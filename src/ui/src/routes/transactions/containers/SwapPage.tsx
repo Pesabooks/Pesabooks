@@ -10,16 +10,16 @@ import { onTransactionComplete } from '../../../services/blockchainServices';
 import { approveToken, swapTokens } from '../../../services/transactionsServices';
 import {
   ReviewTransactionModal,
-  ReviewTransactionModalRef
+  ReviewTransactionModalRef,
 } from '../components/ReviewTransactionModal';
 import {
   SubmittingTransactionModal,
-  SubmittingTxModalRef
+  SubmittingTxModalRef,
 } from '../components/SubmittingTransactionModal';
 import { ApproveArgs, SwapArgs, SwapCard } from '../components/SwapCard';
 import {
   TransactionSubmittedModal,
-  TransactionSubmittedModalRef
+  TransactionSubmittedModalRef,
 } from '../components/TransactionSubmittedModal';
 
 const DEFAULT_ALLOWED_SLIPPAGE = 0.01; //1%
@@ -60,8 +60,7 @@ export const SwapPage = () => {
       );
 
       if (tx?.hash) onTransactionComplete(pool.chain_id, tx.hash, callback);
-
-      confirmationRef.current?.open(tx);
+      if (tx) confirmationRef.current?.open(tx?.type, tx?.hash, tx?.id);
     } catch (e: any) {
       const message = typeof e === 'string' ? e : e.message;
       toast({
@@ -108,8 +107,7 @@ export const SwapPage = () => {
         priceRoute,
       );
       callback();
-
-      confirmationRef.current?.open(tx);
+      if (tx) confirmationRef.current?.open(tx.type, tx.hash, tx.id);
     } catch (e: any) {
       const message = typeof e === 'string' ? e : e.message;
       toast({

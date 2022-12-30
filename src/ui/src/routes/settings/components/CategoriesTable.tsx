@@ -5,18 +5,17 @@ import {
   EditableInput,
   EditablePreview,
   Flex,
-  Stack, Table,
+  Stack,
+  Table,
   Tbody,
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
 } from '@chakra-ui/react';
 import React from 'react';
 import { Column, useSortBy, useTable } from 'react-table';
-import {
-  SwitchWithAdmingRights
-} from '../../../components/withConnectedWallet';
+import { SwitchWithAdmingRights } from '../../../components/withConnectedWallet';
 import { Category } from '../../../types';
 
 interface CategoriesTableProps {

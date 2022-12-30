@@ -7,7 +7,7 @@ import {
   FiUnlock,
   FiUserPlus,
   FiUsers,
-  FiUserX
+  FiUserX,
 } from 'react-icons/fi';
 import { TransactionType } from '../types';
 
@@ -20,6 +20,7 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
       color = 'green.400';
       break;
     case 'withdrawal':
+    case 'transfer_out':
       logo = FiArrowUpRight;
       color = 'red.400';
       break;
@@ -39,7 +40,7 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
     case 'swap':
       logo = BiTransfer;
       break;
-      case 'createSafe':
+    case 'createSafe':
       logo = BsSafe;
       break;
 

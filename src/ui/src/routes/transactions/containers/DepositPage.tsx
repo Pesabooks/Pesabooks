@@ -11,12 +11,18 @@ import { getAddressBalance } from '../../../services/blockchainServices';
 import { getAllCategories } from '../../../services/categoriesService';
 import { deposit } from '../../../services/transactionsServices';
 import { Category } from '../../../types';
-import { ReviewTransactionModal, ReviewTransactionModalRef } from '../components/ReviewTransactionModal';
-import { SubmittingTransactionModal, SubmittingTxModalRef } from '../components/SubmittingTransactionModal';
+import {
+  ReviewTransactionModal,
+  ReviewTransactionModalRef,
+} from '../components/ReviewTransactionModal';
+import {
+  SubmittingTransactionModal,
+  SubmittingTxModalRef,
+} from '../components/SubmittingTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 import {
   TransactionSubmittedModal,
-  TransactionSubmittedModalRef
+  TransactionSubmittedModalRef,
 } from '../components/TransactionSubmittedModal';
 
 export interface DepositFormValue {
@@ -63,18 +69,25 @@ export const DepositPage = () => {
 
   const confirmTx = (formValue: DepositFormValue) => {
     const { amount } = formValue;
-    reviewTxRef.current?.open(`Deposit ${amount} ${pool.token?.symbol}`, 'deposit', formValue, onDeposit);
+    reviewTxRef.current?.open(
+      `Deposit ${amount} ${pool.token?.symbol}`,
+      'deposit',
+      formValue,
+      onDeposit,
+    );
   };
 
   const onDeposit = async (confirmed: boolean, formValue: DepositFormValue) => {
     if (!provider || !confirmed) return;
-    submittingRef.current?.open('deposit')
+    submittingRef.current?.open('deposit');
 
     const { amount, memo, category } = formValue;
 
     try {
       const tx = await deposit(provider, pool, category.id, amount, memo);
-      txSubmittedRef.current?.open(tx);
+
+      if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
+
       methods.reset();
     } catch (e: any) {
       const message = typeof e === 'string' ? e : e?.data?.message ?? e.message;
@@ -116,7 +129,7 @@ export const DepositPage = () => {
       </Container>
       <TransactionSubmittedModal ref={txSubmittedRef} chainId={pool?.chain_id} />
       <SubmittingTransactionModal ref={submittingRef} />
-      <ReviewTransactionModal ref={reviewTxRef}  />
+      <ReviewTransactionModal ref={reviewTxRef} />
     </>
   );
 };

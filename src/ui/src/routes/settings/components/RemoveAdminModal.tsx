@@ -14,7 +14,7 @@ import {
   ModalOverlay,
   Select,
   Text,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 import { forwardRef, Ref, useImperativeHandle, useRef, useState } from 'react';
 import { UserWalletCard } from '../../../components/UserWalletCard';

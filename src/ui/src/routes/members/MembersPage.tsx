@@ -9,7 +9,7 @@ import {
   createInvitation,
   getActiveInvitations,
   revokeInvitation,
-  sendInvitation
+  sendInvitation,
 } from '../../services/invitationService';
 import { getMembers } from '../../services/membersService';
 import { Invitation } from '../../types';

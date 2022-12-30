@@ -1,6 +1,6 @@
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 import { createClient, PostgrestError } from '@supabase/supabase-js';
-import { Category, Invitation, Pool, Token, Transaction, User } from './types';
+import { Activity, Category, Invitation, Pool, Token, Transaction, User } from './types';
 import { Member } from './types/Member';
 import { isTokenExpired } from './utils/jwt-utils';
 import { getTypedStorageItem } from './utils/storage-utils';
@@ -34,6 +34,7 @@ export const tokensTable = () => supabase().from<Token>('tokens');
 export const categoriesTable = () => supabase().from<Category>('categories');
 export const membersTable = () => supabase().from<Member>('members');
 export const invitationsTable = () => supabase().from<Invitation>('invitations');
+export const activitiesTable = () => supabase().from<Activity>('activities');
 export const handleSupabaseError = (error: PostgrestError | null) => {
   if (error) {
     if (error.message === 'JWT expired') {

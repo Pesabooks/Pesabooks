@@ -1,9 +1,7 @@
 import { DeleteIcon } from '@chakra-ui/icons';
 import { Flex, Spacer, Text, Tooltip, useColorModeValue } from '@chakra-ui/react';
 import { WalletAddress } from '../../../components/WalletAddress';
-import {
-  IconButtonWithAdmingRights
-} from '../../../components/withConnectedWallet';
+import { IconButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 import { User } from '../../../types';
 
 interface AdminsListProps {

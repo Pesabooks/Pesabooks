@@ -5,7 +5,7 @@ import {
   IconButtonProps,
   Switch,
   SwitchProps,
-  Tooltip
+  Tooltip,
 } from '@chakra-ui/react';
 import { forwardRef, useMemo } from 'react';
 import { usePool } from '../hooks/usePool';
@@ -20,13 +20,13 @@ export function withAdminRight<T>(Component: React.ComponentType<T>) {
   return forwardRef(({ ...props }: T & A, _) => {
     const componentsProps: any = { ...props };
 
-    const {isAdmin} = usePoolAdmins();
-    const {isSafeAdmin} = useSafeAdmins();
-    const {pool} = usePool()
+    const { isAdmin } = usePoolAdmins();
+    const { isSafeAdmin } = useSafeAdmins();
+    const { pool } = usePool();
 
     const authorized = useMemo(() => {
-     if (!pool?.gnosis_safe_address) return isAdmin;
-     else return isSafeAdmin
+      if (!pool?.gnosis_safe_address) return isAdmin;
+      else return isSafeAdmin;
     }, [isAdmin, isSafeAdmin, pool?.gnosis_safe_address]);
 
     if (!authorized)

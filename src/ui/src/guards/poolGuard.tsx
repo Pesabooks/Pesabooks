@@ -6,7 +6,7 @@ export function PoolGuard({ children }: { children: JSX.Element }) {
   let { pool, loading } = usePool();
 
   if (loading) {
-    return <Loading  fullHeight></Loading>;
+    return <Loading fullHeight></Loading>;
   } else if (!pool) {
     return <Navigate to="/" />;
   }

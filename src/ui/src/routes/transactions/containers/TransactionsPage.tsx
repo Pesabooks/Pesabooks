@@ -82,24 +82,26 @@ export const TransactionsPage = () => {
       <Heading as="h2" mb={4} size="lg">
         Transations
       </Heading>
-     { txQueue.length>0 && <Card mb={30}>
-        <CardHeader>
-          <Text fontSize="lg" fontWeight="bold">
-            Queue
-          </Text>
-        </CardHeader>
-        <CardBody>
-          <TransactionsTable
-            pool={pool}
-            transactions={txQueue}
-            users={users}
-            loading={txsLoading}
-            categories={categories}
-            onSelect={(t) => openTransactionPane(t.id)}
-            showNonce={true}
-          ></TransactionsTable>
-        </CardBody>
-      </Card>}
+      {txQueue.length > 0 && (
+        <Card mb={30}>
+          <CardHeader>
+            <Text fontSize="lg" fontWeight="bold">
+              Queue
+            </Text>
+          </CardHeader>
+          <CardBody>
+            <TransactionsTable
+              pool={pool}
+              transactions={txQueue}
+              users={users}
+              loading={txsLoading}
+              categories={categories}
+              onSelect={(t) => openTransactionPane(t.id)}
+              showNonce={true}
+            ></TransactionsTable>
+          </CardBody>
+        </Card>
+      )}
 
       <Card>
         {/* <CardHeader>

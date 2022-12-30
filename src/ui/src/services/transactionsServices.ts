@@ -89,51 +89,6 @@ export const deposit = async (
   return data?.[0];
 };
 
-export const depositWithCard = async (
-  pool: Pool,
-  rampId: string,
-  rampPurchaseViewToken: string | undefined,
-  category_id: number | undefined,
-  memo: string | undefined,
-  amount: number,
-  finalTxHash: string | undefined,
-) => {
-  const { token } = pool;
-  if (token == null) throw new Error();
-
-  const transaction: Partial<Transaction> = {
-    memo: memo,
-    type: 'deposit',
-    category_id: category_id,
-    status: 'pending',
-    pool_id: pool.id,
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    metadata: {
-      ramp_id: rampId,
-      ramp_purchase_view_token: rampPurchaseViewToken,
-      transfer_to: checksummed(pool.gnosis_safe_address!),
-      token: {
-        address: checksummed(token.address),
-        symbol: token.symbol,
-        name: token.name,
-        decimals: token.decimals,
-        image: `${process.env.PUBLIC_URL}/${token.image}`,
-      },
-      amount: amount,
-    },
-    hash: finalTxHash,
-  };
-
-  const { data, error } = await transationsTable().insert(transaction);
-  handleSupabaseError(error);
-
-  if (finalTxHash) {
-    notifyTransaction(pool.chain_id, finalTxHash);
-  }
-
-  return data?.[0];
-};
-
 export const withdraw = async (
   signer: JsonRpcSigner,
   pool: Pool,

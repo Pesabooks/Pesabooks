@@ -1,5 +1,6 @@
 import { BalanceQuery, BalancesReponse } from '@pesabooks/supabase/functions';
 import { supabase } from '../supabase';
+import { TokenBase } from '../types/Token';
 
 export const getBalances = async (chain_id: number, address: string) => {
   if (!address) throw new Error();
@@ -12,5 +13,26 @@ export const getBalances = async (chain_id: number, address: string) => {
   if (error) throw error;
   if (!Array.isArray(data)) throw new Error(data ?? '');
 
-  return data;
+  return data.map(
+    (b) =>
+      ({
+        balance: b.balance,
+        quote: b.quote,
+        token: {
+          address: b.contract_address,
+          symbol: b.contract_ticker_symbol,
+          decimals: b.contract_decimals,
+          name: b.contract_name,
+          image: b.logo_url,
+          is_native: b.native_token,
+        },
+      } as TokenBalance),
+  );
 };
+
+export interface TokenBalance {
+  balance: string;
+  quote: number;
+  type: string;
+  token: TokenBase;
+}

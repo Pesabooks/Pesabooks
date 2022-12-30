@@ -1,9 +1,7 @@
 import { CheckIcon, CloseIcon, EditIcon } from '@chakra-ui/icons';
 import { ButtonGroup, Flex, IconButton, Select, SelectProps, Spacer } from '@chakra-ui/react';
 import { useState } from 'react';
-import {
-  IconButtonWithAdmingRights
-} from '../../../components/withConnectedWallet';
+import { IconButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 
 interface EditableSelectProps extends SelectProps {
   options: { value: any; name: string }[];

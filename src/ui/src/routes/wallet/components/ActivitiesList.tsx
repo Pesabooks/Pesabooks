@@ -1,20 +1,36 @@
 import { Flex, HStack, Text } from '@chakra-ui/react';
 import dayjs from 'dayjs';
 import { TransactionIcon } from '../../../components/TransactionIcon';
-import { Transaction, User } from '../../../types';
-import { getTransactionDescription, getTxAmountDescription } from '../../../utils';
+import { Activity } from '../../../types';
+import { SwapData, TransferData } from '../../../types/transaction';
+import { getTxAmountDescription, shortenHash } from '../../../utils';
 import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';
 
 interface TransactionsListProps {
-  transactions: Transaction[];
-  users: User[];
+  activities: Activity[];
 }
 
-export const TransactionsList = ({ transactions, users }: TransactionsListProps) => {
+const getActivityDescription = (activity: Activity): string => {
+  const { type, metadata } = activity;
+
+  switch (type) {
+    case 'transfer_out':
+      return `Sent To ${shortenHash((metadata as TransferData).transfer_to)}`;
+      case 'unlockToken':
+        return `unlock token ${(metadata as any).token.symbol}`;
+    case 'swap':
+      const swapData = metadata as SwapData;
+      return `Trade ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
+    default:
+      return type;
+  }
+};
+
+export const ActivitiesList = ({ activities }: TransactionsListProps) => {
   return (
     <Flex direction="column" w="100%">
-      {transactions.map((transaction, key) => {
-        const { created_at, type, metadata } = transaction;
+      {activities.map((activity, key) => {
+        const { created_at, type, metadata } = activity;
 
         return (
           <Flex key={key} my="1rem" justifyContent="space-between">
@@ -22,14 +38,14 @@ export const TransactionsList = ({ transactions, users }: TransactionsListProps)
               <TransactionIcon type={type} />
               <Flex direction="column">
                 <Text fontSize={{ sm: 'md', md: 'lg', lg: 'md' }} fontWeight="bold">
-                  {getTransactionDescription(transaction, users)}
+                  {getActivityDescription(activity)}
                 </Text>
                 <Flex gap={2} fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }} fontWeight="semibold">
                   <Text color="gray.400">{dayjs(created_at).fromNow()}</Text>
                   <Text color="gray.400"> - </Text>
 
                   <Text>
-                    <TransactionStatusBadge type={transaction.status} hideIcon={true} />
+                    <TransactionStatusBadge type={activity.status} hideIcon={true} />
                   </Text>
                 </Flex>
               </Flex>

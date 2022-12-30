@@ -4,15 +4,16 @@ import {
   ADAPTER_EVENTS,
   CHAIN_NAMESPACES,
   CustomChainConfig,
-  WALLET_ADAPTERS
+  WALLET_ADAPTERS,
 } from '@web3auth/base';
 import { Web3AuthCore } from '@web3auth/core';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import {
-  onAuthStateChanged, signInWithEmailLink,
+  onAuthStateChanged,
+  signInWithEmailLink,
   signOut as FirebaseSignOut,
   updateProfile as FirebaseUpdateProfile,
-  User as FirebaseUser
+  User as FirebaseUser,
 } from 'firebase/auth';
 import React, { useEffect, useState } from 'react';
 import { networks } from '../data/networks';

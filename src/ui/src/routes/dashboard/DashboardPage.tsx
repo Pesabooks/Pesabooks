@@ -1,11 +1,10 @@
 import { Flex, Grid, SimpleGrid, Text } from '@chakra-ui/react';
-import { BalancesReponse } from '@pesabooks/supabase/functions';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Card, CardBody, CardHeader } from '../../components/Card';
 import { usePool } from '../../hooks/usePool';
 import { useTransactions } from '../../hooks/useTransactions';
-import { getBalances } from '../../services/covalentServices';
+import { getBalances, TokenBalance } from '../../services/covalentServices';
 import { getMembers } from '../../services/membersService';
 import { User } from '../../types';
 import { AssetsList } from './components/AssetsList';
@@ -18,7 +17,7 @@ import { TransactionsStats } from './components/TransactionsStats';
 export const DashboardPage = () => {
   const { pool } = usePool();
   const [users, setUsers] = useState<User[]>([]);
-  const [balances, setBalances] = useState<BalancesReponse[]>([]);
+  const [balances, setBalances] = useState<TokenBalance[]>([]);
   const [loading, setLoading] = useState(true);
 
   const token = pool?.token;

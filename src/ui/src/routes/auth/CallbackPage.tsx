@@ -10,7 +10,7 @@ import { supabase, usersTable } from '../../supabase';
 import {
   clearTypedStorageItem,
   getTypedStorageItem,
-  setTypedStorageItem
+  setTypedStorageItem,
 } from '../../utils/storage-utils';
 
 export const CallbackPage = () => {

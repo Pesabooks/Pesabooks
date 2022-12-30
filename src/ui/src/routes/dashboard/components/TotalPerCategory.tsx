@@ -34,7 +34,7 @@ export const TotalPerCategory = ({ pool }: TotalPerCategoryProps) => {
 
   return (
     <Box w="100%">
-      <Table size="sm" >
+      <Table size="sm">
         <Thead>
           <Tr>
             <Th>Category</Th>

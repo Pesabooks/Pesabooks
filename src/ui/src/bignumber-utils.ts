@@ -2,7 +2,7 @@ import { BigNumber, ethers } from 'ethers';
 
 export const formatBigNumber = (
   amount: string | BigNumber | undefined,
-  decimals = 18,
+  decimals: number,
   digits = 4,
 ) => {
   if (!amount) return;

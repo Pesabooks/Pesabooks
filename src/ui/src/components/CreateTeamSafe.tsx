@@ -1,21 +1,15 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons';
-import {
-  Alert,
-  AlertDescription,
-  Button,
-  Link,
-  Text, useToast
-} from '@chakra-ui/react';
+import { Alert, AlertDescription, Button, Link, Text, useToast } from '@chakra-ui/react';
 import { useRef } from 'react';
 import { usePool } from '../hooks/usePool';
 import { useWeb3Auth } from '../hooks/useWeb3Auth';
 import {
   ReviewTransactionModal,
-  ReviewTransactionModalRef
+  ReviewTransactionModalRef,
 } from '../routes/transactions/components/ReviewTransactionModal';
 import {
   SubmittingTransactionModal,
-  SubmittingTxModalRef
+  SubmittingTxModalRef,
 } from '../routes/transactions/components/SubmittingTransactionModal';
 import { deployNewSafe } from '../services/poolsService';
 

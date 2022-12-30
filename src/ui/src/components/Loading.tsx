@@ -5,7 +5,7 @@ interface LoadingProps extends SpinnerProps {
 }
 function Loading({ fullHeight, ...spinnerProps }: LoadingProps) {
   return (
-    <Center h={fullHeight ? '100vh' : '100%'} >
+    <Center h={fullHeight ? '100vh' : '100%'}>
       <Spinner thickness="4px" speed="0.65s" size="xl" {...spinnerProps} />
     </Center>
   );

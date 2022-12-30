@@ -4,7 +4,7 @@ import { Button, Icon, Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/r
 import {
   BsArrowDownLeftCircleFill,
   BsArrowLeftRight,
-  BsArrowUpRightCircleFill
+  BsArrowUpRightCircleFill,
 } from 'react-icons/bs';
 import { useNavigate } from 'react-router-dom';
 import { usePool } from '../hooks/usePool';
@@ -13,7 +13,7 @@ import { useSafeAdmins } from '../hooks/useSafeAdmins';
 export const NewTransactionMenu = () => {
   const { pool } = usePool();
   const navigate = useNavigate();
-  const {isSafeAdmin} = useSafeAdmins();
+  const { isSafeAdmin } = useSafeAdmins();
 
   const DepositLogo = () => <Icon as={BsArrowDownLeftCircleFill} boxSize={6} color="green.400" />;
   const WithdrawLogo = () => <Icon as={BsArrowUpRightCircleFill} boxSize={6} color="red.400" />;

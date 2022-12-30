@@ -1,12 +1,5 @@
 import { AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
-import {
-  Button, Link,
-  Menu,
-  MenuButton,
-  MenuDivider,
-  MenuItem,
-  MenuList
-} from '@chakra-ui/react';
+import { Button, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { updateLastPool } from '../../services/profilesService';
