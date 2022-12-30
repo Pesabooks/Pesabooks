@@ -78,6 +78,11 @@ interface SwapCardProps {
   onSwap: (swapargs: SwapArgs) => void;
 }
 
+const compareParaswapToken = (b: TokenBalance, t: Token) =>
+  b.token.is_native
+    ? compareAddress(NATIVE_TOKEN_ADDRESS, t.address)
+    : compareAddress(b.token.address, t.address);
+
 export const SwapCard = ({
   chain_id,
   address,
@@ -269,9 +274,7 @@ export const SwapCard = ({
 
   useEffect(() => {
     const availableTokens =
-      state.tokens?.filter((t) =>
-        state.balances?.find((b) => compareAddress(b.token.address, t.address)),
-      ) ?? [];
+      state.tokens?.filter((t) => state.balances?.find((b) => compareParaswapToken(b, t))) ?? [];
     setState((prevState) => ({
       ...prevState,
       availableTokens,
@@ -316,8 +319,9 @@ export const SwapCard = ({
   };
 
   const getTokenBalance = (token: Token | undefined) => {
+    if (!token) return '0';
     const balance = formatBigNumber(
-      state.balances?.find((b) => compareAddress(b.token.address, token?.address))?.balance,
+      state.balances?.find((b) => compareParaswapToken(b, token))?.balance,
       token?.decimals!,
     );
     if (balance) return balance.toString();
