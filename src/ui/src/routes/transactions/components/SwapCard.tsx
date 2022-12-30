@@ -42,6 +42,7 @@ interface IState {
   status?: string;
   loading?: boolean;
   tokens: Token[];
+  availableTokens: Token[];
   srcAmount: string;
   receiver?: Address;
   tokenFrom?: Token;
@@ -88,14 +89,18 @@ export const SwapCard = ({
 }: SwapCardProps) => {
   const [paraswap, setParaswap] = useState<ParaSwap>();
 
-  const [state, setState] = useState<IState>({ srcAmount: DEFAULT_AMOUNT, tokens: [] });
+  const [state, setState] = useState<IState>({
+    srcAmount: DEFAULT_AMOUNT,
+    tokens: [],
+    availableTokens: [],
+  });
 
   useEffect(() => {
     if (chain_id && (chain_id === 137 || chain_id === 56)) setParaswap(new ParaSwap(chain_id));
   }, [chain_id]);
 
   const getBalancesCB = useCallback(() => {
-    if (address) {
+    if (address && paraswap) {
       getBalances(chain_id, address).then((balances) => {
         setState((prevState) => ({
           ...prevState,
@@ -103,7 +108,7 @@ export const SwapCard = ({
         }));
       });
     }
-  }, [address, chain_id]);
+  }, [address, paraswap, chain_id]);
 
   const getBestPrice = useCallback(
     async (srcAmount: string, tokenFrom: Token, tokenTo: Token) => {
@@ -262,12 +267,16 @@ export const SwapCard = ({
     return res;
   };
 
-  const availableTokens = () => {
-    const { tokens, balances } = state;
-    return (
-      tokens?.filter((t) => balances?.find((b) => compareAddress(b.token.address, t.address))) ?? []
-    );
-  };
+  useEffect(() => {
+    const availableTokens =
+      state.tokens?.filter((t) =>
+        state.balances?.find((b) => compareAddress(b.token.address, t.address)),
+      ) ?? [];
+    setState((prevState) => ({
+      ...prevState,
+      availableTokens,
+    }));
+  }, [state.balances, state.tokens]);
 
   const switchToken = () => {
     const { tokenFrom, tokenTo } = state;
@@ -509,7 +518,7 @@ export const SwapCard = ({
               </NumberInput>
               <SelectParaswapToken
                 value={state.tokenFrom}
-                tokens={availableTokens()}
+                tokens={state.availableTokens}
                 onChange={(e) => updatePair('tokenFrom', e)}
               />
             </Flex>
