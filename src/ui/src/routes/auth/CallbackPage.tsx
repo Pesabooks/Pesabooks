@@ -10,11 +10,11 @@ import { supabase, usersTable } from '../../supabase';
 import {
   clearTypedStorageItem,
   getTypedStorageItem,
-  setTypedStorageItem,
+  setTypedStorageItem
 } from '../../utils/storage-utils';
 
 export const CallbackPage = () => {
-  const { web3Auth, isInitialised } = useWeb3Auth();
+  const { web3Auth, isInitialised, setUser } = useWeb3Auth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,7 +43,12 @@ export const CallbackPage = () => {
         }
         setTypedStorageItem('supabase_access_token', data?.access_token ?? '');
 
-        await usersTable().upsert({ id: user_id!, wallet: address, email });
+        const { data: newUSer } = await usersTable()
+          .upsert({ id: user_id!, wallet: address, email })
+          .single();
+        if (newUSer) {
+          setUser(newUSer);
+        }
 
         const returnUrl = getTypedStorageItem('redirect_url') ?? '/';
         navigate(returnUrl);
@@ -52,7 +57,7 @@ export const CallbackPage = () => {
     };
 
     handleCallBack();
-  }, [web3Auth, isInitialised, navigate]);
+  }, [web3Auth, isInitialised, navigate, setUser]);
 
   return (
     <Flex w="100%" direction="column" textAlign="center" gap={10}>

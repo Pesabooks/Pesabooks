@@ -38,7 +38,7 @@ export const ChooseUsernameModal = () => {
       try {
         setIsSubmitting(true);
         await updateUsername(user?.id!, username);
-        updateProfile(username)
+        updateProfile(username);
         onClose();
       } catch (error) {
       } finally {
@@ -62,7 +62,6 @@ export const ChooseUsernameModal = () => {
   }, 1000);
 
   const onUsernameChange = (e: any) => {
-    console.log(e);
     setIsValidating(true);
     setUsername(e);
     checkAvailability(e);
