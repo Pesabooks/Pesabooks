@@ -4,7 +4,7 @@ import {
   ADAPTER_EVENTS,
   CHAIN_NAMESPACES,
   CustomChainConfig,
-  WALLET_ADAPTERS,
+  WALLET_ADAPTERS
 } from '@web3auth/base';
 import { Web3AuthCore } from '@web3auth/core';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
@@ -12,15 +12,18 @@ import {
   onAuthStateChanged,
   signInWithEmailLink,
   signOut as FirebaseSignOut,
-  updateProfile as FirebaseUpdateProfile,
-  User as FirebaseUser,
+  updateProfile as FirebaseUpdateProfile
 } from 'firebase/auth';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { networks } from '../data/networks';
 import { firebaseAuth } from '../firebase';
 import { usersTable } from '../supabase';
 import { User } from '../types';
-import { clearTypedStorageItem, setTypedStorageItem } from '../utils/storage-utils';
+import {
+  clearTypedStorageItem,
+  getTypedStorageItem,
+  setTypedStorageItem
+} from '../utils/storage-utils';
 
 export interface IWeb3AuthContext {
   web3Auth: Web3AuthCore | null;
@@ -177,51 +180,48 @@ export const Web3AuthProvider = ({ children }: any) => {
     getAccount();
   }, [provider, isInitialised]);
 
-  const updateProfile = async (name: string) => {
+  const updateProfile = async (username: string) => {
     const currentUser = firebaseAuth.currentUser;
     if (currentUser) {
-      await FirebaseUpdateProfile(currentUser, { displayName: name });
-      await usersTable().update({ name }).eq('id', currentUser.uid);
+      await FirebaseUpdateProfile(currentUser, { displayName: username });
     }
+    if (user) setUser({ ...user, username: username });
   };
 
+  const getUserWithProfile = useCallback(async (user_id: string | undefined) => {
+    if (!user_id) {
+      Sentry.configureScope((scope) => scope.setUser(null));
+
+      return null;
+    }
+    let { data } = await usersTable().select(`*`).eq('id', user_id).single();
+
+    Sentry.setUser({ email: data?.email, username: data?.username, id: data?.id });
+
+    return data;
+  }, []);
+
   useEffect(() => {
-    let getUserWithProfile = async (firebaseUser: FirebaseUser | undefined | null) => {
-      if (!firebaseUser) {
-        Sentry.configureScope((scope) => scope.setUser(null));
-
-        return null;
-      }
-      let { data } = await usersTable()
-        .select(`name, last_pool_id`)
-        .eq('id', firebaseUser.uid)
-        .single();
-
-      const profile: User = {
-        id: firebaseUser.uid,
-        name: data?.name ?? firebaseUser.displayName ?? '',
-        last_pool_id: data?.last_pool_id,
-        email: firebaseUser.email || '',
-        wallet: '',
-      };
-
-      Sentry.setUser({ email: profile.email, username: profile.name, id: profile.id });
-
-      return profile;
-    };
-
     // Listen for changes on auth state (logged in, signed out, etc.)
     const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
       if (user) setTypedStorageItem('user_id', user.uid);
       else clearTypedStorageItem('user_id');
 
-      getUserWithProfile(user).then((user) => {
+      getUserWithProfile(user?.uid).then((user) => {
         setUser(user);
       });
     });
 
     return unsubscribe;
-  }, []);
+  }, [getUserWithProfile]);
+
+  useEffect(() => {
+    const userId = getTypedStorageItem('user_id');
+    if (userId)
+      getUserWithProfile(userId).then((user) => {
+        setUser(user);
+      });
+  }, [getUserWithProfile]);
 
   const contextProvider: IWeb3AuthContext = {
     web3Auth: web3Auth,

@@ -19,7 +19,7 @@ export const AdminsList = ({ chainId, admins, remove }: AdminsListProps) => {
           <Flex key={index} my={{ sm: '1rem', xl: '10px' }} alignItems="center">
             <Flex direction="column">
               <Text fontSize="md" color={textColor} fontWeight="bold">
-                {row.name}
+                {row.username}
               </Text>
               <WalletAddress address={row.wallet} chainId={chainId} type="address" />
             </Flex>

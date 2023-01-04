@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import { CellProps, Column, useSortBy, useTable } from 'react-table';
 import Loading from '../../../components/Loading';
 import { Category, Pool, Transaction, TransactionStatus, User } from '../../../types';
-import { getTransactionTypeLabel, getTxAmountDescription } from '../../../utils';
+import { getTxAmountDescription } from '../../../utils';
 import { RefreshTransactionButton } from './RefreshTransactionButton';
 import { TransactionCell } from './TransactionCell';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
@@ -30,13 +30,13 @@ export const TransactionsTable = ({
 }: TransactionsTableProps) => {
   const columns = useMemo(() => {
     const columns: Column[] = [
-      {
-        Header: 'Type',
-        accessor: 'type',
-        Cell: ({ cell: { value, row } }: CellProps<Transaction>) => (
-          <Text>{getTransactionTypeLabel(value)}</Text>
-        ),
-      },
+      // {
+      //   Header: 'Type',
+      //   accessor: 'type',
+      //   Cell: ({ cell: { value, row } }: CellProps<Transaction>) => (
+      //     <Text>{getTransactionTypeLabel(value)}</Text>
+      //   ),
+      // },
 
       {
         Header: 'Description',

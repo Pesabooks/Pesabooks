@@ -1,5 +1,4 @@
 import { Avatar, AvatarGroup, Flex, Text, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
 import { Pool } from '../types';
 import { Card, CardBody, CardHeader } from './Card';
 import { Separator } from './Layout/Separator';
@@ -20,7 +19,7 @@ export const PoolCard = ({ pool }: PoolCardProps) => {
             </Text>
             <AvatarGroup size="xs">
               {pool.members?.map((member, index) => {
-                return <Avatar key={index} name={member.name} />;
+                return <Avatar key={index} name={member.username} />;
               })}
             </AvatarGroup>
           </Flex>

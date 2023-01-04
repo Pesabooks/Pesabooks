@@ -1,4 +1,4 @@
-import { handleSupabaseError, usersTable } from '../supabase';
+import { handleSupabaseError, supabase, usersTable } from '../supabase';
 import { getTypedStorageItem } from '../utils/storage-utils';
 
 export const getCurrentUserProfile = async () => {
@@ -17,6 +17,24 @@ export const updateLastPool = async (user_id: string, pool_id: string) => {
   handleSupabaseError(error);
 };
 
-export const insertProfile = async (user_id: string, name: string, email: string) => {
-  await usersTable().insert({ id: user_id, name: name, email: email });
+export const getMyProfile = async (user_id: string) => {
+  const { data: user } = await usersTable().select('*').eq('id', user_id).single();
+  return user;
+};
+
+export const checkifUsernameExists = async (username: string) => {
+  const { data, error } = await supabase()
+    .rpc<boolean>('check_username', {
+      username,
+    })
+    .single();
+
+  handleSupabaseError(error);
+
+  return data;
+};
+
+export const updateUsername = async (user_id: string, username: string) => {
+  const { error } = await usersTable().update({ username }).eq('id', user_id);
+  handleSupabaseError(error);
 };

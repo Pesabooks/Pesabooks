@@ -12,7 +12,7 @@ import {
   Td,
   Text,
   Tr,
-  useColorModeValue,
+  useColorModeValue
 } from '@chakra-ui/react';
 import { FaUserShield } from 'react-icons/fa';
 import { FiMoreVertical } from 'react-icons/fi';
@@ -77,7 +77,7 @@ export const MemberTableRow = ({
       <Td>
         <Flex align="center">
           {isAdmin && <Icon as={FaUserShield} color="green.400" w="24px" h="24px" me="6px" />}
-          <Text>{role}</Text>
+          <Text>{isAdmin ? 'Admin' : 'Member'}</Text>
         </Flex>
       </Td>
 

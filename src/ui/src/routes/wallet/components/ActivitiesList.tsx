@@ -20,7 +20,10 @@ const getActivityDescription = (activity: Activity): string => {
         return `unlock token ${(metadata as any).token.symbol}`;
     case 'swap':
       const swapData = metadata as SwapData;
-      return `Trade ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
+      return `Traded ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
+    case 'purchase':
+        const data = metadata as TransferData;
+        return `Purchased ${data.token.symbol}`;
     default:
       return type;
   }

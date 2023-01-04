@@ -5,6 +5,7 @@ import { MdSubject } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/Card';
 import { NavbarLight } from '../../components/Layout/NavbarLight';
+import { ChooseUsernameModal } from '../../components/Modals/ChooseUsername';
 import { PoolCard } from '../../components/PoolCard';
 import { getMyPools } from '../../services/poolsService';
 import { Pool } from '../../types';
@@ -130,6 +131,7 @@ export const HomePage = () => {
           </Box>
         )
       )}
+      <ChooseUsernameModal/>
     </Flex>
   );
 };

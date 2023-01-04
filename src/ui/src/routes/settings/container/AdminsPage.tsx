@@ -13,22 +13,22 @@ import { User } from '../../../types';
 import { compareAddress } from '../../../utils';
 import {
   ReviewTransactionModal,
-  ReviewTransactionModalRef,
+  ReviewTransactionModalRef
 } from '../../transactions/components/ReviewTransactionModal';
 import {
   SubmittingTransactionModal,
-  SubmittingTxModalRef,
+  SubmittingTxModalRef
 } from '../../transactions/components/SubmittingTransactionModal';
 import {
   TransactionSubmittedModal,
-  TransactionSubmittedModalRef,
+  TransactionSubmittedModalRef
 } from '../../transactions/components/TransactionSubmittedModal';
 import { AddAdminFormValue, AddAdminModal } from '../components/addAdminModal';
 import { AdminsList } from '../components/AdminsList';
 import {
   RemoveAdminFormValue,
   RemoveAdminModal,
-  RemoveAdminModalRef,
+  RemoveAdminModalRef
 } from '../components/RemoveAdminModal';
 
 export const AdminsPage = () => {
@@ -77,7 +77,7 @@ export const AdminsPage = () => {
 
   const reviewAddAdminTx = (formValue: AddAdminFormValue) => {
     const { user } = formValue;
-    reviewTxRef.current?.open(`Add ${user.name} as an Admin`, 'addOwner', formValue, onAddmin);
+    reviewTxRef.current?.open(`Add ${user.username} as an Admin`, 'addOwner', formValue, onAddmin);
   };
 
   const onAddmin = async (confirmed: boolean, { user, threshold: treshold }: AddAdminFormValue) => {
@@ -115,7 +115,7 @@ export const AdminsPage = () => {
   const reviewRemoveAdminTx = (formValue: RemoveAdminFormValue) => {
     const { user } = formValue;
     reviewTxRef.current?.open(
-      `Remove ${user.name} as an Admin`,
+      `Remove ${user.username} as an Admin`,
       'removeOwner',
       formValue,
       onRemoveAdmin,

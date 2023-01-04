@@ -5,6 +5,7 @@ import {
   Button,
   Center,
   Flex,
+  HStack,
   Menu,
   MenuButton,
   MenuDivider,
@@ -14,9 +15,12 @@ import {
   Spacer,
   Text,
   useColorMode,
+  VStack
 } from '@chakra-ui/react';
+import { FiChevronDown } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
+import { shortenHash } from '../../utils';
 import { WalletAddress } from '../WalletAddress';
 
 export const AvatarMenu = () => {
@@ -33,12 +37,28 @@ export const AvatarMenu = () => {
   return (
     <Menu>
       <MenuButton as={Button} rounded={'full'} variant={'link'} cursor={'pointer'} minW={0}>
-        <Avatar size={'sm'} name={user?.name} />
+        <HStack>
+          <Avatar size={'sm'} name={user?.username} />
+          <VStack
+            display={{ base: 'none', md: 'flex' }}
+            alignItems="flex-start"
+            spacing="1px"
+            ml="2"
+          >
+            <Text fontSize="sm">{user?.username}</Text>
+            <Text fontSize="xs" color="gray.600">
+              {user?.wallet && shortenHash(user?.wallet)}
+            </Text>
+          </VStack>
+          <Box display={{ base: 'none', md: 'flex' }}>
+            <FiChevronDown />
+          </Box>
+        </HStack>
       </MenuButton>
       <Portal>
         <MenuList m={0} alignItems={'center'}>
           <Center flexDirection="column">
-            <p>{user?.email}</p>
+            <p>{user?.username}</p>
             {account && <WalletAddress chainId={chainId} address={account} type="address" />}
           </Center>
 

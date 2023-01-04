@@ -44,7 +44,7 @@ export const MembersTable = ({
             return (
               <MemberTableRow
                 key={member.user_id}
-                name={member.user?.name ?? member.user?.email}
+                name={member.user?.username}
                 wallet={member.user?.wallet}
                 active={member.active}
                 status={member.active ? 'active' : 'inactive'}

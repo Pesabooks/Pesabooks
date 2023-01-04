@@ -14,7 +14,7 @@ export const getAddressName = (address: string | undefined, users: User[]) => {
 
   const user = users.find((a) => compareAddress(a.wallet, address));
 
-  return user?.name ?? address;
+  return user?.username ?? address;
 };
 
 export const getTransactionDescription = (transaction: Transaction, addresses: User[]): string => {
@@ -26,16 +26,16 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
     case 'withdrawal':
       return `Sent To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
     case 'addOwner':
-      return `add ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
+      return `Added ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
     case 'removeOwner':
-      return `Remove ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
+      return `Removed ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
     case 'unlockToken':
-      return `unlock token ${(metadata as any).token.symbol}`;
+      return `Unlocked token ${(metadata as any).token.symbol}`;
     case 'swap':
       const swapData = metadata as SwapData;
-      return `Trade ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
+      return `Traded ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
     case 'createSafe':
-      return 'Create Safe';
+      return 'Created group wallet';
     default:
       return transaction.type;
   }

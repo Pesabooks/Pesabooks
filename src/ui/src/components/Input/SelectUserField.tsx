@@ -39,8 +39,8 @@ export const SelectUserField = ({ users, label, ...boxProps }: Props) => {
             onBlur={onBlur}
             value={value}
             options={users}
-            getOptionValue={(profile: User) => profile.wallet}
-            getOptionLabel={(profile: User) => profile.name ?? shortenHash(profile.wallet)}
+            getOptionValue={(user: User) => user.wallet}
+            getOptionLabel={(user: User) => user.username ?? shortenHash(user.wallet)}
             components={{ Option: AvatarOption }}
           />
 
