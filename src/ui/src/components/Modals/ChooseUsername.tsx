@@ -52,6 +52,9 @@ export const ChooseUsernameModal = () => {
     try {
       if (!value || value.length < 3 || value.length > 20) {
         setErrors('Username must be between 3 and 20 characters');
+      }
+      else if (!/^[\w-]{3,20}$/.test(value)){
+        setErrors('Letters, numbers, dashes, and underscores only. Please try again without symbols')
       } else {
         const usernameExists = await checkifUsernameExists(value);
         if (usernameExists) setErrors('That username is already taken');
