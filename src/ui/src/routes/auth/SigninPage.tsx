@@ -41,6 +41,7 @@ export const SignInPage = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [shouldConfirmEmail, setShouldConfirmEmail] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasTriedSignin, setHasTriedSignin] = useState(false);
 
   const emailParam = searchParams.get('email') ?? '';
 
@@ -77,24 +78,35 @@ export const SignInPage = () => {
   useEffect(() => {
     const completeEmailSignin = async () => {
       const isEmailSignin = isSignInWithEmailLink(firebaseAuth, window.location.href);
-      if (!isEmailSignin) {
+      if (!isEmailSignin || hasTriedSignin) {
         setIsLoading(false);
       }
 
-      if (isInitialised && isEmailSignin) {
+      if (isInitialised && isEmailSignin && !hasTriedSignin) {
         let email = getTypedStorageItem('emailForSignIn');
         if (!email) {
           setShouldConfirmEmail(true);
           setIsLoading(false);
         } else {
-          await signIn(email!, window.location.href);
-          clearTypedStorageItem('emailForSignIn');
+          try {
+            await signIn(email!, window.location.href);
+            clearTypedStorageItem('emailForSignIn');
+          } catch (error) {
+            toast({
+              title: 'An error occured while trying to log you in. try again',
+              status: 'error',
+              isClosable: true,
+            });
+          } finally {
+            setHasTriedSignin(true);
+            setIsLoading(false);
+          }
         }
       }
     };
 
     completeEmailSignin();
-  }, [isInitialised, signIn]);
+  }, [hasTriedSignin, isInitialised, signIn, toast]);
 
   const {
     handleSubmit,
