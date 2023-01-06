@@ -13,7 +13,8 @@ export type TransactionType =
   | 'unlockToken'
   | 'swap'
   | 'transfer_out'
-  | 'purchase';
+  | 'purchase'
+  | 'rejection';
 
 export type TransactionStatus =
   | 'awaitingConfirmations'

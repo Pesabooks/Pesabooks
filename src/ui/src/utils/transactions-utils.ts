@@ -61,6 +61,8 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
       return 'Create group wallet';
     case 'transfer_out':
       return 'Send';
+    case 'rejection':
+      return 'Reject transaction';
     default:
       return type;
   }

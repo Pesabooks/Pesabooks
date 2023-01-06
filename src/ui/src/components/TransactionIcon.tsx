@@ -10,6 +10,7 @@ import {
   FiUsers,
   FiUserX
 } from 'react-icons/fi';
+import { MdCancel } from 'react-icons/md';
 import { TransactionType } from '../types';
 
 export const TransactionIcon = ({ type }: { type: TransactionType }) => {
@@ -46,6 +47,9 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
       break;
     case 'purchase':
       logo = FiCreditCard;
+      break;
+      case 'rejection':
+      logo = MdCancel;
       break;
     default:
       break;

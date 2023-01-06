@@ -107,11 +107,10 @@ export const TransactionsTable = ({
       },
     ];
 
-    if (showNonce)
-      columns.push({
-        Header: '',
-        accessor: 'safe_nonce',
-      });
+    columns.push({
+      Header: showNonce ? 'Execution order' : '' ,
+      accessor: 'safe_nonce',
+    });
 
     return columns;
   }, [showNonce, users, pool.chain_id]);

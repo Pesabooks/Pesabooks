@@ -103,26 +103,25 @@ export const TransactionsPage = () => {
         </Card>
       )}
 
+      <Skeleton height="20px" isLoaded={!isLoading}></Skeleton>
       <Card>
-        {/* <CardHeader>
+        <CardHeader>
           <Text fontSize="lg" fontWeight="bold">
             History
           </Text>
-        </CardHeader> */}
+        </CardHeader>
 
-        <Skeleton height="20px" isLoaded={!isLoading}>
-          <CardBody>
-            <TransactionsTable
-              pool={pool}
-              transactions={txHistory}
-              users={users}
-              loading={txsLoading}
-              categories={categories}
-              onSelect={(t) => openTransactionPane(t.id)}
-              showNonce={false}
-            ></TransactionsTable>
-          </CardBody>
-        </Skeleton>
+        <CardBody>
+          <TransactionsTable
+            pool={pool}
+            transactions={txHistory}
+            users={users}
+            loading={txsLoading}
+            categories={categories}
+            onSelect={(t) => openTransactionPane(t.id)}
+            showNonce={false}
+          ></TransactionsTable>
+        </CardBody>
       </Card>
       <TransactionDetail ref={txDetailRef} />
     </>

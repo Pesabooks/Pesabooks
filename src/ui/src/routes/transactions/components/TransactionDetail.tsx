@@ -20,7 +20,7 @@ import {
   Text,
   useDisclosure,
   useToast,
-  VStack,
+  VStack
 } from '@chakra-ui/react';
 import type { Web3Provider } from '@ethersproject/providers';
 import { SafeMultisigTransactionResponse } from '@gnosis.pm/safe-service-client';
@@ -40,7 +40,7 @@ import {
   estimateSafeTransactionByHash,
   getSafeNonce,
   getSafeTransaction,
-  getSafeTreshold,
+  getSafeTreshold
 } from '../../../services/gnosisServices';
 import { getMembers } from '../../../services/membersService';
 import {
@@ -49,7 +49,7 @@ import {
   getTransactionById,
   rejectTransaction,
   updateTransactionCategory,
-  updateTransactionMemo,
+  updateTransactionMemo
 } from '../../../services/transactionsServices';
 import { Category, Transaction, User } from '../../../types';
 import { SwapData, TransferData } from '../../../types/transaction';
@@ -57,7 +57,7 @@ import {
   compareAddress,
   getTransactionDescription,
   getTransactionTypeLabel,
-  mathAddress,
+  mathAddress
 } from '../../../utils';
 import { EditableSelect } from './EditableSelect';
 import { ReviewTransactionModal, ReviewTransactionModalRef } from './ReviewTransactionModal';
@@ -168,10 +168,11 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   };
 
   const confirmTx = (isRejection: boolean) => {
-    const message = getTransactionDescription(transaction!, users);
+    const message = isRejection ? '' : getTransactionDescription(transaction!, users);
     const safeTxHash = isRejection ? transaction?.reject_safe_tx_hash : transaction?.safe_tx_hash;
+    const type = isRejection ? 'rejection' : transaction!.type;
 
-    reviewTxRef.current?.open(message, transaction!.type, isRejection, execute, safeTxHash);
+    reviewTxRef.current?.open(message, type, isRejection, execute, safeTxHash);
   };
 
   const execute = async (confirmed: boolean, isRejection: boolean) => {
