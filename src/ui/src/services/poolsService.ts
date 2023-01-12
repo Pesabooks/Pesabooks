@@ -2,13 +2,15 @@ import { Web3Provider } from '@ethersproject/providers';
 import { handleSupabaseError, poolsTable, supabase, transationsTable } from '../supabase';
 import { Pool, Token, Transaction, User } from '../types';
 import { deploySafe } from './gnosisServices';
+import { getMembers } from './membersService';
 
 export const getPool = async (pool_id: string) => {
   const { data, error } = await poolsTable()
     .select(
       `
         *,
-        token:token_id(*)
+        token:token_id(*),
+        organizer:user_id(*)
       `,
     )
     .eq('id', pool_id);
@@ -35,21 +37,28 @@ export const createNewPool = async (
   token: Token,
   chainId: number,
 ) => {
-  const { data: poolId, error } = await supabase().rpc<number>('create_pool', {
-    chain_id: chainId,
-    name: name,
-    description: description ?? '',
-    token_id: token.id,
-  });
+  const { data: poolId, error } = await supabase()
+    .rpc<string>('create_pool', {
+      chain_id: chainId,
+      name: name,
+      description: description ?? '',
+      token_id: token.id,
+    })
+    .single();
 
   handleSupabaseError(error);
 
-  return poolId;
+  return getPool(poolId!);
 };
 
 export const deployNewSafe = async (provider: Web3Provider, pool_id: string) => {
   const signer = provider.getSigner();
-  const gnosis_address = await deploySafe(signer);
+
+  const members = await getMembers(pool_id);
+  const gnosis_address = await deploySafe(
+    signer,
+    members.map((m) => m.user!.wallet),
+  );
 
   await poolsTable().update({ gnosis_safe_address: gnosis_address }).eq('id', pool_id);
 

@@ -53,9 +53,16 @@ const getServiceClient = (ethAdapter: EthersAdapter, chainId: number) => {
   return new SafeServiceClient({ txServiceUrl, ethAdapter });
 };
 
-export const deploySafe = async (signer: JsonRpcSigner) => {
-  const signerAddress = await signer.getAddress();
+const calculateThreshold = (membersCount: number) => {
+  if (membersCount === 1) return 1;
+  if (membersCount === 2) return 2;
 
+  const isEven = membersCount % 2 === 0;
+  if (isEven) return membersCount / 2 + 1;
+  else return Math.ceil(membersCount / 2);
+};
+
+export const deploySafe = async (signer: JsonRpcSigner, owners: string[]) => {
   const ethAdapter = getEthersAdapter(signer);
 
   const safeFactory = await SafeFactory.create({ ethAdapter });
@@ -63,8 +70,8 @@ export const deploySafe = async (signer: JsonRpcSigner) => {
   if (!safeFactory) return;
 
   const safeAccountConfig: SafeAccountConfig = {
-    owners: [signerAddress],
-    threshold: 1,
+    owners,
+    threshold: calculateThreshold(owners.length),
   };
   const safe = await safeFactory.deploySafe({ safeAccountConfig });
 

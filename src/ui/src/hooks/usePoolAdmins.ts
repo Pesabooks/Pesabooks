@@ -4,6 +4,7 @@ import { User } from '../types';
 import { getTypedStorageItem } from '../utils/storage-utils';
 import { usePool } from './usePool';
 
+//todo: delete
 export const usePoolAdmins = (): { admins: User[]; isAdmin: boolean } => {
   const [isAdmin, setIsAdmin] = useState(false);
   const { pool } = usePool();

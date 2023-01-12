@@ -2,38 +2,53 @@ import { Container, Flex, Text, useToast } from '@chakra-ui/react';
 import { Step, Steps, useSteps } from 'chakra-ui-steps';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { FaEdit, FaEthereum } from 'react-icons/fa';
+import { FaEdit, FaEthereum, FaUsers } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
 import { Navbar } from '../../components/Layout/Navbar';
+import { useWeb3Auth } from '../../hooks/useWeb3Auth';
+import { createInvitation } from '../../services/invitationService';
 import { createNewPool } from '../../services/poolsService';
 import { getAllTokens } from '../../services/tokensService';
-import { Token } from '../../types';
+import { Invitation, Token } from '../../types';
 import { ChooseNetworkTab } from './components/ChooseNetworkTab';
 import { CreatingPool } from './components/CreatingPool';
+import { InviteMembers } from './components/InviteMembers';
 import { CreatePoolFormValue, PoolFormTab } from './components/PoolFormTab';
 
 export const CreatePoolPage = () => {
+  const { user } = useWeb3Auth();
   const [tokens, setTokens] = useState<Token[]>([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
   const [chainId, setChainId] = useState<number | null>(null);
+  const [poolInfo, setPoolInfo] = useState<CreatePoolFormValue>();
+  const [members, setMembers] = useState<Partial<Invitation>[]>([
+    { name: user?.username, email: user?.email },
+  ]);
 
   const { nextStep, prevStep, setStep, activeStep } = useSteps({
     initialStep: 0,
   });
 
-  const createPool = async (values: CreatePoolFormValue) => {
+  const createPool = async () => {
     setLoading(true);
-    if (!chainId) return;
+    if (!chainId || !poolInfo) return;
     try {
-      const { name, description, token } = values;
+      const { name, description, token } = poolInfo;
 
       nextStep();
-      const pool_id = await createNewPool(name, description, token, chainId);
+      const pool = await createNewPool(name, description, token, chainId);
+      if (pool) {
+        await Promise.all(
+          members
+            .filter((m) => m.email !== user?.email!)
+            .map((member) => createInvitation(pool, member.name!, member.email!, user?.username!)),
+        );
 
-      navigate(`/pool/${pool_id}`);
+        navigate(`/pool/${pool.id}`);
+      }
     } catch (e: any) {
       toast({
         title: e.message,
@@ -50,21 +65,42 @@ export const CreatePoolPage = () => {
     getAllTokens().then(setTokens);
   }, []);
 
+  const addMember = (member: Partial<Invitation>) => {
+    if (!members.find((m) => m.email === member.email)) setMembers([...members, member]);
+  };
+  const removeMember = (member: Partial<Invitation>) => {
+    setMembers([...members.filter((m) => m.email !== member.email)]);
+  };
+
   const netWorkTab = <ChooseNetworkTab onNext={nextStep} onSelect={setChainId} chainId={chainId} />;
 
   const infoTab = chainId ? (
     <PoolFormTab
       chainId={chainId}
       tokens={tokens}
-      onCreate={createPool}
-      loading={loading}
+      onNext={(info) => {
+        setPoolInfo(info);
+        nextStep();
+      }}
       onPrev={prevStep}
     ></PoolFormTab>
   ) : null;
 
+  const inviteMembersTab = (
+    <InviteMembers
+      members={members}
+      onAdd={addMember}
+      onRemove={removeMember}
+      loading={loading}
+      onPrev={prevStep}
+      onNext={createPool}
+    ></InviteMembers>
+  );
+
   const steps = [
     { label: 'Select a network', content: netWorkTab, icon: FaEthereum },
     { label: 'Group information', content: infoTab, icon: FaEdit },
+    { label: 'Invite Members', content: inviteMembersTab, icon: FaUsers },
   ];
 
   return (

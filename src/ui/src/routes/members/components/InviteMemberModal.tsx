@@ -10,9 +10,8 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Stack,
+  Stack
 } from '@chakra-ui/react';
-import React from 'react';
 import { useForm } from 'react-hook-form';
 
 export interface InviteMemberModalProps {

@@ -1,7 +1,8 @@
-import { Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
+import { Flex, Heading, Spacer, Spinner, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ButtonWithAdmingRights } from '../../components/withConnectedWallet';
+import { useIsOrganizer } from '../../hooks/useIsOrganizer';
 import { usePool } from '../../hooks/usePool';
 import { useSafeAdmins } from '../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
@@ -9,7 +10,7 @@ import {
   createInvitation,
   getActiveInvitations,
   revokeInvitation,
-  sendInvitation,
+  sendInvitation
 } from '../../services/invitationService';
 import { getMembers } from '../../services/membersService';
 import { Invitation } from '../../types';
@@ -21,9 +22,10 @@ export const MembersPage = () => {
   const { user } = useWeb3Auth();
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const { pool } = usePool();
+  const { pool, isDeployed } = usePool();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { safeAdmins } = useSafeAdmins();
+  const { safeAdmins, threshold, loading: safeInfoLoading } = useSafeAdmins();
+  const isOrganizer = useIsOrganizer()
 
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -50,7 +52,7 @@ export const MembersPage = () => {
     if (!pool) throw new Error('Argument Exception: pool');
     if (!user) throw new Error('Argument Exception: user');
     try {
-      await createInvitation(pool, name, email, user);
+      await createInvitation(pool, name, email, user.username!);
       toast({
         title: `${name} has been invited to join the group`,
         status: 'success',
@@ -97,9 +99,25 @@ export const MembersPage = () => {
         <Heading as="h2" size="lg">
           Members
         </Heading>
+
         <Spacer />
-        <ButtonWithAdmingRights onClick={onOpen}> Invite a member</ButtonWithAdmingRights>
+        {!isDeployed && isOrganizer && (
+          <ButtonWithAdmingRights onClick={onOpen}> Invite a member</ButtonWithAdmingRights>
+        )}
       </Flex>
+      {isDeployed && (
+        <Text color="gray.400" fontSize="sm" fontWeight="normal">
+          Every transaction requires the confirmation of{' '}
+          {safeInfoLoading ? (
+            <Spinner size="sm" />
+          ) : (
+            <b>
+              {threshold} out of {safeAdmins.length}
+            </b>
+          )}{' '}
+          members
+        </Text>
+      )}
       <MembersTable
         adminAddresses={safeAdmins}
         members={members}

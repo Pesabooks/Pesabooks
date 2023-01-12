@@ -3,19 +3,12 @@ import {
   Badge,
   Button,
   Flex,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Td,
+  Icon, Td,
   Text,
   Tr,
   useColorModeValue
 } from '@chakra-ui/react';
 import { FaUserShield } from 'react-icons/fa';
-import { FiMoreVertical } from 'react-icons/fi';
 import { WalletAddress } from '../../../components/WalletAddress';
 import { usePool } from '../../../hooks/usePool';
 
@@ -48,6 +41,7 @@ export const MemberTableRow = ({
   let bgStatus = useColorModeValue('gray.400', '#1a202c');
   let colorStatus = useColorModeValue('white', 'gray.400');
   const { pool } = usePool();
+  const isOrganizer = pool?.organizer.id === id
 
   if (isInvitation) {
     bgStatus = 'orange.300';
@@ -76,8 +70,8 @@ export const MemberTableRow = ({
 
       <Td>
         <Flex align="center">
-          {isAdmin && <Icon as={FaUserShield} color="green.400" w="24px" h="24px" me="6px" />}
-          <Text>{isAdmin ? 'Admin' : 'Member'}</Text>
+          {isOrganizer && <Icon as={FaUserShield} color="green.400" w="24px" h="24px" me="6px" />}
+          <Text>{isOrganizer ? 'Organizer' : 'Member'}</Text>
         </Flex>
       </Td>
 
@@ -94,7 +88,7 @@ export const MemberTableRow = ({
         )}
       </Td>
 
-      <Td>
+      {/* <Td>
         <Menu>
           <MenuButton
             as={IconButton}
@@ -108,7 +102,7 @@ export const MemberTableRow = ({
             </MenuItem>
           </MenuList>
         </Menu>
-      </Td>
+      </Td> */}
     </Tr>
   );
 };

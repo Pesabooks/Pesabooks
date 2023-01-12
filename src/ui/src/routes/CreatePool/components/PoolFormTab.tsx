@@ -8,7 +8,7 @@ import {
   Input,
   Stack,
   Text,
-  Textarea,
+  Textarea
 } from '@chakra-ui/react';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
 import { useMemo } from 'react';
@@ -19,8 +19,7 @@ import { Token } from '../../../types';
 interface PoolFormTabProps {
   chainId: number;
   tokens: Token[];
-  onCreate: (values: CreatePoolFormValue) => void;
-  loading: boolean;
+  onNext: (values: CreatePoolFormValue) => void;
   onPrev: () => void;
 }
 
@@ -45,9 +44,9 @@ const IconOption = (props: OptionProps<Token, boolean, GroupBase<Token>>) => {
     </chakraComponents.Option>
   );
 };
-export const PoolFormTab = ({ chainId, tokens, onCreate, loading, onPrev }: PoolFormTabProps) => {
+export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProps) => {
   const submit = (values: CreatePoolFormValue) => {
-    onCreate(values);
+    onNext(values);
   };
 
   const {
@@ -135,7 +134,6 @@ export const PoolFormTab = ({ chainId, tokens, onCreate, loading, onPrev }: Pool
                 w={{ sm: '75px', lg: '100px' }}
                 h="35px"
                 onClick={onPrev}
-                isLoading={loading}
               >
                 Prev
               </Button>
@@ -143,10 +141,9 @@ export const PoolFormTab = ({ chainId, tokens, onCreate, loading, onPrev }: Pool
                 alignSelf="flex-end"
                 w={{ sm: '75px', lg: '100px' }}
                 h="35px"
-                isLoading={loading}
                 type="submit"
               >
-                Create
+                Next
               </Button>
             </Flex>
           </Flex>

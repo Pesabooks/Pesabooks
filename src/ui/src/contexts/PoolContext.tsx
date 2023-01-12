@@ -10,6 +10,7 @@ type PoolContextType = {
   loading: boolean;
   error: any;
   refresh: () => void;
+  isDeployed:boolean
 };
 
 export const PoolContext = React.createContext<PoolContextType>({
@@ -17,6 +18,7 @@ export const PoolContext = React.createContext<PoolContextType>({
   refresh: () => {},
   error: {},
   pool: undefined,
+  isDeployed:false
 });
 
 export const PoolProvider = ({ children }: any) => {
@@ -53,7 +55,7 @@ export const PoolProvider = ({ children }: any) => {
 
   const refresh = () => fetchPool();
 
-  const value: PoolContextType = { pool, loading, error, refresh };
+  const value: PoolContextType = { pool, loading, error, refresh, isDeployed: !!pool?.gnosis_safe_address };
 
   return <PoolContext.Provider value={value}>{children}</PoolContext.Provider>;
 };

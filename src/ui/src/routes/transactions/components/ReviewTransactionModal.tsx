@@ -81,7 +81,7 @@ export const ReviewTransactionModal = forwardRef(
   (_: ReviewTransactionModalProps, ref: Ref<ReviewTransactionModalRef>) => {
     const { isOpen, onClose, onOpen } = useDisclosure();
     const [state, setState] = useState<State>();
-    const { pool } = usePool();
+    const { pool, isDeployed } = usePool();
     const { provider, chainId } = useWeb3Auth();
     const [estimatedFee, setEstimatedFee] = useState('');
     const { balance } = useNativeBalance();
@@ -115,8 +115,8 @@ export const ReviewTransactionModal = forwardRef(
       ) => {
         setState({ message, data, type });
         onOpen();
-        const admins = await getSafeAdmins(pool?.chain_id!, pool?.gnosis_safe_address!);
-        const estimatedFee = await estimate(admins.length, type, data, safeTxHash);
+
+        const estimatedFee = await estimate(type, data, safeTxHash);
         checkFunds(estimatedFee);
         onConfirmRef.current = (confirmed: boolean, data?: any) => onConfirm(confirmed, data);
       },
@@ -129,13 +129,17 @@ export const ReviewTransactionModal = forwardRef(
     };
 
     const estimate = async (
-      adminCount: number,
       type: TransactionType,
       data: DataType,
       safeTxHash: string | undefined,
     ) => {
       if (provider && pool?.token?.address) {
         let estimatedFee: BigNumber | undefined;
+        let bypass = false;
+        if (isDeployed) {
+          const admins = await getSafeAdmins(pool?.chain_id!, pool?.gnosis_safe_address!);
+          bypass = admins.length > 1;
+        }
 
         if (safeTxHash) {
           estimatedFee = await estimateTransaction(
@@ -145,7 +149,7 @@ export const ReviewTransactionModal = forwardRef(
             safeTxHash,
           );
         } else {
-          if (adminCount > 1) {
+          if (bypass) {
             estimatedFee = BigNumber.from(0);
           } else {
             switch (type) {

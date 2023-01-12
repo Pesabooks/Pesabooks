@@ -29,7 +29,7 @@ export const TransactionStatusBadge = ({
       break;
     case 'awaitingConfirmations':
       color = 'yellow.400';
-      text = 'Awaiting Confirmations';
+      text = 'Awaiting Votes';
       logo = BsClockHistory;
       break;
     case 'awaitingExecution':

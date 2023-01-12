@@ -29,9 +29,8 @@ export const AvatarMenu = () => {
   const navigate = useNavigate();
 
   const onSignout = () => {
-    signOut?.().finally(() => {
-      navigate('/auth/signin');
-    });
+    navigate('/auth/signin');
+    signOut?.()
   };
 
   return (

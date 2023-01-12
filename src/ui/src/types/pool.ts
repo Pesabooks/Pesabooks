@@ -11,4 +11,5 @@ export interface Pool extends BaseEntity<string> {
   active: boolean;
   gnosis_safe_address?: string;
   members?: User[];
+  organizer: User;
 }
