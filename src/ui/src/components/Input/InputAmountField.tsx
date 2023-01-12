@@ -10,11 +10,12 @@ import {
   NumberInput,
   NumberInputField,
   Spacer,
-  Text,
+  Text
 } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FaWallet } from 'react-icons/fa';
+import { formatLongNumber } from '../../bignumber-utils';
 
 interface InputAmountFieldProps extends BoxProps {
   balance?: number;
@@ -69,7 +70,7 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
               variant="link"
             >
               <Text fontSize="sm">
-                Balance: {balance} {symbol}
+                Balance: {formatLongNumber(balance)} {symbol}
               </Text>
             </Button>
           )}

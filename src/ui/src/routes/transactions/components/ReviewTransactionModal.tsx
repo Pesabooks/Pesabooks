@@ -136,7 +136,8 @@ export const ReviewTransactionModal = forwardRef(
       if (provider && pool?.token?.address) {
         let estimatedFee: BigNumber | undefined;
         let bypass = false;
-        if (isDeployed) {
+
+        if (isDeployed && !['deposit', 'createSafe'].includes(type)) {
           const admins = await getSafeAdmins(pool?.chain_id!, pool?.gnosis_safe_address!);
           bypass = admins.length > 1;
         }

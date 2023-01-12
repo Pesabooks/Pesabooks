@@ -14,14 +14,18 @@ export const formatBigNumber = (
 
   const amountN = Number(rawFormattedAmount);
 
-  if (isNaN(amountN)) return;
+  return formatLongNumber(amountN);
+};
 
-  if (Number.isInteger(amountN)) return amountN;
+export const formatLongNumber = (amount: number | undefined, digits = 4) => {
+  if (!amount) return;
 
-  const formatted = amountN.toFixed(digits);
+  if (Number.isInteger(amount)) return amount;
+
+  return +amount.toFixed(digits);
 
   // if amout is 0.00002391, to fixed(4) will be 0.000. use instead toPrecision
-  return Number(formatted.endsWith('0') ? amountN.toPrecision(digits) : formatted);
+  // return Number(formatted.endsWith('0') ? amount.toPrecision(digits) : formatted);
 };
 
 export const formatCurrency = (amount: number | string, digits = 2) => {

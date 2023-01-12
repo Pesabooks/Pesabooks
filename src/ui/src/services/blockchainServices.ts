@@ -1,7 +1,6 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { ERC20, ERC20__factory, PoolSafe__factory } from '@pesabooks/contracts/typechain';
 import { ethers, Signer } from 'ethers';
-import { formatBigNumber } from '../bignumber-utils';
 import { networks } from '../data/networks';
 
 export const getNetwork = (chain_id: number) => networks[chain_id];
@@ -32,7 +31,7 @@ export const getAddressBalance = async (
   const balance = await tokenContract.balanceOf(accountAddress);
   const decimals = await tokenContract.decimals();
 
-  return formatBigNumber(balance, decimals) ?? 0;
+  return +ethers.utils.formatUnits(balance, decimals);
 };
 
 export const onTransactionComplete = async (
