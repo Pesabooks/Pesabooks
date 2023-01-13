@@ -224,7 +224,9 @@ export const ReviewTransactionModal = forwardRef(
 
     const checkFunds = (estimatedFee: BigNumber | undefined) => {
       if (estimatedFee) {
-        const formattedFee = formatBigNumber(estimatedFee, network.nativeCurrency.decimals);
+        const formattedFee = estimatedFee.eq(BigNumber.from(0))
+          ? 0
+          : formatBigNumber(estimatedFee, network.nativeCurrency.decimals);
         setEstimatedFee(formattedFee?.toString() ?? '');
 
         if (balance.lt(estimatedFee)) setError('insufficientFunds');
