@@ -25,7 +25,7 @@ export const MembersPage = () => {
   const { pool, isDeployed } = usePool();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { safeAdmins, threshold, loading: safeInfoLoading } = useSafeAdmins();
-  const isOrganizer = useIsOrganizer()
+  const isOrganizer = useIsOrganizer();
 
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -106,17 +106,23 @@ export const MembersPage = () => {
         )}
       </Flex>
       {isDeployed && (
-        <Text color="gray.400" fontSize="sm" fontWeight="normal">
-          Every transaction requires the confirmation of{' '}
+        <Flex>
+          <Text color="gray.400" fontSize="sm" fontWeight="normal" mr={2}>
+            Every transaction requires the confirmation of{' '}
+          </Text>
           {safeInfoLoading ? (
             <Spinner size="sm" />
           ) : (
-            <b>
-              {threshold} out of {safeAdmins.length}
-            </b>
-          )}{' '}
-          members
-        </Text>
+            <Text color="gray.400" fontSize="sm" fontWeight="normal">
+              <b>
+                {threshold} out of {safeAdmins.length}
+              </b>
+            </Text>
+          )}
+          <Text color="gray.400" fontSize="sm" fontWeight="normal" ml={2}>
+            members
+          </Text>
+        </Flex>
       )}
       <MembersTable
         adminAddresses={safeAdmins}

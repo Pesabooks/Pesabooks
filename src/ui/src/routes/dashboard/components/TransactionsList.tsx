@@ -27,10 +27,7 @@ export const TransactionsList = ({ transactions, users }: TransactionsListProps)
                 <Flex gap={2} fontSize={{ sm: 'xs', md: 'sm', lg: 'xs' }} fontWeight="semibold">
                   <Text color="gray.400">{dayjs(created_at).fromNow()}</Text>
                   <Text color="gray.400"> - </Text>
-
-                  <Text>
-                    <TransactionStatusBadge type={transaction.status} hideIcon={true} />
-                  </Text>
+                  <TransactionStatusBadge type={transaction.status} hideIcon={true} />
                 </Flex>
               </Flex>
             </Flex>
