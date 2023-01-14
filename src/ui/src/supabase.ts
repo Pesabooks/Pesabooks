@@ -20,6 +20,8 @@ export const supabase = () => {
     if (!isExpired) {
       _supabaseClient.auth.setAuth(access_token);
     }
+  } else {
+    _supabaseClient.auth.setAuth(supabaseAnonKey);
   }
 
   return _supabaseClient;

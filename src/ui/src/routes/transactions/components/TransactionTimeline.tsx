@@ -48,19 +48,22 @@ export const TransactionTimeline = ({
                 status={confirmation.rejected ? 'rejected' : 'approved'}
                 key={index}
                 logo={FaBell}
-                title={getAddressName(confirmation.owner, users) ?? ''}
+                title={`${confirmation.rejected ? 'Rejected' : 'Approved'} by ${getAddressName(
+                  confirmation.owner,
+                  users,
+                )}`}
                 date={formatDate(confirmation.submissionDate)}
-                tag={{
-                  titleTag: confirmation.rejected ? 'Transaction rejected' : 'Transaction approved',
-                  bgTag: confirmation.rejected ? 'red' : 'green',
-                }}
+                // tag={{
+                //   titleTag: confirmation.rejected ? 'Transaction rejected' : 'Transaction approved',
+                //   bgTag: confirmation.rejected ? 'red' : 'green',
+                // }}
               />
             );
           })}
           <TimelineRow
             status={isExecuted ? 'done' : 'pending'}
             logo={FaBell}
-            title="Transaction executed"
+            title={isExecuted ? 'Transaction executed' : 'Waiting for execution'}
             description={isExecuted ? '' : 'Can be executed once the threshold is reached'}
             date={isExecuted ? formatTimestampSeconds(executionTimestamp) : ''}
             last={true}

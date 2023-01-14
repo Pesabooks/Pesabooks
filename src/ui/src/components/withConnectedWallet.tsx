@@ -9,7 +9,6 @@ import {
 } from '@chakra-ui/react';
 import { forwardRef, useMemo } from 'react';
 import { usePool } from '../hooks/usePool';
-import { usePoolAdmins } from '../hooks/usePoolAdmins';
 import { useWeb3Auth } from '../hooks/useWeb3Auth';
 
 type A = {
@@ -20,7 +19,6 @@ export function withAdminRight<T>(Component: React.ComponentType<T>) {
   return forwardRef(({ ...props }: T & A, _) => {
     const componentsProps: any = { ...props };
 
-    const { isAdmin } = usePoolAdmins();
     const { user } = useWeb3Auth();
     const { pool, isDeployed } = usePool();
 
@@ -28,8 +26,9 @@ export function withAdminRight<T>(Component: React.ComponentType<T>) {
 
     const authorized = useMemo(() => {
       if (!isDeployed) return isOrganizer;
-      else return isOrganizer || isAdmin;
-    }, [isAdmin, isDeployed, isOrganizer]);
+      //todo: refactor this
+      else return true;
+    }, [isDeployed, isOrganizer]);
 
     if (!authorized)
       return (

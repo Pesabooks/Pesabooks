@@ -1,22 +1,22 @@
-import { JsonRpcSigner } from '@ethersproject/providers';
-import Safe, { EthSignSignature, SafeAccountConfig, SafeFactory } from '@gnosis.pm/safe-core-sdk';
-import { SafeTransaction, SafeTransactionDataPartial } from '@gnosis.pm/safe-core-sdk-types';
-import EthersAdapter from '@gnosis.pm/safe-ethers-lib';
-import SafeServiceClient from '@gnosis.pm/safe-service-client';
-import { ethers, Signer, VoidSigner } from 'ethers';
+import { default as Safe, SafeAccountConfig, SafeFactory } from '@safe-global/safe-core-sdk';
+import { SafeTransaction, SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
+import EthersAdapter from '@safe-global/safe-ethers-lib';
+import SafeServiceClient from '@safe-global/safe-service-client';
+import { ethers, Signer } from 'ethers';
 import { defaultProvider } from './blockchainServices';
+import { TokenBalance } from './covalentServices';
 
 const getEthersAdapter = (signer: Signer) => {
   return new EthersAdapter({
     ethers,
-    signer,
+    signerOrProvider: signer,
   });
 };
 
 const getDefaultEthersAdapter = (chainId: number) => {
   return new EthersAdapter({
     ethers,
-    signer: new VoidSigner('', defaultProvider(chainId)),
+    signerOrProvider: defaultProvider(chainId),
   });
 };
 
@@ -62,7 +62,7 @@ const calculateThreshold = (membersCount: number) => {
   else return Math.ceil(membersCount / 2);
 };
 
-export const deploySafe = async (signer: JsonRpcSigner, owners: string[]) => {
+export const deploySafe = async (signer: Signer, owners: string[]) => {
   const ethAdapter = getEthersAdapter(signer);
 
   const safeFactory = await SafeFactory.create({ ethAdapter });
@@ -88,11 +88,7 @@ export const createSafeTransaction = async (
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
   const nonce = await getNextTxNonce(chainId, safeAddress);
 
-  const adjustedTransaction: SafeTransactionDataPartial = {
-    ...transaction,
-    nonce,
-  };
-  return await safeSdk.createTransaction(adjustedTransaction);
+  return await safeSdk.createTransaction({ safeTransactionData: transaction, options: { nonce } });
 };
 
 export const proposeSafeTransaction = async (
@@ -109,13 +105,13 @@ export const proposeSafeTransaction = async (
   const safeTxHash = await safeSdk.getTransactionHash(safeTransaction);
 
   const signature = await safeSdk.signTransactionHash(safeTxHash);
-  safeTransaction.addSignature(signature);
 
   await safeService.proposeTransaction({
     safeAddress,
-    safeTransaction,
+    safeTransactionData: safeTransaction.data,
     safeTxHash,
     senderAddress: signerAddress,
+    senderSignature: signature.data,
     origin: 'pesabooks',
   });
 
@@ -172,26 +168,7 @@ export const executeSafeTransactionByHash = async (
 
   const transaction = await safeService.getTransaction(safeTxHash);
 
-  if (!safeSdk) return;
-  const safeTransactionData = {
-    to: transaction.to,
-    value: transaction.value,
-    data: transaction.data || '0x',
-    operation: transaction.operation,
-    safeTxGas: transaction.safeTxGas,
-    baseGas: transaction.baseGas,
-    gasPrice: Number(transaction.gasPrice),
-    gasToken: transaction.gasToken,
-    refundReceiver: transaction.refundReceiver,
-    nonce: transaction.nonce,
-  };
-  const safeTransaction = await safeSdk.createTransaction(safeTransactionData);
-  transaction.confirmations?.forEach((confirmation) => {
-    const signature = new EthSignSignature(confirmation.owner, confirmation.signature);
-    safeTransaction.addSignature(signature);
-  });
-
-  const executeTxResponse = await safeSdk.executeTransaction(safeTransaction);
+  const executeTxResponse = await safeSdk.executeTransaction(transaction);
 
   return executeTxResponse.transactionResponse;
 };
@@ -207,7 +184,7 @@ export const getAddOwnerTx = async (
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
   const nonce = await getNextTxNonce(chainId, safeAddress);
 
-  return safeSdk.getAddOwnerTx({ ownerAddress: address, threshold: treshold }, { nonce });
+  return safeSdk.createAddOwnerTx({ ownerAddress: address, threshold: treshold }, { nonce });
 };
 
 export const getRemoveOwnerTx = async (
@@ -221,7 +198,7 @@ export const getRemoveOwnerTx = async (
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
   const nonce = await getNextTxNonce(chainId, safeAddress);
 
-  return safeSdk.getRemoveOwnerTx({ ownerAddress: address, threshold: treshold }, { nonce });
+  return safeSdk.createRemoveOwnerTx({ ownerAddress: address, threshold: treshold }, { nonce });
 };
 
 export const createSafeRejectionTransaction = async (
@@ -244,15 +221,15 @@ export const getSafeTransaction = async (chainId: number, safeTxHash: string) =>
   return await safeService.getTransaction(safeTxHash);
 };
 
-export const getSafeBalance = async (chainId: number, safeAddress: string) => {
-  const ethAdapter = getDefaultEthersAdapter(chainId);
+// export const getSafeBalance = async (chainId: number, safeAddress: string) => {
+//   const ethAdapter = getDefaultEthersAdapter(chainId);
 
-  const safeService = getServiceClient(ethAdapter, chainId);
+//   const safeService = getServiceClient(ethAdapter, chainId);
 
-  const balances = await safeService.getUsdBalances(safeAddress, { excludeSpamTokens: true });
+//   const balances = await safeService.getUsdBalances(safeAddress, { excludeSpamTokens: true });
 
-  return balances.reduce((balance, resp) => balance + Number.parseFloat(resp.fiatBalance), 0);
-};
+//   return balances.reduce((balance, resp) => balance + Number.parseFloat(resp.fiatBalance), 0);
+// };
 
 export const getSafeAdmins = async (chainId: number, safeAddress: string) => {
   const ethAdapter = getDefaultEthersAdapter(chainId);
@@ -301,9 +278,23 @@ export const getSafeBalances = async (chainId: number, safeAddress: string) => {
   const ethAdapter = getDefaultEthersAdapter(chainId);
 
   const safeService = getServiceClient(ethAdapter, chainId);
-  return (await safeService.getUsdBalances(safeAddress, { excludeSpamTokens: true })).filter(
-    (b) => b.balance !== '0',
-  );
+  return (await safeService.getUsdBalances(safeAddress, { excludeSpamTokens: true }))
+    .filter((b) => b.balance !== '0')
+    .map(
+      (b) =>
+        ({
+          balance: b.balance,
+          quote: Number.parseFloat(b.fiatBalance),
+          token: {
+            address: b.tokenAddress,
+            symbol: b.token.symbol,
+            decimals: b.token.decimals,
+            name: b.token.name,
+            image: b.token.logoUri,
+            is_native: false,
+          },
+        } as TokenBalance),
+    );
 };
 
 export const estimateSafeTransactionByHash = async (

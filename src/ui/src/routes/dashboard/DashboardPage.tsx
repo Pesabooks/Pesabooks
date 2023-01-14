@@ -21,13 +21,15 @@ export const DashboardPage = () => {
   const [balances, setBalances] = useState<TokenBalance[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const total = balances.reduce((balance, resp) => balance + resp.quote, 0);
+
   const token = pool?.token;
   if (!token) {
     throw new Error();
   }
 
   const filter = useCallback((query) => {
-    return query.order('timestamp', { ascending: false }).limit(7);
+    return query.order('created_at', { ascending: false }).limit(7);
   }, []);
 
   const { transactions } = useTransactions(pool.id, filter, {
@@ -61,7 +63,7 @@ export const DashboardPage = () => {
       ) : (
         <>
           <SimpleGrid mb={4} columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
-            <BalanceCard />
+            <BalanceCard balance={total} loading={loading} />
           </SimpleGrid>
 
           <Grid

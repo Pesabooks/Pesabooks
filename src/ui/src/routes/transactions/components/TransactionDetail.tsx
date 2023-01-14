@@ -23,7 +23,7 @@ import {
   VStack
 } from '@chakra-ui/react';
 import type { Web3Provider } from '@ethersproject/providers';
-import { SafeMultisigTransactionResponse } from '@gnosis.pm/safe-service-client';
+import { SafeMultisigTransactionResponse } from '@safe-global/safe-core-sdk-types';
 import { forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { formatBigNumber } from '../../../bignumber-utils';
 import { EditableControls } from '../../../components/Editable/EditableControls';

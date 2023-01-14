@@ -28,6 +28,7 @@ serve(async (req) => {
       exp,
       email,
       name,
+      role: "authenticated",
     };
 
     const jwt = await new jose.SignJWT(token).setProtectedHeader({ alg: "HS256" }).sign(buffer);

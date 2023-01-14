@@ -1,6 +1,6 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
-import { SafeTransaction } from '@gnosis.pm/safe-core-sdk-types';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
+import { SafeTransaction } from '@safe-global/safe-core-sdk-types';
 import { BigNumber, ContractReceipt, ContractTransaction, ethers, Signer } from 'ethers';
 import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
