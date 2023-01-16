@@ -1,8 +1,8 @@
 import { Flex, FlexboxProps, Text, useColorModeValue } from '@chakra-ui/react';
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 interface TxPropertyBoxProps extends FlexboxProps {
-  label: string;
+  label?: string;
   value?: string;
   children?: ReactNode;
 }
@@ -24,9 +24,11 @@ export const TxPropertyBox = (props: TxPropertyBoxProps) => {
       py={1}
       px={2}
     >
-      <Text color="gray.400" fontSize="sm" fontWeight="bold">
-        {label}:
-      </Text>
+      {label && (
+        <Text color="gray.400" fontSize="sm" fontWeight="bold">
+          {label}:
+        </Text>
+      )}
       {children ? children : <Text color={textColor}>{value}</Text>}
     </Flex>
   );

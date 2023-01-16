@@ -7,11 +7,11 @@
     "@chakra-ui/react": "^1.8.8",
     "@emotion/react": "11",
     "@emotion/styled": "11",
+    "@ramp-network/ramp-instant-sdk": "^3.1.1",
     "@safe-global/safe-core-sdk": "^3.2.2",
     "@safe-global/safe-core-sdk-types": "^1.8.0",
     "@safe-global/safe-ethers-lib": "^1.8.0",
     "@safe-global/safe-service-client": "^1.5.0",
-    "@ramp-network/ramp-instant-sdk": "^3.1.1",
     "@sentry/react": "^6.16.1",
     "@sentry/tracing": "^6.16.1",
     "@supabase/supabase-js": "^1.35.4",
@@ -23,6 +23,7 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-table": "^7.7.9",
+    "@walletconnect/client": "^1.8.0",
     "@walletconnect/ethereum-provider": "^1.7.5",
     "@web3-react/core": "8.0.23-beta.0",
     "@web3-react/eip1193": "8.0.18-beta.0",
@@ -87,6 +88,7 @@
   },
   "devDependencies": {
     "@craco/craco": "^6.4.2",
+    "@walletconnect/legacy-types": "^2.0.0-rc.0",
     "node-polyfill-webpack-plugin": "^1.1.4",
     "ts-loader": "8.2.0"
   },

@@ -2,12 +2,13 @@ import { formatBigNumber } from '../bignumber-utils';
 import { Transaction, User } from '../types';
 import {
   AddOwnerData,
+  ChangeThresholdData,
   SwapData,
   TransactionType,
   TransferData,
   UnlockTokenData,
 } from '../types/transaction';
-import { compareAddress } from './addresses';
+import { compareAddress } from './addresses-utils';
 
 export const getAddressName = (address: string | undefined, users: User[]) => {
   if (!address) return null;
@@ -36,6 +37,11 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
       return `Traded ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
     case 'createSafe':
       return 'Created group wallet';
+    case 'walletConnect':
+      // const walletConnectData = metadata as WalletConnectData;
+      return `Contract interaction`;
+    case 'changeThreshold':
+      return `Change required confirmations to ${(metadata as ChangeThresholdData).threshold}`;
     default:
       return transaction.type;
   }
@@ -63,6 +69,10 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
       return 'Send';
     case 'rejection':
       return 'Reject transaction';
+    case 'walletConnect':
+      return 'WalletConnect';
+    case 'changeThreshold':
+      return 'Change threshold';
     default:
       return type;
   }

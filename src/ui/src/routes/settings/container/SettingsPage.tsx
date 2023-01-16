@@ -42,6 +42,7 @@ export const SettingsPage = () => {
         mb="24px"
       >
         <NavLink title="Overview" link="./" />
+        <NavLink title="Group Wallet" link="./threshold" />
         {/* {isDeployed && <NavLink title="Administrators" link="./admins" />} */}
         <NavLink title="Categories" link="./categories" />
       </Stack>

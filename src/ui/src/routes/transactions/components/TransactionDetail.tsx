@@ -15,6 +15,7 @@ import {
   Flex,
   HStack,
   Image,
+  Img,
   Spacer,
   StackDivider,
   Text,
@@ -52,7 +53,12 @@ import {
   updateTransactionMemo
 } from '../../../services/transactionsServices';
 import { Category, Transaction, User } from '../../../types';
-import { SwapData, TransferData } from '../../../types/transaction';
+import {
+  ChangeThresholdData,
+  SwapData,
+  TransferData,
+  WalletConnectData
+} from '../../../types/transaction';
 import {
   compareAddress,
   getTransactionDescription,
@@ -355,7 +361,37 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                       </Flex>
                     </TxPropertyBox>
                   )}
+
+                  {transaction?.type === 'walletConnect' && (
+                    <TxPropertyBox flex="1">
+                      <HStack>
+                        <Img
+                          src={(transaction?.metadata as WalletConnectData)?.peer_data.icons[0]}
+                        />
+                        <VStack
+                          display={{ base: 'none', md: 'flex' }}
+                          alignItems="flex-start"
+                          spacing="1px"
+                          ml="2"
+                        >
+                          <Text fontSize="sm">
+                            {(transaction?.metadata as WalletConnectData).peer_data.name}
+                          </Text>
+                          <Text fontSize="xs" color="gray.600">
+                            {(transaction?.metadata as WalletConnectData).peer_data.description}
+                          </Text>
+                        </VStack>
+                      </HStack>
+                    </TxPropertyBox>
+                  )}
                 </Flex>
+
+                {transaction?.type === 'changeThreshold' && (
+                  <TxPropertyBox
+                    label="Threshold"
+                    value={`${(transaction?.metadata as ChangeThresholdData).threshold}`}
+                  />
+                )}
 
                 <TxPropertyBox label="Category">
                   <EditableSelect

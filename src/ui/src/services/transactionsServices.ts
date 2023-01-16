@@ -19,6 +19,7 @@ import {
   executeSafeTransaction,
   executeSafeTransactionByHash,
   getAddOwnerTx,
+  getChangeThresholdTx,
   getRemoveOwnerTx,
   getSafeTransaction,
   getSafeTransactionHash,
@@ -200,6 +201,30 @@ export const removeAdmin = async (
   return submitTransaction(signer, pool, transaction, safeTransaction);
 };
 
+export const changeThreshold = async (
+  signer: JsonRpcSigner,
+  pool: Pool,
+  treshold: number,
+): Promise<Transaction | undefined> => {
+  const transaction: Partial<Transaction> = {
+    type: 'changeThreshold',
+    pool_id: pool.id,
+    timestamp: Math.floor(new Date().valueOf() / 1000),
+    metadata: {
+      threshold: treshold,
+    },
+  };
+
+  const safeTransaction = await getChangeThresholdTx(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address!,
+    treshold,
+  );
+
+  return submitTransaction(signer, pool, transaction, safeTransaction);
+};
+
 export const approveToken = async (
   signer: JsonRpcSigner,
   pool: Pool,
@@ -278,7 +303,7 @@ export const swapTokens = async (
   return submitTransaction(signer, pool, transaction, safeTransaction);
 };
 
-const submitTransaction = async (
+export const submitTransaction = async (
   signer: Signer,
   pool: Pool,
   transaction: Partial<Transaction>,
@@ -350,7 +375,7 @@ export const executeTransaction = async (
     safeTxHash,
   );
 
-  onTransactionExecuted(tx, pool.chain_id, isRejection);
+  onTransactionExecuted(tx, pool.chain_id, isRejection, safeTxHash);
 
   await transationsTable().update({ hash: tx?.hash, status: 'pending' }).eq('id', transactionId);
 
@@ -383,6 +408,7 @@ const onTransactionExecuted = async (
   tx: ContractTransaction | undefined,
   chainId: number,
   isRejection: boolean,
+  safeTxHash?: string,
 ) => {
   if (tx) notifyTransaction(chainId, tx.hash);
 
@@ -390,7 +416,10 @@ const onTransactionExecuted = async (
     (receipt) => {
       onTransactionComplete(receipt, chainId, isRejection);
     },
-    () => onTransactionFailed(tx.hash),
+    () => {
+      //a failed transaction is still not executed in gnosis. A rejection execution is needed
+      if (!safeTxHash) onTransactionFailed(tx.hash);
+    },
   );
 };
 
@@ -421,9 +450,8 @@ export const getAllTransactions = async (pool_id: string, filter?: Filter<Transa
   `,
   );
 
-  query = (filter ? filter(query) : query)
-    .filter('pool_id', 'eq', pool_id)
-    .filter('status', 'neq', 'failed');
+  query = (filter ? filter(query) : query).filter('pool_id', 'eq', pool_id);
+  //.filter('status', 'neq', 'failed');
   const { data, error } = await query;
 
   handleSupabaseError(error);

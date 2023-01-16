@@ -1,4 +1,4 @@
-import { Heading, Skeleton, Text } from '@chakra-ui/react';
+import { Heading, Skeleton } from '@chakra-ui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
@@ -79,15 +79,13 @@ export const TransactionsPage = () => {
       <Helmet>
         <title>Transactions | {pool?.name}</title>
       </Helmet>
-      <Heading as="h2" mb={4} size="lg">
-        Transations
-      </Heading>
+
       {txQueue.length > 0 && (
         <Card mb={30}>
           <CardHeader>
-            <Text fontSize="lg" fontWeight="bold">
-              Queue
-            </Text>
+            <Heading as="h2" mb={4} size="lg">
+              Proposals
+            </Heading>
           </CardHeader>
           <CardBody>
             <TransactionsTable
@@ -106,9 +104,9 @@ export const TransactionsPage = () => {
       <Skeleton height="20px" isLoaded={!isLoading}></Skeleton>
       <Card>
         <CardHeader>
-          <Text fontSize="lg" fontWeight="bold">
-            History
-          </Text>
+          <Heading as="h2" mb={4} size="lg">
+            Transations
+          </Heading>
         </CardHeader>
 
         <CardBody>

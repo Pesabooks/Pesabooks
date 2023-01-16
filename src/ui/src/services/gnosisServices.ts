@@ -201,6 +201,19 @@ export const getRemoveOwnerTx = async (
   return safeSdk.createRemoveOwnerTx({ ownerAddress: address, threshold: treshold }, { nonce });
 };
 
+export const getChangeThresholdTx = async (
+  signer: Signer,
+  chainId: number,
+  safeAddress: string,
+  threshold: number,
+) => {
+  const ethAdapter = getEthersAdapter(signer);
+  const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
+  const nonce = await getNextTxNonce(chainId, safeAddress);
+
+  return safeSdk.createChangeThresholdTx(threshold, { nonce });
+};
+
 export const createSafeRejectionTransaction = async (
   signer: Signer,
   safeAddress: string,

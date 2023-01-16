@@ -14,7 +14,9 @@ export type TransactionType =
   | 'swap'
   | 'transfer_out'
   | 'purchase'
-  | 'rejection';
+  | 'rejection'
+  | 'walletConnect'
+  | 'changeThreshold';
 
 export type TransactionStatus =
   | 'awaitingConfirmations'
@@ -36,7 +38,7 @@ export interface Transaction extends Entity {
   status: TransactionStatus;
   type: TransactionType;
   pool_id: string;
-  metadata: TransferData | AddOwnerData | SwapData;
+  metadata: TransferData | AddOwnerData | SwapData | WalletConnectData | ChangeThresholdData;
 }
 
 export interface TransferData {
@@ -54,6 +56,10 @@ export interface AddOwnerData {
   treshold: number;
 }
 
+export interface ChangeThresholdData {
+  threshold: number;
+}
+
 export interface SwapData {
   src_token: ParaswapToken;
   src_usd: string;
@@ -64,6 +70,28 @@ export interface SwapData {
   slippage: number;
   gas_cost: string;
   gas_cost_usd: string;
+}
+
+export interface WalletConnectData {
+  payload: {
+    id: number;
+    method: string;
+    params: Array<{
+      to: string;
+      gas: string;
+      data: string;
+      from: string;
+      value: string;
+      gasPrice: string;
+    }>;
+    jsonrpc: string;
+  };
+  peer_data: {
+    url: string;
+    name: string;
+    icons: string[];
+    description: string;
+  };
 }
 
 export interface UnlockTokenData {

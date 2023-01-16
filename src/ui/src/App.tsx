@@ -27,6 +27,7 @@ import { AdminsPage } from './routes/settings/container/AdminsPage';
 import { CategoriesPage } from './routes/settings/container/CategoriesPage';
 import { OverviewPage } from './routes/settings/container/OverviewPage';
 import { SettingsPage } from './routes/settings/container/SettingsPage';
+import { ThresholdPage } from './routes/settings/container/ThresholdPage';
 import { DepositPage } from './routes/transactions/containers/DepositPage';
 import { SwapPage } from './routes/transactions/containers/SwapPage';
 import { TransactionsPage } from './routes/transactions/containers/TransactionsPage';
@@ -96,6 +97,7 @@ function App() {
                     <Route index element={<OverviewPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
                     <Route path="admins" element={<AdminsPage />} />
+                    <Route path="threshold" element={<ThresholdPage />} />
                   </Route>
                 </Route>
               </Route>

@@ -4,7 +4,9 @@ import { BsSafe } from 'react-icons/bs';
 import {
   FiArrowDownLeft,
   FiArrowUpRight,
+  FiCode,
   FiCreditCard,
+  FiSettings,
   FiUnlock,
   FiUserPlus,
   FiUsers,
@@ -48,9 +50,15 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
     case 'purchase':
       logo = FiCreditCard;
       break;
-      case 'rejection':
+    case 'rejection':
       logo = MdCancel;
       break;
+    case 'walletConnect':
+      logo = FiCode;
+      break;
+      case 'changeThreshold':
+        logo = FiSettings;
+        break;
     default:
       break;
   }

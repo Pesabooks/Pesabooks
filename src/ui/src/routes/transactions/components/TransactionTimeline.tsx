@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { TimelineRow } from '../../../components/TimelineRow';
 import { User } from '../../../types';
 import { getAddressName } from '../../../utils';
-import { formatDate, formatTimestampSeconds } from '../../../utils/date';
+import { formatDate, formatTimestampSeconds } from '../../../utils/date-utils';
 
 interface TransactionTimelineProps extends BoxProps {
   users: User[];

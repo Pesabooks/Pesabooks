@@ -39,6 +39,7 @@ export const Layout = () => {
         </Box>
         <Footer />
       </MainPanel>
+      
     </>
   );
 };

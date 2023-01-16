@@ -4,7 +4,7 @@ import {
   AlertTitle,
   Box,
   createStandaloneToast,
-  Progress,
+  Progress
 } from '@chakra-ui/react';
 import { defaultProvider } from '../services/blockchainServices';
 import theme from '../theme/theme';
@@ -38,7 +38,7 @@ export const notifyTransaction = async (chain_id: number, txHash: string, descri
   const provider = defaultProvider(chain_id);
   var tx = await provider.getTransaction(txHash);
 
-  tx.wait().then(
+  tx?.wait().then(
     (receipt) => {
       toast.update(tx.hash, {
         title: 'Your transaction has succeeded',

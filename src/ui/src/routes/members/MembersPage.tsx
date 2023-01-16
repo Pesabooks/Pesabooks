@@ -1,4 +1,4 @@
-import { Flex, Heading, Spacer, Spinner, Text, useDisclosure, useToast } from '@chakra-ui/react';
+import { Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { ButtonWithAdmingRights } from '../../components/withConnectedWallet';
@@ -24,7 +24,7 @@ export const MembersPage = () => {
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const { pool, isDeployed } = usePool();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { safeAdmins, threshold, loading: safeInfoLoading } = useSafeAdmins();
+  const { safeAdmins } = useSafeAdmins();
   const isOrganizer = useIsOrganizer();
 
   const toast = useToast();
@@ -105,25 +105,7 @@ export const MembersPage = () => {
           <ButtonWithAdmingRights onClick={onOpen}> Invite a member</ButtonWithAdmingRights>
         )}
       </Flex>
-      {isDeployed && (
-        <Flex>
-          <Text color="gray.400" fontSize="sm" fontWeight="normal" mr={2}>
-            Every transaction requires the confirmation of{' '}
-          </Text>
-          {safeInfoLoading ? (
-            <Spinner size="sm" />
-          ) : (
-            <Text color="gray.400" fontSize="sm" fontWeight="normal">
-              <b>
-                {threshold} out of {safeAdmins.length}
-              </b>
-            </Text>
-          )}
-          <Text color="gray.400" fontSize="sm" fontWeight="normal" ml={2}>
-            members
-          </Text>
-        </Flex>
-      )}
+
       <MembersTable
         adminAddresses={safeAdmins}
         members={members}

@@ -48,6 +48,7 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
 
       <Stack direction={'row'} spacing={7}>
         <Flex gap={7} display={{ sm: 'none', xl: 'flex' }} alignItems="center">
+          {/* <WalletConnectDrawer /> */}
           <NewTransactionMenu />
           <ConnectedChain />
         </Flex>
