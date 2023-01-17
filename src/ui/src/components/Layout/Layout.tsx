@@ -1,5 +1,6 @@
 import { Box, Drawer, DrawerContent, useDisclosure } from '@chakra-ui/react';
 import { Outlet } from 'react-router-dom';
+import { BottomSheet } from './BottomSheet';
 import { Footer } from './Footer';
 import { MainPanel } from './MainPanel';
 import { Navbar } from './Navbar';
@@ -38,6 +39,7 @@ export const Layout = () => {
           </Box>
         </Box>
         <Footer />
+        <BottomSheet />
       </MainPanel>
       
     </>
