@@ -14,7 +14,6 @@ interface TransactionsTableProps {
   transactions: Transaction[];
   users: User[];
   loading: boolean;
-  categories: Category[];
   showNonce: boolean;
   onSelect: (transaction: Transaction) => void;
 }
@@ -24,7 +23,6 @@ export const TransactionsTable = ({
   transactions,
   users,
   loading,
-  categories,
   onSelect,
   showNonce,
 }: TransactionsTableProps) => {
@@ -105,12 +103,11 @@ export const TransactionsTable = ({
           );
         },
       },
+      {
+        Header: showNonce ? 'Execution order' : '',
+        accessor: 'safe_nonce',
+      },
     ];
-
-    columns.push({
-      Header: showNonce ? 'Execution order' : '' ,
-      accessor: 'safe_nonce',
-    });
 
     return columns;
   }, [showNonce, users, pool.chain_id]);
@@ -146,26 +143,29 @@ export const TransactionsTable = ({
             </Tr>
           ))}
         </Thead>
-        <Tbody {...getTableBodyProps()}>
-          {rows.map((row) => {
-            prepareRow(row);
-            return (
-              <Tr
-                _hover={{ cursor: 'pointer' }}
-                {...row.getRowProps()}
-                onClick={() => onSelect(row.original as Transaction)}
-              >
-                {row.cells.map((cell) => (
-                  <Td {...cell.getCellProps()} isNumeric={cell.column.isNumeric}>
-                    {cell.render('Cell')}
-                  </Td>
-                ))}
-              </Tr>
-            );
-          })}
-        </Tbody>
+        {loading ? (
+          <Loading m={4} />
+        ) : (
+          <Tbody {...getTableBodyProps()}>
+            {rows.map((row) => {
+              prepareRow(row);
+              return (
+                <Tr
+                  _hover={{ cursor: 'pointer' }}
+                  {...row.getRowProps()}
+                  onClick={() => onSelect(row.original as Transaction)}
+                >
+                  {row.cells.map((cell) => (
+                    <Td {...cell.getCellProps()} isNumeric={cell.column.isNumeric}>
+                      {cell.render('Cell')}
+                    </Td>
+                  ))}
+                </Tr>
+              );
+            })}
+          </Tbody>
+        )}
       </Table>
-      {loading && <Loading m={4} />}
     </>
   );
 };

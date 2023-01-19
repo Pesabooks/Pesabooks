@@ -1,6 +1,6 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
-import { SafeTransaction } from '@safe-global/safe-core-sdk-types';
+import { SafeMultisigTransactionResponse, SafeTransaction } from '@safe-global/safe-core-sdk-types';
 import { BigNumber, ContractReceipt, ContractTransaction, ethers, Signer } from 'ethers';
 import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
@@ -21,6 +21,7 @@ import {
   getAddOwnerTx,
   getChangeThresholdTx,
   getRemoveOwnerTx,
+  getSafePendingTransactions,
   getSafeTransaction,
   getSafeTransactionHash,
   getSafeTreshold,
@@ -204,14 +205,16 @@ export const removeAdmin = async (
 export const changeThreshold = async (
   signer: JsonRpcSigner,
   pool: Pool,
-  treshold: number,
+  threshold: number,
+  currentThresold: number,
 ): Promise<Transaction | undefined> => {
   const transaction: Partial<Transaction> = {
     type: 'changeThreshold',
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
-      threshold: treshold,
+      threshold,
+      currentThresold,
     },
   };
 
@@ -219,7 +222,7 @@ export const changeThreshold = async (
     signer,
     pool.chain_id,
     pool.gnosis_safe_address!,
-    treshold,
+    threshold,
   );
 
   return submitTransaction(signer, pool, transaction, safeTransaction);
@@ -456,6 +459,33 @@ export const getAllTransactions = async (pool_id: string, filter?: Filter<Transa
 
   handleSupabaseError(error);
   return data;
+};
+
+export type getAllProposalsResponse = Awaited<ReturnType<typeof getAllProposals>>;
+export const getAllProposals = async (pool: Pool) => {
+  let query = transationsTable()
+    .select(
+      `
+    *,
+    category:category_id(id, name),
+    user:users(id,name,email)
+  `,
+    )
+    .in('status', ['awaitingConfirmations', 'awaitingExecution'])
+    .filter('pool_id', 'eq', pool.id);
+
+  const safeTransactions: Record<string, SafeMultisigTransactionResponse> = (
+    await getSafePendingTransactions(pool.chain_id, pool.gnosis_safe_address!)
+  ).reduce((acc, safeTx) => ({ ...acc, [safeTx.safeTxHash]: safeTx }), {});
+
+  const { data, error } = await query;
+
+  handleSupabaseError(error);
+  return data?.map((d) => ({
+    ...d,
+    safeTx: safeTransactions[d.safe_tx_hash],
+    rejectSafeTx: safeTransactions[d.reject_safe_tx_hash],
+  }));
 };
 
 export const getTransactionById = async (txId: number) => {

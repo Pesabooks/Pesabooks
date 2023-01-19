@@ -1,38 +1,50 @@
-import { Flex, Grid, SimpleGrid, Text } from '@chakra-ui/react';
+import { Flex, SimpleGrid, Text } from '@chakra-ui/react';
+import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { FaArrowDown, FaArrowUp, FaWallet } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardBody, CardHeader } from '../../components/Card';
 import { CreateTeamSafe } from '../../components/CreateTeamSafe';
 import { usePool } from '../../hooks/usePool';
 import { useTransactions } from '../../hooks/useTransactions';
 import { getBalances, TokenBalance } from '../../services/covalentServices';
 import { getMembers } from '../../services/membersService';
-import { User } from '../../types';
+import { getAllProposals, getAllProposalsResponse } from '../../services/transactionsServices';
+import { supabase } from '../../supabase';
+import { Transaction, User } from '../../types';
+import { TransactionsTable } from '../transactions/components/TransactionsTable';
 import { AssetsList } from './components/AssetsList';
 import BalanceCard from './components/BalanceCard';
-import { TotalPerCategory } from './components/TotalPerCategory';
-import { TransactionsList } from './components/TransactionsList';
-import { TransactionsPerMonth } from './components/TransactionsPerMonth';
-import { TransactionsStats } from './components/TransactionsStats';
+import { ProposalsList } from './components/ProposalsList';
 
 export const DashboardPage = () => {
   const { pool, isDeployed } = usePool();
   const [users, setUsers] = useState<User[]>([]);
   const [balances, setBalances] = useState<TokenBalance[]>([]);
   const [loading, setLoading] = useState(true);
+  const [proposalsLoading, setProposalsLoading] = useState(true);
+  const [txStats, setTxStats] = useState({ count: null, deposit: null, withdrawal: null });
+  const [proposals, setProposals] = useState<getAllProposalsResponse>();
+  const navigate = useNavigate();
 
   const total = balances.reduce((balance, resp) => balance + resp.quote, 0);
+
+  const navigateToTransactions = () => navigate(`../transactions`);
 
   const token = pool?.token;
   if (!token) {
     throw new Error();
   }
 
-  const filter = useCallback((query) => {
-    return query.order('created_at', { ascending: false }).limit(7);
+  const filter = useCallback((query: PostgrestFilterBuilder<Transaction>) => {
+    return query
+      .order('created_at', { ascending: false })
+      .in('status', ['completed', 'rejected'])
+      .limit(5);
   }, []);
 
-  const { transactions } = useTransactions(pool.id, filter, {
+  const { transactions, loading: txLoading } = useTransactions(pool.id, filter, {
     useRealTime: true,
   });
 
@@ -45,9 +57,26 @@ export const DashboardPage = () => {
           await getBalances(pool.chain_id, pool.gnosis_safe_address).then((balances) => {
             setBalances(balances ?? []);
           });
+
+          await supabase()
+            .rpc('get_transactions_stats', { pool_id: pool.id })
+            .then(({ data }) => setTxStats(data?.[0] ?? {}));
         }
       } finally {
         setLoading(false);
+      }
+    };
+    fetchData();
+  }, [pool]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (pool) {
+          await getAllProposals(pool).then(setProposals);
+        }
+      } finally {
+        setProposalsLoading(false);
       }
     };
     fetchData();
@@ -58,30 +87,32 @@ export const DashboardPage = () => {
       <Helmet>
         <title>Dashboard | {pool?.name}</title>
       </Helmet>
-      {!isDeployed ? (
-        <CreateTeamSafe />
-      ) : (
+      <CreateTeamSafe />
+      {isDeployed && (
         <>
           <SimpleGrid mb={4} columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
-            <BalanceCard balance={total} loading={loading} />
+            <BalanceCard
+              description={`$ ${total.toFixed(2)}`}
+              loading={loading}
+              icon={FaWallet}
+              title="Balance"
+            />
+            <BalanceCard
+              description={`${txStats.deposit} ${pool.token?.symbol}`}
+              loading={loading}
+              icon={FaArrowUp}
+              title="Deposit"
+            />
+            <BalanceCard
+              description={`${txStats.withdrawal} ${pool.token?.symbol}`}
+              loading={loading}
+              icon={FaArrowDown}
+              iconBg="#f44336"
+              title="Withdrawal"
+            />
           </SimpleGrid>
 
-          <Grid
-            templateColumns={{ sm: '1fr', lg: '1fr 1fr' }}
-            templateRows={{ sm: 'repeat(2, 1fr)', lg: '1fr' }}
-            gap="24px"
-            mb={{ lg: '26px' }}
-          >
-            <Card p="16px">
-              <CardBody>
-                <Flex direction="column" w="100%">
-                  <TransactionsPerMonth pool_id={pool.id} />
-
-                  <TransactionsStats pool={pool} />
-                </Flex>
-              </CardBody>
-            </Card>
-
+          <Flex gap="24px" mb={{ lg: '26px' }}>
             <Card p="28px 10px 16px 0px" mb={{ sm: '26px', lg: '0px' }}>
               <CardHeader mb="20px" pl="22px">
                 <Flex direction="column" alignSelf="flex-start">
@@ -92,36 +123,49 @@ export const DashboardPage = () => {
               </CardHeader>
               <AssetsList balances={balances} loading={loading} />
             </Card>
-          </Grid>
 
-          <Grid
+            <Card p="16px">
+              <CardHeader p="6px 0px 22px 0px">
+                <Text fontSize="lg" fontWeight="bold">
+                  Proposals
+                </Text>
+              </CardHeader>
+              <CardBody>
+                <Flex direction="column" w="100%">
+                  <ProposalsList
+                    proposals={proposals}
+                    users={users}
+                    onSelect={navigateToTransactions}
+                    loading={proposalsLoading}
+                  />
+                </Flex>
+              </CardBody>
+            </Card>
+          </Flex>
+
+          {/* <Grid
             templateColumns={{ sm: '1fr', lg: '1fr 1fr' }}
             templateRows={{ sm: 'repeat(2, 1fr)', lg: '1fr' }}
             gap="24px"
             mb={{ lg: '26px' }}
-          >
-            <Card mt="8">
-              <CardHeader p="6px 0px 22px 0px">
-                <Text fontSize="lg" fontWeight="bold">
-                  Total per category
-                </Text>
-              </CardHeader>
-              <CardBody>
-                <TotalPerCategory pool={pool} />
-              </CardBody>
-            </Card>
-
-            <Card mt="8">
-              <CardHeader p="6px 0px 22px 0px">
-                <Text fontSize="lg" fontWeight="bold">
-                  Latest Transactions
-                </Text>
-              </CardHeader>
-              <CardBody>
-                <TransactionsList transactions={transactions} users={users}></TransactionsList>
-              </CardBody>
-            </Card>
-          </Grid>
+          > */}
+          <Card mt="8">
+            <CardHeader p="6px 0px 22px 0px">
+              <Text fontSize="lg" fontWeight="bold">
+                Latest Transactions
+              </Text>
+            </CardHeader>
+            <CardBody>
+              <TransactionsTable
+                pool={pool}
+                transactions={transactions}
+                users={users}
+                loading={txLoading}
+                onSelect={navigateToTransactions}
+                showNonce={false}
+              />
+            </CardBody>
+          </Card>
         </>
       )}
     </>

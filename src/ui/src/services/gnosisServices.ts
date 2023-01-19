@@ -234,15 +234,14 @@ export const getSafeTransaction = async (chainId: number, safeTxHash: string) =>
   return await safeService.getTransaction(safeTxHash);
 };
 
-// export const getSafeBalance = async (chainId: number, safeAddress: string) => {
-//   const ethAdapter = getDefaultEthersAdapter(chainId);
+export const getSafePendingTransactions = async (chainId: number, safeTxHash: string) => {
+  const ethAdapter = getDefaultEthersAdapter(chainId);
 
-//   const safeService = getServiceClient(ethAdapter, chainId);
+  const safeService = getServiceClient(ethAdapter, chainId);
 
-//   const balances = await safeService.getUsdBalances(safeAddress, { excludeSpamTokens: true });
-
-//   return balances.reduce((balance, resp) => balance + Number.parseFloat(resp.fiatBalance), 0);
-// };
+  const response = await safeService.getPendingTransactions(safeTxHash);
+  return response.results;
+};
 
 export const getSafeAdmins = async (chainId: number, safeAddress: string) => {
   const ethAdapter = getDefaultEthersAdapter(chainId);

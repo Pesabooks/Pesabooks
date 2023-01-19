@@ -4,6 +4,7 @@ import {
   AddOwnerData,
   ChangeThresholdData,
   SwapData,
+  TransactionStatus,
   TransactionType,
   TransferData,
   UnlockTokenData,
@@ -20,21 +21,46 @@ export const getAddressName = (address: string | undefined, users: User[]) => {
 
 export const getTransactionDescription = (transaction: Transaction, addresses: User[]): string => {
   const { type, metadata } = transaction;
+  const isProposal = (
+    ['awaitingConfirmations', 'awaitingExecution'] as TransactionStatus[]
+  ).includes(transaction.status);
 
   switch (type) {
     case 'deposit':
       return `Received From ${getAddressName((metadata as TransferData).transfer_from, addresses)}`;
+
     case 'withdrawal':
+      if (isProposal)
+        return `Send ${(metadata as TransferData).amount} ${
+          (metadata as TransferData)?.token?.symbol
+        } To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
       return `Sent To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
+
     case 'addOwner':
-      return `Added ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
+      return `${isProposal ? 'Add' : 'Added'} ${getAddressName(
+        (metadata as AddOwnerData).address,
+        addresses,
+      )} as member`;
+
     case 'removeOwner':
-      return `Removed ${getAddressName((metadata as AddOwnerData).address, addresses)} as admin`;
+      return `${isProposal ? 'Remove' : 'Removed'} ${getAddressName(
+        (metadata as AddOwnerData).address,
+        addresses,
+      )} as admin`;
+
     case 'unlockToken':
-      return `Unlocked token ${(metadata as any).token.symbol}`;
+      return `${isProposal ? 'Unlock' : 'Unlocked'} token ${(metadata as any).token.symbol}`;
+
     case 'swap':
       const swapData = metadata as SwapData;
+      if (isProposal)
+        return `Trade ${formatBigNumber(swapData.src_amount, swapData.src_token.decimals)} ${
+          swapData.src_token.symbol
+        } for ${formatBigNumber(swapData.dest_amount, swapData.dest_token.decimals)} ${
+          swapData.dest_token.symbol
+        }  `;
       return `Traded ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
+
     case 'createSafe':
       return 'Created group wallet';
     case 'walletConnect':

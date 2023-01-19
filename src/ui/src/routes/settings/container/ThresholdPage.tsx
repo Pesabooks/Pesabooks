@@ -8,16 +8,16 @@ import { useSafeAdmins } from '../../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { changeThreshold } from '../../../services/transactionsServices';
 import {
-    ReviewTransactionModal,
-    ReviewTransactionModalRef
+  ReviewTransactionModal,
+  ReviewTransactionModalRef
 } from '../../transactions/components/ReviewTransactionModal';
 import {
-    SubmittingTransactionModal,
-    SubmittingTxModalRef
+  SubmittingTransactionModal,
+  SubmittingTxModalRef
 } from '../../transactions/components/SubmittingTransactionModal';
 import {
-    TransactionSubmittedModal,
-    TransactionSubmittedModalRef
+  TransactionSubmittedModal,
+  TransactionSubmittedModalRef
 } from '../../transactions/components/TransactionSubmittedModal';
 import { ChangeThresholdModal } from '../components/ChangeThresholdModal';
 
@@ -48,7 +48,7 @@ export const ThresholdPage = () => {
       try {
         submittingRef.current?.open('changeThreshold');
 
-        let tx = await changeThreshold(signer, pool, threshold);
+        let tx = await changeThreshold(signer, pool, threshold, currentThreshold);
 
         if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
 

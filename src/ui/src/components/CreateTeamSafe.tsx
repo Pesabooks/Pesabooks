@@ -17,7 +17,7 @@ import { Card } from './Card';
 
 export const CreateTeamSafe = () => {
   const { provider, user } = useWeb3Auth();
-  const { pool, refresh } = usePool();
+  const { pool, refresh, isDeployed } = usePool();
   const confirmTxRef = useRef<ReviewTransactionModalRef>(null);
   const submittingRef = useRef<SubmittingTxModalRef>(null);
   const toast = useToast();
@@ -58,7 +58,7 @@ export const CreateTeamSafe = () => {
       }
     }
   };
-  if (pool?.gnosis_safe_address) return null;
+  if (isDeployed) return null;
 
   return (
     <>

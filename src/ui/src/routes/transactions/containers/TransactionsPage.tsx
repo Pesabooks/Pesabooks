@@ -5,17 +5,15 @@ import { useSearchParams } from 'react-router-dom';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { usePool } from '../../../hooks/usePool';
 import { useTransactions } from '../../../hooks/useTransactions';
-import { getAllCategories } from '../../../services/categoriesService';
 import { getMembers } from '../../../services/membersService';
 import { Filter } from '../../../supabase';
-import { Category, Transaction, User } from '../../../types';
+import { Transaction, User } from '../../../types';
 import { TransactionDetail, TransactionDetailRef } from '../components/TransactionDetail';
 import { TransactionsTable } from '../components/TransactionsTable';
 
 export const TransactionsPage = () => {
   const { pool } = usePool();
   const [users, setUsers] = useState<User[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   let [searchParams] = useSearchParams();
   const txDetailRef = useRef<TransactionDetailRef>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +47,6 @@ export const TransactionsPage = () => {
       const members = await getMembers(pool.id);
       setUsers(members?.map((m) => m.user!));
       setIsLoading(false);
-      getAllCategories(pool.id).then(setCategories);
     };
     fetchData();
   }, [pool, transactions]);
@@ -93,7 +90,6 @@ export const TransactionsPage = () => {
               transactions={txQueue}
               users={users}
               loading={txsLoading}
-              categories={categories}
               onSelect={(t) => openTransactionPane(t.id)}
               showNonce={true}
             ></TransactionsTable>
@@ -115,7 +111,6 @@ export const TransactionsPage = () => {
             transactions={txHistory}
             users={users}
             loading={txsLoading}
-            categories={categories}
             onSelect={(t) => openTransactionPane(t.id)}
             showNonce={false}
           ></TransactionsTable>

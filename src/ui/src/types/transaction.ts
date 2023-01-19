@@ -58,6 +58,7 @@ export interface AddOwnerData {
 
 export interface ChangeThresholdData {
   threshold: number;
+  currentThresold: number;
 }
 
 export interface SwapData {
