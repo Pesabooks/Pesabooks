@@ -214,7 +214,7 @@ export const changeThreshold = async (
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
       threshold,
-      currentThresold,
+      current_threshold: currentThresold,
     },
   };
 

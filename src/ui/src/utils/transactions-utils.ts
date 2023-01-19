@@ -66,8 +66,12 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
     case 'walletConnect':
       // const walletConnectData = metadata as WalletConnectData;
       return `Contract interaction`;
+
     case 'changeThreshold':
-      return `Change required confirmations to ${(metadata as ChangeThresholdData).threshold}`;
+      const thresholdData = metadata as ChangeThresholdData;
+      if (isProposal)
+        return `Change required confirmations from ${thresholdData.current_threshold} to ${thresholdData.threshold}`;
+      return `Change required confirmations to ${thresholdData.threshold}`;
     default:
       return transaction.type;
   }
