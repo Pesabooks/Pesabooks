@@ -1,5 +1,5 @@
 import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
-import { chakra, Flex, Table, Tbody, Td, Text, Th, Thead, Tooltip, Tr } from '@chakra-ui/react';
+import { Box, chakra, Flex, Table, Tbody, Td, Text, Th, Thead, Tooltip, Tr } from '@chakra-ui/react';
 import { useMemo } from 'react';
 import { CellProps, Column, useSortBy, useTable } from 'react-table';
 import Loading from '../../../components/Loading';
@@ -118,7 +118,7 @@ export const TransactionsTable = ({
   );
 
   return (
-    <>
+    <Box overflowX="auto" w='100%'>
       <Table {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup) => (
@@ -166,6 +166,6 @@ export const TransactionsTable = ({
           </Tbody>
         )}
       </Table>
-    </>
+    </Box>
   );
 };

@@ -89,7 +89,7 @@ export const DashboardPage = () => {
       </Helmet>
       <CreateTeamSafe />
       {isDeployed && (
-        <>
+        <Flex direction='column'>
           <SimpleGrid mb={4} columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
             <BalanceCard
               description={`$ ${total.toFixed(2)}`}
@@ -112,7 +112,7 @@ export const DashboardPage = () => {
             />
           </SimpleGrid>
 
-          <Flex gap="24px" mb={{ lg: '26px' }}>
+          <Flex gap="24px" mb={{ lg: '26px' }} direction={{ base: 'column', md: 'row' }}>
             <Card p="28px 10px 16px 0px" mb={{ sm: '26px', lg: '0px' }}>
               <CardHeader mb="20px" pl="22px">
                 <Flex direction="column" alignSelf="flex-start">
@@ -166,7 +166,7 @@ export const DashboardPage = () => {
               />
             </CardBody>
           </Card>
-        </>
+        </Flex>
       )}
     </>
   );
