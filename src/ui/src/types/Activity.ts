@@ -9,4 +9,6 @@ export interface Activity extends Entity {
   user_id: string;
   metadata: TransferData | SwapData;
   chain_id: number;
+  pool_id?: string;
+  pool_name?: string;
 }

@@ -14,12 +14,14 @@ interface useWalletConnectV1Type {
   reject: (message: string) => void;
   txRequestPayload: any;
   onTxSumitted: () => void;
+  functionName?: string;
 }
 
 export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
   const [connector, setConnector] = useState<WalletConnect | undefined>();
   const [clientData, setClientData] = useState<IClientMeta | null>(null);
   const [txRequestPayload, setTxRequestPayload] = useState<any>();
+  const [functionName, setFunctionName] = useState<string>();
 
   const isConnected = connector?.connected === true;
   const localStorageSessionKey = useRef(`session_${pool.gnosis_safe_address}`);
@@ -108,9 +110,10 @@ export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
     connector?.rejectRequest({
       id: txRequestPayload.id,
       error: {
-        message,
+        message: message ?? 'Rejected by user',
       },
     });
+    setTxRequestPayload(undefined);
   };
 
   const onTxSumitted = () => setTxRequestPayload(undefined);
@@ -130,6 +133,25 @@ export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
     }
   }, [connector, connect, uri]);
 
+  useEffect(() => {
+    const data: string = txRequestPayload?.params?.[0]?.data;
+    if (data)
+      fetch(`https://api.etherface.io/v1/signatures/hash/all/${data.substring(2, 10)}/1`, {
+        method: 'GET',
+      })
+        .then((response) => response.text())
+        .then((result) => {
+          const resp = JSON.parse(result);
+          const func = resp.items[0].text.split('(')[0];
+          setFunctionName(func);
+        })
+        .catch((error) => {
+          console.log('error', error);
+          setFunctionName(undefined);
+        });
+    else setFunctionName(undefined);
+  }, [txRequestPayload]);
+
   return {
     connector,
     clientData,
@@ -139,5 +161,6 @@ export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
     reject,
     txRequestPayload,
     onTxSumitted,
+    functionName,
   };
 };

@@ -87,12 +87,13 @@ export interface WalletConnectData {
     }>;
     jsonrpc: string;
   };
-  peer_data: {
+  peer_data?: {
     url: string;
     name: string;
     icons: string[];
     description: string;
   };
+  functionName?: string;
 }
 
 export interface UnlockTokenData {

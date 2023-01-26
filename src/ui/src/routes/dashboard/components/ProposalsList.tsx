@@ -1,6 +1,7 @@
 import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react';
 import dayjs from 'dayjs';
 import { BsCardList } from 'react-icons/bs';
+import { FaUsers } from 'react-icons/fa';
 import { IconBox } from '../../../components/Icons';
 import Loading from '../../../components/Loading';
 import { TransactionIcon } from '../../../components/TransactionIcon';
@@ -17,7 +18,7 @@ interface TransactionsListProps {
 }
 
 const EmptyCard = () => (
-  <Box textAlign="center" >
+  <Box textAlign="center">
     <Icon boxSize={'50px'} as={BsCardList} />
 
     <Text color={'gray.500'} mb={6}>
@@ -58,14 +59,12 @@ export const ProposalsList = ({ proposals, users, onSelect, loading }: Transacti
               </Flex>
 
               <HStack>
-                <IconBox p="6px" bg="teal" gap={2}>
-                  {/* <Flex direction="row" alignItems="center" gap={2} bg="teal"> */}
-                  {/* <Icon as={FaUsers} h={'15px'} w={'15px'} /> */}
+                <IconBox py={2} px={4} bg="teal" gap={2}>
+                  <Icon as={FaUsers} h={'15px'} w={'15px'} />
                   <Text fontWeight="bold">
                     {transaction.safeTx.confirmations?.length}/
-                    {transaction.safeTx.confirmationsRequired} approved
+                    {transaction.safeTx.confirmationsRequired}
                   </Text>
-                  {/* </Flex> */}
                 </IconBox>
               </HStack>
             </Flex>

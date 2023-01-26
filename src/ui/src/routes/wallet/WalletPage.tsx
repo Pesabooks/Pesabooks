@@ -39,6 +39,7 @@ import { ConnectedChain } from '../../components/ConnectedChain';
 import { AvatarMenu } from '../../components/Layout/AvatarMenu';
 import { Logo } from '../../components/Layout/Logo';
 import Loading from '../../components/Loading';
+import { Pagination } from '../../components/Pagination';
 import { WalletAddress } from '../../components/WalletAddress';
 import { networks } from '../../data/networks';
 import { useNativeBalance } from '../../hooks/useNativeBalance';
@@ -96,9 +97,20 @@ export const WalletPage = () => {
   const { isOpen: isOpenSend, onOpen: onOpenSend, onClose: onCloseSend } = useDisclosure();
   const { isOpen: isOpenSwap, onOpen: onOpenSwap, onClose: onCloseSwap } = useDisclosure();
   const [balances, setBalances] = useState<TokenBalance[]>([]);
-  const [activities, setActivities] = useState<Activity[]>([]);
+  const [activities, setActivities] = useState<{ data: Activity[]; total: number }>({
+    data: [],
+    total: 0,
+  });
   const [balancesLoading, setBalancesLoading] = useState(true);
   const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+
+  const { pageIndex, pageSize } = pagination;
+  const changePage = (page: number) => {
+    console.log('page', page);
+
+    setPagination({ ...pagination, pageIndex: page });
+  };
 
   const balanceColor = useColorModeValue('gray.700', 'gray.400');
   const network = networks[chainId];
@@ -113,14 +125,18 @@ export const WalletPage = () => {
         .finally(() => {
           setBalancesLoading(false);
         });
-
-      getAllActivities(chainId).then((a) => setActivities(a ?? []));
     }
   }, []);
 
   useEffect(() => {
+    getAllActivities(chainId, pageSize, pageIndex).then((a) => {
+      setActivities(a);
+    });
+  }, [chainId, pageIndex, pageSize]);
+
+  useEffect(() => {
     setBalances([]);
-    setActivities([]);
+    setActivities({ data: [], total: 0 });
     getData(chainId, account);
   }, [account, chainId, getData]);
 
@@ -297,7 +313,15 @@ export const WalletPage = () => {
               </TabPanel>
               {/* initially not mounted */}
               <TabPanel>
-                <ActivitiesList activities={activities} />
+                <Stack gap={5}>
+                  <ActivitiesList activities={activities.data} />
+                  <Pagination
+                    pageSize={pageSize}
+                    pageIndex={pageIndex}
+                    total={activities.total}
+                    onChangePage={changePage}
+                  />
+                </Stack>
               </TabPanel>
             </TabPanels>
           </Tabs>

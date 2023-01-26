@@ -1,5 +1,6 @@
-import { Flex, HStack, Text } from '@chakra-ui/react';
+import { Flex, HStack, Link, Text } from '@chakra-ui/react';
 import dayjs from 'dayjs';
+import { Link as RouterLink } from 'react-router-dom';
 import { TransactionIcon } from '../../../components/TransactionIcon';
 import { Activity } from '../../../types';
 import { SwapData, TransferData } from '../../../types/transaction';
@@ -10,20 +11,29 @@ interface TransactionsListProps {
   activities: Activity[];
 }
 
-const getActivityDescription = (activity: Activity): string => {
-  const { type, metadata } = activity;
+const getActivityDescription = (activity: Activity): string | JSX.Element => {
+  const { type, metadata, pool_id, pool_name } = activity;
 
   switch (type) {
     case 'transfer_out':
-      return `Sent To ${shortenHash((metadata as TransferData).transfer_to)}`;
-      case 'unlockToken':
-        return `unlock token ${(metadata as any).token.symbol}`;
+      if (pool_id)
+        return (
+          <>
+            Sent to{' '}
+            <Link as={RouterLink} to={`/pool/${pool_id}`} textDecoration="underline">
+              {pool_name}
+            </Link>
+          </>
+        );
+      else return `Sent to ${shortenHash((metadata as TransferData).transfer_to)}`;
+    case 'unlockToken':
+      return `unlock token ${(metadata as any).token.symbol}`;
     case 'swap':
       const swapData = metadata as SwapData;
       return `Traded ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
     case 'purchase':
-        const data = metadata as TransferData;
-        return `Purchased ${data.token.symbol}`;
+      const data = metadata as TransferData;
+      return `Purchased ${data.token.symbol}`;
     default:
       return type;
   }

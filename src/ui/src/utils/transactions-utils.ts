@@ -8,6 +8,7 @@ import {
   TransactionType,
   TransferData,
   UnlockTokenData,
+  WalletConnectData,
 } from '../types/transaction';
 import { compareAddress } from './addresses-utils';
 
@@ -64,8 +65,10 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
     case 'createSafe':
       return 'Created group wallet';
     case 'walletConnect':
-      // const walletConnectData = metadata as WalletConnectData;
-      return `Contract interaction`;
+      const walletConnectData = metadata as WalletConnectData;
+      return `Contract interaction ${
+        walletConnectData.functionName ? `- ${walletConnectData.functionName}` : ''
+      } `;
 
     case 'changeThreshold':
       const thresholdData = metadata as ChangeThresholdData;

@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Drawer,
   DrawerBody,
@@ -6,8 +7,10 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
+  Flex,
   Heading,
   HStack,
+  Icon,
   Img,
   Input,
   Spacer,
@@ -20,6 +23,7 @@ import { SafeTransaction } from '@safe-global/safe-core-sdk-types';
 
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { BiTransfer } from 'react-icons/bi';
 import { usePool } from '../hooks/usePool';
 import { useWalletConnectV1 } from '../hooks/useWalletConnect';
 import { useWeb3Auth } from '../hooks/useWeb3Auth';
@@ -61,6 +65,7 @@ export const WalletConnectDrawer = () => {
     disconnect,
     txRequestPayload,
     onTxSumitted,
+    reject,functionName
   } = useWalletConnectV1(pool!);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -98,9 +103,10 @@ export const WalletConnectDrawer = () => {
       category_id: category.id,
       memo,
       metadata: {
-        peer_data: clientData,
+        peer_data: clientData??undefined,
         payload: txRequestPayload,
-      } as any,
+        functionName: functionName
+      },
     };
 
     const safetransaction: SafeTransaction = await createSafeTransaction(
@@ -201,10 +207,20 @@ export const WalletConnectDrawer = () => {
               </HStack>
             )}
 
+            {isConnected && !txRequestPayload && (
+              <Box textAlign="center" mt={20}>
+                <Icon boxSize={'50px'} as={BiTransfer} />
+
+                <Text color={'gray.500'} mb={6}>
+                  Transaction will appear here
+                </Text>
+              </Box>
+            )}
+
             {txRequestPayload && (
-              <Card>
+              <Card p={0} mt={20}>
                 <CardHeader p="6px 0px 32px 0px">
-                  <Heading size="lg">Accept transaction</Heading>
+                  <Heading size="md">{functionName}</Heading>
                 </CardHeader>
                 <FormProvider {...methods}>
                   <form onSubmit={methods.handleSubmit(propose)}>
@@ -212,9 +228,15 @@ export const WalletConnectDrawer = () => {
 
                     <TextAreaMemoField mb="4" />
 
-                    <Button isLoading={methods.formState.isSubmitting} type="submit">
-                      Create proposal
-                    </Button>
+                    <Flex>
+                      <Button variant="outline" onClick={() => reject('')}>
+                        Cancel
+                      </Button>
+                      <Spacer />
+                      <Button isLoading={methods.formState.isSubmitting} type="submit">
+                        Create proposal
+                      </Button>
+                    </Flex>
                   </form>
                 </FormProvider>
               </Card>

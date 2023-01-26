@@ -4,7 +4,7 @@ import { BigNumber, ethers } from 'ethers';
 import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
 import { networks } from '../data/networks';
-import { activitiesTable } from '../supabase';
+import { activitiesTable, supabase } from '../supabase';
 import { Activity, TokenBase } from '../types';
 import { SwapData } from '../types/transaction';
 import { checksummed, notifyTransaction } from '../utils';
@@ -226,13 +226,22 @@ export const purchaseToken = async (
   await activitiesTable().insert(activity);
 };
 
-export const getAllActivities = async (chainId: number) => {
-  const { data } = await activitiesTable()
-    .select(`*,user:users(id,name,email)`)
-    .order('created_at', { ascending: false })
-    .eq('chain_id', chainId);
+export const getAllActivities = async (chainId: number, pageSize: number, pageIndex: number) => {
+  const from = pageIndex * pageSize;
+  const to = from + pageSize - 1;
+  const { data, count } = await supabase()
+    .rpc<Activity>(
+      'get_user_activities',
+      {
+        chain_id: chainId,
+      },
+      {
+        count: 'exact',
+      },
+    )
+    .range(from, to);
 
-  return data;
+  return { data: data ?? [], total: count ?? 0 };
 };
 
 const fee = async (provider: Web3Provider, gasLimit: BigNumber) => {

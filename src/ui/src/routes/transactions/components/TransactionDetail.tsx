@@ -99,14 +99,6 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
   const { transaction, safeTransaction, safeRejectionTransaction } = transactions;
 
-  const confirmations = [
-    ...(safeTransaction?.confirmations?.map((c) => ({ ...c, rejected: false })) ?? []),
-    ...(safeRejectionTransaction?.confirmations?.map((c) => ({
-      ...c,
-      rejected: true,
-    })) ?? []),
-  ];
-
   const loadTransaction = async (id: number) => {
     let transaction: Transaction | undefined;
     let safeTransaction: SafeMultisigTransactionResponse | undefined = undefined;
@@ -143,6 +135,14 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
       setLoading(false);
     },
   }));
+
+  const confirmations = [
+    ...(safeTransaction?.confirmations?.map((c) => ({ ...c, rejected: false })) ?? []),
+    ...(safeRejectionTransaction?.confirmations?.map((c) => ({
+      ...c,
+      rejected: true,
+    })) ?? []),
+  ];
 
   const isAdmin: boolean = !!safeAdmins?.find((a) => compareAddress(a, account));
 
@@ -274,8 +274,6 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                           )}
                         />
                       )}
-                      {/* //todo: weir error when this line is removed  */}
-                      {transaction?.metadata && ''}
                     </TxPropertyBox>
                   )}
 
@@ -363,26 +361,33 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                   )}
 
                   {transaction?.type === 'walletConnect' && (
-                    <TxPropertyBox flex="1">
-                      <HStack>
-                        <Img
-                          src={(transaction?.metadata as WalletConnectData)?.peer_data.icons[0]}
+                    <>
+                      <TxPropertyBox flex="1">
+                        <HStack>
+                          <Img
+                            src={(transaction?.metadata as WalletConnectData)?.peer_data?.icons[0]}
+                          />
+                          <VStack
+                            display={{ base: 'none', md: 'flex' }}
+                            alignItems="flex-start"
+                            spacing="1px"
+                            ml="2"
+                          >
+                            <Text fontSize="sm">
+                              {(transaction?.metadata as WalletConnectData).peer_data?.name}
+                            </Text>
+                          </VStack>
+                        </HStack>
+                      </TxPropertyBox>
+
+                      {
+                        <TxPropertyBox
+                          flex="1"
+                          label="Function"
+                          value={`${(transaction?.metadata as WalletConnectData).functionName}`}
                         />
-                        <VStack
-                          display={{ base: 'none', md: 'flex' }}
-                          alignItems="flex-start"
-                          spacing="1px"
-                          ml="2"
-                        >
-                          <Text fontSize="sm">
-                            {(transaction?.metadata as WalletConnectData).peer_data.name}
-                          </Text>
-                          <Text fontSize="xs" color="gray.600">
-                            {(transaction?.metadata as WalletConnectData).peer_data.description}
-                          </Text>
-                        </VStack>
-                      </HStack>
-                    </TxPropertyBox>
+                      }
+                    </>
                   )}
                 </Flex>
 
