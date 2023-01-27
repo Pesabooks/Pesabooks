@@ -54,6 +54,7 @@ import {
 } from '../../../services/transactionsServices';
 import { Category, Transaction, User } from '../../../types';
 import {
+  AddOrRemoveOwnerData,
   ChangeThresholdData,
   SwapData,
   TransferData,
@@ -119,7 +120,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   useEffect(() => {
     const fetchData = async () => {
       if (pool) {
-        getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user!)));
+        getMembers(pool.id,true).then((members) => setUsers(members?.map((m) => m.user!)));
         getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!).then(setTreshold);
         getSafeNonce(pool.chain_id, pool.gnosis_safe_address!).then(setCurrentSafeNonce);
         getAllCategories(pool.id, { activeOnly: true }).then(setCategories);
@@ -200,7 +201,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
         });
       }
 
-      await executeTransaction(signer, pool, transaction.id, safeTxHash, isRejection);
+      await executeTransaction(signer, pool, transaction, safeTxHash, isRejection);
       loadTransaction(transaction.id);
     } catch (e: any) {
       toast({
@@ -262,36 +263,26 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
             <DrawerBody>
               <Flex direction="column" gap={4}>
                 <TxPropertyBox label="Type" value={getTransactionTypeLabel(transaction?.type)} />
+                <TxPropertyBox
+                  label="Description"
+                  value={getTransactionDescription(transaction!, users)}
+                />
+                {transaction?.type === 'unlockToken' && (
+                  <TxPropertyBox label="Token" flex="1">
+                    <Flex align="center">
+                      <Image
+                        w="20px"
+                        h="20px"
+                        src={(transaction?.metadata as any)?.token?.img}
+                        alt=""
+                      />
+                      <Text ml="10px">{(transaction?.metadata as any)?.token.symbol}</Text>
+                    </Flex>
+                  </TxPropertyBox>
+                )}
 
-                <Flex gap={4}>
-                  {transaction?.type === 'deposit' && (
-                    <TxPropertyBox label="From" flex="1">
-                      {!!(transaction?.metadata as TransferData)?.transfer_from && (
-                        <UserWalletCard
-                          user={mathAddress(
-                            users,
-                            (transaction?.metadata as TransferData)?.transfer_from,
-                          )}
-                        />
-                      )}
-                    </TxPropertyBox>
-                  )}
-
-                  {transaction?.type === 'unlockToken' && (
-                    <TxPropertyBox label="Token" flex="1">
-                      <Flex align="center">
-                        <Image
-                          w="20px"
-                          h="20px"
-                          src={(transaction?.metadata as any)?.token?.img}
-                          alt=""
-                        />
-                        <Text ml="10px">{(transaction?.metadata as any)?.token.symbol}</Text>
-                      </Flex>
-                    </TxPropertyBox>
-                  )}
-
-                  {transaction?.type === 'swap' && (
+                {transaction?.type === 'swap' && (
+                  <Flex gap={4}>
                     <TxPropertyBox label="Paid" flex="1">
                       <Flex align="center">
                         <Image
@@ -309,9 +300,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                         </Text>
                       </Flex>
                     </TxPropertyBox>
-                  )}
 
-                  {transaction?.type === 'swap' && (
                     <TxPropertyBox label="Received" flex="1">
                       <Flex align="center">
                         <Text mr={2}>~</Text>
@@ -329,6 +318,20 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                           {(transaction?.metadata as SwapData)?.dest_token?.symbol}
                         </Text>
                       </Flex>
+                    </TxPropertyBox>
+                  </Flex>
+                )}
+                <Flex gap={4}>
+                  {transaction?.type === 'deposit' && (
+                    <TxPropertyBox label="From" flex="1">
+                      {!!(transaction?.metadata as TransferData)?.transfer_from && (
+                        <UserWalletCard
+                          user={mathAddress(
+                            users,
+                            (transaction?.metadata as TransferData)?.transfer_from,
+                          )}
+                        />
+                      )}
                     </TxPropertyBox>
                   )}
 
@@ -359,43 +362,56 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                       </Flex>
                     </TxPropertyBox>
                   )}
-
-                  {transaction?.type === 'walletConnect' && (
-                    <>
-                      <TxPropertyBox flex="1">
-                        <HStack>
-                          <Img
-                            src={(transaction?.metadata as WalletConnectData)?.peer_data?.icons[0]}
-                          />
-                          <VStack
-                            display={{ base: 'none', md: 'flex' }}
-                            alignItems="flex-start"
-                            spacing="1px"
-                            ml="2"
-                          >
-                            <Text fontSize="sm">
-                              {(transaction?.metadata as WalletConnectData).peer_data?.name}
-                            </Text>
-                          </VStack>
-                        </HStack>
-                      </TxPropertyBox>
-
-                      {
-                        <TxPropertyBox
-                          flex="1"
-                          label="Function"
-                          value={`${(transaction?.metadata as WalletConnectData).functionName}`}
-                        />
-                      }
-                    </>
-                  )}
                 </Flex>
+                {transaction?.type === 'walletConnect' && (
+                  <Flex gap={4}>
+                    <TxPropertyBox flex="1">
+                      <HStack>
+                        <Img
+                          src={(transaction?.metadata as WalletConnectData)?.peer_data?.icons[0]}
+                        />
+                        <VStack
+                          display={{ base: 'none', md: 'flex' }}
+                          alignItems="flex-start"
+                          spacing="1px"
+                          ml="2"
+                        >
+                          <Text fontSize="sm">
+                            {(transaction?.metadata as WalletConnectData).peer_data?.name}
+                          </Text>
+                        </VStack>
+                      </HStack>
+                    </TxPropertyBox>
+
+                    <TxPropertyBox
+                      flex="1"
+                      label="Function"
+                      value={`${(transaction?.metadata as WalletConnectData).functionName}`}
+                    />
+                  </Flex>
+                )}
 
                 {transaction?.type === 'changeThreshold' && (
                   <TxPropertyBox
                     label="Threshold"
                     value={`${(transaction?.metadata as ChangeThresholdData).threshold}`}
                   />
+                )}
+
+                {transaction?.type === 'removeOwner' && (
+                  <Flex gap={4}>
+                    <TxPropertyBox
+                      flex="1"
+                      label="Current Threshold"
+                      value={`${(transaction?.metadata as AddOrRemoveOwnerData).current_threshold}`}
+                    />
+
+                    <TxPropertyBox
+                      flex="1"
+                      label="New Threshold"
+                      value={`${(transaction?.metadata as AddOrRemoveOwnerData).threshold}`}
+                    />
+                  </Flex>
                 )}
 
                 <TxPropertyBox label="Category">

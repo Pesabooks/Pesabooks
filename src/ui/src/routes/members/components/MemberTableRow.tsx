@@ -3,12 +3,13 @@ import {
   Badge,
   Button,
   Flex,
-  Icon, Td,
+  Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Td,
   Text,
   Tr,
   useColorModeValue
 } from '@chakra-ui/react';
 import { FaUserShield } from 'react-icons/fa';
+import { FiMoreVertical } from 'react-icons/fi';
 import { WalletAddress } from '../../../components/WalletAddress';
 import { usePool } from '../../../hooks/usePool';
 
@@ -88,7 +89,7 @@ export const MemberTableRow = ({
         )}
       </Td>
 
-      {/* <Td>
+      <Td>
         <Menu>
           <MenuButton
             as={IconButton}
@@ -97,12 +98,12 @@ export const MemberTableRow = ({
             variant="ghost"
           />
           <MenuList>
-            <MenuItem isDisabled={!isInvitation} onClick={() => onRemove?.(id)}>
+            <MenuItem  onClick={() => onRemove?.(id)}>
               Remove
             </MenuItem>
           </MenuList>
         </Menu>
-      </Td> */}
+      </Td> 
     </Tr>
   );
 };

@@ -8,4 +8,5 @@ export interface Member {
   active: boolean;
   role: 'admin' | 'member';
   last_viewed_at: Date;
+  inactive_reason: 'Removed' | 'Left' | 'None';
 }

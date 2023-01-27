@@ -1,6 +1,11 @@
 import { Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { Web3Provider } from '@ethersproject/providers';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import {
+  ReviewAndSubmitTransaction,
+  ReviewAndSubmitTransactionRef
+} from '../../components/ReviewAndSubmitTransaction';
 import { ButtonWithAdmingRights } from '../../components/withConnectedWallet';
 import { useIsOrganizer } from '../../hooks/useIsOrganizer';
 import { usePool } from '../../hooks/usePool';
@@ -13,22 +18,31 @@ import {
   sendInvitation
 } from '../../services/invitationService';
 import { getMembers } from '../../services/membersService';
+import { removeAdmin } from '../../services/transactionsServices';
 import { Invitation } from '../../types';
 import { Member } from '../../types/Member';
+import {
+  RemoveAdminFormValue,
+  RemoveAdminModal,
+  RemoveAdminModalRef
+} from '../settings/components/RemoveAdminModal';
 import { InviteMemberFormValue, InviteMemberModal } from './components/InviteMemberModal';
 import { MembersTable } from './components/MembersTable';
 
 export const MembersPage = () => {
-  const { user } = useWeb3Auth();
+  const { user, provider } = useWeb3Auth();
   const [members, setMembers] = useState<Member[]>([]);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
   const { pool, isDeployed } = usePool();
   const { isOpen, onClose, onOpen } = useDisclosure();
-  const { safeAdmins } = useSafeAdmins();
+  const { safeAdmins, threshold: currentThreshold } = useSafeAdmins();
   const isOrganizer = useIsOrganizer();
+  const removeAdminModaldRef = useRef<RemoveAdminModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
 
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const signer = (provider as Web3Provider)?.getSigner();
 
   const loadData = useCallback(async () => {
     try {
@@ -90,6 +104,45 @@ export const MembersPage = () => {
     });
   };
 
+  const onpenRemoveAdmin = (id: string) => {
+    const user = members.find((m) => m.user_id === id);
+    removeAdminModaldRef.current?.open(user?.user!, reviewRemoveAdminTx);
+  };
+
+  const reviewRemoveAdminTx = (formValue: RemoveAdminFormValue) => {
+    const { user } = formValue;
+    reviewTxRef.current?.review(
+      `Remove ${user.username} as an Admin`,
+      'removeOwner',
+      formValue,
+      onRemoveAdmin,
+    );
+  };
+
+  const onRemoveAdmin = async (confirmed: boolean, { user, threshold }: RemoveAdminFormValue) => {
+    if (confirmed && pool) {
+      try {
+        reviewTxRef.current?.openSubmitting('removeOwner');
+
+        let tx = await removeAdmin(signer, pool, user, currentThreshold, threshold);
+        if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
+        if (tx?.hash) {
+          (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
+            loadData();
+          });
+        }
+      } catch (e: any) {
+        toast({
+          title: e?.data?.message ?? e.message,
+          status: 'error',
+          isClosable: true,
+        });
+      } finally {
+        reviewTxRef.current?.closeSubmitting();
+      }
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -113,6 +166,7 @@ export const MembersPage = () => {
         onRevoke={revoke}
         onResendInvitation={resendInvitation}
         isLoading={isLoading}
+        onRemoveAdmin={onpenRemoveAdmin}
       ></MembersTable>
       {isOpen && (
         <InviteMemberModal
@@ -121,6 +175,8 @@ export const MembersPage = () => {
           onInvite={inviteMember}
         ></InviteMemberModal>
       )}
+      <RemoveAdminModal ref={removeAdminModaldRef} currentThreshold={currentThreshold} />
+      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
     </>
   );
 };

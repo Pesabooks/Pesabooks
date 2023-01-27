@@ -10,6 +10,7 @@ interface MembersTableProps {
   onRevoke: (id: string) => void;
   onResendInvitation: (id: string) => void;
   onAddAdmin?: (id: string) => void;
+  onRemoveAdmin: (id: string) => void;
   isLoading: boolean;
   adminAddresses: string[];
 }
@@ -17,6 +18,7 @@ export const MembersTable = ({
   members,
   invitations,
   onRevoke,
+  onRemoveAdmin,
   onResendInvitation,
   adminAddresses,
   isLoading,
@@ -52,6 +54,7 @@ export const MembersTable = ({
                 isInvitation={false}
                 id={member.user_id}
                 isAdmin={isAdmin(member.user?.wallet)}
+                onRemove={onRemoveAdmin}
               />
             );
           })}

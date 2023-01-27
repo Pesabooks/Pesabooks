@@ -14,7 +14,7 @@ import {
   ModalOverlay,
   Select,
   Text,
-  useDisclosure,
+  useDisclosure
 } from '@chakra-ui/react';
 import { forwardRef, Ref, useImperativeHandle, useRef, useState } from 'react';
 import { UserWalletCard } from '../../../components/UserWalletCard';
@@ -62,7 +62,7 @@ export const RemoveAdminModal = forwardRef(
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Remove admin</ModalHeader>
+          <ModalHeader>Remove member</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Box mb={10}>

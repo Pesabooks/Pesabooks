@@ -85,7 +85,7 @@ export const AdminsPage = () => {
       try {
         submittingRef.current?.open('addOwner');
 
-        let tx = await addAdmin(signer, pool, user, treshold);
+        let tx = await addAdmin(signer, pool, user, currentThreshold, treshold);
 
         if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
 
@@ -130,7 +130,7 @@ export const AdminsPage = () => {
       try {
         submittingRef.current?.open('removeOwner');
 
-        let tx = await removeAdmin(signer, pool, user, treshold);
+        let tx = await removeAdmin(signer, pool, user, currentThreshold, treshold);
         if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
         if (tx?.hash) {
           (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {

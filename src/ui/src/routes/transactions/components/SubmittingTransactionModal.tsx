@@ -10,7 +10,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-  useDisclosure,
+  useDisclosure
 } from '@chakra-ui/react';
 import { forwardRef, Ref, useImperativeHandle, useState } from 'react';
 import { TransactionType } from '../../../types';
@@ -20,6 +20,9 @@ interface SubmittingTxModalState {
   type: TransactionType;
   description?: string;
 }
+
+export type openSubmittingModal = (type: TransactionType, description?: string) => void;
+export type closeSubmittingModal = () => void;
 
 export interface SubmittingTxModalRef {
   open: (type: TransactionType, description?: string) => void;

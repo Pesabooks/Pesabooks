@@ -1,7 +1,7 @@
 import { handleSupabaseError, membersTable } from '../supabase';
 
-export const getMembers = async (pool_id: string) => {
-  const { data, error } = await membersTable()
+export const getMembers = async (pool_id: string, includeInactive = false) => {
+  const query = membersTable()
     .select(
       `*, 
     user:users(*)
@@ -9,6 +9,11 @@ export const getMembers = async (pool_id: string) => {
     )
     .eq('pool_id', pool_id);
 
+  if (!includeInactive) {
+    query.eq('active', true);
+  }
+
+  const { data, error } = await query;
   handleSupabaseError(error);
   return data ?? [];
 };
@@ -17,8 +22,19 @@ export const isMemberAdmin = async (userId: string, pool_id: string) => {
   const { data, error } = await membersTable()
     .select()
     .eq('user_id', userId)
-    .eq('pool_id', pool_id);
+    .eq('pool_id', pool_id)
+    .eq('active', true);
 
   handleSupabaseError(error);
   return data?.[0].role === 'admin';
+};
+
+//deactivate member
+export const deactivateMember = async (pool_id: string, user_id: string) => {
+  const { data, error } = await membersTable()
+    .update({ active: false, inactive_reason: 'Removed' })
+    .eq('pool_id', pool_id)
+    .eq('user_id', user_id);
+  handleSupabaseError(error);
+  return data;
 };

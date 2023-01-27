@@ -50,21 +50,25 @@ import { ApproveArgs, SwapArgs } from './SwapCard';
 type DataType = any | null;
 type callbackfn = (confirmed: boolean, data?: any) => void | Promise<void>;
 
+export type ReviewTransactionFn = (
+  message: string,
+  type: TransactionType,
+  data: DataType | null,
+  onConfirm: callbackfn,
+  safeTx?: string,
+) => void;
+
+export type ReviewTransactionWithEstimateFn = (
+  message: string,
+  type: TransactionType,
+  data: any | null,
+  onConfirm: callbackfn,
+  estimatedFee: BigNumber | undefined,
+) => void;
+
 export interface ReviewTransactionModalRef {
-  open: (
-    message: string,
-    type: TransactionType,
-    data: DataType | null,
-    onConfirm: callbackfn,
-    safeTx?: string,
-  ) => void;
-  openWithEstimate: (
-    message: string,
-    type: TransactionType,
-    data: DataType | null,
-    onConfirm: callbackfn,
-    estimatedFee: BigNumber | undefined,
-  ) => void;
+  open: ReviewTransactionFn;
+  openWithEstimate: ReviewTransactionWithEstimateFn;
 }
 
 export interface ReviewTransactionModalProps {
@@ -73,7 +77,7 @@ export interface ReviewTransactionModalProps {
 
 interface State {
   type: TransactionType;
-  data: DataType;
+  data: any | null;
   message: string;
 }
 

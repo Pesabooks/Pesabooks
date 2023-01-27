@@ -22,6 +22,7 @@ import { DashboardPage } from './routes/dashboard/DashboardPage';
 import { HomePage } from './routes/home/HomePage';
 import { MembersPage } from './routes/members/MembersPage';
 import { NotFound } from './routes/notfound/NotFound';
+import { Unauthorized } from './routes/notfound/Unauthorized';
 import { ProfilePage } from './routes/profile';
 import { AdminsPage } from './routes/settings/container/AdminsPage';
 import { CategoriesPage } from './routes/settings/container/CategoriesPage';
@@ -64,6 +65,7 @@ function App() {
           <Web3ReactProvider connectors={connectors}>
             <Routes>
               <Route path="*" element={<NotFound />} />
+              <Route path="/403" element={<Unauthorized />} />
               <Route path="/auth" element={<Auth />}>
                 <Route path="signin" element={<SignInPage />} />
                 <Route path="callback" element={<CallbackPage />} />

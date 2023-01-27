@@ -38,7 +38,12 @@ export interface Transaction extends Entity {
   status: TransactionStatus;
   type: TransactionType;
   pool_id: string;
-  metadata: TransferData | AddOwnerData | SwapData | WalletConnectData | ChangeThresholdData;
+  metadata:
+    | TransferData
+    | AddOrRemoveOwnerData
+    | SwapData
+    | WalletConnectData
+    | ChangeThresholdData;
 }
 
 export interface TransferData {
@@ -50,10 +55,12 @@ export interface TransferData {
   ramp_purchase_view_token?: string;
 }
 
-export interface AddOwnerData {
+export interface AddOrRemoveOwnerData {
   address: string;
   user_id: string;
-  treshold: number;
+  username: string;
+  threshold: number;
+  current_threshold: number;
 }
 
 export interface ChangeThresholdData {

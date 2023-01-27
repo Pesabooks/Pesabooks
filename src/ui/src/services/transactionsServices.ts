@@ -1,14 +1,14 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
 import { SafeMultisigTransactionResponse, SafeTransaction } from '@safe-global/safe-core-sdk-types';
-import { BigNumber, ContractReceipt, ContractTransaction, ethers, Signer } from 'ethers';
+import { BigNumber, ethers, Signer } from 'ethers';
 import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
 import { Filter } from 'react-supabase';
 import { networks } from '../data/networks';
 import { handleSupabaseError, transationsTable } from '../supabase';
 import { Pool, User } from '../types';
-import { SwapData, Transaction } from '../types/transaction';
+import { AddOrRemoveOwnerData, SwapData, Transaction } from '../types/transaction';
 import { checksummed } from '../utils';
 import { notifyTransaction } from '../utils/notification';
 import { defaultProvider, getTokenContract } from './blockchainServices';
@@ -27,6 +27,11 @@ import {
   getSafeTreshold,
   proposeSafeTransaction,
 } from './gnosisServices';
+import {
+  onTransactionComplete,
+  onTransactionFailed,
+  onTransactionSubmitted,
+} from './transaction-events';
 
 export const deposit = async (
   provider: Web3Provider,
@@ -83,7 +88,7 @@ export const deposit = async (
 
   tx.wait().then(
     (receipt) => {
-      onTransactionComplete(receipt, pool.chain_id);
+      onTransactionComplete(transaction, receipt, pool.chain_id);
     },
     () => onTransactionFailed(tx.hash),
   );
@@ -150,7 +155,8 @@ export const addAdmin = async (
   signer: JsonRpcSigner,
   pool: Pool,
   user: User,
-  treshold: number,
+  currentTreshold: number,
+  threshold: number,
 ): Promise<Transaction | undefined> => {
   const transaction: Partial<Transaction> = {
     type: 'addOwner',
@@ -159,7 +165,9 @@ export const addAdmin = async (
     metadata: {
       address: user.wallet,
       user_id: user.id,
-      treshold: treshold,
+      username: user.username,
+      threshold: threshold,
+      current_threshold: currentTreshold,
     },
   };
 
@@ -168,7 +176,7 @@ export const addAdmin = async (
     pool.chain_id,
     pool.gnosis_safe_address!,
     checksummed(user.wallet),
-    treshold,
+    threshold,
   );
 
   return submitTransaction(signer, pool, transaction, safeTransaction);
@@ -178,7 +186,8 @@ export const removeAdmin = async (
   signer: JsonRpcSigner,
   pool: Pool,
   user: User,
-  treshold: number,
+  currentTreshold: number,
+  threshold: number,
 ): Promise<Transaction | undefined> => {
   const transaction: Partial<Transaction> = {
     type: 'removeOwner',
@@ -187,8 +196,10 @@ export const removeAdmin = async (
     metadata: {
       address: user.wallet,
       user_id: user.id,
-      treshold: treshold,
-    },
+      username: user.username,
+      current_threshold: currentTreshold,
+      threshold: threshold,
+    } as AddOrRemoveOwnerData,
   };
 
   const safeTransaction = await getRemoveOwnerTx(
@@ -196,7 +207,7 @@ export const removeAdmin = async (
     pool.chain_id,
     pool.gnosis_safe_address!,
     checksummed(user.wallet),
-    treshold,
+    threshold,
   );
 
   return submitTransaction(signer, pool, transaction, safeTransaction);
@@ -344,7 +355,7 @@ export const submitTransaction = async (
       hash: tx?.hash,
       status: 'pending',
     });
-    onTransactionExecuted(tx, pool.chain_id, false);
+    onTransactionSubmitted(transaction, tx, pool.chain_id, false);
     return data?.[0];
   }
 };
@@ -367,7 +378,7 @@ export const confirmTransaction = async (
 export const executeTransaction = async (
   signer: Signer,
   pool: Pool,
-  transactionId: number,
+  transaction: Transaction,
   safeTxHash: string,
   isRejection: boolean,
 ) => {
@@ -378,9 +389,9 @@ export const executeTransaction = async (
     safeTxHash,
   );
 
-  onTransactionExecuted(tx, pool.chain_id, isRejection, safeTxHash);
+  onTransactionSubmitted(transaction, tx, pool.chain_id, isRejection, safeTxHash);
 
-  await transationsTable().update({ hash: tx?.hash, status: 'pending' }).eq('id', transactionId);
+  await transationsTable().update({ hash: tx?.hash, status: 'pending' }).eq('id', transaction.id);
 
   return tx;
 };
@@ -407,50 +418,13 @@ export const rejectTransaction = async (
   await transationsTable().update({ reject_safe_tx_hash: safeTxHash }).eq('id', transactionId);
 };
 
-const onTransactionExecuted = async (
-  tx: ContractTransaction | undefined,
-  chainId: number,
-  isRejection: boolean,
-  safeTxHash?: string,
-) => {
-  if (tx) notifyTransaction(chainId, tx.hash);
-
-  tx?.wait().then(
-    (receipt) => {
-      onTransactionComplete(receipt, chainId, isRejection);
-    },
-    () => {
-      //a failed transaction is still not executed in gnosis. A rejection execution is needed
-      if (!safeTxHash) onTransactionFailed(tx.hash);
-    },
-  );
-};
-
-const onTransactionComplete = async (
-  receipt: ContractReceipt,
-  chainId: number,
-  isRejection: boolean = false,
-) => {
-  if (receipt.blockNumber) {
-    const timestamp = (await defaultProvider(chainId).getBlock(receipt.blockNumber)).timestamp;
-    const { error } = await transationsTable()
-      .update({ status: isRejection ? 'rejected' : 'completed', timestamp })
-      .eq('hash', receipt.transactionHash);
-    if (error) console.error(error);
-  }
-};
-
-const onTransactionFailed = async (txHash: string) => {
-  await transationsTable().update({ status: 'failed' }).eq('hash', txHash);
-};
-
 export const getAllTransactions = async (pool_id: string, filter?: Filter<Transaction>) => {
   let query = transationsTable().select(
     `
-    *,
-    category:category_id(id, name),
-    user:users(id,name,email)
-  `,
+      *,
+      category:category_id(id, name),
+      user:users(id,name,email)
+    `,
   );
 
   query = (filter ? filter(query) : query).filter('pool_id', 'eq', pool_id);
@@ -507,7 +481,7 @@ export const refreshTransaction = async (chain_id: number, t: Transaction) => {
   const provider = defaultProvider(chain_id);
   var tx = await provider.getTransaction(t.hash);
   await tx.wait().then(
-    async (receipt) => await onTransactionComplete(receipt, chain_id),
+    async (receipt) => await onTransactionComplete(t, receipt, chain_id),
     async () => await onTransactionFailed,
   );
 };

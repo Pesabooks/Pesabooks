@@ -13,7 +13,7 @@ import {
   Stack,
   Text,
   useColorModeValue,
-  useDisclosure,
+  useDisclosure
 } from '@chakra-ui/react';
 import { forwardRef, Ref, useImperativeHandle, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -22,8 +22,10 @@ import { getTxScanLink } from '../../../services/transactionsServices';
 import { TransactionType } from '../../../types';
 import { getTransactionTypeLabel } from '../../../utils';
 
+export type openTxSubmittedModal = (type: TransactionType, hash: string, internalTxId?: number) => void;
+
 export interface TransactionSubmittedModalRef {
-  open: (type: TransactionType, hash: string, internalTxId?: number) => void;
+  open: openTxSubmittedModal;
 }
 
 interface TransactionSubmittedModalProps {

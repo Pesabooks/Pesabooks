@@ -1,7 +1,7 @@
 import { formatBigNumber } from '../bignumber-utils';
 import { Transaction, User } from '../types';
 import {
-  AddOwnerData,
+  AddOrRemoveOwnerData,
   ChangeThresholdData,
   SwapData,
   TransactionStatus,
@@ -39,15 +39,13 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
 
     case 'addOwner':
       return `${isProposal ? 'Add' : 'Added'} ${getAddressName(
-        (metadata as AddOwnerData).address,
+        (metadata as AddOrRemoveOwnerData).address,
         addresses,
       )} as member`;
 
     case 'removeOwner':
-      return `${isProposal ? 'Remove' : 'Removed'} ${getAddressName(
-        (metadata as AddOwnerData).address,
-        addresses,
-      )} as admin`;
+      const removeOwnerData = metadata as AddOrRemoveOwnerData;
+      return `${isProposal ? 'Remove' : 'Removed'} ${removeOwnerData.username} as member`;
 
     case 'unlockToken':
       return `${isProposal ? 'Unlock' : 'Unlocked'} token ${(metadata as any).token.symbol}`;
@@ -89,9 +87,9 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
     case 'withdrawal':
       return 'Withdrawal';
     case 'addOwner':
-      return 'Add admin';
+      return 'Add member';
     case 'removeOwner':
-      return 'Remove admin';
+      return 'Remove member';
     case 'unlockToken':
       return 'Unlock Token';
     case 'swap':
