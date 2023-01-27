@@ -2,40 +2,29 @@ import { Flex, Spinner, Text, useDisclosure, useToast } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import { useRef } from 'react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
+import {
+  ReviewAndSubmitTransaction,
+  ReviewAndSubmitTransactionRef
+} from '../../../components/ReviewAndSubmitTransaction';
 import { ButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
 import { useSafeAdmins } from '../../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { changeThreshold } from '../../../services/transactionsServices';
-import {
-  ReviewTransactionModal,
-  ReviewTransactionModalRef
-} from '../../transactions/components/ReviewTransactionModal';
-import {
-  SubmittingTransactionModal,
-  SubmittingTxModalRef
-} from '../../transactions/components/SubmittingTransactionModal';
-import {
-  TransactionSubmittedModal,
-  TransactionSubmittedModalRef
-} from '../../transactions/components/TransactionSubmittedModal';
 import { ChangeThresholdModal } from '../components/ChangeThresholdModal';
 
 export const ThresholdPage = () => {
-
   const { pool } = usePool();
   const { provider } = useWeb3Auth();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const toast = useToast();
-  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
-  const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
-  const submittingRef = useRef<SubmittingTxModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
   const signer = (provider as Web3Provider)?.getSigner();
 
-  const { safeAdmins:adminAddressess, threshold:currentThreshold, loading } = useSafeAdmins();
+  const { safeAdmins: adminAddressess, threshold: currentThreshold, loading } = useSafeAdmins();
 
   const reviewChangeThresholdTx = (threshold: number) => {
-    reviewTxRef.current?.open(
+    reviewTxRef.current?.review(
       `Change required confirmations to ${threshold}`,
       'changeThreshold',
       threshold,
@@ -46,11 +35,11 @@ export const ThresholdPage = () => {
   const onChangeThreshold = async (confirmed: boolean, threshold: number) => {
     if (confirmed && pool) {
       try {
-        submittingRef.current?.open('changeThreshold');
+        reviewTxRef.current?.openSubmitting('changeThreshold');
 
         let tx = await changeThreshold(signer, pool, threshold, currentThreshold);
 
-        if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
+        if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
 
         onClose();
       } catch (e: any) {
@@ -60,7 +49,7 @@ export const ThresholdPage = () => {
           isClosable: true,
         });
       } finally {
-        submittingRef.current?.close();
+        reviewTxRef.current?.closeSubmitting();
       }
     }
   };
@@ -110,9 +99,7 @@ export const ThresholdPage = () => {
           adminsCount={adminAddressess.length}
         />
       )}
-      <ReviewTransactionModal ref={reviewTxRef} />
-      <TransactionSubmittedModal ref={txSubmittedRef} chainId={pool?.chain_id} />
-      <SubmittingTransactionModal ref={submittingRef} />
+      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
     </>
   );
 };

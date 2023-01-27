@@ -1,21 +1,21 @@
 import { BigNumber } from 'ethers';
 import { forwardRef, Ref, useImperativeHandle, useRef } from 'react';
 import {
-    ReviewTransactionFn,
-    ReviewTransactionModal,
-    ReviewTransactionModalRef,
-    ReviewTransactionWithEstimateFn
+  ReviewTransactionFn,
+  ReviewTransactionModal,
+  ReviewTransactionModalRef,
+  ReviewTransactionWithEstimateFn
 } from '../routes/transactions/components/ReviewTransactionModal';
 import {
-    closeSubmittingModal,
-    openSubmittingModal,
-    SubmittingTransactionModal,
-    SubmittingTxModalRef
+  closeSubmittingModal,
+  openSubmittingModal,
+  SubmittingTransactionModal,
+  SubmittingTxModalRef
 } from '../routes/transactions/components/SubmittingTransactionModal';
 import {
-    openTxSubmittedModal,
-    TransactionSubmittedModal,
-    TransactionSubmittedModalRef
+  openTxSubmittedModal,
+  TransactionSubmittedModal,
+  TransactionSubmittedModalRef
 } from '../routes/transactions/components/TransactionSubmittedModal';
 import { TransactionType } from '../types';
 
@@ -28,7 +28,7 @@ export interface ReviewAndSubmitTransactionRef {
 }
 
 export interface ReviewTransactionModalProps {
-  chainId: number;
+  chainId?: number;
   ref: Ref<ReviewAndSubmitTransactionRef>;
 }
 

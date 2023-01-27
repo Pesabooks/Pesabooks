@@ -7,6 +7,7 @@ import { Card, CardHeader } from '../../../components/Card';
 import { InputAmountField } from '../../../components/Input/InputAmountField';
 import { SelectCategoryField } from '../../../components/Input/SelectCategoryField';
 import { SelectUserField } from '../../../components/Input/SelectUserField';
+import { ReviewAndSubmitTransaction, ReviewAndSubmitTransactionRef } from '../../../components/ReviewAndSubmitTransaction';
 import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAddressBalance } from '../../../services/blockchainServices';
@@ -14,19 +15,7 @@ import { getAllCategories } from '../../../services/categoriesService';
 import { getMembers } from '../../../services/membersService';
 import { withdraw } from '../../../services/transactionsServices';
 import { Category, User } from '../../../types';
-import {
-  ReviewTransactionModal,
-  ReviewTransactionModalRef,
-} from '../components/ReviewTransactionModal';
-import {
-  SubmittingTransactionModal,
-  SubmittingTxModalRef,
-} from '../components/SubmittingTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
-import {
-  TransactionSubmittedModal,
-  TransactionSubmittedModalRef,
-} from '../components/TransactionSubmittedModal';
 
 export interface WithdrawFormValue {
   amount: number;
@@ -42,9 +31,7 @@ export const WithdrawPage = () => {
   const { pool } = usePool();
   const toast = useToast();
   const [balance, setBalance] = useState<number>(0);
-  const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
-  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
-  const submittingRef = useRef<SubmittingTxModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
 
   const signer = (provider as Web3Provider)?.getSigner();
   const methods = useForm<WithdrawFormValue>();
@@ -71,7 +58,7 @@ export const WithdrawPage = () => {
 
   const confirmTx = (formValue: WithdrawFormValue) => {
     const { amount, user } = formValue;
-    reviewTxRef.current?.open(
+    reviewTxRef.current?.review(
       `Withdraw ${amount} ${pool.token?.symbol} to ${user.wallet}`,
       'withdrawal',
       formValue,
@@ -82,14 +69,14 @@ export const WithdrawPage = () => {
   const onWithDraw = async (confirmed: boolean, formValue: WithdrawFormValue) => {
     if (!provider || !confirmed) return;
 
-    submittingRef.current?.open('withdrawal');
+    reviewTxRef.current?.openSubmitting('withdrawal');
 
     const { amount, memo, user, category } = formValue;
 
     try {
       const tx = await withdraw(signer, pool, category.id, amount, memo, user);
 
-      if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
+      if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
 
       methods.reset();
     } catch (e: any) {
@@ -102,7 +89,7 @@ export const WithdrawPage = () => {
 
       throw e;
     } finally {
-      submittingRef.current?.close();
+      reviewTxRef.current?.closeSubmitting();
     }
   };
 
@@ -134,9 +121,7 @@ export const WithdrawPage = () => {
           </FormProvider>
         </Card>
       </Container>
-      <TransactionSubmittedModal ref={txSubmittedRef} chainId={pool?.chain_id} />
-      <SubmittingTransactionModal ref={submittingRef} />
-      <ReviewTransactionModal ref={reviewTxRef} />
+      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
     </>
   );
 };

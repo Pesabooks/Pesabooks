@@ -5,25 +5,17 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Card, CardHeader } from '../../../components/Card';
 import { InputAmountField } from '../../../components/Input/InputAmountField';
 import { SelectCategoryField } from '../../../components/Input/SelectCategoryField';
+import {
+  ReviewAndSubmitTransaction,
+  ReviewAndSubmitTransactionRef
+} from '../../../components/ReviewAndSubmitTransaction';
 import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAddressBalance } from '../../../services/blockchainServices';
 import { getAllCategories } from '../../../services/categoriesService';
 import { deposit } from '../../../services/transactionsServices';
 import { Category } from '../../../types';
-import {
-  ReviewTransactionModal,
-  ReviewTransactionModalRef,
-} from '../components/ReviewTransactionModal';
-import {
-  SubmittingTransactionModal,
-  SubmittingTxModalRef,
-} from '../components/SubmittingTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
-import {
-  TransactionSubmittedModal,
-  TransactionSubmittedModalRef,
-} from '../components/TransactionSubmittedModal';
 
 export interface DepositFormValue {
   amount: number;
@@ -36,11 +28,9 @@ export const DepositPage = () => {
   const { provider, account } = useWeb3Auth();
   const { pool } = usePool();
   const [balance, setBalance] = useState<number>(0);
-  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
-  const submittingRef = useRef<SubmittingTxModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
   const toast = useToast();
   const methods = useForm<DepositFormValue>();
-  const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
 
   const token = pool?.token;
 
@@ -69,7 +59,7 @@ export const DepositPage = () => {
 
   const confirmTx = (formValue: DepositFormValue) => {
     const { amount } = formValue;
-    reviewTxRef.current?.open(
+    reviewTxRef.current?.review(
       `Deposit ${amount} ${pool.token?.symbol}`,
       'deposit',
       formValue,
@@ -79,14 +69,14 @@ export const DepositPage = () => {
 
   const onDeposit = async (confirmed: boolean, formValue: DepositFormValue) => {
     if (!provider || !confirmed) return;
-    submittingRef.current?.open('deposit');
+    reviewTxRef.current?.openSubmitting('deposit');
 
     const { amount, memo, category } = formValue;
 
     try {
       const tx = await deposit(provider, pool, category.id, amount, memo);
 
-      if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
+      if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
 
       methods.reset();
     } catch (e: any) {
@@ -98,7 +88,7 @@ export const DepositPage = () => {
       });
       throw e;
     } finally {
-      submittingRef.current?.close();
+      reviewTxRef.current?.closeSubmitting();
     }
   };
 
@@ -127,9 +117,7 @@ export const DepositPage = () => {
           </FormProvider>
         </Card>
       </Container>
-      <TransactionSubmittedModal ref={txSubmittedRef} chainId={pool?.chain_id} />
-      <SubmittingTransactionModal ref={submittingRef} />
-      <ReviewTransactionModal ref={reviewTxRef} />
+      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
     </>
   );
 };

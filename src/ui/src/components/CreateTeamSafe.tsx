@@ -3,23 +3,18 @@ import { Button, Flex, Heading, Link, Stack, Text, useToast } from '@chakra-ui/r
 import { useEffect, useRef, useState } from 'react';
 import { usePool } from '../hooks/usePool';
 import { useWeb3Auth } from '../hooks/useWeb3Auth';
-import {
-  ReviewTransactionModal,
-  ReviewTransactionModalRef
-} from '../routes/transactions/components/ReviewTransactionModal';
-import {
-  SubmittingTransactionModal,
-  SubmittingTxModalRef
-} from '../routes/transactions/components/SubmittingTransactionModal';
 import { getPendingInvitationCount } from '../services/invitationService';
 import { deployNewSafe } from '../services/poolsService';
 import { Card } from './Card';
+import {
+  ReviewAndSubmitTransaction,
+  ReviewAndSubmitTransactionRef
+} from './ReviewAndSubmitTransaction';
 
 export const CreateTeamSafe = () => {
   const { provider, user } = useWeb3Auth();
   const { pool, refresh, isDeployed } = usePool();
-  const confirmTxRef = useRef<ReviewTransactionModalRef>(null);
-  const submittingRef = useRef<SubmittingTxModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
   const toast = useToast();
   const [hasPendingInvitations, setHasPendingInvitations] = useState(false);
 
@@ -36,13 +31,13 @@ export const CreateTeamSafe = () => {
   }, [pool?.id]);
 
   const confirmTx = () => {
-    confirmTxRef.current?.open(`Create group wallet`, 'createSafe', null, onDeployNewSafe);
+    reviewTxRef.current?.review(`Create group wallet`, 'createSafe', null, onDeployNewSafe);
   };
 
   const onDeployNewSafe = async (confirmed: boolean) => {
     if (confirmed && pool?.id && provider) {
       try {
-        submittingRef.current?.open('createSafe', 'Wait while the group wallet is created');
+        reviewTxRef.current?.openSubmitting('createSafe', 'Wait while the group wallet is created');
         await deployNewSafe(provider, pool?.id);
         refresh();
       } catch (e: any) {
@@ -54,7 +49,7 @@ export const CreateTeamSafe = () => {
         });
         throw e;
       } finally {
-        submittingRef.current?.close();
+        reviewTxRef.current?.closeSubmitting();
       }
     }
   };
@@ -80,7 +75,7 @@ export const CreateTeamSafe = () => {
           </Text>
           <Flex mt={10}>
             <Text color={'gray.500'}>
-              Once the wallet is deployed, adding or removing a member requires a vote 
+              Once the wallet is deployed, adding or removing a member requires a vote
             </Text>
           </Flex>
         </Card>
@@ -128,8 +123,7 @@ export const CreateTeamSafe = () => {
         </Card>
       )}
 
-      <SubmittingTransactionModal ref={submittingRef} />
-      <ReviewTransactionModal ref={confirmTxRef} />
+      <ReviewAndSubmitTransaction ref={reviewTxRef} />
     </>
   );
 };
