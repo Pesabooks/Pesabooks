@@ -133,13 +133,15 @@ export const TransactionsTable = ({
                   {original.safeTx?.confirmations?.length}/{original?.safeTx?.confirmationsRequired}
                 </Text>
               </Flex>
-              <Flex gap={2} alignItems="center">
-                <Icon as={MdOutlineCancel} color="red.500" />
-                <Text size="sm">
-                  {original.rejectSafeTx?.confirmations?.length}/
-                  {original?.rejectSafeTx?.confirmationsRequired}
-                </Text>
-              </Flex>
+              {original.rejectSafeTx && (
+                <Flex gap={2} alignItems="center">
+                  <Icon as={MdOutlineCancel} color="red.500" />
+                  <Text size="sm">
+                    {original.rejectSafeTx.confirmations?.length}/
+                    {original?.rejectSafeTx.confirmationsRequired}
+                  </Text>
+                </Flex>
+              )}
             </Flex>
           );
         },
