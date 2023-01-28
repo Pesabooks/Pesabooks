@@ -1,6 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { handleSupabaseError, poolsTable, supabase, transationsTable } from '../supabase';
-import { Pool, Token, Transaction } from '../types';
+import { NewTransaction, Pool, Token, User } from '../types';
 import { deploySafe } from './gnosisServices';
 import { getMembers } from './membersService';
 
@@ -17,13 +17,13 @@ export const getPool = async (pool_id: string) => {
     .eq('id', pool_id);
   handleSupabaseError(error);
 
-  return data?.[0];
+  return data?.[0] as Pool;
 };
 
 export const getMyPools = async () => {
-  const { data, error } = await supabase().rpc<Pool>('get_my_pools');
+  const { data, error } = await supabase().rpc('get_my_pools');
   handleSupabaseError(error);
-  return data;
+  return (data as Pool[] | null) ?? [];
 };
 
 export const createNewPool = async (
@@ -33,7 +33,7 @@ export const createNewPool = async (
   chainId: number,
 ) => {
   const { data: poolId, error } = await supabase()
-    .rpc<string>('create_pool', {
+    .rpc('create_pool', {
       chain_id: chainId,
       name: name,
       description: description ?? '',
@@ -52,16 +52,18 @@ export const deployNewSafe = async (provider: Web3Provider, pool_id: string) => 
   const members = await getMembers(pool_id);
   const gnosis_address = await deploySafe(
     signer,
-    members.map((m) => m.user!.wallet),
+    members.map((m) => (m.user as User)!.wallet),
   );
 
   await poolsTable().update({ gnosis_safe_address: gnosis_address }).eq('id', pool_id);
 
-  const transaction: Partial<Transaction> = {
+  const transaction: NewTransaction = {
     type: 'createSafe',
     pool_id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     status: 'completed',
+    category_id: null,
+    memo: null,
   };
 
   await transationsTable().insert(transaction);

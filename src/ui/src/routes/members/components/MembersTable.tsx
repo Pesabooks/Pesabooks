@@ -42,7 +42,7 @@ export const MembersTable = ({
           </Tr>
         </Thead>
         <Tbody>
-          {members.map((member, index) => {
+          {members.map((member) => {
             return (
               <MemberTableRow
                 key={member.user_id}
@@ -58,7 +58,7 @@ export const MembersTable = ({
               />
             );
           })}
-          {invitations.map((invitation, index) => {
+          {invitations.map((invitation) => {
             return (
               <MemberTableRow
                 key={invitation.id}

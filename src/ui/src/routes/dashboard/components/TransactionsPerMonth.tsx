@@ -72,7 +72,7 @@ export const TransactionsPerMonth = ({ pool_id }: TransactionsPerMonthProps) => 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await supabase().rpc('get_transactions_per_month', { pool_id });
+        const { data } = await supabase().rpc('get_transactions_per_month', { pool_id }).single();
 
         const deposit = [];
         const withdrawal = [];

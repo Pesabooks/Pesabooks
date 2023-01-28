@@ -17,7 +17,7 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
   const [myPools, setMyPools] = useState<Pool[]>([]);
 
   useEffect(() => {
-    getMyPools().then((pools) => setMyPools(pools ?? []));
+    getMyPools().then((pools) => setMyPools(pools));
   }, []);
 
   return (

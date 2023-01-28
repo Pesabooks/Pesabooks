@@ -263,7 +263,7 @@ export const WalletPage = () => {
             p={6}
             textAlign={'center'}
           >
-            <Avatar size={'xl'} name={user?.username} mb={4} pos={'relative'} />
+            <Avatar size={'xl'} name={user?.username ?? undefined} mb={4} pos={'relative'} />
             <Heading fontSize={'2xl'} fontFamily={'body'}>
               {user?.email}
             </Heading>

@@ -1,12 +1,8 @@
-export interface Invitation {
-  id: string;
-  name: string;
-  email: string;
-  pool_id: string;
-  pool_name: string;
+import { Table } from '../supabase';
+
+export type Invitation = Table<'invitations'> & {
   role: 'admin' | 'member';
-  active: boolean;
   status: 'pending' | 'accepted' | 'revoked';
-  user_id: string;
-  invited_by: string;
-}
+};
+
+export type NewInvitation = Omit<Invitation, 'created_at' | 'id' | 'status' | 'user_id'>;

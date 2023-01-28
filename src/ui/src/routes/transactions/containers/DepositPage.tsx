@@ -19,7 +19,7 @@ import { TextAreaMemoField } from '../components/TextAreaMemoField';
 
 export interface DepositFormValue {
   amount: number;
-  memo?: string;
+  memo: string | null;
   category: Category;
 }
 

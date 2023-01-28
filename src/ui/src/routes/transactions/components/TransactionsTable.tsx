@@ -1,6 +1,21 @@
 import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
-import { Box, chakra, Flex, Table, Tbody, Td, Text, Th, Thead, Tooltip, Tr } from '@chakra-ui/react';
+import {
+  Box,
+  chakra,
+  Flex,
+  Icon,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tooltip,
+  Tr
+} from '@chakra-ui/react';
 import { useMemo } from 'react';
+import { BiCheckCircle } from 'react-icons/bi';
+import { MdOutlineCancel } from 'react-icons/md';
 import { CellProps, Column, useSortBy, useTable } from 'react-table';
 import Loading from '../../../components/Loading';
 import { Category, Pool, Transaction, TransactionStatus, User } from '../../../types';
@@ -27,7 +42,7 @@ export const TransactionsTable = ({
   showNonce,
 }: TransactionsTableProps) => {
   const columns = useMemo(() => {
-    const columns: Column[] = [
+    let columns: Column[] = [
       // {
       //   Header: 'Type',
       //   accessor: 'type',
@@ -67,7 +82,6 @@ export const TransactionsTable = ({
       },
       {
         Header: 'Amount',
-
         accessor: 'metadata.amount',
         isNumeric: true,
         Cell: ({
@@ -104,10 +118,40 @@ export const TransactionsTable = ({
         },
       },
       {
+        Header: '',
+        accessor: 'safeTxHash',
+        Cell: ({
+          cell: {
+            row: { original },
+          },
+        }: CellProps<Transaction>) => {
+          return (
+            <Flex direction="column">
+              <Flex gap={2} alignItems="center">
+                <Icon as={BiCheckCircle} color="green.500" />
+                <Text size="sm">
+                  {original.safeTx?.confirmations?.length}/{original?.safeTx?.confirmationsRequired}
+                </Text>
+              </Flex>
+              <Flex gap={2} alignItems="center">
+                <Icon as={MdOutlineCancel} color="red.500" />
+                <Text size="sm">
+                  {original.rejectSafeTx?.confirmations?.length}/
+                  {original?.rejectSafeTx?.confirmationsRequired}
+                </Text>
+              </Flex>
+            </Flex>
+          );
+        },
+      },
+      {
         Header: showNonce ? 'Execution order' : '',
         accessor: 'safe_nonce',
+        isNumeric: true,
       },
     ];
+
+    if (!showNonce) columns = columns.filter((column) => column.accessor !== 'safeTxHash');
 
     return columns;
   }, [showNonce, users, pool.chain_id]);
@@ -118,7 +162,7 @@ export const TransactionsTable = ({
   );
 
   return (
-    <Box overflowX="auto" w='100%'>
+    <Box overflowX="auto" w="100%">
       <Table {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup) => (

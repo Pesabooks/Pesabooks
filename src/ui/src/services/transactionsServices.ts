@@ -4,11 +4,10 @@ import { SafeMultisigTransactionResponse, SafeTransaction } from '@safe-global/s
 import { BigNumber, ethers, Signer } from 'ethers';
 import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
-import { Filter } from 'react-supabase';
 import { networks } from '../data/networks';
-import { handleSupabaseError, transationsTable } from '../supabase';
+import { Filter, handleSupabaseError, transationsTable } from '../supabase';
 import { Pool, User } from '../types';
-import { AddOrRemoveOwnerData, SwapData, Transaction } from '../types/transaction';
+import { AddOrRemoveOwnerData, NewTransaction, SwapData, Transaction } from '../types/transaction';
 import { checksummed } from '../utils';
 import { notifyTransaction } from '../utils/notification';
 import { defaultProvider, getTokenContract } from './blockchainServices';
@@ -38,7 +37,7 @@ export const deposit = async (
   pool: Pool,
   category_id: number,
   amount: number,
-  memo: string | undefined,
+  memo: string | null,
 ) => {
   const { token } = pool;
   if (token == null) throw new Error();
@@ -51,7 +50,7 @@ export const deposit = async (
   const tokenContract = ERC20__factory.connect(token.address, signer);
   const decimals = await tokenContract.decimals();
 
-  const transaction: Partial<Transaction> = {
+  const transaction: NewTransaction = {
     memo: memo,
     type: 'deposit',
     category_id: category_id,
@@ -81,9 +80,10 @@ export const deposit = async (
 
   notifyTransaction(pool.chain_id, tx.hash);
 
-  transaction.hash = tx.hash;
-
-  const { data, error } = await transationsTable().insert({ ...transaction, hash: tx.hash });
+  const { data, error } = await transationsTable()
+    .insert({ ...transaction, hash: tx.hash })
+    .select()
+    .single();
   handleSupabaseError(error);
 
   tx.wait().then(
@@ -93,7 +93,7 @@ export const deposit = async (
     () => onTransactionFailed(tx.hash),
   );
 
-  return data?.[0];
+  return data as Transaction;
 };
 
 export const withdraw = async (
@@ -101,7 +101,7 @@ export const withdraw = async (
   pool: Pool,
   category_id: number,
   amount: number,
-  memo: string | undefined,
+  memo: string | null,
   user: User,
 ): Promise<Transaction | undefined> => {
   const { token } = pool;
@@ -114,12 +114,13 @@ export const withdraw = async (
   const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
   const decimals = await tokenContract.decimals();
 
-  const transaction: Partial<Transaction> = {
+  const transaction: NewTransaction = {
     memo: memo,
     type: 'withdrawal',
     category_id: category_id,
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
+    status: 'pending',
     metadata: {
       transfer_from: from,
       transfer_to: to,
@@ -158,14 +159,17 @@ export const addAdmin = async (
   currentTreshold: number,
   threshold: number,
 ): Promise<Transaction | undefined> => {
-  const transaction: Partial<Transaction> = {
+  const transaction: NewTransaction = {
     type: 'addOwner',
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
+    category_id: null,
+    memo: null,
+    status: 'pending',
     metadata: {
       address: user.wallet,
       user_id: user.id,
-      username: user.username,
+      username: user.username!,
       threshold: threshold,
       current_threshold: currentTreshold,
     },
@@ -189,10 +193,13 @@ export const removeAdmin = async (
   currentTreshold: number,
   threshold: number,
 ): Promise<Transaction | undefined> => {
-  const transaction: Partial<Transaction> = {
+  const transaction: NewTransaction = {
     type: 'removeOwner',
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
+    category_id: null,
+    memo: null,
+    status: 'pending',
     metadata: {
       address: user.wallet,
       user_id: user.id,
@@ -219,10 +226,13 @@ export const changeThreshold = async (
   threshold: number,
   currentThresold: number,
 ): Promise<Transaction | undefined> => {
-  const transaction: Partial<Transaction> = {
+  const transaction: NewTransaction = {
     type: 'changeThreshold',
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
+    category_id: null,
+    memo: null,
+    status: 'pending',
     metadata: {
       threshold,
       current_threshold: currentThresold,
@@ -250,9 +260,12 @@ export const approveToken = async (
   const decimals = await tokenContract.decimals();
   const maxAllowance = BigNumber.from('2').pow(BigNumber.from('256').sub(BigNumber.from('1')));
 
-  const transaction: Partial<Transaction> = {
+  const transaction: NewTransaction = {
     type: 'unlockToken',
     pool_id: pool.id,
+    category_id: null,
+    memo: null,
+    status: 'pending',
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
       token: token,
@@ -286,10 +299,13 @@ export const swapTokens = async (
   slippage: number,
   priceRoute: OptimalRate,
 ): Promise<Transaction | undefined> => {
-  const transaction: Partial<Transaction> = {
+  const transaction: NewTransaction = {
     type: 'swap',
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
+    category_id: null,
+    memo: null,
+    status: 'pending',
     metadata: {
       src_token: tokenFrom,
       src_usd: priceRoute.srcUSD,
@@ -320,7 +336,7 @@ export const swapTokens = async (
 export const submitTransaction = async (
   signer: Signer,
   pool: Pool,
-  transaction: Partial<Transaction>,
+  transaction: NewTransaction,
   safeTransaction: SafeTransaction,
 ) => {
   const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
@@ -348,15 +364,18 @@ export const submitTransaction = async (
     );
     const tx = await executeSafeTransaction(signer, pool.gnosis_safe_address!, safeTransaction);
 
-    const { data } = await transationsTable().insert({
-      ...transaction,
-      safe_tx_hash: safeTxHash,
-      safe_nonce: safeTransaction.data.nonce,
-      hash: tx?.hash,
-      status: 'pending',
-    });
+    const { data } = await transationsTable()
+      .insert({
+        ...transaction,
+        safe_tx_hash: safeTxHash,
+        safe_nonce: safeTransaction.data.nonce,
+        hash: tx?.hash,
+        status: 'pending',
+      })
+      .select()
+      .single();
     onTransactionSubmitted(transaction, tx, pool.chain_id, false);
-    return data?.[0];
+    return data as Transaction;
   }
 };
 
@@ -418,7 +437,12 @@ export const rejectTransaction = async (
   await transationsTable().update({ reject_safe_tx_hash: safeTxHash }).eq('id', transactionId);
 };
 
-export const getAllTransactions = async (pool_id: string, filter?: Filter<Transaction>) => {
+export const getAllTransactions = async (
+  poolId: string,
+  chainId: number,
+  safeAddress: string,
+  filter?: Filter<'transactions'>,
+): Promise<Transaction[]> => {
   let query = transationsTable().select(
     `
       *,
@@ -427,39 +451,40 @@ export const getAllTransactions = async (pool_id: string, filter?: Filter<Transa
     `,
   );
 
-  query = (filter ? filter(query) : query).filter('pool_id', 'eq', pool_id);
+  query = (filter ? filter(query) : query).filter('pool_id', 'eq', poolId);
   //.filter('status', 'neq', 'failed');
   const { data, error } = await query;
 
   handleSupabaseError(error);
-  return data;
+
+  const transactions = data as Transaction[] | null;
+
+  // If there are any pending transactions, we need to fetch the safe transactions
+  if (
+    transactions?.find(
+      (t) => t.status === 'awaitingConfirmations' || t.status === 'awaitingExecution',
+    )
+  ) {
+    const safeTransactions: Record<string, SafeMultisigTransactionResponse> = (
+      await getSafePendingTransactions(chainId, safeAddress)
+    ).reduce((acc, safeTx) => ({ ...acc, [safeTx.safeTxHash]: safeTx }), {});
+
+    return (
+      transactions?.map((d) => ({
+        ...d,
+        safeTx: safeTransactions[d.safe_tx_hash!],
+        rejectSafeTx: safeTransactions[d.reject_safe_tx_hash!],
+      })) ?? []
+    );
+  }
+
+  return transactions ?? [];
 };
 
-export type getAllProposalsResponse = Awaited<ReturnType<typeof getAllProposals>>;
 export const getAllProposals = async (pool: Pool) => {
-  let query = transationsTable()
-    .select(
-      `
-    *,
-    category:category_id(id, name),
-    user:users(id,name,email)
-  `,
-    )
-    .in('status', ['awaitingConfirmations', 'awaitingExecution'])
-    .filter('pool_id', 'eq', pool.id);
-
-  const safeTransactions: Record<string, SafeMultisigTransactionResponse> = (
-    await getSafePendingTransactions(pool.chain_id, pool.gnosis_safe_address!)
-  ).reduce((acc, safeTx) => ({ ...acc, [safeTx.safeTxHash]: safeTx }), {});
-
-  const { data, error } = await query;
-
-  handleSupabaseError(error);
-  return data?.map((d) => ({
-    ...d,
-    safeTx: safeTransactions[d.safe_tx_hash],
-    rejectSafeTx: safeTransactions[d.reject_safe_tx_hash],
-  }));
+  const filter: Filter<'transactions'> = (query) =>
+    query.in('status', ['awaitingConfirmations', 'awaitingExecution']);
+  return getAllTransactions(pool.id, pool.chain_id, pool.gnosis_safe_address!, filter);
 };
 
 export const getTransactionById = async (txId: number) => {
@@ -471,15 +496,16 @@ export const getTransactionById = async (txId: number) => {
       user:users(id,name,email)
     `,
     )
-    .eq('id', txId);
+    .eq('id', txId)
+    .single();
   handleSupabaseError(error);
 
-  return data?.[0];
+  return data as Transaction | null;
 };
 
 export const refreshTransaction = async (chain_id: number, t: Transaction) => {
   const provider = defaultProvider(chain_id);
-  var tx = await provider.getTransaction(t.hash);
+  var tx = await provider.getTransaction(t.hash!);
   await tx.wait().then(
     async (receipt) => await onTransactionComplete(t, receipt, chain_id),
     async () => await onTransactionFailed,

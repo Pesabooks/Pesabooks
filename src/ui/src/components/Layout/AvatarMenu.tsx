@@ -30,14 +30,14 @@ export const AvatarMenu = () => {
 
   const onSignout = () => {
     navigate('/auth/signin');
-    signOut?.()
+    signOut?.();
   };
 
   return (
     <Menu>
       <MenuButton as={Button} rounded={'full'} variant={'link'} cursor={'pointer'} minW={0}>
         <HStack>
-          <Avatar size={'sm'} name={user?.username} />
+          <Avatar size={'sm'} name={user?.username ?? undefined} />
           <VStack
             display={{ base: 'none', md: 'flex' }}
             alignItems="flex-start"

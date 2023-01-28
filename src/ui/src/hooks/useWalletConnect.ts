@@ -25,7 +25,6 @@ export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
 
   const isConnected = connector?.connected === true;
   const localStorageSessionKey = useRef(`session_${pool.gnosis_safe_address}`);
-  const [uri, setUri] = useState<string>();
 
   const onSessionRequest = useCallback(
     async (connector: WalletConnect, error, payload) => {
@@ -77,14 +76,12 @@ export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
       },
     });
     setConnector(connector);
-    setUri(undefined);
     if (connector.session?.connected) setClientData(connector.session.peerMeta);
   }, []);
 
   const disconnect = useCallback(async () => {
     setConnector(undefined);
     setClientData(null);
-    setUri(undefined);
     setTxRequestPayload(undefined);
     localStorage.removeItem(localStorageSessionKey.current);
     try {
@@ -127,11 +124,11 @@ export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
     }
   }, [connector, connect]);
 
-  useEffect(() => {
-    if (!connector && uri) {
-      connect({ uri });
-    }
-  }, [connector, connect, uri]);
+  // useEffect(() => {
+  //   if (!connector && uri) {
+  //     connect({ uri });
+  //   }
+  // }, [connector, connect, uri]);
 
   useEffect(() => {
     const data: string = txRequestPayload?.params?.[0]?.data;

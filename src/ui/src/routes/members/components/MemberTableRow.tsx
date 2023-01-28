@@ -3,7 +3,13 @@ import {
   Badge,
   Button,
   Flex,
-  Icon, IconButton, Menu, MenuButton, MenuItem, MenuList, Td,
+  Icon,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Td,
   Text,
   Tr,
   useColorModeValue
@@ -14,7 +20,7 @@ import { WalletAddress } from '../../../components/WalletAddress';
 import { usePool } from '../../../hooks/usePool';
 
 interface MembleTableRowProps {
-  name: string | undefined;
+  name?: string | null;
   wallet?: string | undefined;
   active: boolean;
   status: string;
@@ -42,7 +48,7 @@ export const MemberTableRow = ({
   let bgStatus = useColorModeValue('gray.400', '#1a202c');
   let colorStatus = useColorModeValue('white', 'gray.400');
   const { pool } = usePool();
-  const isOrganizer = pool?.organizer.id === id
+  const isOrganizer = pool?.organizer.id === id;
 
   if (isInvitation) {
     bgStatus = 'orange.300';
@@ -56,7 +62,7 @@ export const MemberTableRow = ({
     <Tr>
       <Td minWidth={{ sm: '250px' }} pl="0px">
         <Flex align="center" minWidth="100%" flexWrap="nowrap">
-          <Avatar name={name} w="50px" borderRadius="12px" me="18px" />
+          <Avatar name={name ?? undefined} w="50px" borderRadius="12px" me="18px" />
 
           <Text fontSize="md" color={textColor} fontWeight="bold">
             {name}
@@ -98,12 +104,10 @@ export const MemberTableRow = ({
             variant="ghost"
           />
           <MenuList>
-            <MenuItem  onClick={() => onRemove?.(id)}>
-              Remove
-            </MenuItem>
+            <MenuItem onClick={() => onRemove?.(id)}>Remove</MenuItem>
           </MenuList>
         </Menu>
-      </Td> 
+      </Td>
     </Tr>
   );
 };

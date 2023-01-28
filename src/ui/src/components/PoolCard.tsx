@@ -19,7 +19,7 @@ export const PoolCard = ({ pool }: PoolCardProps) => {
             </Text>
             <AvatarGroup size="xs">
               {pool.members?.map((member, index) => {
-                return <Avatar key={index} name={member.username} />;
+                return <Avatar key={index} name={member.username ?? undefined} />;
               })}
             </AvatarGroup>
           </Flex>

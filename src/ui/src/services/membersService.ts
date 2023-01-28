@@ -1,4 +1,5 @@
 import { handleSupabaseError, membersTable } from '../supabase';
+import { Member } from '../types';
 
 export const getMembers = async (pool_id: string, includeInactive = false) => {
   const query = membersTable()
@@ -15,7 +16,7 @@ export const getMembers = async (pool_id: string, includeInactive = false) => {
 
   const { data, error } = await query;
   handleSupabaseError(error);
-  return data ?? [];
+  return (data as Member[] | null) ?? [];
 };
 
 export const isMemberAdmin = async (userId: string, pool_id: string) => {

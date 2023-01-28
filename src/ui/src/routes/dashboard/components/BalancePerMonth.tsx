@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Card, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
-import { supabase } from '../../../supabase';
 
 const options: ApexOptions = {
   chart: {
@@ -71,7 +70,8 @@ export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await supabase().rpc('get_balance_per_month', { pool_id });
+        // const { data } = await supabase().rpc('get_balance_per_month', { pool_id });
+        const data:any[] = [];
 
         setSeries([{ name: 'Balance', data: data?.map((d) => ({ x: d.month, y: d.balance })) }]);
       } finally {

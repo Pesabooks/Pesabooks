@@ -25,7 +25,7 @@ export const CreatePoolPage = () => {
   const [chainId, setChainId] = useState<number | null>(null);
   const [poolInfo, setPoolInfo] = useState<CreatePoolFormValue>();
   const [members, setMembers] = useState<Partial<Invitation>[]>([
-    { name: user?.username, email: user?.email },
+    { name: user?.username ?? undefined, email: user?.email },
   ]);
 
   const { nextStep, prevStep, setStep, activeStep } = useSteps({

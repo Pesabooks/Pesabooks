@@ -1,6 +1,7 @@
+import { SafeMultisigTransactionResponse } from '@safe-global/safe-core-sdk-types';
 import { Token as ParaswapToken } from 'paraswap';
+import { Table } from '../supabase';
 import { Category } from './Category';
-import { Entity } from './Entity';
 import { TokenBase } from './Token';
 
 export type TransactionType =
@@ -26,25 +27,34 @@ export type TransactionStatus =
   | 'failed'
   | 'rejected';
 
-export interface Transaction extends Entity {
-  safe_nonce?: number;
-  timestamp?: number;
-  category_id?: number;
+type Metadata =
+  | TransferData
+  | AddOrRemoveOwnerData
+  | SwapData
+  | WalletConnectData
+  | ChangeThresholdData;
+
+export type Transaction = Omit<Table<'transactions'>, 'metadata'> & {
   category?: Category;
-  memo?: string;
-  hash: string;
-  safe_tx_hash: string;
-  reject_safe_tx_hash: string;
   status: TransactionStatus;
   type: TransactionType;
-  pool_id: string;
-  metadata:
-    | TransferData
-    | AddOrRemoveOwnerData
-    | SwapData
-    | WalletConnectData
-    | ChangeThresholdData;
-}
+  metadata?: Metadata;
+  safeTx?: SafeMultisigTransactionResponse;
+  rejectSafeTx?: SafeMultisigTransactionResponse;
+};
+
+export type NewTransaction = Omit<
+  Transaction,
+  | 'id'
+  | 'created_at'
+  | 'updated_at'
+  | 'hash'
+  | 'safe_tx_hash'
+  | 'reject_safe_tx_hash'
+  | 'safe_nonce'
+  | 'safe_transaction'
+  | 'user_id'
+>;
 
 export interface TransferData {
   transfer_from?: string;

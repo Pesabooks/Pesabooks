@@ -6,13 +6,15 @@ import { supabase } from '../../../supabase';
 import { Pool } from '../../../types';
 
 export const TransactionsStats = ({ pool }: { pool: Pool }) => {
-  const [state, setState] = useState({ count: null, deposit: null, withdrawal: null });
+  const [state, setState] = useState({ count: 0, deposit: 0, withdrawal: 0 });
 
   useEffect(() => {
     const fetchData = async () => {
       if (!pool.gnosis_safe_address) return;
-      const { data } = await supabase().rpc('get_transactions_stats', { pool_id: pool.id });
-      setState(data?.[0] ?? {});
+      const { data } = await supabase()
+        .rpc('get_transactions_stats', { pool_id: pool.id })
+        .single();
+      if (data?.[0]) setState(data?.[0]);
     };
     fetchData();
   }, [pool]);

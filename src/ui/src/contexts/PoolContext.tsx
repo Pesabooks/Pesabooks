@@ -10,7 +10,7 @@ type PoolContextType = {
   loading: boolean;
   error: any;
   refresh: () => void;
-  isDeployed:boolean
+  isDeployed: boolean;
 };
 
 export const PoolContext = React.createContext<PoolContextType>({
@@ -18,7 +18,7 @@ export const PoolContext = React.createContext<PoolContextType>({
   refresh: () => {},
   error: {},
   pool: undefined,
-  isDeployed:false
+  isDeployed: false,
 });
 
 export const PoolProvider = ({ children }: any) => {
@@ -33,7 +33,7 @@ export const PoolProvider = ({ children }: any) => {
       getPool(pool_id)
         .then((p) => {
           membersTable()
-            .update({ last_viewed_at: new Date() })
+            .update({ last_viewed_at: new Date().toString() })
             .eq('user_id', user?.id)
             .eq('pool_id', pool_id)
             .then();
@@ -55,7 +55,13 @@ export const PoolProvider = ({ children }: any) => {
 
   const refresh = () => fetchPool();
 
-  const value: PoolContextType = { pool, loading, error, refresh, isDeployed: !!pool?.gnosis_safe_address };
+  const value: PoolContextType = {
+    pool,
+    loading,
+    error,
+    refresh,
+    isDeployed: !!pool?.gnosis_safe_address,
+  };
 
   return <PoolContext.Provider value={value}>{children}</PoolContext.Provider>;
 };

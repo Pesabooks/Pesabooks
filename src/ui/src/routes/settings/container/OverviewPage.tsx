@@ -5,7 +5,7 @@ import {
   EditableTextarea,
   HStack,
   Stack,
-  Text,
+  Text
 } from '@chakra-ui/react';
 import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { EditableControls } from '../../../components/Editable/EditableControls';
@@ -57,7 +57,7 @@ export const OverviewPage = () => {
           <HStack>
             <Text w="200px">Description:</Text>
             <Editable
-              defaultValue={pool?.description}
+              defaultValue={pool?.description ?? undefined}
               isPreviewFocusable={false}
               submitOnBlur={false}
               onSubmit={(val) => submit({ description: val })}

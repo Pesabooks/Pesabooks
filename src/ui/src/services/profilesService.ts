@@ -24,7 +24,7 @@ export const getMyProfile = async (user_id: string) => {
 
 export const checkifUsernameExists = async (username: string) => {
   const { data, error } = await supabase()
-    .rpc<boolean>('check_username', {
+    .rpc('check_username', {
       username,
     })
     .single();

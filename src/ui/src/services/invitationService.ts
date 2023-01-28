@@ -1,6 +1,6 @@
 import { SendInvitationRequest } from '@pesabooks/supabase/functions';
 import { handleSupabaseError, invitationsTable, supabase } from '../supabase';
-import { Invitation, Pool } from '../types';
+import { Invitation, NewInvitation, Pool } from '../types';
 
 export const getActiveInvitations = async (pool_id: string) => {
   const { data, error } = await invitationsTable()
@@ -9,7 +9,7 @@ export const getActiveInvitations = async (pool_id: string) => {
     .filter('pool_id', 'eq', pool_id);
 
   handleSupabaseError(error);
-  return data;
+  return data as Invitation[];
 };
 
 export const getActiveInvitationsByEmail = async (email: string) => {
@@ -19,17 +19,17 @@ export const getActiveInvitationsByEmail = async (email: string) => {
     .filter('email', 'eq', email);
 
   handleSupabaseError(error);
-  return data;
+  return data as Invitation[] | null;
 };
 
 export const getInvitation = async (invitation_id: string) => {
   const { data, error } = await supabase()
-    .rpc<Invitation>('get_invitation', { invitation_id })
+    .rpc('get_invitation', { invitation_id })
     .eq('active', true);
 
   handleSupabaseError(error);
 
-  return data?.[0];
+  return data?.[0] as Invitation;
 };
 
 export const invitationExists = async (pool_id: string, email: string) => {
@@ -54,10 +54,10 @@ export const createInvitation = async (
     throw new Error('An invitation already exists for this email');
   }
 
-  const invitation: Partial<Invitation> = {
+  const invitation: NewInvitation = {
     pool_id: pool.id,
     name,
-    email,
+    email: email,
     active: true,
     role: 'member',
     pool_name: pool.name,

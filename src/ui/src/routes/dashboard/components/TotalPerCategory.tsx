@@ -21,10 +21,11 @@ export const TotalPerCategory = ({ pool }: TotalPerCategoryProps) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await supabase().rpc<TotalPerCategoryType>('get_total_per_category', {
+        const { data } = await supabase().rpc('get_total_per_category', {
           pool_id: pool.id,
         });
-        setData(data ?? []);
+        const totalPerCatory = data as TotalPerCategoryType[] | null;
+        setData(totalPerCatory ?? []);
       } finally {
         setIsLoading(false);
       }

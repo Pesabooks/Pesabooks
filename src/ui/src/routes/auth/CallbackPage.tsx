@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../../components/Loading';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
-import { supabase, usersTable } from '../../supabase';
+import { initSupabaseClient, supabase, usersTable } from '../../supabase';
 import {
   clearTypedStorageItem,
   getTypedStorageItem,
@@ -42,9 +42,10 @@ export const CallbackPage = () => {
           throw error;
         }
         setTypedStorageItem('supabase_access_token', data?.access_token ?? '');
+        initSupabaseClient(data?.access_token)
 
         const { data: newUSer } = await usersTable()
-          .upsert({ id: user_id!, wallet: address, email })
+          .upsert({ id: user_id!, wallet: address, email:email! })
           .single();
         if (newUSer) {
           setUser(newUSer);

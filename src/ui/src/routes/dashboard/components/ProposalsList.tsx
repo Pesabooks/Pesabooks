@@ -1,17 +1,17 @@
 import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react';
 import dayjs from 'dayjs';
+import { BiCheckCircle } from 'react-icons/bi';
 import { BsCardList } from 'react-icons/bs';
-import { FaUsers } from 'react-icons/fa';
+import { MdOutlineCancel } from 'react-icons/md';
 import { IconBox } from '../../../components/Icons';
 import Loading from '../../../components/Loading';
 import { TransactionIcon } from '../../../components/TransactionIcon';
-import { getAllProposalsResponse } from '../../../services/transactionsServices';
-import { User } from '../../../types';
+import { Transaction, User } from '../../../types';
 import { getTransactionDescription } from '../../../utils';
 import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';
 
 interface TransactionsListProps {
-  proposals: getAllProposalsResponse;
+  proposals: Transaction[];
   users: User[];
   onSelect: () => void;
   loading: boolean;
@@ -59,13 +59,20 @@ export const ProposalsList = ({ proposals, users, onSelect, loading }: Transacti
               </Flex>
 
               <HStack>
-                <IconBox py={2} px={4} bg="teal" gap={2}>
-                  <Icon as={FaUsers} h={'15px'} w={'15px'} />
+                <IconBox py={2} px={4} gap={2}>
+                  <Icon as={BiCheckCircle} boxSize={5} />
                   <Text fontWeight="bold">
-                    {transaction.safeTx.confirmations?.length}/
-                    {transaction.safeTx.confirmationsRequired}
+                    {transaction.safeTx?.confirmations?.length}/
+                    {transaction.safeTx?.confirmationsRequired}
                   </Text>
                 </IconBox>
+                {transaction.rejectSafeTx && <IconBox py={2} px={4} gap={2} bg="red.500">
+                  <Icon as={MdOutlineCancel} boxSize={5} />
+                  <Text fontWeight="bold">
+                    {transaction.rejectSafeTx?.confirmations?.length}/
+                    {transaction.rejectSafeTx?.confirmationsRequired}
+                  </Text>
+                </IconBox>}
               </HStack>
             </Flex>
           );

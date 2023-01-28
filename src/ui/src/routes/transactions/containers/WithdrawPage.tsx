@@ -19,7 +19,7 @@ import { TextAreaMemoField } from '../components/TextAreaMemoField';
 
 export interface WithdrawFormValue {
   amount: number;
-  memo?: string;
+  memo: string | null;
   user: User;
   category: Category;
 }

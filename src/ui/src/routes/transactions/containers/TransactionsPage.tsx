@@ -1,4 +1,5 @@
-import { Heading, Skeleton } from '@chakra-ui/react';
+import { RepeatIcon } from '@chakra-ui/icons';
+import { Heading, IconButton, Skeleton, Spacer } from '@chakra-ui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
@@ -34,11 +35,15 @@ export const TransactionsPage = () => {
     }
   }, [transactionIdParam]);
 
-  const filter: Filter<Transaction> = useCallback((query) => {
+  const filter: Filter<'transactions'> = useCallback((query) => {
     return query.order('created_at', { ascending: false }).limit(200);
   }, []);
 
-  const { transactions, loading: txsLoading } = useTransactions(pool.id, filter, {
+  const {
+    transactions,
+    loading: txsLoading,
+    refresh,
+  } = useTransactions(pool.id, pool.chain_id, pool.gnosis_safe_address!, filter, {
     useRealTime: true,
   });
 
@@ -103,6 +108,14 @@ export const TransactionsPage = () => {
           <Heading as="h2" mb={4} size="lg">
             Transations
           </Heading>
+          <Spacer />
+          <IconButton
+            variant="ghost"
+            onClick={refresh}
+            isLoading={txsLoading}
+            aria-label="Search database"
+            icon={<RepeatIcon />}
+          />
         </CardHeader>
 
         <CardBody>

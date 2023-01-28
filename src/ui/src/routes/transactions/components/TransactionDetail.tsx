@@ -90,10 +90,10 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   const [currentSafeNonce, setCurrentSafeNonce] = useState(0);
   const [users, setUsers] = useState<User[]>([]);
   const [transactions, setTransactions] = useState<{
-    transaction: Transaction | undefined;
-    safeTransaction: SafeMultisigTransactionResponse | undefined;
-    safeRejectionTransaction: SafeMultisigTransactionResponse | undefined;
-  }>({ transaction: undefined, safeTransaction: undefined, safeRejectionTransaction: undefined });
+    transaction: Transaction | null;
+    safeTransaction: SafeMultisigTransactionResponse | null;
+    safeRejectionTransaction: SafeMultisigTransactionResponse | null;
+  }>({ transaction: null, safeTransaction: null, safeRejectionTransaction: null });
   const [categories, setCategories] = useState<Category[]>([]);
   const toast = useToast();
   const signer = (provider as Web3Provider)?.getSigner();
@@ -101,9 +101,9 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   const { transaction, safeTransaction, safeRejectionTransaction } = transactions;
 
   const loadTransaction = async (id: number) => {
-    let transaction: Transaction | undefined;
-    let safeTransaction: SafeMultisigTransactionResponse | undefined = undefined;
-    let safeRejectionTransaction: SafeMultisigTransactionResponse | undefined = undefined;
+    let transaction: Transaction | null;
+    let safeTransaction: SafeMultisigTransactionResponse | null = null;
+    let safeRejectionTransaction: SafeMultisigTransactionResponse | null = null;
 
     transaction = await getTransactionById(id);
     if (pool && transaction?.safe_tx_hash)
@@ -120,7 +120,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   useEffect(() => {
     const fetchData = async () => {
       if (pool) {
-        getMembers(pool.id,true).then((members) => setUsers(members?.map((m) => m.user!)));
+        getMembers(pool.id, true).then((members) => setUsers(members?.map((m) => m.user!)));
         getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!).then(setTreshold);
         getSafeNonce(pool.chain_id, pool.gnosis_safe_address!).then(setCurrentSafeNonce);
         getAllCategories(pool.id, { activeOnly: true }).then(setCategories);
@@ -166,7 +166,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     try {
       setIsSubmitting(true);
 
-      await confirmTransaction(signer, pool, transaction.id, transaction?.safe_tx_hash);
+      await confirmTransaction(signer, pool, transaction.id, transaction?.safe_tx_hash!);
       loadTransaction(transaction.id);
       toast({ title: 'You approved the transaction', status: 'success' });
     } finally {
@@ -179,7 +179,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     const safeTxHash = isRejection ? transaction?.reject_safe_tx_hash : transaction?.safe_tx_hash;
     const type = isRejection ? 'rejection' : transaction!.type;
 
-    reviewTxRef.current?.open(message, type, isRejection, execute, safeTxHash);
+    reviewTxRef.current?.open(message, type, isRejection, execute, safeTxHash!);
   };
 
   const execute = async (confirmed: boolean, isRejection: boolean) => {
@@ -191,7 +191,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
       setIsSubmitting(true);
       submittingRef.current?.open(transaction.type);
       try {
-        await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address!, safeTxHash);
+        await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address!, safeTxHash!);
       } catch (_) {
         toast({
           title:
@@ -201,7 +201,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
         });
       }
 
-      await executeTransaction(signer, pool, transaction, safeTxHash, isRejection);
+      await executeTransaction(signer, pool, transaction, safeTxHash!, isRejection);
       loadTransaction(transaction.id);
     } catch (e: any) {
       toast({
@@ -235,9 +235,9 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   const closeDrawer = () => {
     onClose();
     setTransactions({
-      transaction: undefined,
-      safeTransaction: undefined,
-      safeRejectionTransaction: undefined,
+      transaction: null,
+      safeTransaction: null,
+      safeRejectionTransaction: null,
     });
     setLoading(true);
   };
@@ -419,14 +419,14 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                     onSelect={(categoryId) =>
                       updateTransactionCategory(transaction?.id ?? 0, +categoryId)
                     }
-                    defaultValue={transaction?.category_id}
+                    defaultValue={transaction?.category_id ?? undefined}
                     options={categories.map((c) => ({ value: c.id, name: c.name }))}
                   />
                 </TxPropertyBox>
 
                 <TxPropertyBox label="Memo">
                   <Editable
-                    defaultValue={transaction?.memo}
+                    defaultValue={transaction?.memo ?? undefined}
                     isPreviewFocusable={false}
                     submitOnBlur={false}
                     onSubmit={(val) => updateTransactionMemo(transaction?.id ?? 0, val)}
@@ -452,7 +452,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                 <TransactionTimeline
                   mt={10}
                   isExecuted={isExecuted}
-                  executionTimestamp={transaction?.timestamp}
+                  executionTimestamp={transaction?.timestamp!}
                   submissionDate={safeTransaction?.submissionDate}
                   users={users}
                   confirmations={confirmations}

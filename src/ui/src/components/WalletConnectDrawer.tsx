@@ -43,7 +43,7 @@ import {
 import { getAllCategories } from '../services/categoriesService';
 import { createSafeTransaction } from '../services/gnosisServices';
 import { submitTransaction } from '../services/transactionsServices';
-import { Category, Transaction } from '../types';
+import { Category, NewTransaction } from '../types';
 import { checksummed } from '../utils';
 import { shortenString } from '../utils/string-utils';
 import { Card, CardHeader } from './Card';
@@ -65,7 +65,8 @@ export const WalletConnectDrawer = () => {
     disconnect,
     txRequestPayload,
     onTxSumitted,
-    reject,functionName
+    reject,
+    functionName,
   } = useWalletConnectV1(pool!);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -96,16 +97,17 @@ export const WalletConnectDrawer = () => {
       params: [{ data, gas, gasPrice, to, value }],
     } = txRequestPayload;
 
-    const transaction: Partial<Transaction> = {
+    const transaction: NewTransaction = {
       type: 'walletConnect',
       pool_id: pool.id,
       timestamp: Math.floor(new Date().valueOf() / 1000),
       category_id: category.id,
-      memo,
+      memo: memo ?? null,
+      status: 'pending',
       metadata: {
-        peer_data: clientData??undefined,
+        peer_data: clientData ?? undefined,
         payload: txRequestPayload,
-        functionName: functionName
+        functionName: functionName,
       },
     };
 

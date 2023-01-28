@@ -56,7 +56,7 @@ export const ReviewAndSubmitTransaction = forwardRef(
       openSubmitting: (type: TransactionType, description?: string) =>
         submittingRef.current?.open(type, description),
       closeSubmitting: () => submittingRef.current?.close(),
-      openTxSubmitted: (type: TransactionType, hash: string, internalTxId?: number) =>
+      openTxSubmitted: (type: TransactionType, hash: string | null, internalTxId?: number) =>
         txSubmittedRef.current?.open(type, hash, internalTxId),
     }));
 

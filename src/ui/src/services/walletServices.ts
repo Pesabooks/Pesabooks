@@ -202,7 +202,7 @@ export const purchaseToken = async (
   finalTxHash: string | undefined,
   token: TokenBase,
 ) => {
-  const activity: Partial<Activity> = {
+  const activity = {
     type: 'purchase',
     status: 'pending',
     timestamp: Math.floor(new Date().valueOf() / 1000),
@@ -230,7 +230,7 @@ export const getAllActivities = async (chainId: number, pageSize: number, pageIn
   const from = pageIndex * pageSize;
   const to = from + pageSize - 1;
   const { data, count } = await supabase()
-    .rpc<Activity>(
+    .rpc(
       'get_user_activities',
       {
         chain_id: chainId,
@@ -241,7 +241,7 @@ export const getAllActivities = async (chainId: number, pageSize: number, pageIn
     )
     .range(from, to);
 
-  return { data: data ?? [], total: count ?? 0 };
+  return { data: (data as Activity[] | null) ?? [], total: count ?? 0 };
 };
 
 const fee = async (provider: Web3Provider, gasLimit: BigNumber) => {

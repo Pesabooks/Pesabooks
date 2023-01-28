@@ -1,7 +1,6 @@
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
-import { createClient, PostgrestError } from '@supabase/supabase-js';
-import { Activity, Category, Invitation, Pool, Token, Transaction, User } from './types';
-import { Member } from './types/Member';
+import { createClient, PostgrestError, SupabaseClient } from '@supabase/supabase-js';
+import { Database } from './types/database';
 import { isTokenExpired } from './utils/jwt-utils';
 import { getTypedStorageItem } from './utils/storage-utils';
 
@@ -11,32 +10,56 @@ const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase configs are missing');
 }
-const _supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+const _anonSupabaseClient: SupabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
+let _supabaseClient: SupabaseClient;
 
-export const supabase = () => {
-  const access_token = getTypedStorageItem('supabase_access_token');
+export const initSupabaseClient = (access_token?: string) => {
+  if (!access_token) {
+    access_token = getTypedStorageItem('supabase_access_token') ?? undefined;
+  }
   if (access_token) {
     const isExpired = isTokenExpired(access_token);
     if (!isExpired) {
-      _supabaseClient.auth.setAuth(access_token);
+      _supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+        realtime: {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        },
+        global: {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        },
+      });
     }
-  } else {
-    _supabaseClient.auth.setAuth(supabaseAnonKey);
   }
-
-  return _supabaseClient;
 };
 
-export type Filter<Data> = (query: PostgrestFilterBuilder<Data>) => PostgrestFilterBuilder<Data>;
+export const supabase = () => {
+  return _supabaseClient ?? _anonSupabaseClient;
+};
 
-export const usersTable = () => supabase().from<User>('users');
-export const transationsTable = () => supabase().from<Transaction>('transactions');
-export const poolsTable = () => supabase().from<Pool>('pools');
-export const tokensTable = () => supabase().from<Token>('tokens');
-export const categoriesTable = () => supabase().from<Category>('categories');
-export const membersTable = () => supabase().from<Member>('members');
-export const invitationsTable = () => supabase().from<Invitation>('invitations');
-export const activitiesTable = () => supabase().from<Activity>('activities');
+type Schema = Database['public'];
+
+export type Table<TableName extends string & keyof Schema['Tables']> =
+  Database['public']['Tables'][TableName]['Row'];
+
+export type QueryBuilder<TableName extends string & keyof Schema['Tables']> =
+  PostgrestFilterBuilder<Schema, Schema['Tables'][TableName]['Row'], any>;
+
+export type Filter<TableName extends string & keyof Schema['Tables']> = (
+  query: QueryBuilder<TableName>,
+) => QueryBuilder<TableName>;
+
+export const usersTable = () => supabase().from('users');
+export const transationsTable = () => supabase().from('transactions');
+export const poolsTable = () => supabase().from('pools');
+export const tokensTable = () => supabase().from('tokens');
+export const categoriesTable = () => supabase().from('categories');
+export const membersTable = () => supabase().from('members');
+export const invitationsTable = () => supabase().from('invitations');
+export const activitiesTable = () => supabase().from('activities');
 export const handleSupabaseError = (error: PostgrestError | null) => {
   if (error) {
     if (error.message === 'JWT expired') {
@@ -45,3 +68,5 @@ export const handleSupabaseError = (error: PostgrestError | null) => {
     throw error;
   }
 };
+
+initSupabaseClient();

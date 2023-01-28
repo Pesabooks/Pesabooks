@@ -11,7 +11,8 @@ export const getAllCategories = async (pool_id: string, options?: { activeOnly: 
   const { data, error } = await query;
 
   handleSupabaseError(error);
-  return data ?? [];
+
+  return (data as Category[] | null) ?? [];
 };
 
 export const editCategory = async (id: number, category: Partial<Category>) => {

@@ -1,5 +1,4 @@
 import { Flex, SimpleGrid, Text } from '@chakra-ui/react';
-import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaArrowDown, FaArrowUp, FaWallet } from 'react-icons/fa';
@@ -10,8 +9,8 @@ import { usePool } from '../../hooks/usePool';
 import { useTransactions } from '../../hooks/useTransactions';
 import { getBalances, TokenBalance } from '../../services/covalentServices';
 import { getMembers } from '../../services/membersService';
-import { getAllProposals, getAllProposalsResponse } from '../../services/transactionsServices';
-import { supabase } from '../../supabase';
+import { getAllProposals } from '../../services/transactionsServices';
+import { QueryBuilder, supabase } from '../../supabase';
 import { Transaction, User } from '../../types';
 import { TransactionsTable } from '../transactions/components/TransactionsTable';
 import { AssetsList } from './components/AssetsList';
@@ -24,8 +23,8 @@ export const DashboardPage = () => {
   const [balances, setBalances] = useState<TokenBalance[]>([]);
   const [loading, setLoading] = useState(true);
   const [proposalsLoading, setProposalsLoading] = useState(true);
-  const [txStats, setTxStats] = useState({ count: null, deposit: null, withdrawal: null });
-  const [proposals, setProposals] = useState<getAllProposalsResponse>();
+  const [txStats, setTxStats] = useState({ count: 0, deposit: 0, withdrawal: 0 });
+  const [proposals, setProposals] = useState<Transaction[]>([]);
   const navigate = useNavigate();
 
   const total = balances.reduce((balance, resp) => balance + resp.quote, 0);
@@ -37,16 +36,22 @@ export const DashboardPage = () => {
     throw new Error();
   }
 
-  const filter = useCallback((query: PostgrestFilterBuilder<Transaction>) => {
+  const filter = useCallback((query: QueryBuilder<'transactions'>) => {
     return query
       .order('created_at', { ascending: false })
       .in('status', ['completed', 'rejected'])
       .limit(5);
   }, []);
 
-  const { transactions, loading: txLoading } = useTransactions(pool.id, filter, {
-    useRealTime: true,
-  });
+  const { transactions, loading: txLoading } = useTransactions(
+    pool.id,
+    pool.chain_id,
+    pool.gnosis_safe_address!,
+    filter,
+    {
+      useRealTime: true,
+    },
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,7 +65,10 @@ export const DashboardPage = () => {
 
           await supabase()
             .rpc('get_transactions_stats', { pool_id: pool.id })
-            .then(({ data }) => setTxStats(data?.[0] ?? {}));
+            .single()
+            .then(({ data }) => {
+              if (data) setTxStats(data);
+            });
         }
       } finally {
         setLoading(false);
@@ -89,7 +97,7 @@ export const DashboardPage = () => {
       </Helmet>
       <CreateTeamSafe />
       {isDeployed && (
-        <Flex direction='column'>
+        <Flex direction="column">
           <SimpleGrid mb={4} columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
             <BalanceCard
               description={`$ ${total.toFixed(2)}`}
@@ -152,7 +160,7 @@ export const DashboardPage = () => {
           <Card mt="8">
             <CardHeader p="6px 0px 22px 0px">
               <Text fontSize="lg" fontWeight="bold">
-                Latest Transactions
+                Last 5 Transactions
               </Text>
             </CardHeader>
             <CardBody>

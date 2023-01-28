@@ -1,7 +1,7 @@
-import { RealtimeSubscription, SupabaseRealtimePayload } from '@supabase/supabase-js';
-import { useEffect, useReducer } from 'react';
+import { RealtimeChannel } from '@supabase/supabase-js';
+import { useCallback, useEffect, useReducer } from 'react';
 import { getAllTransactions, getTransactionById } from '../services/transactionsServices';
-import { Filter, supabase, transationsTable } from '../supabase';
+import { Filter, supabase } from '../supabase';
 import { Transaction } from '../types';
 
 type State = {
@@ -55,44 +55,58 @@ const reducer = (state: State, action: Action): State => {
 
 export function useTransactions(
   pool_id: string,
-  filter?: Filter<Transaction>,
+  chainId: number,
+  safeAddress: string,
+  filter?: Filter<'transactions'>,
   config?: { useRealTime?: boolean; includeFailedTx?: boolean },
-): { transactions: Transaction[]; loading: boolean; error: any } {
+): { transactions: Transaction[]; loading: boolean; error: any; refresh: () => void } {
   const [{ transactions, loading, error }, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
-    const getInitialData = async () => {
-      try {
-        const data = await getAllTransactions(pool_id, filter);
-        dispatch({ type: 'INIT', data: data });
-      } catch (error) {
-        dispatch({ type: 'ERROR', data: error });
-      }
-    };
-    getInitialData();
-  }, [filter, pool_id]);
+  const getInitialData = useCallback(async () => {
+    try {
+      const data = await getAllTransactions(pool_id, chainId, safeAddress, filter);
+      dispatch({ type: 'INIT', data: data });
+    } catch (error) {
+      dispatch({ type: 'ERROR', data: error });
+    }
+  }, [chainId, filter, pool_id, safeAddress]);
 
   useEffect(() => {
-    const asyncDispatch = (payload: SupabaseRealtimePayload<Transaction>) => {
-      getTransactionById(payload.new.id).then((transation) => {
-        dispatch({ type: payload.eventType, data: transation });
+    getInitialData();
+  }, [getInitialData]);
+
+  useEffect(() => {
+    const asyncDispatch = (eventType: 'INSERT' | 'UPDATE' | 'DELETE', transactonId: number) => {
+      getTransactionById(transactonId).then((transation) => {
+        dispatch({ type: eventType, data: transation });
       });
     };
 
-    let sub: RealtimeSubscription;
+    let sub: RealtimeChannel;
     if (!loading && config?.useRealTime) {
-      sub = transationsTable()
-        .on('*', (payload) => {
-          if (payload.new.pool_id === pool_id) {
-            asyncDispatch(payload);
-          }
-        })
+      sub = supabase()
+        .channel('any')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'transactions' },
+          (payload) => {
+            const t = payload.new as Transaction;
+            if (t.pool_id === pool_id) {
+              asyncDispatch(payload.eventType, t.id);
+            }
+          },
+        )
         .subscribe();
     }
     return () => {
-      if (sub) supabase().removeSubscription(sub);
+      if (sub) supabase().removeChannel(sub);
     }; // clean up
   }, [config?.useRealTime, loading, pool_id]);
 
-  return { transactions, loading, error };
+  return {
+    transactions,
+    loading,
+    error,
+    refresh: getInitialData,
+  };
 }

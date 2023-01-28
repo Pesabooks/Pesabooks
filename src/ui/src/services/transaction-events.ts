@@ -1,12 +1,12 @@
 import { ContractReceipt, ContractTransaction } from 'ethers';
 import { transationsTable } from '../supabase';
-import { AddOrRemoveOwnerData, Transaction } from '../types/transaction';
+import { AddOrRemoveOwnerData, NewTransaction, Transaction } from '../types/transaction';
 import { notifyTransaction } from '../utils/notification';
 import { defaultProvider } from './blockchainServices';
 import { deactivateMember } from './membersService';
 
 export const onTransactionSubmitted = async (
-  transaction: Partial<Transaction>,
+  transaction: Transaction | NewTransaction,
   tx: ContractTransaction | undefined,
   chainId: number,
   isRejection: boolean,
@@ -26,7 +26,7 @@ export const onTransactionSubmitted = async (
 };
 
 export const onTransactionComplete = async (
-  transaction: Partial<Transaction>,
+  transaction: Transaction | NewTransaction,
   receipt: ContractReceipt,
   chainId: number,
   isRejection: boolean = false,
@@ -42,7 +42,7 @@ export const onTransactionComplete = async (
   }
 };
 
-const afterTransactionComplete = async (transaction: Partial<Transaction>) => {
+const afterTransactionComplete = async (transaction: Transaction | NewTransaction) => {
   try {
     if (transaction.type === 'removeOwner') {
       const metadata = transaction.metadata as AddOrRemoveOwnerData;

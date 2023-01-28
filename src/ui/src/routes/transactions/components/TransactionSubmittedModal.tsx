@@ -22,7 +22,7 @@ import { getTxScanLink } from '../../../services/transactionsServices';
 import { TransactionType } from '../../../types';
 import { getTransactionTypeLabel } from '../../../utils';
 
-export type openTxSubmittedModal = (type: TransactionType, hash: string, internalTxId?: number) => void;
+export type openTxSubmittedModal = (type: TransactionType, hash: string|null, internalTxId?: number) => void;
 
 export interface TransactionSubmittedModalRef {
   open: openTxSubmittedModal;
@@ -36,10 +36,10 @@ export const TransactionSubmittedModal = forwardRef(
   ({ chainId }: TransactionSubmittedModalProps, ref: Ref<TransactionSubmittedModalRef>) => {
     const { isOpen, onClose, onOpen } = useDisclosure();
     const [state, setState] =
-      useState<{ type: TransactionType; internalTxId?: number; hash: string }>();
+      useState<{ type: TransactionType; internalTxId?: number; hash: string|null }>();
 
     useImperativeHandle(ref, () => ({
-      open: (type: TransactionType, hash: string, internalTxId?: number) => {
+      open: (type: TransactionType, hash: string|null, internalTxId?: number) => {
         setState({ type, hash, internalTxId });
         onOpen();
       },
