@@ -3,6 +3,7 @@ import { useCallback, useEffect, useReducer } from 'react';
 import { getAllTransactions, getTransactionById } from '../services/transactionsServices';
 import { Filter, supabase } from '../supabase';
 import { Transaction } from '../types';
+import { getTypedStorageItem } from '../utils/storage-utils';
 
 type State = {
   transactions: Transaction[];
@@ -82,13 +83,14 @@ export function useTransactions(
       });
     };
 
+    const client = supabase(true);
     let sub: RealtimeChannel;
     if (!loading && config?.useRealTime) {
-      sub = supabase()
+      sub = client
         .channel('any')
         .on(
           'postgres_changes',
-          { event: '*', schema: 'public', table: 'transactions' },
+          { event: '*', schema: 'public', table: 'transactions', filter: `pool_id=eq.${pool_id}` },
           (payload) => {
             const t = payload.new as Transaction;
             if (t.pool_id === pool_id) {
@@ -96,10 +98,17 @@ export function useTransactions(
             }
           },
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('status: ', status);
+          if (status === 'SUBSCRIBED') {
+            const access_token = getTypedStorageItem('supabase_access_token');
+            // @ts-ignore
+            client.realtime.setAuth(access_token);
+          }
+        });
     }
     return () => {
-      if (sub) supabase().removeChannel(sub);
+      if (sub) client.removeChannel(sub);
     }; // clean up
   }, [config?.useRealTime, loading, pool_id]);
 

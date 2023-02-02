@@ -31,7 +31,12 @@ serve(async (req) => {
       role: "authenticated",
     };
 
-    const jwt = await new jose.SignJWT(token).setProtectedHeader({ alg: "HS256" }).sign(buffer);
+    const jwt = await new jose.SignJWT(token)
+      .setProtectedHeader({
+        alg: "HS256",
+        typ: "JWT",
+      })
+      .sign(buffer);
 
     const response: GetAccessTokenResponse = {
       access_token: jwt,

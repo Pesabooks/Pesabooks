@@ -36,7 +36,9 @@ export const initSupabaseClient = (access_token?: string) => {
   }
 };
 
-export const supabase = () => {
+export const supabase = (forRealtime = false) => {
+  if (forRealtime) return _anonSupabaseClient;
+
   return _supabaseClient ?? _anonSupabaseClient;
 };
 
