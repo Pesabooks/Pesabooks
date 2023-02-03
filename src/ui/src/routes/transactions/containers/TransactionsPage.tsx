@@ -35,7 +35,7 @@ export const TransactionsPage = () => {
   }, [transactionIdParam]);
 
   const filter: Filter<'transactions'> = useCallback((query) => {
-    return query.order('created_at', { ascending: false }).limit(200);
+    return query.order('timestamp', { ascending: false }).limit(200);
   }, []);
 
   const { transactions, loading: txsLoading } = useTransactions(

@@ -38,7 +38,7 @@ export const DashboardPage = () => {
 
   const filter = useCallback((query: QueryBuilder<'transactions'>) => {
     return query
-      .order('created_at', { ascending: false })
+      .order('timestamp', { ascending: false })
       .in('status', ['completed', 'rejected'])
       .limit(5);
   }, []);
