@@ -32,10 +32,9 @@ export const isMemberAdmin = async (userId: string, pool_id: string) => {
 
 //deactivate member
 export const deactivateMember = async (pool_id: string, user_id: string) => {
-  const { data, error } = await membersTable()
+  const { error } = await membersTable()
     .update({ active: false, inactive_reason: 'Removed' })
     .eq('pool_id', pool_id)
     .eq('user_id', user_id);
   handleSupabaseError(error);
-  return data;
 };

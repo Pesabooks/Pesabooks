@@ -63,10 +63,10 @@ export const createInvitation = async (
     pool_name: pool.name,
     invited_by: username,
   };
-  const { data, error } = await invitationsTable().insert(invitation);
+  const { data, error } = await invitationsTable().insert(invitation).select().single();
   handleSupabaseError(error);
 
-  const newIinvitation = data?.[0];
+  const newIinvitation = data as Invitation;
   sendInvitation(newIinvitation!);
 
   return newIinvitation;

@@ -33,7 +33,7 @@ export const PoolProvider = ({ children }: any) => {
       getPool(pool_id)
         .then((p) => {
           membersTable()
-            .update({ last_viewed_at: new Date().toString() })
+            .update({ last_viewed_at: new Date().toDateString() })
             .eq('user_id', user?.id)
             .eq('pool_id', pool_id)
             .then();

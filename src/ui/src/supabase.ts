@@ -1,4 +1,4 @@
-import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
+import { PostgrestFilterBuilder, PostgrestQueryBuilder } from '@supabase/postgrest-js';
 import { createClient, PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 import { Database } from './types/database';
 import { isTokenExpired } from './utils/jwt-utils';
@@ -44,24 +44,27 @@ export const supabase = (forRealtime = false) => {
 
 type Schema = Database['public'];
 
-export type Table<TableName extends string & keyof Schema['Tables']> =
-  Database['public']['Tables'][TableName]['Row'];
+type TableName = string & keyof Schema['Tables'];
 
-export type QueryBuilder<TableName extends string & keyof Schema['Tables']> =
-  PostgrestFilterBuilder<Schema, Schema['Tables'][TableName]['Row'], any>;
+export type Table<T extends TableName> = Schema['Tables'][T]['Row'];
 
-export type Filter<TableName extends string & keyof Schema['Tables']> = (
-  query: QueryBuilder<TableName>,
-) => QueryBuilder<TableName>;
+export type QueryBuilder<T extends TableName> = PostgrestFilterBuilder<Schema, Table<T>, any>;
 
-export const usersTable = () => supabase().from('users');
-export const transationsTable = () => supabase().from('transactions');
-export const poolsTable = () => supabase().from('pools');
-export const tokensTable = () => supabase().from('tokens');
-export const categoriesTable = () => supabase().from('categories');
-export const membersTable = () => supabase().from('members');
-export const invitationsTable = () => supabase().from('invitations');
-export const activitiesTable = () => supabase().from('activities');
+export type Filter<T extends TableName> = (query: QueryBuilder<T>) => QueryBuilder<T>;
+
+const getTable = <T extends TableName>(
+  tableName: T,
+): PostgrestQueryBuilder<Schema, Schema['Tables'][T]> => supabase().from(tableName);
+
+export const usersTable = () => getTable('users');
+export const transationsTable = () => getTable('transactions');
+export const poolsTable = () => getTable('pools');
+export const tokensTable = () => getTable('tokens');
+export const categoriesTable = () => getTable('categories');
+export const membersTable = () => getTable('members');
+export const invitationsTable = () => getTable('invitations');
+export const activitiesTable = () => getTable('activities');
+
 export const handleSupabaseError = (error: PostgrestError | null) => {
   if (error) {
     if (error.message === 'JWT expired') {

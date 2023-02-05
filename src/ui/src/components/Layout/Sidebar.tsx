@@ -5,6 +5,7 @@ import { Link as reactRouterLink, NavLink } from 'react-router-dom';
 import { Logo } from './Logo';
 import { NavLinkButton } from './NavLinkButton';
 import { Separator } from './Separator';
+import { SidebarHelp } from './SidebarHelp';
 
 interface SidebarProps extends BoxProps {
   onClose: () => void;
@@ -75,6 +76,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
       <Stack direction="column" mb="40px">
         {createLinks(routes)}
       </Stack>
+      <SidebarHelp></SidebarHelp>
     </Box>
   );
 };

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaEdit, FaEthereum, FaUsers } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
-import { Navbar } from '../../components/Layout/Navbar';
+import { NavbarLight } from '../../components/Layout/NavbarLight';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { createInvitation } from '../../services/invitationService';
 import { createNewPool } from '../../services/poolsService';
@@ -108,8 +108,8 @@ export const CreatePoolPage = () => {
       <Helmet>
         <title>Create Group</title>
       </Helmet>
+        <NavbarLight  />
       <Flex direction="column" minH="100vh" align="center" pt={{ sm: '125px', lg: '75px' }}>
-        <Navbar />
         <Flex direction="column" textAlign="center" mb={{ sm: '25px', md: '45px' }}>
           <Text fontSize={{ sm: '2xl', md: '3xl', lg: '4xl' }} fontWeight="bold" mb="8px">
             Create Group

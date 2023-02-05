@@ -46,7 +46,7 @@ export const Auth = () => {
           >
             <Logo theme="light" />
             <Text fontSize="lg" color="white" fontWeight="bold" mt="10px" mb="26px">
-              Your digital crypto-powered platform for saving groups
+              Save and invest together with crypto
             </Text>
           </Flex>
         </Box>

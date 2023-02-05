@@ -108,7 +108,7 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
                   fieldState: { invalid, error },
                 }) => (
                   <FormControl isInvalid={invalid} isRequired>
-                    <FormLabel htmlFor="token">token</FormLabel>
+                    <FormLabel htmlFor="token">Accepts deposits in</FormLabel>
                     <Select
                       name={name}
                       ref={ref}
@@ -127,7 +127,7 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
               />
             </Stack>
 
-            <Flex justify="space-between" mt="100px">
+            <Flex justify="space-between" mt="150px">
               <Button
                 variant="outline"
                 alignSelf="flex-end"

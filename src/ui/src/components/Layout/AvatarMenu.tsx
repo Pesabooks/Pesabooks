@@ -15,6 +15,7 @@ import {
   Spacer,
   Text,
   useColorMode,
+  useColorModeValue,
   VStack
 } from '@chakra-ui/react';
 import { FiChevronDown } from 'react-icons/fi';
@@ -33,9 +34,18 @@ export const AvatarMenu = () => {
     signOut?.();
   };
 
+  const txtColor = useColorModeValue('black', 'white');
+
   return (
     <Menu>
-      <MenuButton as={Button} rounded={'full'} variant={'link'} cursor={'pointer'} minW={0}>
+      <MenuButton
+        as={Button}
+        rounded="full"
+        variant="ghost"
+        cursor={'pointer'}
+        minW={0}
+        color={txtColor}
+      >
         <HStack>
           <Avatar size={'sm'} name={user?.username ?? undefined} />
           <VStack
@@ -45,9 +55,7 @@ export const AvatarMenu = () => {
             ml="2"
           >
             <Text fontSize="sm">{user?.username}</Text>
-            <Text fontSize="xs" color="gray.600">
-              {user?.wallet && shortenHash(user?.wallet)}
-            </Text>
+            <Text fontSize="xs">{user?.wallet && shortenHash(user?.wallet)}</Text>
           </VStack>
           <Box display={{ base: 'none', md: 'flex' }}>
             <FiChevronDown />

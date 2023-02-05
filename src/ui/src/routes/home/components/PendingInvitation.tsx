@@ -20,7 +20,7 @@ import {
   Thead,
   Tr,
   useDisclosure,
-  useToast,
+  useToast
 } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { Card } from '../../../components/Card';
@@ -72,7 +72,7 @@ export const PendingInvitation = ({ onAccepted }: PendingInvitationProps) => {
 
   return invitations.length > 0 ? (
     <>
-      <Card px={10} py={1} w={{ sm: 'calc(100vw - 30px)', xl: 'calc(100vw - 75px - 275px)' }}>
+      <Card px={10} py={1} >
         <Flex gap={5} align="center">
           <EmailIcon />
           <Text> You have {invitations.length} pending group invitations</Text>

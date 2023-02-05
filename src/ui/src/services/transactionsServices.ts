@@ -348,14 +348,17 @@ export const submitTransaction = async (
       pool.gnosis_safe_address!,
       safeTransaction,
     );
-    const { data } = await transationsTable().insert({
-      ...transaction,
-      safe_tx_hash: safeTxHash,
-      safe_nonce: safeTransaction.data.nonce,
-      status: 'awaitingConfirmations',
-    });
+    const { data } = await transationsTable()
+      .insert({
+        ...transaction,
+        safe_tx_hash: safeTxHash,
+        safe_nonce: safeTransaction.data.nonce,
+        status: 'awaitingConfirmations',
+      })
+      .select()
+      .single();
 
-    return data?.[0];
+    return data as Transaction;
   } else if (treshold === 1) {
     const safeTxHash = await getSafeTransactionHash(
       signer,
@@ -374,6 +377,7 @@ export const submitTransaction = async (
       })
       .select()
       .single();
+
     onTransactionSubmitted(transaction, tx, pool.chain_id, false);
     return data as Transaction;
   }

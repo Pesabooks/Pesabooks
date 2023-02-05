@@ -1,6 +1,5 @@
 import { QuestionIcon } from '@chakra-ui/icons';
 import { Button, Flex, FlexProps, Link, Text } from '@chakra-ui/react';
-import React from 'react';
 import { IconBox } from '../Icons';
 
 interface SidebarHelpProps extends FlexProps {}
@@ -22,16 +21,12 @@ export function SidebarHelp(props: SidebarHelpProps) {
         <QuestionIcon color="teal.300" h="18px" w="18px" />
       </IconBox>
       <Text fontSize="sm" color="white" fontWeight="bold">
-        Need tokens for testing?
+        Need help?
       </Text>
       <Text fontSize="xs" color="white" mb="10px">
         Please check our docs
       </Text>
-      <Link
-        w="100%"
-        isExternal
-        href="https://season-tangelo-df2.notion.site/Testing-Pesabooks-on-Polygon-Testnet-1dbd6d2c0da1473cb06d32efc36e2408"
-      >
+      <Link w="100%" isExternal href="https://docs.pesabooks.com">
         <Button
           fontSize="10px"
           fontWeight="bold"
@@ -48,7 +43,7 @@ export function SidebarHelp(props: SidebarHelpProps) {
           }}
           color="black"
         >
-          Testing Pesabooks
+          DOCUMENTATION
         </Button>
       </Link>
     </Flex>

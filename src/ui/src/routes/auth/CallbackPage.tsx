@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Loading from '../../components/Loading';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { initSupabaseClient, supabase, usersTable } from '../../supabase';
+import { User } from '../../types';
 import {
   clearTypedStorageItem,
   getTypedStorageItem,
@@ -42,14 +43,14 @@ export const CallbackPage = () => {
           throw error;
         }
         setTypedStorageItem('supabase_access_token', data?.access_token ?? '');
-        initSupabaseClient(data?.access_token)
+        initSupabaseClient(data?.access_token);
 
         const { data: newUSer } = await usersTable()
-          .upsert({ id: user_id!, wallet: address, email:email! })
+          .upsert({ id: user_id!, wallet: address, email: email! })
+          .select()
           .single();
-        if (newUSer) {
-          setUser(newUSer);
-        }
+
+        setUser(newUSer as User);
 
         const returnUrl = getTypedStorageItem('redirect_url') ?? '/';
         navigate(returnUrl);
