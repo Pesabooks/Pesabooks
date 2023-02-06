@@ -97,9 +97,9 @@ export const SignInPage = () => {
               status: 'error',
               isClosable: true,
             });
+            setIsLoading(false);
           } finally {
             setHasTriedSignin(true);
-            setIsLoading(false);
           }
         }
       }

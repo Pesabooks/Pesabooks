@@ -160,10 +160,7 @@ export const Web3AuthProvider = ({ children }: any) => {
       return;
     }
 
-    clearTypedStorageItem('supabase_access_token');
     await FirebaseSignOut(firebaseAuth);
-    await web3Auth.logout();
-    setProvider(null);
   };
 
   useEffect(() => {
@@ -206,14 +203,22 @@ export const Web3AuthProvider = ({ children }: any) => {
   useEffect(() => {
     // Listen for changes on auth state (logged in, signed out, etc.)
     const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
-      if (user) setTypedStorageItem('user_id', user.uid);
-      else clearTypedStorageItem('user_id');
-
       configureUser(user);
+
+      if (user) setTypedStorageItem('user_id', user.uid);
+      else {
+        clearTypedStorageItem('user_id');
+        if (web3Auth?.status === 'connected') {
+          web3Auth?.logout().then();
+        }
+
+        clearTypedStorageItem('supabase_access_token');
+        setProvider(null);
+      }
     });
 
     return unsubscribe;
-  }, [configureUser]);
+  }, [configureUser, web3Auth]);
 
   const contextProvider: IWeb3AuthContext = {
     web3Auth: web3Auth,
@@ -222,7 +227,7 @@ export const Web3AuthProvider = ({ children }: any) => {
     signOut: logout,
     setChainId: setChainId,
     chainId,
-    isAuthenticated: !!user,
+    isAuthenticated: web3Auth?.status === 'connected',
     user,
     account,
     isInitialised,

@@ -67,9 +67,6 @@ export const activitiesTable = () => getTable('activities');
 
 export const handleSupabaseError = (error: PostgrestError | null) => {
   if (error) {
-    if (error.message === 'JWT expired') {
-      window.location.replace('/auth/signin');
-    }
     throw error;
   }
 };

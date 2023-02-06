@@ -30,7 +30,6 @@ export const AvatarMenu = () => {
   const navigate = useNavigate();
 
   const onSignout = () => {
-    navigate('/auth/signin');
     signOut?.();
   };
 
