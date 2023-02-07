@@ -37,6 +37,7 @@ import { compareAddress } from '../../../utils';
 import { SelectParaswapToken } from '../components/SelectParaswapToken';
 
 const DEFAULT_ALLOWED_SLIPPAGE = 1; //1%
+const MAX_ALLOWED_SLIPPAGE = 15; //15%
 const DEFAULT_AMOUNT = '1';
 const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
@@ -492,11 +493,17 @@ export const SwapCard = ({
 
   const changeSlippage = () => {
     const { InputSlippage } = state;
-    if (!InputSlippage || isNaN(+InputSlippage) || +InputSlippage < 0 || +InputSlippage > 15) {
+    if (!InputSlippage || isNaN(+InputSlippage) || +InputSlippage < 0) {
       setState((prevState) => ({
         ...prevState,
         InputSlippage: DEFAULT_ALLOWED_SLIPPAGE.toString(),
         slippage: DEFAULT_ALLOWED_SLIPPAGE,
+      }));
+    } else if (+InputSlippage > MAX_ALLOWED_SLIPPAGE) {
+      setState((prevState) => ({
+        ...prevState,
+        InputSlippage: MAX_ALLOWED_SLIPPAGE.toString(),
+        slippage: MAX_ALLOWED_SLIPPAGE,
       }));
     } else {
       setState((prevState) => ({
@@ -630,7 +637,7 @@ export const SwapCard = ({
 
           <Flex style={styles} direction="column" p={3}>
             <Flex justifyContent="space-between">
-              <Text fontSize="sm">Estimated Cost</Text>
+              <Text fontSize="sm">Estimated Cost:</Text>
               {state.priceRoute?.gasCostUSD && (
                 <Text as="i" fontSize="sm">
                   ~${formatCurrency(state.priceRoute.gasCostUSD)}
@@ -639,7 +646,7 @@ export const SwapCard = ({
             </Flex>
 
             <Flex justifyContent="space-between">
-              <Text fontSize="sm">Minimum Received</Text>
+              <Text fontSize="sm">Minimum Received:</Text>
               <Text as="i" fontSize="sm">
                 {formatBigNumber(minDestinationAmount?.toString(), state.tokenTo?.decimals!, 8)}{' '}
                 {state.tokenTo?.symbol}
@@ -647,8 +654,8 @@ export const SwapCard = ({
             </Flex>
 
             <Flex justifyContent="space-between">
-              <Text fontSize="sm">Slippage (Max 15%)</Text>
-              <Flex alignItems='center' gap={0.5}>
+              <Text fontSize="sm">Slippage (Max allowed 15%):</Text>
+              <Flex alignItems="center" gap={0.5}>
                 <Editable
                   value={state.InputSlippage}
                   onChange={(value) =>
@@ -659,8 +666,8 @@ export const SwapCard = ({
                   }
                   onBlur={changeSlippage}
                 >
-                  <EditablePreview fontSize='sm' />
-                  <Input as={EditableInput} size='sm' />
+                  <EditablePreview fontSize="sm" />
+                  <Input as={EditableInput} size="sm" />
                 </Editable>
                 <Text fontSize="sm" marginLeft={0}>
                   %
