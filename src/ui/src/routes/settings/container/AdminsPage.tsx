@@ -197,7 +197,7 @@ export const AdminsPage = () => {
         />
       )}
       <ReviewTransactionModal ref={reviewTxRef} />
-      <RemoveAdminModal ref={removeAdminModaldRef} currentThreshold={currentThreshold} />
+      <RemoveAdminModal ref={removeAdminModaldRef} currentThreshold={currentThreshold} adminsCount={0} />
       <TransactionSubmittedModal ref={txSubmittedRef} chainId={pool?.chain_id} />
       <SubmittingTransactionModal ref={submittingRef} />
     </>

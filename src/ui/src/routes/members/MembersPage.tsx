@@ -175,7 +175,7 @@ export const MembersPage = () => {
           onInvite={inviteMember}
         ></InviteMemberModal>
       )}
-      <RemoveAdminModal ref={removeAdminModaldRef} currentThreshold={currentThreshold} />
+      <RemoveAdminModal ref={removeAdminModaldRef} currentThreshold={currentThreshold} adminsCount={safeAdmins.length}/>
       <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
     </>
   );

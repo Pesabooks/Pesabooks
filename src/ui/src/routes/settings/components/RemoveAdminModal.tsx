@@ -28,6 +28,7 @@ export interface RemoveAdminModalRef {
 
 export interface AddAdminModalProps {
   currentThreshold: number;
+  adminsCount: number;
   ref: Ref<RemoveAdminModalRef>;
 }
 
@@ -37,7 +38,7 @@ export interface RemoveAdminFormValue {
 }
 
 export const RemoveAdminModal = forwardRef(
-  ({ currentThreshold }: AddAdminModalProps, ref: Ref<RemoveAdminModalRef>) => {
+  ({ currentThreshold, adminsCount }: AddAdminModalProps, ref: Ref<RemoveAdminModalRef>) => {
     const { isOpen, onClose, onOpen } = useDisclosure();
     const [user, setUser] = useState<User>();
     const [threshold, setThreshold] = useState(currentThreshold - 1);
@@ -73,7 +74,7 @@ export const RemoveAdminModal = forwardRef(
               <FormHelperText mb={4}>Any transaction requires the confirmation of:</FormHelperText>
               <HStack gap={4}>
                 <Select w={70} onChange={(e) => setThreshold(+e.target.value)}>
-                  {[...Array(currentThreshold - 1).keys()]
+                  {[...Array(adminsCount).keys()]
                     .map((el) => el + 1)
                     .map((t) => (
                       <option value={t} key={t}>
@@ -81,7 +82,7 @@ export const RemoveAdminModal = forwardRef(
                       </option>
                     ))}
                 </Select>
-                <Text>out of {currentThreshold - 1} admins</Text>
+                <Text>out of {adminsCount} admins</Text>
               </HStack>
             </FormControl>
           </ModalBody>
