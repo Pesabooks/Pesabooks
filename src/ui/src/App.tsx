@@ -24,6 +24,8 @@ import { MembersPage } from './routes/members/MembersPage';
 import { NotFound } from './routes/notfound/NotFound';
 import { Unauthorized } from './routes/notfound/Unauthorized';
 import { ProfilePage } from './routes/profile';
+import { ReportsPage } from './routes/Reports/ReportsPage';
+import { TotalDepositPerUser } from './routes/Reports/TotalDepositPerUser';
 import { AdminsPage } from './routes/settings/container/AdminsPage';
 import { CategoriesPage } from './routes/settings/container/CategoriesPage';
 import { OverviewPage } from './routes/settings/container/OverviewPage';
@@ -100,6 +102,9 @@ function App() {
                     <Route path="categories" element={<CategoriesPage />} />
                     <Route path="admins" element={<AdminsPage />} />
                     <Route path="threshold" element={<ThresholdPage />} />
+                  </Route>
+                  <Route path="reports" element={<ReportsPage />}>
+                    <Route path="total-deposit-per-user" element={<TotalDepositPerUser />} />
                   </Route>
                 </Route>
               </Route>

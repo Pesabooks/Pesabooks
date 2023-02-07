@@ -1,37 +1,33 @@
 export type Json = any;
 
 export interface Database {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never;
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      graphql: {
+        Args: {
+          operationName?: string;
+          query?: string;
+          variables?: Json;
+          extensions?: Json;
+        };
+        Returns: Json;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
   public: {
     Tables: {
-      accounts: {
-        Row: {
-          contract_address: string;
-          created_at: string | null;
-          description: string | null;
-          id: number;
-          is_default: boolean;
-          name: string;
-          user_id: string;
-        };
-        Insert: {
-          contract_address: string;
-          created_at?: string | null;
-          description?: string | null;
-          id?: number;
-          is_default?: boolean;
-          name: string;
-          user_id: string;
-        };
-        Update: {
-          contract_address?: string;
-          created_at?: string | null;
-          description?: string | null;
-          id?: number;
-          is_default?: boolean;
-          name?: string;
-          user_id?: string;
-        };
-      };
       activities: {
         Row: {
           chain_id: number;
@@ -330,11 +326,15 @@ export interface Database {
     };
     Functions: {
       accept_invitation: {
-        Args: { invitation_id: string };
+        Args: {
+          invitation_id: string;
+        };
         Returns: undefined;
       };
       check_username: {
-        Args: { username: string };
+        Args: {
+          username: string;
+        };
         Returns: boolean;
       };
       create_pool: {
@@ -348,11 +348,25 @@ export interface Database {
       };
       get_co_members_for_authenticated_user: {
         Args: Record<PropertyKey, never>;
-        Returns: string;
+        Returns: string[];
       };
       get_invitation: {
-        Args: { invitation_id: string };
-        Returns: unknown;
+        Args: {
+          invitation_id: string;
+        };
+        Returns: {
+          active: boolean;
+          created_at: string | null;
+          email: string;
+          id: string;
+          invited_by: string;
+          name: string;
+          pool_id: string;
+          pool_name: string;
+          role: string;
+          status: string;
+          user_id: string;
+        }[];
       };
       get_my_pools: {
         Args: Record<PropertyKey, never>;
@@ -360,46 +374,75 @@ export interface Database {
       };
       get_pools_for_authenticated_user: {
         Args: Record<PropertyKey, never>;
-        Returns: string;
+        Returns: string[];
       };
       get_pools_where_authenticated_user_is_admin: {
         Args: Record<PropertyKey, never>;
-        Returns: string;
+        Returns: string[];
       };
       get_total_per_category: {
-        Args: { pool_id: string };
-        Returns: { name: string; deposit: number; withdrawal: number }[];
+        Args: {
+          pool_id: string;
+        };
+        Returns: {
+          name: string;
+          deposit: number;
+          withdrawal: number;
+        }[];
       };
       get_transactions_per_month: {
-        Args: { pool_id: string };
-        Returns: { month: string; deposit: number; withdrawal: number }[];
+        Args: {
+          pool_id: string;
+        };
+        Returns: {
+          month: string;
+          deposit: number;
+          withdrawal: number;
+        }[];
       };
       get_transactions_stats: {
-        Args: { pool_id: string };
-        Returns: { count: number; deposit: number; withdrawal: number }[];
+        Args: {
+          pool_id: string;
+        };
+        Returns: {
+          count: number;
+          deposit: number;
+          withdrawal: number;
+        }[];
       };
-      get_user_activities:
-        | {
-            Args: Record<PropertyKey, never>;
-            Returns: Record<string, unknown>[];
-          }
-        | {
-            Args: { chain_id: number };
-            Returns: {
-              id: number;
-              type: string;
-              hash: string;
-              status: string;
-              metadata: Json;
-              pool_id: string;
-              pool_name: string;
-              timestamp: number;
-              created_at: string;
-            }[];
-          };
+      get_user_activities: {
+        Args: {
+          chain_id: number;
+        };
+        Returns: {
+          id: number;
+          type: string;
+          hash: string;
+          status: string;
+          metadata: Json;
+          pool_id: string;
+          pool_name: string;
+          timestamp: number;
+          created_at: string;
+        }[];
+      };
       join_pool: {
-        Args: { invitation_id: string };
+        Args: {
+          invitation_id: string;
+        };
         Returns: number;
+      };
+      report_users_stake: {
+        Args: {
+          pool_id: string;
+        };
+        Returns: {
+          id: string;
+          username: string;
+          wallet: string;
+          total_deposit: number;
+          stake: number;
+        }[];
       };
       user_id: {
         Args: Record<PropertyKey, never>;
@@ -407,6 +450,150 @@ export interface Database {
       };
     };
     Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
+  storage: {
+    Tables: {
+      buckets: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          name: string;
+          owner: string | null;
+          public: boolean | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          id: string;
+          name: string;
+          owner?: string | null;
+          public?: boolean | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          name?: string;
+          owner?: string | null;
+          public?: boolean | null;
+          updated_at?: string | null;
+        };
+      };
+      migrations: {
+        Row: {
+          executed_at: string | null;
+          hash: string;
+          id: number;
+          name: string;
+        };
+        Insert: {
+          executed_at?: string | null;
+          hash: string;
+          id: number;
+          name: string;
+        };
+        Update: {
+          executed_at?: string | null;
+          hash?: string;
+          id?: number;
+          name?: string;
+        };
+      };
+      objects: {
+        Row: {
+          bucket_id: string | null;
+          created_at: string | null;
+          id: string;
+          last_accessed_at: string | null;
+          metadata: Json | null;
+          name: string | null;
+          owner: string | null;
+          path_tokens: string[] | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          bucket_id?: string | null;
+          created_at?: string | null;
+          id?: string;
+          last_accessed_at?: string | null;
+          metadata?: Json | null;
+          name?: string | null;
+          owner?: string | null;
+          path_tokens?: string[] | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          bucket_id?: string | null;
+          created_at?: string | null;
+          id?: string;
+          last_accessed_at?: string | null;
+          metadata?: Json | null;
+          name?: string | null;
+          owner?: string | null;
+          path_tokens?: string[] | null;
+          updated_at?: string | null;
+        };
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      extension: {
+        Args: {
+          name: string;
+        };
+        Returns: string;
+      };
+      filename: {
+        Args: {
+          name: string;
+        };
+        Returns: string;
+      };
+      foldername: {
+        Args: {
+          name: string;
+        };
+        Returns: string[];
+      };
+      get_size_by_bucket: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          size: number;
+          bucket_id: string;
+        }[];
+      };
+      search: {
+        Args: {
+          prefix: string;
+          bucketname: string;
+          limits?: number;
+          levels?: number;
+          offsets?: number;
+          search?: string;
+          sortcolumn?: string;
+          sortorder?: string;
+        };
+        Returns: {
+          name: string;
+          id: string;
+          updated_at: string;
+          created_at: string;
+          last_accessed_at: string;
+          metadata: Json;
+        }[];
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
       [_ in never]: never;
     };
   };

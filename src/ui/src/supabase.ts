@@ -36,7 +36,7 @@ export const initSupabaseClient = (access_token?: string) => {
   }
 };
 
-export const supabase = (forRealtime = false) => {
+export const supabase = (forRealtime = false): SupabaseClient<Database> => {
   if (forRealtime) return _anonSupabaseClient;
 
   return _supabaseClient ?? _anonSupabaseClient;
@@ -45,8 +45,10 @@ export const supabase = (forRealtime = false) => {
 type Schema = Database['public'];
 
 type TableName = string & keyof Schema['Tables'];
+type FunctionName = string & keyof Schema['Functions'];
 
 export type Table<T extends TableName> = Schema['Tables'][T]['Row'];
+export type FunctionReturns<F extends FunctionName> = Schema['Functions'][F]['Returns'];
 
 export type QueryBuilder<T extends TableName> = PostgrestFilterBuilder<Schema, Table<T>, any>;
 

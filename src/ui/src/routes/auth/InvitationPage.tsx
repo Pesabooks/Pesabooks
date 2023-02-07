@@ -12,7 +12,7 @@ export const InvitationPage = () => {
   let navigate = useNavigate();
   let { isAuthenticated } = useWeb3Auth();
   let { invitation_id } = useParams();
-  const [invitation, setInvitation] = useState<Invitation | undefined>();
+  const [invitation, setInvitation] = useState<Invitation | null>();
   const toast = useToast();
 
   const bgColor = useColorModeValue('white', 'gray.700');

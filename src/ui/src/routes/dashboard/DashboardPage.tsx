@@ -67,6 +67,7 @@ export const DashboardPage = () => {
             .rpc('get_transactions_stats', { pool_id: pool.id })
             .single()
             .then(({ data }) => {
+              //@ts-ignore todo: fix this
               if (data) setTxStats(data);
             });
         }
