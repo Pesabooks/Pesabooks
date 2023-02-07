@@ -30,6 +30,10 @@ import { formatBigNumber } from '../../../bignumber-utils';
 import { EditableControls } from '../../../components/Editable/EditableControls';
 import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
 import Loading from '../../../components/Loading';
+import {
+  ReviewAndSubmitTransaction,
+  ReviewAndSubmitTransactionRef
+} from '../../../components/ReviewAndSubmitTransaction';
 import { UserWalletCard } from '../../../components/UserWalletCard';
 import { WalletAddress } from '../../../components/WalletAddress';
 import { ButtonWithAdmingRights } from '../../../components/withConnectedWallet';
@@ -67,8 +71,6 @@ import {
   mathAddress
 } from '../../../utils';
 import { EditableSelect } from './EditableSelect';
-import { ReviewTransactionModal, ReviewTransactionModalRef } from './ReviewTransactionModal';
-import { SubmittingTransactionModal, SubmittingTxModalRef } from './SubmittingTransactionModal';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
 import { TransactionTimeline } from './TransactionTimeline';
 import { TxPropertyBox } from './TxPropertyBox';
@@ -83,8 +85,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   const { safeAdmins } = useSafeAdmins();
   const { provider, account } = useWeb3Auth();
   const [loading, setLoading] = useState(true);
-  const submittingRef = useRef<SubmittingTxModalRef>(null);
-  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [treshold, setTreshold] = useState(0);
   const [currentSafeNonce, setCurrentSafeNonce] = useState(0);
@@ -179,7 +180,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     const safeTxHash = isRejection ? transaction?.reject_safe_tx_hash : transaction?.safe_tx_hash;
     const type = isRejection ? 'rejection' : transaction!.type;
 
-    reviewTxRef.current?.open(message, type, isRejection, execute, safeTxHash!);
+    reviewTxRef.current?.review(message, type, isRejection, execute, safeTxHash!);
   };
 
   const execute = async (confirmed: boolean, isRejection: boolean) => {
@@ -189,7 +190,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
     try {
       setIsSubmitting(true);
-      submittingRef.current?.open(transaction.type);
+      reviewTxRef.current?.openSubmitting(transaction.type);
       try {
         await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address!, safeTxHash!);
       } catch (_) {
@@ -210,7 +211,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
         isClosable: true,
       });
     } finally {
-      submittingRef.current?.close();
+      reviewTxRef.current?.closeSubmitting();
       setIsSubmitting(false);
     }
   };
@@ -227,7 +228,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
       loadTransaction(transaction.id);
       toast({ title: 'You rejected the transaction', status: 'success' });
     } finally {
-      submittingRef.current?.close();
+      reviewTxRef.current?.closeSubmitting();
       setIsSubmitting(false);
     }
   };
@@ -531,8 +532,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
           )}
         </DrawerContent>
       </Drawer>
-      <SubmittingTransactionModal ref={submittingRef} />
-      <ReviewTransactionModal ref={reviewTxRef} />
+      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
     </>
   );
 });

@@ -34,7 +34,7 @@ const reducer = (state: State, action: Action): State => {
     return {
       ...state,
       transactions: state.transactions.map((item) => {
-        return item.id === t.id ? t : item;
+        return item.id === t.id ? { ...item, ...t } : item;
       }),
     };
   } else if (action.type === 'INSERT') {

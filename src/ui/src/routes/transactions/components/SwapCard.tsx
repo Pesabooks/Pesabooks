@@ -4,10 +4,14 @@ import {
   AlertIcon,
   Box,
   Button,
+  Editable,
+  EditableInput,
+  EditablePreview,
   Flex,
   FormControl,
   FormLabel,
   Heading,
+  HStack,
   Icon,
   Image,
   Input,
@@ -33,7 +37,7 @@ import { getPendingTokenUnlockingTxCount } from '../../../services/transactionsS
 import { compareAddress } from '../../../utils';
 import { SelectParaswapToken } from '../components/SelectParaswapToken';
 
-const DEFAULT_ALLOWED_SLIPPAGE = 0.01; //1%
+const DEFAULT_ALLOWED_SLIPPAGE = 1; //1%
 const DEFAULT_AMOUNT = '1';
 const NATIVE_TOKEN_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 
@@ -51,6 +55,8 @@ interface IState {
   priceRoute?: OptimalRate;
   pendingUnlocking?: boolean;
   validation?: 'insufficientFunds' | 'insufficientAllowance' | 'invalidAmount';
+  slippage: number;
+  InputSlippage?: string;
 }
 
 export interface SwapArgs {
@@ -58,6 +64,7 @@ export interface SwapArgs {
   tokenFrom: Token;
   tokenTo: Token;
   priceRoute: OptimalRate;
+  slippage: number;
   callback: () => void;
 }
 
@@ -98,6 +105,8 @@ export const SwapCard = ({
     srcAmount: DEFAULT_AMOUNT,
     tokens: [],
     availableTokens: [],
+    slippage: DEFAULT_ALLOWED_SLIPPAGE,
+    InputSlippage: DEFAULT_ALLOWED_SLIPPAGE.toString(),
   });
 
   useEffect(() => {
@@ -264,13 +273,23 @@ export const SwapCard = ({
     checkPendingTokenUnlocking();
   }, [checkPendingTokenUnlocking]);
 
-  const getMinDestAmount = () => {
+  const minDestinationAmount = useMemo(() => {
     if (!state.priceRoute?.destAmount || !BigNumber.from(state.priceRoute?.destAmount)) return;
-    const res = BigNumber.from(state.priceRoute?.destAmount)
-      .mul(1000 * (1 - DEFAULT_ALLOWED_SLIPPAGE))
-      .div(1000);
+
+    let res: BigNumber;
+    //Bignumber throw an erro on small numbers
+    try {
+      res = BigNumber.from(state.priceRoute?.destAmount).mul(
+        1 - (state.slippage ?? DEFAULT_ALLOWED_SLIPPAGE) / 100,
+      );
+    } catch (error) {
+      res = BigNumber.from(state.priceRoute?.destAmount)
+        .mul(1000 * (1 - (state.slippage ?? DEFAULT_ALLOWED_SLIPPAGE) / 100))
+        .div(1000);
+    }
+
     return res;
-  };
+  }, [state.priceRoute?.destAmount, state.slippage]);
 
   useEffect(() => {
     const availableTokens =
@@ -428,8 +447,6 @@ export const SwapCard = ({
 
     const _srcAmount = ethers.utils.parseUnits(srcAmount.toString(), tokenFrom!.decimals);
 
-    const minDestinationAmount = getMinDestAmount();
-
     const txParams = await paraswap.buildTx(
       tokenFrom!.address,
       tokenTo!.address,
@@ -452,6 +469,7 @@ export const SwapCard = ({
       tokenFrom,
       tokenTo,
       priceRoute,
+      slippage: state.slippage,
       callback: () => {
         setState((prevState) => ({
           ...prevState,
@@ -470,6 +488,22 @@ export const SwapCard = ({
     if (balanceBN) {
       const balance = ethers.utils.formatUnits(balanceBN, state.tokenFrom?.decimals!);
       onAmountChange(balance);
+    }
+  };
+
+  const changeSlippage = () => {
+    const { InputSlippage } = state;
+    if (!InputSlippage || isNaN(+InputSlippage) || +InputSlippage < 0 || +InputSlippage > 15) {
+      setState((prevState) => ({
+        ...prevState,
+        InputSlippage: DEFAULT_ALLOWED_SLIPPAGE.toString(),
+        slippage: DEFAULT_ALLOWED_SLIPPAGE,
+      }));
+    } else {
+      setState((prevState) => ({
+        ...prevState,
+        slippage: +InputSlippage,
+      }));
     }
   };
 
@@ -608,9 +642,29 @@ export const SwapCard = ({
             <Flex justifyContent="space-between">
               <Text fontSize="sm">Minimum Received</Text>
               <Text as="i" fontSize="sm">
-                {formatBigNumber(getMinDestAmount()?.toString(), state.tokenTo?.decimals!, 8)}{' '}
+                {formatBigNumber(minDestinationAmount?.toString(), state.tokenTo?.decimals!, 8)}{' '}
                 {state.tokenTo?.symbol}
               </Text>
+            </Flex>
+
+            <Flex justifyContent="space-between">
+              <Text fontSize="sm">Slippage (Max 15%)</Text>
+              <HStack gap={0}>
+                <Editable
+                  value={state.InputSlippage}
+                  onChange={(value) =>
+                    setState((prevState) => ({
+                      ...prevState,
+                      InputSlippage: value,
+                    }))
+                  }
+                  onBlur={changeSlippage}
+                >
+                  <EditablePreview />
+                  <Input as={EditableInput} />
+                </Editable>
+                <Text fontSize="sm">%</Text>
+              </HStack>
             </Flex>
           </Flex>
         </Stack>

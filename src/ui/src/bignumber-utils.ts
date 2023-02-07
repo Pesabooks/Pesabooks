@@ -18,6 +18,7 @@ export const formatBigNumber = (
 };
 
 export const formatLongNumber = (amount: number | undefined, digits = 4) => {
+  if (amount === 0) return 0;
   if (!amount) return;
 
   if (Number.isInteger(amount)) return amount;

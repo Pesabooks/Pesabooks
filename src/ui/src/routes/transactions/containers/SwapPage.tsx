@@ -11,7 +11,7 @@ import { onTransactionComplete } from '../../../services/blockchainServices';
 import { approveToken, swapTokens } from '../../../services/transactionsServices';
 import { ApproveArgs, SwapArgs, SwapCard } from '../components/SwapCard';
 
-const DEFAULT_ALLOWED_SLIPPAGE = 0.01; //1%
+
 
 export const SwapPage = () => {
   const { pool } = usePool();
@@ -76,7 +76,7 @@ export const SwapPage = () => {
 
   const onConfirmSwap = async (
     confirmed: boolean,
-    { txParams, tokenFrom, tokenTo, priceRoute, callback }: SwapArgs,
+    { txParams, tokenFrom, tokenTo, priceRoute, slippage, callback }: SwapArgs,
   ) => {
     if (!pool || !confirmed) return;
 
@@ -90,7 +90,7 @@ export const SwapPage = () => {
         txParams as ParaswapTx,
         tokenFrom,
         tokenTo,
-        DEFAULT_ALLOWED_SLIPPAGE,
+        slippage,
         priceRoute,
       );
       callback();
