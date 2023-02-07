@@ -11,7 +11,6 @@ import {
   FormControl,
   FormLabel,
   Heading,
-  HStack,
   Icon,
   Image,
   Input,
@@ -649,7 +648,7 @@ export const SwapCard = ({
 
             <Flex justifyContent="space-between">
               <Text fontSize="sm">Slippage (Max 15%)</Text>
-              <HStack gap={0}>
+              <Flex alignItems='center' gap={0.5}>
                 <Editable
                   value={state.InputSlippage}
                   onChange={(value) =>
@@ -660,11 +659,13 @@ export const SwapCard = ({
                   }
                   onBlur={changeSlippage}
                 >
-                  <EditablePreview />
-                  <Input as={EditableInput} />
+                  <EditablePreview fontSize='sm' />
+                  <Input as={EditableInput} size='sm' />
                 </Editable>
-                <Text fontSize="sm">%</Text>
-              </HStack>
+                <Text fontSize="sm" marginLeft={0}>
+                  %
+                </Text>
+              </Flex>
             </Flex>
           </Flex>
         </Stack>
