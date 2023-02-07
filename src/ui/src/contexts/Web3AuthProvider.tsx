@@ -156,7 +156,6 @@ export const Web3AuthProvider = ({ children }: any) => {
 
   const logout = async () => {
     if (!web3Auth) {
-      console.log('web3auth not initialized yet');
       return;
     }
 

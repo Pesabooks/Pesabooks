@@ -107,8 +107,6 @@ export const WalletPage = () => {
 
   const { pageIndex, pageSize } = pagination;
   const changePage = (page: number) => {
-    console.log('page', page);
-
     setPagination({ ...pagination, pageIndex: page });
   };
 

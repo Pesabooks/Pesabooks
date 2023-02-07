@@ -99,7 +99,6 @@ export function useTransactions(
           },
         )
         .subscribe((status) => {
-          console.log('status: ', status);
           if (status === 'SUBSCRIBED') {
             const access_token = getTypedStorageItem('supabase_access_token');
             // @ts-ignore
