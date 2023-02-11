@@ -1,5 +1,7 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import * as Sentry from '@sentry/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Web3ReactHooks, Web3ReactProvider } from '@web3-react/core';
 import { MetaMask } from '@web3-react/metamask';
 import { WalletConnect } from '@web3-react/walletconnect';
@@ -57,62 +59,67 @@ function App() {
     analytics();
   }, [analytics]);
 
+  const queryClient = new QueryClient();
+
   return (
-    <HelmetProvider>
-      <Helmet titleTemplate="%s - Pesabooks" defaultTitle="Pesabooks">
-        <meta name="description" content="A crypto-powered financial platform for saving clubs" />
-      </Helmet>
-      <ChakraProvider theme={theme}>
-        <Web3AuthProvider>
-          <Web3ReactProvider connectors={connectors}>
-            <Routes>
-              <Route path="*" element={<NotFound />} />
-              <Route path="/403" element={<Unauthorized />} />
-              <Route path="/auth" element={<Auth />}>
-                <Route path="signin" element={<SignInPage />} />
-                <Route path="callback" element={<CallbackPage />} />
-                <Route path="invitation/:invitation_id" element={<InvitationPage />} />
-              </Route>
-              <Route element={<AuthGuard />}>
-                <Route path="/new-pool" element={<CreatePoolPage />} />
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <Helmet titleTemplate="%s - Pesabooks" defaultTitle="Pesabooks">
+          <meta name="description" content="A crypto-powered financial platform for saving clubs" />
+        </Helmet>
+        <ChakraProvider theme={theme}>
+          <Web3AuthProvider>
+            <Web3ReactProvider connectors={connectors}>
+              <Routes>
+                <Route path="*" element={<NotFound />} />
+                <Route path="/403" element={<Unauthorized />} />
+                <Route path="/auth" element={<Auth />}>
+                  <Route path="signin" element={<SignInPage />} />
+                  <Route path="callback" element={<CallbackPage />} />
+                  <Route path="invitation/:invitation_id" element={<InvitationPage />} />
+                </Route>
+                <Route element={<AuthGuard />}>
+                  <Route path="/new-pool" element={<CreatePoolPage />} />
 
-                <Route path="/" element={<HomePage />} />
-                <Route path="/wallet" element={<WalletPage />} />
-                <Route path="/profile" element={<ProfilePage />}></Route>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/wallet" element={<WalletPage />} />
+                  <Route path="/profile" element={<ProfilePage />}></Route>
 
-                <Route
-                  path="/pool/:pool_id"
-                  element={
-                    <PoolProvider>
-                      <PoolGuard>
-                        <Layout />
-                      </PoolGuard>
-                    </PoolProvider>
-                  }
-                >
-                  <Route index element={<Navigate replace to="dashboard" />} />
-                  <Route path="dashboard" element={<DashboardPage />} />
-                  <Route path="transactions" element={<TransactionsPage />} />
-                  <Route path="members" element={<MembersPage />} />
-                  <Route path="deposit" element={<DepositPage />} />
-                  <Route path="withdraw" element={<WithdrawPage />} />
-                  <Route path="swap" element={<SwapPage />} />
-                  <Route path="settings" element={<SettingsPage />}>
-                    <Route index element={<OverviewPage />} />
-                    <Route path="categories" element={<CategoriesPage />} />
-                    <Route path="admins" element={<AdminsPage />} />
-                    <Route path="threshold" element={<ThresholdPage />} />
-                  </Route>
-                  <Route path="reports" element={<ReportsPage />}>
-                    <Route path="total-deposit-per-user" element={<TotalDepositPerUser />} />
+                  <Route
+                    path="/pool/:pool_id"
+                    element={
+                      <PoolProvider>
+                        <PoolGuard>
+                          <Layout />
+                        </PoolGuard>
+                      </PoolProvider>
+                    }
+                  >
+                    <Route index element={<Navigate replace to="dashboard" />} />
+                    <Route path="dashboard" element={<DashboardPage />} />
+                    <Route path="transactions" element={<TransactionsPage />} />
+                    <Route path="members" element={<MembersPage />} />
+                    <Route path="deposit" element={<DepositPage />} />
+                    <Route path="withdraw" element={<WithdrawPage />} />
+                    <Route path="swap" element={<SwapPage />} />
+                    <Route path="settings" element={<SettingsPage />}>
+                      <Route index element={<OverviewPage />} />
+                      <Route path="categories" element={<CategoriesPage />} />
+                      <Route path="admins" element={<AdminsPage />} />
+                      <Route path="threshold" element={<ThresholdPage />} />
+                    </Route>
+                    <Route path="reports" element={<ReportsPage />}>
+                      <Route path="total-deposit-per-user" element={<TotalDepositPerUser />} />
+                    </Route>
                   </Route>
                 </Route>
-              </Route>
-            </Routes>
-          </Web3ReactProvider>
-        </Web3AuthProvider>
-      </ChakraProvider>
-    </HelmetProvider>
+              </Routes>
+            </Web3ReactProvider>
+          </Web3AuthProvider>
+        </ChakraProvider>
+      </HelmetProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 

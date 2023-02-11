@@ -10,7 +10,7 @@ import {
   Spinner,
   Text
 } from '@chakra-ui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BsPlus } from 'react-icons/bs';
 import { MdSubject } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
@@ -19,23 +19,17 @@ import { NavbarLight } from '../../components/Layout/NavbarLight';
 import { ChooseUsernameModal } from '../../components/Modals/ChooseUsername';
 import { PoolCard } from '../../components/PoolCard';
 import { getMyPools } from '../../services/poolsService';
-import { Pool } from '../../types';
 import { PendingInvitation } from './components/PendingInvitation';
 
 export const HomePage = () => {
-  const [pools, setPools] = useState<Pool[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const KEY = 'my-pools';
 
-  const loadData = useCallback(async () => {
-    getMyPools()
-      .then((pools) => setPools(pools ?? []))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const { data: pools, isLoading } = useQuery({
+    queryKey: ['my-pools'],
+    queryFn: getMyPools,
+  });
 
   const boxW = 250;
   const boxH = 216;
@@ -67,7 +61,9 @@ export const HomePage = () => {
             mx={{ sm: 'auto' }}
             mt={{ sm: '14px' }}
           ></Box>
-          <PendingInvitation onAccepted={loadData} />
+          <PendingInvitation
+            onAccepted={() => queryClient.invalidateQueries({ queryKey: [KEY] })}
+          />
 
           <Flex direction="column" textAlign="start" justifyContent="center" mt="2.5rem" px={4}>
             <Text fontSize="3xl" color="black" fontWeight="bold">
@@ -88,66 +84,64 @@ export const HomePage = () => {
             </Flex>
           </Flex>
 
-          {loading ? (
-            <Spinner thickness="4px" speed="0.65s" size="xl" />
-          ) : (
-            <Box mt="3.5rem">
-              <Box p="6px 0px 22px 20px">
-                <Text fontSize="xl" fontWeight="bold">
-                  Recent groups
-                </Text>
-              </Box>
-              <Grid
-                templateColumns={{
-                  sm: '1fr',
-                  md: 'repeat(2, auto)',
-                  lg: 'repeat(3, auto)',
-                }}
-                templateRows={{ md: 'repeat(3, auto)', lg: 'repeat(2, auto)' }}
-                gap={5}
-                columnGap={5}
-              >
-                <Button
-                  variant="no-hover"
-                  w="100%"
-                  h="100%"
-                  onClick={() => navigate('/new-pool')}
-                  p={0}
-                >
-                  <Card w={boxW} h={boxH}>
-                    <Flex
-                      w="100%"
-                      h="100%"
-                      direction="column"
-                      align="center"
-                      justify="center"
-                      color="gray.500"
-                    >
-                      <Icon as={BsPlus} w="30px" h="30px" mb="12px" fontWeight="bold" />
-                      <Text fontSize="lg" fontWeight="bold">
-                        Create a group
-                      </Text>
-                    </Flex>
-                  </Card>
-                </Button>
-
-                {pools.map((pool, index) => {
-                  return (
-                    <Button
-                      key={index}
-                      variant="no-hover"
-                      w="100%"
-                      h="100%"
-                      p={0}
-                      onClick={() => navigate(`/pool/${pool.id}`)}
-                    >
-                      <PoolCard pool={pool} w={boxW} h={boxH}></PoolCard>{' '}
-                    </Button>
-                  );
-                })}
-              </Grid>
+          {isLoading && <Spinner thickness="4px" speed="0.65s" size="xl" />}
+          <Box mt="3.5rem">
+            <Box p="6px 0px 22px 20px">
+              <Text fontSize="xl" fontWeight="bold">
+                Recent groups
+              </Text>
             </Box>
-          )}
+            <Grid
+              templateColumns={{
+                sm: '1fr',
+                md: 'repeat(2, auto)',
+                lg: 'repeat(3, auto)',
+              }}
+              templateRows={{ md: 'repeat(3, auto)', lg: 'repeat(2, auto)' }}
+              gap={5}
+              columnGap={5}
+            >
+              <Button
+                variant="no-hover"
+                w="100%"
+                h="100%"
+                onClick={() => navigate('/new-pool')}
+                p={0}
+              >
+                <Card w={boxW} h={boxH}>
+                  <Flex
+                    w="100%"
+                    h="100%"
+                    direction="column"
+                    align="center"
+                    justify="center"
+                    color="gray.500"
+                  >
+                    <Icon as={BsPlus} w="30px" h="30px" mb="12px" fontWeight="bold" />
+                    <Text fontSize="lg" fontWeight="bold">
+                      Create a group
+                    </Text>
+                  </Flex>
+                </Card>
+              </Button>
+
+              {pools?.map((pool, index) => {
+                return (
+                  <Button
+                    key={index}
+                    variant="no-hover"
+                    w="100%"
+                    h="100%"
+                    p={0}
+                    onClick={() => navigate(`/pool/${pool.id}`)}
+                  >
+                    <PoolCard pool={pool} w={boxW} h={boxH}></PoolCard>{' '}
+                  </Button>
+                );
+              })}
+            </Grid>
+          </Box>
+
           <ChooseUsernameModal />
         </Flex>
       </Center>
