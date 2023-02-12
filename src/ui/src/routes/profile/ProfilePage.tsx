@@ -18,7 +18,7 @@ import {
   Spinner,
   Stack,
   Text,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
@@ -37,7 +37,7 @@ import { Pool } from '../../types';
 
 export const NetworkSelectorMenu = () => {
   const { setChainId } = useWeb3Auth();
-  const includeTestnets = import.meta.env.VITE_INCLUDE_TESTNETS === 'true';
+  const includeTestnets = process.env.REACT_APP_INCLUDE_TESTNETS === 'true';
 
   return (
     <Menu>
@@ -55,7 +55,7 @@ export const NetworkSelectorMenu = () => {
                 <Image
                   boxSize="2rem"
                   borderRadius="full"
-                  src={`/${network.logoUrl}`}
+                  src={`${process.env.PUBLIC_URL}/${network.logoUrl}`}
                   alt="Fluffybuns the destroyer"
                   mr="12px"
                 />

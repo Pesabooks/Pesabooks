@@ -55,7 +55,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
     return routes.map((prop, key) => {
       if (prop.collapse) {
         return (
-          <Accordion allowToggle key={key}>
+          <Accordion allowToggle>
             <AccordionItem border="none">
               <AccordionButton
                 display="flex"

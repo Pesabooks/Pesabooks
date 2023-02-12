@@ -1,6 +1,7 @@
 import { ChakraProvider } from '@chakra-ui/react';
 import * as Sentry from '@sentry/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Web3ReactHooks, Web3ReactProvider } from '@web3-react/core';
 import { MetaMask } from '@web3-react/metamask';
 import { WalletConnect } from '@web3-react/walletconnect';
@@ -117,7 +118,7 @@ function App() {
           </Web3AuthProvider>
         </ChakraProvider>
       </HelmetProvider>
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   );
 }

@@ -1,6 +1,6 @@
 import { GA4React } from 'ga-4-react';
 
-const ga4react = new GA4React(import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '').initialize();
+const ga4react = new GA4React(process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || '').initialize();
 
 export interface AnalyticsData {
   path: string;
@@ -9,7 +9,7 @@ export interface AnalyticsData {
 }
 
 const trackPathForAnalytics = (data: AnalyticsData) => {
-  if (import.meta.env.VITE_ENV === 'development') return;
+  if (process.env.REACT_APP_ENV === 'development') return;
 
   const { path, search } = data;
 

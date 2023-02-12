@@ -1,4 +1,4 @@
-import { User } from './User';
+import { User } from './Profile';
 
 export interface BaseEntity<T> {
   id: T;

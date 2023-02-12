@@ -36,7 +36,7 @@ const IconOption = (props: OptionProps<Token, boolean, GroupBase<Token>>) => {
         <Image
           w="20px"
           h="20px"
-          src={`/${props.data.image}`}
+          src={`${process.env.PUBLIC_URL}/${props.data.image}`}
           alt={props.data.name}
         />
         <Text ml="10px">{props.data.name}</Text>

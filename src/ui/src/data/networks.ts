@@ -18,7 +18,7 @@ export interface Network {
 export const networks: { [chainId: number]: Network } = {
   1: {
     chainId: '0x1',
-    rpcUrls: [`https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_KEY}`],
+    rpcUrls: [`https://mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
     chainName: 'Ethereum',
     nativeCurrency: {
       name: 'Ether',
@@ -32,7 +32,7 @@ export const networks: { [chainId: number]: Network } = {
   },
   80001: {
     chainId: '0x13881',
-    rpcUrls: [`https://polygon-mumbai.infura.io/v3/${import.meta.env.VITE_INFURA_KEY}`],
+    rpcUrls: [`https://polygon-mumbai.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
     chainName: 'Polygon Testnet Mumbai',
     nativeCurrency: {
       name: 'tMATIC',
@@ -46,7 +46,7 @@ export const networks: { [chainId: number]: Network } = {
   },
   4: {
     chainId: '0x4',
-    rpcUrls: [`https://rinkeby.infura.io/v3/${import.meta.env.VITE_INFURA_KEY}`],
+    rpcUrls: [`https://rinkeby.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
     chainName: 'Rinkeby Testnet',
     nativeCurrency: {
       name: 'Ether',
@@ -60,7 +60,7 @@ export const networks: { [chainId: number]: Network } = {
   },
   5: {
     chainId: '0x5',
-    rpcUrls: [`https://goerli.infura.io/v3/${import.meta.env.VITE_INFURA_KEY}`],
+    rpcUrls: [`https://goerli.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
     chainName: 'Goerli Test Network',
     nativeCurrency: {
       name: 'Ether',
@@ -74,7 +74,7 @@ export const networks: { [chainId: number]: Network } = {
   },
   137: {
     chainId: '0x89',
-    rpcUrls: [`https://polygon-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_KEY}`],
+    rpcUrls: [`https://polygon-mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
     chainName: 'Polygon',
     nativeCurrency: {
       name: 'MATIC',

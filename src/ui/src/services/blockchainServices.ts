@@ -6,7 +6,7 @@ import { networks } from '../data/networks';
 export const getNetwork = (chain_id: number) => networks[chain_id];
 
 export const defaultProvider = (chain_id: number) => {
-  // return new ethers.providers.InfuraProvider(chain_id, import.meta.env.VITE_INFURA_KEY);
+  // return new ethers.providers.InfuraProvider(chain_id, process.env.REACT_APP_INFURA_KEY);
   let url = networks[chain_id].rpcUrls[0];
   return new ethers.providers.JsonRpcProvider(url);
 };

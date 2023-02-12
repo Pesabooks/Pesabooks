@@ -216,7 +216,7 @@ export const purchaseToken = async (
         symbol: token.symbol,
         name: token.name,
         decimals: token.decimals,
-        image: `/${token.image}`,
+        image: `${process.env.PUBLIC_URL}/${token.image}`,
       },
       amount,
     },

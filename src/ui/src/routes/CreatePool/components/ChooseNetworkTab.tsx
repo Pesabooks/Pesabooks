@@ -9,7 +9,7 @@ interface ChooseNetworkTabProps {
 }
 export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTabProps) => {
   // const textColor = useColorModeValue('gray.700', 'white');
-  const includeTestnets = import.meta.env.VITE_INCLUDE_TESTNETS === 'true';
+  const includeTestnets = process.env.REACT_APP_INCLUDE_TESTNETS === 'true';
 
   return (
     <Card>
@@ -53,7 +53,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
                 mr={4}
                 w="40px"
                 height="40px"
-                src={`/images/chains/polygon-matic-logo.svg`}
+                src={`${process.env.PUBLIC_URL}/images/chains/polygon-matic-logo.svg`}
                 alt="polygon"
               />
               Polygon
@@ -74,7 +74,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
                 mr={4}
                 w="40px"
                 height="40px"
-                src={`/images/chains/BNB.png`}
+                src={`${process.env.PUBLIC_URL}/images/chains/BNB.png`}
                 alt="polygon"
               />
               BNB Smart Chain
@@ -98,7 +98,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
                     mr={4}
                     w="40px"
                     height="40px"
-                    src={`/images/chains/ethereum.svg`}
+                    src={`${process.env.PUBLIC_URL}/images/chains/ethereum.svg`}
                     alt="Goerli"
                   />
                   Goerli

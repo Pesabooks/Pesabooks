@@ -15,7 +15,7 @@ export const ChainTag = ({
       <Image
         boxSize="1rem"
         borderRadius="full"
-        src={`\\${network.logoUrl}`}
+        src={`${process.env.PUBLIC_URL}/${network.logoUrl}`}
         alt="Fluffybuns the destroyer"
         mr="12px"
       />

@@ -37,9 +37,9 @@ export interface IWeb3AuthContext {
   setUser: (user: User) => void;
 }
 
-const web3AuthClientId = import.meta.env.VITE_WEB3AUTH_CLIENT_ID ?? '';
-const web3AuthVerifier = import.meta.env.VITE_WEB3AUTH_VERIFIER ?? '';
-const web3AuthNetwork = import.meta.env.VITE_WEB3AUTH_NETWORk ?? '';
+const web3AuthClientId = process.env.REACT_APP_WEB3AUTH_CLIENT_ID ?? '';
+const web3AuthVerifier = process.env.REACT_APP_WEB3AUTH_VERIFIER ?? '';
+const web3AuthNetwork = process.env.REACT_APP_WEB3AUTH_NETWORk ?? '';
 
 const defaultChain = 137;
 
