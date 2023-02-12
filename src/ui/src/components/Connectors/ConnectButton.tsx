@@ -1,5 +1,4 @@
 import { Avatar, Button, Stack, Text } from '@chakra-ui/react';
-import React from 'react';
 
 interface ConnectButtonProps {
   name: string;
@@ -24,7 +23,7 @@ export const ConnectButton = ({ name, description, onClick }: ConnectButtonProps
       }}
     >
       <Stack direction={'row'} spacing={4} align={'center'}>
-        <Avatar size="lg" p="2" src={`${process.env.PUBLIC_URL}/images/wallet/${name}.png`} />
+        <Avatar size="lg" p="2" src={`/images/wallet/${name}.png`} />
         <Stack direction={'column'} align="start" spacing={2}>
           <Text fontSize={'md'} fontWeight={600}>
             {name}

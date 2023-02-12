@@ -59,7 +59,7 @@ import { SwapModal } from './components/SwapModal';
 
 export const NetworkSelectorMenu = () => {
   const { setChainId } = useWeb3Auth();
-  const includeTestnets = process.env.REACT_APP_INCLUDE_TESTNETS === 'true';
+  const includeTestnets = import.meta.env.VITE_INCLUDE_TESTNETS === 'true';
 
   return (
     <Menu>
@@ -77,7 +77,7 @@ export const NetworkSelectorMenu = () => {
                 <Image
                   boxSize="2rem"
                   borderRadius="full"
-                  src={`${process.env.PUBLIC_URL}/${network.logoUrl}`}
+                  src={`/${network.logoUrl}`}
                   alt="Fluffybuns the destroyer"
                   mr="12px"
                 />
@@ -163,8 +163,8 @@ export const WalletPage = () => {
       swapAsset,
       userAddress: account!,
       userEmailAddress: user?.email,
-      hostApiKey: process.env.REACT_APP_RAMP_API_KEY,
-      webhookStatusUrl: `${process.env.REACT_APP_SUPABASE_FUNCTIONS_URL}/ramp-callback`,
+      hostApiKey: import.meta.env.VITE_RAMP_API_KEY,
+      webhookStatusUrl: `${import.meta.env.VITE_SUPABASE_FUNCTIONS_URL}/ramp-callback`,
     })
       .on<RampInstantEvents>(RampInstantEventTypes.PURCHASE_CREATED, (event) => {
         const purchase = event.payload?.purchase;

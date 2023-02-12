@@ -1,7 +1,7 @@
 import { Table } from '../supabase';
 import { Member } from './Member';
-import { User } from './Profile';
 import { Token } from './Token';
+import { User } from './User';
 
 export type Pool = Table<'pools'> & {
   token?: Token;
