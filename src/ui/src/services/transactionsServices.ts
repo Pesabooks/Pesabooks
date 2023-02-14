@@ -26,6 +26,7 @@ import {
   getSafeTreshold,
   proposeSafeTransaction,
 } from './gnosisServices';
+import { sendNotification } from './notificationServices';
 import {
   onTransactionComplete,
   onTransactionFailed,
@@ -35,6 +36,7 @@ import {
 export const deposit = async (
   provider: Web3Provider,
   pool: Pool,
+  user: User,
   category_id: number,
   amount: number,
   memo: string | null,
@@ -58,8 +60,10 @@ export const deposit = async (
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
+      transfer_from_name: user.username!,
       transfer_from: from,
       transfer_to: to,
+      transfer_to_name: pool.name,
       token: {
         address: tokenAddress,
         symbol: token.symbol,
@@ -89,6 +93,7 @@ export const deposit = async (
   tx.wait().then(
     (receipt) => {
       onTransactionComplete(transaction, receipt, pool.chain_id);
+      sendNotification(pool.id, user.id, 'new_deposit', data as Transaction);
     },
     () => onTransactionFailed(tx.hash),
   );
@@ -122,8 +127,10 @@ export const withdraw = async (
     timestamp: Math.floor(new Date().valueOf() / 1000),
     status: 'pending',
     metadata: {
+      transfer_from_name: pool.name,
       transfer_from: from,
       transfer_to: to,
+      transfer_to_name: user.username!,
       token: {
         address: tokenAddress,
         symbol: token.symbol,
@@ -149,7 +156,7 @@ export const withdraw = async (
     },
   );
 
-  return submitTransaction(signer, pool, transaction, safeTransaction);
+  return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
 
 export const addAdmin = async (
@@ -183,7 +190,7 @@ export const addAdmin = async (
     threshold,
   );
 
-  return submitTransaction(signer, pool, transaction, safeTransaction);
+  return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
 
 export const removeAdmin = async (
@@ -217,10 +224,11 @@ export const removeAdmin = async (
     threshold,
   );
 
-  return submitTransaction(signer, pool, transaction, safeTransaction);
+  return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
 
 export const changeThreshold = async (
+  user: User,
   signer: JsonRpcSigner,
   pool: Pool,
   threshold: number,
@@ -246,10 +254,11 @@ export const changeThreshold = async (
     threshold,
   );
 
-  return submitTransaction(signer, pool, transaction, safeTransaction);
+  return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
 
 export const approveToken = async (
+  user: User,
   signer: JsonRpcSigner,
   pool: Pool,
   amount: number | undefined,
@@ -287,10 +296,11 @@ export const approveToken = async (
     },
   );
 
-  return submitTransaction(signer, pool, transaction, safeTransaction);
+  return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
 
 export const swapTokens = async (
+  user: User,
   signer: JsonRpcSigner,
   pool: Pool,
   paraswapTx: ParaswapTransaction,
@@ -330,10 +340,11 @@ export const swapTokens = async (
     },
   );
 
-  return submitTransaction(signer, pool, transaction, safeTransaction);
+  return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
 
 export const submitTransaction = async (
+  user: User,
   signer: Signer,
   pool: Pool,
   transaction: NewTransaction,
@@ -358,6 +369,10 @@ export const submitTransaction = async (
       .select()
       .single();
 
+    sendNotification(pool.id, user.id, 'new_proposal', data as Transaction, {
+      remaining_votes: treshold - 1,
+    });
+
     return data as Transaction;
   } else if (treshold === 1) {
     const safeTxHash = await getSafeTransactionHash(
@@ -379,26 +394,42 @@ export const submitTransaction = async (
       .single();
 
     onTransactionSubmitted(transaction, tx, pool.chain_id, false);
+
+    sendNotification(pool.id, user.id, 'proposal_execution', data as Transaction);
+
     return data as Transaction;
   }
 };
 
 export const confirmTransaction = async (
+  user: User,
   signer: Signer,
   pool: Pool,
-  transactionId: number,
+  transaction: Transaction,
   safeTxHash: string,
+  isRejection: boolean,
 ) => {
   const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
   await confirmSafeTransaction(signer, pool.chain_id, pool.gnosis_safe_address!, safeTxHash);
 
   const safeTransaction = await getSafeTransaction(pool.chain_id, safeTxHash);
   if (safeTransaction.confirmations?.length === treshold) {
-    await transationsTable().update({ status: 'awaitingExecution' }).eq('id', transactionId);
+    await transationsTable().update({ status: 'awaitingExecution' }).eq('id', transaction.id);
+  }
+
+  if (isRejection) {
+    sendNotification(pool.id, user.id, 'proposal_rejection', transaction);
+  } else {
+    const { confirmations, confirmationsRequired } = safeTransaction;
+    const remaining_votes = confirmations
+      ? confirmationsRequired - confirmations.length
+      : confirmations;
+    sendNotification(pool.id, user.id, 'proposal_confirmation', transaction, { remaining_votes });
   }
 };
 
 export const executeTransaction = async (
+  user: User,
   signer: Signer,
   pool: Pool,
   transaction: Transaction,
@@ -416,10 +447,13 @@ export const executeTransaction = async (
 
   await transationsTable().update({ hash: tx?.hash, status: 'pending' }).eq('id', transaction.id);
 
+  sendNotification(pool.id, user.id, 'proposal_execution', transaction);
+
   return tx;
 };
 
-export const rejectTransaction = async (
+export const createRejectTransaction = async (
+  user: User,
   signer: JsonRpcSigner,
   pool: Pool,
   transactionId: number,
@@ -438,7 +472,13 @@ export const rejectTransaction = async (
     safeTransaction,
   );
 
-  await transationsTable().update({ reject_safe_tx_hash: safeTxHash }).eq('id', transactionId);
+  const { data } = await transationsTable()
+    .update({ reject_safe_tx_hash: safeTxHash })
+    .eq('id', transactionId)
+    .select()
+    .single();
+
+  sendNotification(pool.id, user.id, 'proposal_rejection', data as Transaction);
 };
 
 export const getAllTransactions = async (

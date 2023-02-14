@@ -58,7 +58,9 @@ export type NewTransaction = Omit<
 
 export interface TransferData {
   transfer_from?: string;
+  transfer_from_name?: string;
   transfer_to: string;
+  transfer_to_name?: string;
   token: TokenBase;
   amount: number | string;
   ramp_id?: string;

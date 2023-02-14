@@ -70,7 +70,7 @@ export const WalletConnectDrawer = () => {
   } = useWalletConnectV1(pool!);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { provider } = useWeb3Auth();
+  const { provider, user } = useWeb3Auth();
   const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
   const submittingRef = useRef<SubmittingTxModalRef>(null);
   const toast = useToast();
@@ -125,7 +125,7 @@ export const WalletConnectDrawer = () => {
     );
 
     try {
-      const tx = await submitTransaction(signer!, pool, transaction, safetransaction);
+      const tx = await submitTransaction(user!, signer!, pool, transaction, safetransaction);
       connector?.approveRequest({
         id,
         result: tx?.safe_tx_hash,

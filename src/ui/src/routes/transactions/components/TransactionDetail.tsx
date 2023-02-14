@@ -50,9 +50,9 @@ import {
 import { getMembers } from '../../../services/membersService';
 import {
   confirmTransaction,
+  createRejectTransaction,
   executeTransaction,
   getTransactionById,
-  rejectTransaction,
   updateTransactionCategory,
   updateTransactionMemo
 } from '../../../services/transactionsServices';
@@ -83,7 +83,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { pool } = usePool();
   const { safeAdmins } = useSafeAdmins();
-  const { provider, account } = useWeb3Auth();
+  const { provider, account, user } = useWeb3Auth();
   const [loading, setLoading] = useState(true);
   const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -167,7 +167,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     try {
       setIsSubmitting(true);
 
-      await confirmTransaction(signer, pool, transaction.id, transaction?.safe_tx_hash!);
+      await confirmTransaction(user!, signer, pool, transaction, transaction?.safe_tx_hash!, false);
       loadTransaction(transaction.id);
       toast({ title: 'You approved the transaction', status: 'success' });
     } finally {
@@ -202,7 +202,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
         });
       }
 
-      await executeTransaction(signer, pool, transaction, safeTxHash!, isRejection);
+      await executeTransaction(user!, signer, pool, transaction, safeTxHash!, isRejection);
       loadTransaction(transaction.id);
     } catch (e: any) {
       toast({
@@ -221,9 +221,16 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     try {
       setIsSubmitting(true);
       if (transaction.reject_safe_tx_hash) {
-        await confirmTransaction(signer, pool, transaction.id, transaction.reject_safe_tx_hash);
+        await confirmTransaction(
+          user!,
+          signer,
+          pool,
+          transaction,
+          transaction.reject_safe_tx_hash,
+          true,
+        );
       } else {
-        await rejectTransaction(signer, pool, transaction.id, safeTransaction?.nonce);
+        await createRejectTransaction(user!, signer, pool, transaction.id, safeTransaction?.nonce);
       }
       loadTransaction(transaction.id);
       toast({ title: 'You rejected the transaction', status: 'success' });

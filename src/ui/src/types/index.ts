@@ -3,6 +3,7 @@ export * from './Activity';
 export * from './Category';
 export * from './Invitation';
 export * from './Member';
+export * from './Notification';
 export * from './pool';
 export * from './Profile';
 export * from './Token';

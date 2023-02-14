@@ -25,7 +25,7 @@ export interface DepositFormValue {
 
 export const DepositPage = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const { provider, account } = useWeb3Auth();
+  const { provider, account, user } = useWeb3Auth();
   const { pool } = usePool();
   const [balance, setBalance] = useState<number>(0);
   const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
@@ -74,7 +74,7 @@ export const DepositPage = () => {
     const { amount, memo, category } = formValue;
 
     try {
-      const tx = await deposit(provider, pool, category.id, amount, memo);
+      const tx = await deposit(provider, pool, user!, category.id, amount, memo);
 
       if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
 

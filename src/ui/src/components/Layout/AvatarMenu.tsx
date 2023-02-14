@@ -37,7 +37,7 @@ export const AvatarMenu = () => {
 
   return (
     <Menu>
-      <MenuButton
+      <MenuButton p={0}
         as={Button}
         rounded="full"
         variant="ghost"

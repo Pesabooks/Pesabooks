@@ -15,7 +15,7 @@ import { ChangeThresholdModal } from '../components/ChangeThresholdModal';
 
 export const ThresholdPage = () => {
   const { pool } = usePool();
-  const { provider } = useWeb3Auth();
+  const { provider, user } = useWeb3Auth();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const toast = useToast();
   const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
@@ -37,7 +37,7 @@ export const ThresholdPage = () => {
       try {
         reviewTxRef.current?.openSubmitting('changeThreshold');
 
-        let tx = await changeThreshold(signer, pool, threshold, currentThreshold);
+        let tx = await changeThreshold(user!, signer, pool, threshold, currentThreshold);
 
         if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
 

@@ -4,18 +4,19 @@ import { Transaction as ParaswapTx } from 'paraswap';
 import { useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { formatBigNumber } from '../../../bignumber-utils';
-import { ReviewAndSubmitTransaction, ReviewAndSubmitTransactionRef } from '../../../components/ReviewAndSubmitTransaction';
+import {
+  ReviewAndSubmitTransaction,
+  ReviewAndSubmitTransactionRef
+} from '../../../components/ReviewAndSubmitTransaction';
 import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { onTransactionComplete } from '../../../services/blockchainServices';
 import { approveToken, swapTokens } from '../../../services/transactionsServices';
 import { ApproveArgs, SwapArgs, SwapCard } from '../components/SwapCard';
 
-
-
 export const SwapPage = () => {
   const { pool } = usePool();
-  const { provider } = useWeb3Auth();
+  const { provider, user } = useWeb3Auth();
   const signer = (provider as Web3Provider)?.getSigner();
   const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
   const toast = useToast();
@@ -39,6 +40,7 @@ export const SwapPage = () => {
     setIsSubmitting(true);
     try {
       const tx = await approveToken(
+        user!,
         signer,
         pool,
         undefined, //state.srcAmount,
@@ -85,6 +87,7 @@ export const SwapPage = () => {
 
     try {
       const tx = await swapTokens(
+        user!,
         signer,
         pool,
         txParams as ParaswapTx,
