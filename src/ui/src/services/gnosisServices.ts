@@ -88,7 +88,10 @@ export const createSafeTransaction = async (
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
   const nonce = await getNextTxNonce(chainId, safeAddress);
 
-  return await safeSdk.createTransaction({ safeTransactionData: transaction, options: { nonce } });
+  return await safeSdk.createTransaction({
+    safeTransactionData: { ...transaction, nonce },
+    options: { nonce },
+  });
 };
 
 export const proposeSafeTransaction = async (

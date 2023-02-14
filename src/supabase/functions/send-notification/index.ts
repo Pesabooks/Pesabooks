@@ -23,7 +23,7 @@ serve(async (req) => {
     threshold_info_text = "The proposal is ready to be executed.";
   } else if (notification_data?.remaining_votes === 1) {
     threshold_info_text = "1 more confirmation is required to execute the proposal.";
-  } else {
+  } else if (!isNaN(notification_data?.remaining_votes)) {
     threshold_info_text = `${notification_data?.remaining_votes} more confirmations are required to execute the proposal.`;
   }
 
@@ -57,6 +57,8 @@ serve(async (req) => {
     .eq("active", true)
     .neq("user_id", user_id);
 
+  console.log("recipients", recipients);
+
   if (recipients)
     for (const recipient of recipients) {
       try {
@@ -84,6 +86,8 @@ serve(async (req) => {
           ],
           template_id: template_id,
         };
+
+        console.log("mail", JSON.stringify(mail, null, 2));
         await fetch("https://api.sendgrid.com/v3/mail/send", {
           method: "POST",
           headers: {
