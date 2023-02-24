@@ -251,7 +251,7 @@ export const ReviewTransactionModal = forwardRef(
 
     return (
       <Modal
-        size="md"
+        size="lg"
         isOpen={isOpen}
         onClose={() => close(false)}
         closeOnOverlayClick={false}
@@ -278,7 +278,7 @@ export const ReviewTransactionModal = forwardRef(
                     {network?.nativeCurrency.symbol}
                   </Text>
                 </Flex>
-                <Flex justifyContent="space-between">
+               {(isEstimating || !!fee) && <Flex justifyContent="space-between">
                   <Text>Estmimated gas:</Text>
                   {isEstimating ? (
                     <Loading size="sm" thickness="2px" />
@@ -288,19 +288,19 @@ export const ReviewTransactionModal = forwardRef(
                       {network?.nativeCurrency.symbol}
                     </Text>
                   )}
-                </Flex>
+                </Flex>}
               </Flex>
             </Stack>
-          </ModalBody>
 
           {error === 'willFail' && !!state?.safeTxHash && (
-            <Alert status="error">
+            <Alert status="error" mt={10}>
               <AlertIcon />
               <AlertDescription>
                 This transaction will most likely fail. To save gas costs, reject this transaction.
               </AlertDescription>
             </Alert>
           )}
+          </ModalBody>
 
           {error !== 'insufficientFunds' && (
             <ModalFooter>

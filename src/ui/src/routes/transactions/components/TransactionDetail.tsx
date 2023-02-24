@@ -42,7 +42,6 @@ import { useSafeAdmins } from '../../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAllCategories } from '../../../services/categoriesService';
 import {
-  estimateSafeTransactionByHash,
   getSafeNonce,
   getSafeTransaction,
   getSafeTreshold
@@ -160,6 +159,8 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
   const canExecuteRejection = safeRejectionTransaction?.confirmations?.length === treshold;
 
+  const canExecuteOne = canExecute || canExecuteRejection;
+
   const isNextExecution = currentSafeNonce === transaction?.safe_nonce;
 
   const approve = async () => {
@@ -191,22 +192,13 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     try {
       setIsSubmitting(true);
       reviewTxRef.current?.openSubmitting(transaction.type);
-      try {
-        await estimateSafeTransactionByHash(pool.chain_id, pool.gnosis_safe_address!, safeTxHash!);
-      } catch (_) {
-        toast({
-          title:
-            'This transaction will most likely fail. To save gas costs, reject this transaction.',
-          status: 'error',
-          isClosable: true,
-        });
-      }
 
       await executeTransaction(user!, signer, pool, transaction, safeTxHash!, isRejection);
       loadTransaction(transaction.id);
     } catch (e: any) {
       toast({
-        title: e?.message,
+        title: 'Your transaction was unsuccessful',
+        description: e?.reason,
         status: 'error',
         isClosable: true,
       });
@@ -474,7 +466,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                 <Loading />
               ) : (
                 <VStack>
-                  {!isNextExecution && (
+                  {!isNextExecution && canExecuteOne && (
                     <Alert status="warning" mb={30}>
                       <AlertIcon />
                       Transaction with order# {currentSafeNonce} needs to be executed first
