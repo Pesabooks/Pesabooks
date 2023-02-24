@@ -302,7 +302,7 @@ export interface Database {
           pool_id: string;
           reject_safe_tx_hash: string | null;
           safe_nonce: number | null;
-          safe_transaction: Json | null;
+          transaction_data: Json | null;
           safe_tx_hash: string | null;
           status: string;
           timestamp: number | null;
@@ -319,7 +319,7 @@ export interface Database {
           pool_id: string;
           reject_safe_tx_hash?: string | null;
           safe_nonce?: number | null;
-          safe_transaction?: Json | null;
+          transaction_data?: Json | null;
           safe_tx_hash?: string | null;
           status: string;
           timestamp?: number | null;
@@ -336,7 +336,7 @@ export interface Database {
           pool_id?: string;
           reject_safe_tx_hash?: string | null;
           safe_nonce?: number | null;
-          safe_transaction?: Json | null;
+          transaction_data?: Json | null;
           safe_tx_hash?: string | null;
           status?: string;
           timestamp?: number | null;

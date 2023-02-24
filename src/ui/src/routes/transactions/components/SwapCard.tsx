@@ -2,8 +2,10 @@ import {
   Alert,
   AlertDescription,
   AlertIcon,
+  AlertTitle,
   Box,
   Button,
+  CloseButton,
   Editable,
   EditableInput,
   EditablePreview,
@@ -20,7 +22,8 @@ import {
   Spacer,
   Spinner,
   Stack,
-  Text
+  Text,
+  useDisclosure
 } from '@chakra-ui/react';
 import { BigNumber, ethers } from 'ethers';
 import { debounce } from 'lodash';
@@ -107,6 +110,9 @@ export const SwapCard = ({
     availableTokens: [],
     slippage: DEFAULT_ALLOWED_SLIPPAGE,
     InputSlippage: DEFAULT_ALLOWED_SLIPPAGE.toString(),
+  });
+  const { isOpen: isDeadlineWarningVisible, onClose: onCloseDeadlineWarning } = useDisclosure({
+    defaultIsOpen: !!pool_id,
   });
 
   useEffect(() => {
@@ -515,6 +521,26 @@ export const SwapCard = ({
 
   return (
     <>
+      {isDeadlineWarningVisible && (
+        <Alert status="warning" mb={5}>
+          <AlertIcon />
+          <Box>
+            <AlertTitle>Swap deadline!</AlertTitle>
+            <AlertDescription>
+              Swap transaction should be approved and executed in 5min. Otherwise, the transaction
+              will be reverted. Get your team ready.
+            </AlertDescription>
+          </Box>
+          <CloseButton
+            alignSelf="flex-start"
+            position="relative"
+            right={-1}
+            top={-1}
+            onClick={onCloseDeadlineWarning}
+          />
+        </Alert>
+      )}
+
       {state.error && (
         <Alert status="error">
           <AlertIcon />
@@ -673,6 +699,13 @@ export const SwapCard = ({
                   %
                 </Text>
               </Flex>
+            </Flex>
+
+            <Flex justifyContent="space-between">
+              <Text fontSize="sm">Deadline:</Text>
+              <Text as="i" fontSize="sm">
+                5mn
+              </Text>
             </Flex>
           </Flex>
         </Stack>

@@ -90,6 +90,8 @@ export const WalletConnectDrawer = () => {
   const propose = async (formValue: DepositFormValue) => {
     if (!provider || !pool) return;
 
+    const wallet = await signer?.getAddress();
+
     const { memo, category } = formValue;
 
     const {
@@ -97,6 +99,20 @@ export const WalletConnectDrawer = () => {
       params: [{ data, gas, gasPrice, to, value }],
     } = txRequestPayload;
 
+    const txData = {
+      to: checksummed(to),
+      data,
+      value: parseInt(value).toString(),
+      gasPrice: gasPrice ? parseInt(gasPrice) : undefined,
+      baseGas: gas ? parseInt(gas) : undefined,
+    };
+
+    const safetransaction: SafeTransaction = await createSafeTransaction(
+      signer!,
+      pool!.chain_id,
+      pool!.gnosis_safe_address!,
+      txData,
+    );
     const transaction: NewTransaction = {
       type: 'walletConnect',
       pool_id: pool.id,
@@ -109,20 +125,14 @@ export const WalletConnectDrawer = () => {
         payload: txRequestPayload,
         functionName: functionName,
       },
-    };
-
-    const safetransaction: SafeTransaction = await createSafeTransaction(
-      signer!,
-      pool!.chain_id,
-      pool!.gnosis_safe_address!,
-      {
-        to: checksummed(to),
-        data,
-        value: parseInt(value).toString(),
-        gasPrice: gasPrice ? parseInt(gasPrice) : undefined,
-        baseGas: gas ? parseInt(gas) : undefined,
+      transaction_data: {
+        from: wallet!,
+        to: safetransaction.data.to,
+        value: safetransaction.data.value,
+        data: safetransaction.data.data,
+        nonce: safetransaction.data.nonce,
       },
-    );
+    };
 
     try {
       const tx = await submitTransaction(user!, signer!, pool, transaction, safetransaction);

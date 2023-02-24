@@ -8,12 +8,14 @@ import {
   Container,
   Flex,
   Heading,
+  IconButton,
   Image,
   Link,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
+  Spacer,
   Stack,
   Tab,
   TabList,
@@ -31,7 +33,7 @@ import {
 } from '@ramp-network/ramp-instant-sdk';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
+import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard, FiMoreVertical } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
 import { formatBigNumber } from '../../bignumber-utils';
 import { Card } from '../../components/Card';
@@ -91,7 +93,7 @@ export const NetworkSelectorMenu = () => {
 };
 
 export const WalletPage = () => {
-  const { account, chainId, user } = useWeb3Auth();
+  const { account, chainId, user, web3Auth } = useWeb3Auth();
   const { balance, loading: balanceLoading } = useNativeBalance();
   const { isOpen: isOpenReceive, onOpen: onOpenReceive, onClose: onCloseReceive } = useDisclosure();
   const { isOpen: isOpenSend, onOpen: onOpenSend, onClose: onCloseSend } = useDisclosure();
@@ -202,6 +204,13 @@ export const WalletPage = () => {
     [account, chainId, getData],
   );
 
+  const getPrivateKey = async () => {
+    const privateKey = await web3Auth?.provider?.request({
+      method: 'eth_private_key',
+    });
+    console.log('privateKey', privateKey);
+  };
+
   return (
     <>
       <Helmet>
@@ -245,9 +254,23 @@ export const WalletPage = () => {
           </Stack>
         </Flex>
 
-        <Heading as="h2" size="lg">
-          My Wallet
-        </Heading>
+        <Flex>
+          <Heading as="h2" size="lg">
+            My Wallet
+          </Heading>
+          <Spacer />
+          <Menu>
+            <MenuButton
+              as={IconButton}
+              aria-label="Options"
+              icon={<FiMoreVertical />}
+              variant="ghost"
+            />
+            <MenuList>
+              <MenuItem onClick={getPrivateKey}>print key</MenuItem>
+            </MenuList>
+          </Menu>
+        </Flex>
 
         <Center py={6}>
           <Flex

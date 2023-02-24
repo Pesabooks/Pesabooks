@@ -1,6 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { handleSupabaseError, poolsTable, supabase, transationsTable } from '../supabase';
-import { NewTransaction, Pool, Token, User } from '../types';
+import { Pool, Token, User } from '../types';
 import { deploySafe } from './gnosisServices';
 import { getMembers } from './membersService';
 
@@ -57,16 +57,14 @@ export const deployNewSafe = async (provider: Web3Provider, pool_id: string) => 
 
   await poolsTable().update({ gnosis_safe_address: gnosis_address }).eq('id', pool_id);
 
-  const transaction: NewTransaction = {
+  await transationsTable().insert({
     type: 'createSafe',
     pool_id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     status: 'completed',
     category_id: null,
     memo: null,
-  };
-
-  await transationsTable().insert(transaction);
+  });
 
   return pool_id;
 };

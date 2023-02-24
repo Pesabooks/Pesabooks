@@ -2,14 +2,30 @@ import { Web3Provider } from '@ethersproject/providers';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
 import { BigNumber, ethers } from 'ethers';
 import { Transaction as ParaswapTx } from 'paraswap';
+import { TransactionData } from '../types';
 import {
   estimateSafeTransaction,
-  estimateSafeTransactionByHash,
   getAddOwnerTx,
   getRemoveOwnerTx,
+  getSafeTransaction,
 } from './gnosisServices';
 
 const INITIAL_SAFE_CREATION_TX_GAS_COST = 282912;
+
+export const estimateTransaction2 = async (
+  provider: Web3Provider,
+  transactionData: TransactionData,
+) => {
+  const { from, to, data, value } = transactionData;
+  const tx = {
+    from,
+    to: to,
+    data: data,
+    value: value,
+  };
+  const gasLimit = await provider.estimateGas(tx);
+  return fee(provider, gasLimit);
+};
 
 export const estimateTransfer = async (
   provider: Web3Provider,
@@ -109,9 +125,16 @@ export const estimateTransaction = async (
   safe_address: string,
   safeTxHash: string,
 ) => {
-  const gasLimit = await estimateSafeTransactionByHash(chain_id, safe_address, safeTxHash);
-
-  return fee(provider, BigNumber.from(gasLimit));
+  const safeTransaction = await getSafeTransaction(chain_id, safeTxHash);
+  const { to, data, value } = safeTransaction;
+  const tx = {
+    from: safe_address,
+    to: to,
+    data: data,
+    value: value,
+  };
+  const gasLimit = await provider.estimateGas(tx);
+  return fee(provider, gasLimit);
 };
 
 export const estimateWithdraw = async (

@@ -7,7 +7,13 @@ import { OptimalRate } from 'paraswap-core';
 import { networks } from '../data/networks';
 import { Filter, handleSupabaseError, transationsTable } from '../supabase';
 import { Pool, User } from '../types';
-import { AddOrRemoveOwnerData, NewTransaction, SwapData, Transaction } from '../types/transaction';
+import {
+  AddOrRemoveOwnerData,
+  NewTransaction,
+  SwapData,
+  Transaction,
+  TransactionData,
+} from '../types/transaction';
 import { checksummed } from '../utils';
 import { notifyTransaction } from '../utils/notification';
 import { defaultProvider, getTokenContract } from './blockchainServices';
@@ -33,6 +39,17 @@ import {
   onTransactionSubmitted,
 } from './transaction-events';
 
+const getTransactionDataFromSafeTransaction = (
+  safe_address: string,
+  safeTransaction: SafeTransaction,
+): TransactionData => ({
+  from: safe_address,
+  to: safeTransaction.data.to,
+  value: safeTransaction.data.value,
+  data: safeTransaction.data.data,
+  nonce: safeTransaction.data.nonce,
+});
+
 export const deposit = async (
   provider: Web3Provider,
   pool: Pool,
@@ -51,6 +68,8 @@ export const deposit = async (
 
   const tokenContract = ERC20__factory.connect(token.address, signer);
   const decimals = await tokenContract.decimals();
+
+  const _amount = ethers.utils.parseUnits(amount.toString(), decimals);
 
   const transaction: NewTransaction = {
     memo: memo,
@@ -73,9 +92,13 @@ export const deposit = async (
       },
       amount: amount,
     },
+    transaction_data: {
+      from,
+      to,
+      value: '0',
+      data: ERC20__factory.createInterface().encodeFunctionData('transfer', [to, _amount]),
+    },
   };
-
-  const _amount = ethers.utils.parseUnits(amount.toString(), decimals);
 
   const gasLimit = await tokenContract.estimateGas.transfer(to, _amount);
   const gasPrice = await provider.getGasPrice();
@@ -119,6 +142,20 @@ export const withdraw = async (
   const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
   const decimals = await tokenContract.decimals();
 
+  const safeTransaction = await createSafeTransaction(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address!,
+    {
+      to: checksummed(tokenAddress),
+      value: '0',
+      data: ERC20__factory.createInterface().encodeFunctionData('transfer', [
+        to,
+        ethers.utils.parseUnits(amount.toString(), decimals),
+      ]),
+    },
+  );
+
   const transaction: NewTransaction = {
     memo: memo,
     type: 'withdrawal',
@@ -140,21 +177,11 @@ export const withdraw = async (
       },
       amount: amount,
     },
+    transaction_data: getTransactionDataFromSafeTransaction(
+      pool.gnosis_safe_address!,
+      safeTransaction,
+    ),
   };
-
-  const safeTransaction = await createSafeTransaction(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    {
-      to: checksummed(tokenAddress),
-      value: '0',
-      data: ERC20__factory.createInterface().encodeFunctionData('transfer', [
-        to,
-        ethers.utils.parseUnits(amount.toString(), decimals),
-      ]),
-    },
-  );
 
   return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
@@ -166,6 +193,13 @@ export const addAdmin = async (
   currentTreshold: number,
   threshold: number,
 ): Promise<Transaction | undefined> => {
+  const safeTransaction = await getAddOwnerTx(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address!,
+    checksummed(user.wallet),
+    threshold,
+  );
   const transaction: NewTransaction = {
     type: 'addOwner',
     pool_id: pool.id,
@@ -180,15 +214,11 @@ export const addAdmin = async (
       threshold: threshold,
       current_threshold: currentTreshold,
     },
+    transaction_data: getTransactionDataFromSafeTransaction(
+      pool.gnosis_safe_address!,
+      safeTransaction,
+    ),
   };
-
-  const safeTransaction = await getAddOwnerTx(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    checksummed(user.wallet),
-    threshold,
-  );
 
   return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
@@ -200,6 +230,14 @@ export const removeAdmin = async (
   currentTreshold: number,
   threshold: number,
 ): Promise<Transaction | undefined> => {
+  const safeTransaction = await getRemoveOwnerTx(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address!,
+    checksummed(user.wallet),
+    threshold,
+  );
+
   const transaction: NewTransaction = {
     type: 'removeOwner',
     pool_id: pool.id,
@@ -214,15 +252,11 @@ export const removeAdmin = async (
       current_threshold: currentTreshold,
       threshold: threshold,
     } as AddOrRemoveOwnerData,
+    transaction_data: getTransactionDataFromSafeTransaction(
+      pool.gnosis_safe_address!,
+      safeTransaction,
+    ),
   };
-
-  const safeTransaction = await getRemoveOwnerTx(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    checksummed(user.wallet),
-    threshold,
-  );
 
   return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
@@ -234,6 +268,13 @@ export const changeThreshold = async (
   threshold: number,
   currentThresold: number,
 ): Promise<Transaction | undefined> => {
+  const safeTransaction = await getChangeThresholdTx(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address!,
+    threshold,
+  );
+
   const transaction: NewTransaction = {
     type: 'changeThreshold',
     pool_id: pool.id,
@@ -245,14 +286,11 @@ export const changeThreshold = async (
       threshold,
       current_threshold: currentThresold,
     },
+    transaction_data: getTransactionDataFromSafeTransaction(
+      pool.gnosis_safe_address!,
+      safeTransaction,
+    ),
   };
-
-  const safeTransaction = await getChangeThresholdTx(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    threshold,
-  );
 
   return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
@@ -269,19 +307,6 @@ export const approveToken = async (
   const decimals = await tokenContract.decimals();
   const maxAllowance = BigNumber.from('2').pow(BigNumber.from('256').sub(BigNumber.from('1')));
 
-  const transaction: NewTransaction = {
-    type: 'unlockToken',
-    pool_id: pool.id,
-    category_id: null,
-    memo: null,
-    status: 'pending',
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    metadata: {
-      token: token,
-      amount,
-    } as any,
-  };
-
   const safeTransaction = await createSafeTransaction(
     signer,
     pool.chain_id,
@@ -296,6 +321,23 @@ export const approveToken = async (
     },
   );
 
+  const transaction: NewTransaction = {
+    type: 'unlockToken',
+    pool_id: pool.id,
+    category_id: null,
+    memo: null,
+    status: 'pending',
+    timestamp: Math.floor(new Date().valueOf() / 1000),
+    metadata: {
+      token: token,
+      amount,
+    } as any,
+    transaction_data: getTransactionDataFromSafeTransaction(
+      pool.gnosis_safe_address!,
+      safeTransaction,
+    ),
+  };
+
   return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
 
@@ -309,6 +351,17 @@ export const swapTokens = async (
   slippage: number,
   priceRoute: OptimalRate,
 ): Promise<Transaction | undefined> => {
+  const safeTransaction = await createSafeTransaction(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address!,
+    {
+      to: checksummed(paraswapTx.to),
+      value: paraswapTx.value,
+      data: paraswapTx.data,
+    },
+  );
+
   const transaction: NewTransaction = {
     type: 'swap',
     pool_id: pool.id,
@@ -327,18 +380,11 @@ export const swapTokens = async (
       gas_cost: priceRoute.gasCost,
       gas_cost_usd: priceRoute.gasCostUSD,
     } as SwapData,
+    transaction_data: getTransactionDataFromSafeTransaction(
+      pool.gnosis_safe_address!,
+      safeTransaction,
+    ),
   };
-
-  const safeTransaction = await createSafeTransaction(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    {
-      to: checksummed(paraswapTx.to),
-      value: paraswapTx.value,
-      data: paraswapTx.data,
-    },
-  );
 
   return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };

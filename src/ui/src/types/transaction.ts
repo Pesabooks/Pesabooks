@@ -41,6 +41,7 @@ export type Transaction = Omit<Table<'transactions'>, 'metadata'> & {
   metadata?: Metadata;
   safeTx?: SafeMultisigTransactionResponse;
   rejectSafeTx?: SafeMultisigTransactionResponse;
+  transaction_data: TransactionData;
 };
 
 export type NewTransaction = Omit<
@@ -52,9 +53,19 @@ export type NewTransaction = Omit<
   | 'safe_tx_hash'
   | 'reject_safe_tx_hash'
   | 'safe_nonce'
-  | 'safe_transaction'
   | 'user_id'
->;
+  | 'transaction_data'
+> & {
+  transaction_data: TransactionData;
+};
+
+export interface TransactionData {
+  from: string;
+  to: string;
+  value: string;
+  data: string;
+  nonce?: number;
+}
 
 export interface TransferData {
   transfer_from?: string;

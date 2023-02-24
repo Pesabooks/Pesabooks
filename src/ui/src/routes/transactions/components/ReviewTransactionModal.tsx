@@ -34,10 +34,7 @@ import {
   estimateAddOwner,
   estimateApprove,
   estimateRemoveOwner,
-  estimateSafeCreation,
-  estimateSwap,
-  estimateTransaction,
-  estimateTransfer,
+  estimateSafeCreation, estimateSwap, estimateTransaction, estimateTransfer,
   estimateWithdraw
 } from '../../../services/estimationService';
 import { TransactionType } from '../../../types';
@@ -90,7 +87,9 @@ export const ReviewTransactionModal = forwardRef(
     const { pool } = usePool();
     const { provider, chainId } = useWeb3Auth();
     const { balance } = useNativeBalance();
-    const [error, setError] = useState<'insufficientFunds' | 'willFail' | undefined>();
+    const [error, setError] = useState<
+      { code: 'insufficientFunds' | 'willFail'; reason: string } | undefined
+    >();
     const navigate = useNavigate();
     const network = networks[chainId];
     const bgColor = useColorModeValue('white', 'gray.900');
@@ -225,8 +224,8 @@ export const ReviewTransactionModal = forwardRef(
           }
 
           setFee(estimatedFee);
-        } catch (error) {
-          setError('willFail');
+        } catch (error: any) {
+          setError({ code: 'willFail', reason: error?.reason });
         } finally {
           setIsEstimating(false);
         }
@@ -245,7 +244,7 @@ export const ReviewTransactionModal = forwardRef(
 
     useEffect(() => {
       if (fee) {
-        if (balance.lt(fee)) setError('insufficientFunds');
+        if (balance.lt(fee)) setError({ code: 'insufficientFunds', reason: 'Insufficient funds' });
       }
     }, [balance, fee, network.nativeCurrency.decimals]);
 
@@ -278,31 +277,39 @@ export const ReviewTransactionModal = forwardRef(
                     {network?.nativeCurrency.symbol}
                   </Text>
                 </Flex>
-               {(isEstimating || !!fee) && <Flex justifyContent="space-between">
-                  <Text>Estmimated gas:</Text>
-                  {isEstimating ? (
-                    <Loading size="sm" thickness="2px" />
-                  ) : (
-                    <Text>
-                      {formatBigNumber(fee, network.nativeCurrency.decimals)}{' '}
-                      {network?.nativeCurrency.symbol}
-                    </Text>
-                  )}
-                </Flex>}
+                {(isEstimating || !!fee) && (
+                  <Flex justifyContent="space-between">
+                    <Text>Estmimated gas:</Text>
+                    {isEstimating ? (
+                      <Loading size="sm" thickness="2px" />
+                    ) : (
+                      <Text>
+                        {formatBigNumber(fee, network.nativeCurrency.decimals)}{' '}
+                        {network?.nativeCurrency.symbol}
+                      </Text>
+                    )}
+                  </Flex>
+                )}
               </Flex>
             </Stack>
 
-          {error === 'willFail' && !!state?.safeTxHash && (
-            <Alert status="error" mt={10}>
-              <AlertIcon />
-              <AlertDescription>
-                This transaction will most likely fail. To save gas costs, reject this transaction.
-              </AlertDescription>
-            </Alert>
-          )}
+            {error?.code === 'willFail' && !!state?.safeTxHash && (
+              <Alert status="error" mt={10} alignItems="start">
+                <AlertIcon />
+                <Flex direction="column">
+                  <AlertDescription>
+                    This transaction will most likely fail. To save gas costs, reject this
+                    transaction.
+                  </AlertDescription>
+                  <AlertDescription mt={5}>
+                    <b>Detail: </b> {error?.reason}
+                  </AlertDescription>
+                </Flex>
+              </Alert>
+            )}
           </ModalBody>
 
-          {error !== 'insufficientFunds' && (
+          {error?.code !== 'insufficientFunds' && (
             <ModalFooter>
               <Button variant="outline" onClick={() => close(false)}>
                 Cancel
@@ -314,7 +321,7 @@ export const ReviewTransactionModal = forwardRef(
             </ModalFooter>
           )}
 
-          {error === 'insufficientFunds' && (
+          {error?.code === 'insufficientFunds' && (
             <Stack mx={15} p={5}>
               <Button onClick={() => navigate('/wallet')}>Add Funds</Button>
               <Alert status="error">
