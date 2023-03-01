@@ -99,6 +99,13 @@ export const Web3AuthProvider = ({ children }: any) => {
             network: web3AuthNetwork === 'testnet' ? 'testnet' : 'mainnet',
             uxMode: 'redirect',
             redirectUrl: `${window.location.origin}/auth/callback`,
+            whiteLabel: {
+              name: 'Pesabooks',
+              logoLight: 'https://pesabooks.com/assets/img/icon.png',
+              logoDark: 'https://pesabooks.com/assets/img/icon.png',
+              dark: true,
+              theme: { primary: '4FD1C5' },
+            },
             loginConfig: {
               jwt: {
                 name: 'pesabooks firebase',
