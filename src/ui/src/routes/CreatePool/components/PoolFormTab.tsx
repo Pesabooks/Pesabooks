@@ -1,6 +1,5 @@
 import {
-  Button,
-  Flex,
+  Button, Card, CardBody, Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -13,7 +12,6 @@ import {
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
 import { useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { Token } from '../../../types';
 
 interface PoolFormTabProps {
@@ -62,21 +60,8 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
   );
 
   return (
-    <Card p="4">
-      <CardHeader mb="40px">
-        <Flex
-          direction="column"
-          align="center"
-          justify="center"
-          textAlign="center"
-          w="80%"
-          mx="auto"
-        >
-          {/* <Text fontSize="lg" fontWeight="bold" mb="4px">
-            Group info
-          </Text> */}
-        </Flex>
-      </CardHeader>
+    <Card >
+      
       <CardBody flexDirection="column">
         <form onSubmit={handleSubmit(submit)}>
           <Flex direction="column" w="100%">
@@ -88,7 +73,7 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
                   placeholder="name"
                   {...register('name', { required: 'Name is required' })}
                 />
-                <FormErrorMessage>{errors.name}</FormErrorMessage>
+                <FormErrorMessage> {errors.name && errors.name.message}</FormErrorMessage>
               </FormControl>
 
               <FormControl isInvalid={!!errors.description}>
@@ -116,8 +101,8 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
                       onBlur={onBlur}
                       value={value}
                       options={filteredTokens}
-                      getOptionLabel={(t) => t.name}
-                      getOptionValue={(t) => `${t.id}`}
+                      getOptionLabel={(t:Token) => t.name}
+                      getOptionValue={(t:Token) => `${t.id}`}
                       components={{ Option: IconOption }}
                     />
 
@@ -137,12 +122,7 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
               >
                 Prev
               </Button>
-              <Button
-                alignSelf="flex-end"
-                w={{ sm: '75px', lg: '100px' }}
-                h="35px"
-                type="submit"
-              >
+              <Button alignSelf="flex-end" w={{ sm: '75px', lg: '100px' }} h="35px" type="submit">
                 Next
               </Button>
             </Flex>

@@ -3,8 +3,7 @@ import {
   Avatar,
   Box,
   Button,
-  ButtonGroup,
-  Center,
+  ButtonGroup, Card, CardBody, CardHeader, Center,
   Container,
   Flex,
   Grid,
@@ -18,12 +17,11 @@ import {
   Spinner,
   Stack,
   Text,
-  useColorModeValue,
+  useColorModeValue
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { Card, CardBody, CardHeader } from '../../components/Card';
 import { ConnectedChain } from '../../components/ConnectedChain';
 import { AvatarMenu } from '../../components/Layout/AvatarMenu';
 import { Logo } from '../../components/Layout/Logo';
@@ -156,7 +154,9 @@ export const ProfilePage = () => {
             {account && <WalletAddress type="address" chainId={4} address={account} />}
           </Box>
           <Text textAlign={'center'} color={useColorModeValue('gray.700', 'gray.400')} px={3}>
-            {balance} {network?.nativeCurrency.symbol}
+            <>
+              {balance} {network?.nativeCurrency.symbol}
+            </>
           </Text>
 
           <ButtonGroup variant="outline" spacing="4" mt={8}>
@@ -177,7 +177,7 @@ export const ProfilePage = () => {
 
       <Container maxW="container.xl" centerContent>
         <Card mt="8" bg="transparent">
-          <CardHeader p="6px 0px 22px 0px">
+          <CardHeader>
             <Text fontSize="lg" fontWeight="bold">
               My groups
             </Text>

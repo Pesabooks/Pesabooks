@@ -25,27 +25,20 @@ import {
 } from '@chakra-ui/react';
 import type { Web3Provider } from '@ethersproject/providers';
 import { SafeMultisigTransactionResponse } from '@safe-global/safe-core-sdk-types';
+import { BigNumber } from 'ethers';
 import { forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { formatBigNumber } from '../../../bignumber-utils';
 import { EditableControls } from '../../../components/Editable/EditableControls';
 import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
 import Loading from '../../../components/Loading';
-import {
-  ReviewAndSubmitTransaction,
-  ReviewAndSubmitTransactionRef
-} from '../../../components/ReviewAndSubmitTransaction';
+
 import { UserWalletCard } from '../../../components/UserWalletCard';
 import { WalletAddress } from '../../../components/WalletAddress';
-import { ButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
-import { useSafeAdmins } from '../../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAllCategories } from '../../../services/categoriesService';
-import {
-  getSafeNonce,
-  getSafeTransaction,
-  getSafeTreshold
-} from '../../../services/gnosisServices';
+import { estimateSafeTransaction } from '../../../services/estimationService';
+import { getSafeNonce, getSafeTransaction } from '../../../services/gnosisServices';
 import { getMembers } from '../../../services/membersService';
 import {
   confirmTransaction,
@@ -70,6 +63,10 @@ import {
   mathAddress
 } from '../../../utils';
 import { EditableSelect } from './EditableSelect';
+import {
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef
+} from './ReviewAndSendTransactionModal';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
 import { TransactionTimeline } from './TransactionTimeline';
 import { TxPropertyBox } from './TxPropertyBox';
@@ -81,12 +78,9 @@ export interface TransactionDetailRef {
 export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDetailRef>) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { pool } = usePool();
-  const { safeAdmins } = useSafeAdmins();
   const { provider, account, user } = useWeb3Auth();
   const [loading, setLoading] = useState(true);
-  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [treshold, setTreshold] = useState(0);
+  const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
   const [currentSafeNonce, setCurrentSafeNonce] = useState(0);
   const [users, setUsers] = useState<User[]>([]);
   const [transactions, setTransactions] = useState<{
@@ -99,6 +93,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   const signer = (provider as Web3Provider)?.getSigner();
 
   const { transaction, safeTransaction, safeRejectionTransaction } = transactions;
+  const threshold = transaction?.threshold;
 
   const loadTransaction = async (id: number) => {
     let transaction: Transaction | null;
@@ -121,7 +116,6 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     const fetchData = async () => {
       if (pool) {
         getMembers(pool.id, true).then((members) => setUsers(members?.map((m) => m.user!)));
-        getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!).then(setTreshold);
         getSafeNonce(pool.chain_id, pool.gnosis_safe_address!).then(setCurrentSafeNonce);
         getAllCategories(pool.id, { activeOnly: true }).then(setCategories);
       }
@@ -145,8 +139,6 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     })) ?? []),
   ];
 
-  const isAdmin: boolean = !!safeAdmins?.find((a) => compareAddress(a, account));
-
   const hasApproved: boolean = !!safeTransaction?.confirmations?.find((c) =>
     compareAddress(c.owner, account),
   );
@@ -155,9 +147,9 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     compareAddress(c.owner, account),
   );
 
-  const canExecute = safeTransaction?.confirmations?.length === treshold;
+  const canExecute = safeTransaction?.confirmations?.length === threshold;
 
-  const canExecuteRejection = safeRejectionTransaction?.confirmations?.length === treshold;
+  const canExecuteRejection = safeRejectionTransaction?.confirmations?.length === threshold;
 
   const canExecuteOne = canExecute || canExecuteRejection;
 
@@ -165,71 +157,88 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
   const approve = async () => {
     if (!pool || !transaction) return;
-    try {
-      setIsSubmitting(true);
 
-      await confirmTransaction(user!, signer, pool, transaction, transaction?.safe_tx_hash!, false);
-      loadTransaction(transaction.id);
-      toast({ title: 'You approved the transaction', status: 'success' });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const confirmTx = (isRejection: boolean) => {
-    const message = isRejection ? '' : getTransactionDescription(transaction!, users);
-    const safeTxHash = isRejection ? transaction?.reject_safe_tx_hash : transaction?.safe_tx_hash;
-    const type = isRejection ? 'rejection' : transaction!.type;
-
-    reviewTxRef.current?.review(message, type, isRejection, execute, safeTxHash!);
-  };
-
-  const execute = async (confirmed: boolean, isRejection: boolean) => {
-    if (!pool || !transaction || !confirmed) return;
-
-    const safeTxHash = isRejection ? transaction?.reject_safe_tx_hash : transaction.safe_tx_hash;
-
-    try {
-      setIsSubmitting(true);
-      reviewTxRef.current?.openSubmitting(transaction.type);
-
-      await executeTransaction(user!, signer, pool, transaction, safeTxHash!, isRejection);
-      loadTransaction(transaction.id);
-    } catch (e: any) {
-      toast({
-        title: 'Your transaction was unsuccessful',
-        description: e?.reason,
-        status: 'error',
-        isClosable: true,
-      });
-    } finally {
-      reviewTxRef.current?.closeSubmitting();
-      setIsSubmitting(false);
-    }
-  };
-
-  const reject = async () => {
-    if (!pool || !safeTransaction || !transaction) return;
-    try {
-      setIsSubmitting(true);
-      if (transaction.reject_safe_tx_hash) {
+    reviewTxRef.current?.open(
+      'Approve: ' + getTransactionDescription(transaction, users),
+      transaction.type,
+      () => Promise.resolve(BigNumber.from(0)),
+      async () => {
         await confirmTransaction(
           user!,
           signer,
           pool,
           transaction,
-          transaction.reject_safe_tx_hash,
-          true,
+          transaction?.safe_tx_hash!,
+          false,
         );
-      } else {
-        await createRejectTransaction(user!, signer, pool, transaction.id, safeTransaction?.nonce);
-      }
-      loadTransaction(transaction.id);
-      toast({ title: 'You rejected the transaction', status: 'success' });
-    } finally {
-      reviewTxRef.current?.closeSubmitting();
-      setIsSubmitting(false);
-    }
+        loadTransaction(transaction.id);
+        toast({ title: 'You approved the transaction', status: 'success' });
+      },
+      { labelSubmit: 'Approve', closeOnSuccess: true },
+    );
+  };
+
+  const execute = (isRejection: boolean) => {
+    const { type, safe_tx_hash, reject_safe_tx_hash } = transaction!;
+    const safeTxHash = isRejection ? reject_safe_tx_hash! : safe_tx_hash!;
+
+    const message = isRejection
+      ? `Execute rejection`
+      : getTransactionDescription(transaction!, users);
+
+    reviewTxRef.current?.open(
+      message,
+      isRejection ? 'rejection' : type,
+      () =>
+        estimateSafeTransaction(provider!, pool!.chain_id, pool?.gnosis_safe_address!, safeTxHash),
+      async () => {
+        const tx = await executeTransaction(
+          user!,
+          signer,
+          pool!,
+          transaction as Transaction,
+          safeTxHash!,
+          isRejection!,
+        );
+        loadTransaction(transaction!.id);
+        return {
+          hash: tx?.hash,
+        };
+      },
+    );
+  };
+
+  const reject = async () => {
+    if (!pool || !safeTransaction || !transaction) return;
+
+    reviewTxRef.current?.open(
+      'Reject: ' + getTransactionDescription(transaction, users),
+      transaction.type,
+      () => Promise.resolve(BigNumber.from(0)),
+      async () => {
+        if (transaction.reject_safe_tx_hash) {
+          await confirmTransaction(
+            user!,
+            signer,
+            pool,
+            transaction,
+            transaction.reject_safe_tx_hash,
+            true,
+          );
+        } else {
+          await createRejectTransaction(
+            user!,
+            signer,
+            pool,
+            transaction.id,
+            safeTransaction?.nonce,
+          );
+        }
+        loadTransaction(transaction.id);
+        toast({ title: 'You rejected the transaction', status: 'success' });
+      },
+      { labelSubmit: 'Reject', closeOnSuccess: true },
+    );
   };
 
   const closeDrawer = () => {
@@ -462,76 +471,64 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
           )}
           {safeTransaction?.safeTxHash && !isExecuted && transaction?.status !== 'pending' && (
             <DrawerFooter justifyContent="center" pb={10}>
-              {isSubmitting ? (
-                <Loading />
-              ) : (
-                <VStack>
-                  {!isNextExecution && canExecuteOne && (
-                    <Alert status="warning" mb={30}>
-                      <AlertIcon />
-                      Transaction with order# {currentSafeNonce} needs to be executed first
-                    </Alert>
-                  )}
-                  <HStack spacing={8} divider={<StackDivider borderColor="gray.200" />}>
-                    <VStack spacing={4}>
-                      <Text>
-                        {safeRejectionTransaction?.confirmations?.length ?? 0}/{treshold} Rejected
-                      </Text>
+              <VStack>
+                {!isNextExecution && canExecuteOne && (
+                  <Alert status="warning" mb={30}>
+                    <AlertIcon />
+                    Transaction with order# {currentSafeNonce} needs to be executed first
+                  </Alert>
+                )}
+                <HStack spacing={8} divider={<StackDivider borderColor="gray.200" />}>
+                  <VStack spacing={4}>
+                    <Text>
+                      {safeRejectionTransaction?.confirmations?.length ?? 0}/{threshold} Rejected
+                    </Text>
 
-                      {!canExecuteRejection && (
-                        <ButtonWithAdmingRights
-                          colorScheme="red"
-                          mr={8}
-                          onClick={reject}
-                          disabled={!isAdmin || hasRejected}
-                          w={150}
-                        >
-                          Reject
-                        </ButtonWithAdmingRights>
-                      )}
-                      {canExecuteRejection && (
-                        <Button
-                          colorScheme="red"
-                          onClick={() => confirmTx(true)}
-                          w={160}
-                          disabled={!isNextExecution}
-                        >
-                          Execute Rejection
-                        </Button>
-                      )}
-                    </VStack>
+                    {!canExecuteRejection && (
+                      <Button
+                        colorScheme="red"
+                        mr={8}
+                        onClick={reject}
+                        disabled={hasRejected}
+                        w={150}
+                      >
+                        Reject
+                      </Button>
+                    )}
+                    {canExecuteRejection && (
+                      <Button
+                        colorScheme="red"
+                        onClick={() => execute(true)}
+                        w={160}
+                        disabled={!isNextExecution}
+                      >
+                        Execute Rejection
+                      </Button>
+                    )}
+                  </VStack>
 
-                    <VStack spacing={4}>
-                      <Text>
-                        {safeTransaction?.confirmations?.length ?? 0}/{treshold} Approved
-                      </Text>
-                      {!canExecute && (
-                        <ButtonWithAdmingRights
-                          disabled={!isAdmin || hasApproved}
-                          onClick={approve}
-                          w={150}
-                        >
-                          Approve
-                        </ButtonWithAdmingRights>
-                      )}
-                      {canExecute && (
-                        <Button
-                          onClick={() => confirmTx(false)}
-                          w={150}
-                          disabled={!isNextExecution}
-                        >
-                          Execute
-                        </Button>
-                      )}
-                    </VStack>
-                  </HStack>
-                </VStack>
-              )}
+                  <VStack spacing={4}>
+                    <Text>
+                      {safeTransaction?.confirmations?.length ?? 0}/{threshold} Approved
+                    </Text>
+                    {!canExecute && (
+                      <Button disabled={hasApproved} onClick={approve} w={150}>
+                        Approve
+                      </Button>
+                    )}
+                    {canExecute && (
+                      <Button onClick={() => execute(false)} w={150} disabled={!isNextExecution}>
+                        Execute
+                      </Button>
+                    )}
+                  </VStack>
+                </HStack>
+              </VStack>
             </DrawerFooter>
           )}
         </DrawerContent>
       </Drawer>
-      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
+      <ReviewAndSendTransactionModal ref={reviewTxRef} />
     </>
   );
 });

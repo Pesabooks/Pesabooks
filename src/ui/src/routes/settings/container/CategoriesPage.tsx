@@ -1,6 +1,5 @@
-import { Flex, Text, useDisclosure } from '@chakra-ui/react';
+import { Card, CardBody, CardHeader, Flex, Text, useDisclosure } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
-import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { ButtonWithAdmingRights } from '../../../components/withConnectedWallet';
 import { usePool } from '../../../hooks/usePool';
 import { addCategory, editCategory, getAllCategories } from '../../../services/categoriesService';
@@ -40,7 +39,7 @@ export const CategoriesPage = () => {
   return (
     <>
       <Card>
-        <CardHeader mb="40px">
+        <CardHeader>
           <Flex justify="space-between" align="center" w="100%">
             <Text fontSize="lg" fontWeight="bold">
               Categories

@@ -13,8 +13,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Stack,
-  Text,
-  useToast
+  Text
 } from '@chakra-ui/react';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
 import { BigNumber, ethers } from 'ethers';
@@ -30,20 +29,14 @@ import {
   sendNativeToken,
   sendToken
 } from '../../../services/walletServices';
-import { TransactionType } from '../../../types';
 import {
-  ReviewTransactionModal,
-  ReviewTransactionModalRef
-} from '../../transactions/components/ReviewTransactionModal';
-import {
-  SubmittingTransactionModal,
-  SubmittingTxModalRef
-} from '../../transactions/components/SubmittingTransactionModal';
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef
+} from '../../transactions/components/ReviewAndSendTransactionModal';
 
 export interface SendModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onTxSubmitted: (type: TransactionType, hash: string) => void;
   chainId: number;
   balances: TokenBalance[];
 }
@@ -65,17 +58,9 @@ const IconOption = (props: OptionProps<TokenBalance, boolean, GroupBase<TokenBal
   );
 };
 
-export const SendModal = ({
-  isOpen,
-  onClose,
-  onTxSubmitted: onSent,
-  chainId,
-  balances,
-}: SendModalProps) => {
+export const SendModal = ({ isOpen, onClose, chainId, balances }: SendModalProps) => {
   const { provider } = useWeb3Auth();
-  const toast = useToast();
-  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
-  const submittingRef = useRef<SubmittingTxModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
 
   const methods = useForm<SendFormValue>();
   const {
@@ -100,52 +85,44 @@ export const SendModal = ({
     validate: { invalid: ethers.utils.isAddress },
   });
 
-  const confirmTx = async (formValue: SendFormValue) => {
+  const estimate = async (formValue: SendFormValue) => {
     const { amount, token, address } = formValue;
 
-    let estimatedFee: BigNumber | undefined;
-
     if (token.token.is_native) {
-      estimatedFee = await fee(provider!, BigNumber.from(21000));
+      return fee(provider!, BigNumber.from(21000));
     } else {
-      estimatedFee = await estimateTokenTransfer(provider!, address, token.token.address, amount);
+      return estimateTokenTransfer(provider!, address, token.token.address, amount);
     }
-
-    reviewTxRef.current?.openWithEstimate(
-      `Send ${amount} ${token?.token.symbol} to ${address}`,
-      'withdrawal',
-      formValue,
-      send,
-      estimatedFee,
-    );
   };
 
-  const send = async (confirmed: boolean, formValue: SendFormValue) => {
-    if (!provider || !confirmed) return;
-    const signer = provider.getSigner();
-    submittingRef.current?.open('withdrawal');
+  const send = async (formValue: SendFormValue) => {
+    const signer = provider!.getSigner();
     const { amount, token, address } = formValue;
 
     let tx: ethers.providers.TransactionResponse;
-    try {
-      if (token.token.is_native) {
-        tx = await sendNativeToken(signer, chainId, amount, address);
-      } else {
-        tx = await sendToken(signer, chainId, amount, address, token.token);
-      }
 
-      if (tx) onSent('withdrawal', tx.hash);
-
-      reset();
-      onClose();
-    } catch (e: any) {
-      const message = typeof e === 'string' ? e : e.message;
-      toast({
-        title: message,
-        status: 'error',
-        isClosable: true,
-      });
+    if (token.token.is_native) {
+      tx = await sendNativeToken(signer, chainId, amount, address);
+    } else {
+      tx = await sendToken(signer, chainId, amount, address, token.token);
     }
+
+    reset();
+    onClose();
+    return {
+      hash: tx?.hash,
+    };
+  };
+
+  const confirmTx = async (formValue: SendFormValue) => {
+    const { amount, token, address } = formValue;
+
+    reviewTxRef.current?.open(
+      `Send ${amount} ${token?.token.symbol} to ${address}`,
+      'withdrawal',
+      () => estimate(formValue),
+      () => send(formValue),
+    );
   };
 
   return (
@@ -212,8 +189,7 @@ export const SendModal = ({
           </ModalBody>
         </ModalContent>
       </Modal>
-      <SubmittingTransactionModal ref={submittingRef} />
-      <ReviewTransactionModal ref={reviewTxRef} />
+      <ReviewAndSendTransactionModal ref={reviewTxRef} />
     </>
   );
 };

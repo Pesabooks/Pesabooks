@@ -1,20 +1,18 @@
 import {
-  Box,
-  Button,
-  ButtonGroup,
-  Center,
-  Flex,
-  Grid,
-  Icon,
-  Link,
-  Spinner,
-  Text
+    Box,
+    Button,
+    ButtonGroup, Card, Center,
+    Flex,
+    Grid,
+    Icon,
+    Link,
+    Spinner,
+    Text
 } from '@chakra-ui/react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BsPlus } from 'react-icons/bs';
 import { MdSubject } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { Card } from '../../components/Card';
 import { NavbarLight } from '../../components/Layout/NavbarLight';
 import { ChooseUsernameModal } from '../../components/Modals/ChooseUsername';
 import { PoolCard } from '../../components/PoolCard';

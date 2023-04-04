@@ -1,7 +1,6 @@
 import { Table, Tbody, Th, Thead, Tr } from '@chakra-ui/react';
 import Loading from '../../../components/Loading';
 import { Invitation, Member } from '../../../types';
-import { compareAddress } from '../../../utils';
 import { MemberTableRow } from './MemberTableRow';
 
 interface MembersTableProps {
@@ -23,8 +22,6 @@ export const MembersTable = ({
   adminAddresses,
   isLoading,
 }: MembersTableProps) => {
-  const isAdmin = (wallet: string | undefined) =>
-    wallet ? !!adminAddresses.find((a) => compareAddress(a, wallet)) : false;
 
   return (
     <>
@@ -50,10 +47,8 @@ export const MembersTable = ({
                 wallet={member.user?.wallet}
                 active={member.active}
                 status={member.active ? 'active' : 'inactive'}
-                role={member.role}
                 isInvitation={false}
                 id={member.user_id}
-                isAdmin={isAdmin(member.user?.wallet)}
                 onRemove={onRemoveAdmin}
               />
             );
@@ -69,7 +64,6 @@ export const MembersTable = ({
                 id={invitation.id}
                 onRemove={onRevoke}
                 onResendInvitation={onResendInvitation}
-                isAdmin={false}
               />
             );
           })}

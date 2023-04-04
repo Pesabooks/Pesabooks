@@ -1,24 +1,30 @@
-import { Flex, Heading, Spacer, useDisclosure, useToast } from '@chakra-ui/react';
+import {
+  Card,
+  CardBody,
+  CardHeader, Heading,
+  Spacer,
+  useDisclosure,
+  useToast
+} from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
+import { BigNumber } from 'ethers';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import {
-  ReviewAndSubmitTransaction,
-  ReviewAndSubmitTransactionRef
-} from '../../components/ReviewAndSubmitTransaction';
 import { ButtonWithAdmingRights } from '../../components/withConnectedWallet';
 import { useIsOrganizer } from '../../hooks/useIsOrganizer';
 import { usePool } from '../../hooks/usePool';
 import { useSafeAdmins } from '../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
+import { estimateTransaction } from '../../services/estimationService';
 import {
   createInvitation,
   getActiveInvitations,
   revokeInvitation,
   sendInvitation
 } from '../../services/invitationService';
-import { getMembers } from '../../services/membersService';
-import { removeAdmin } from '../../services/transactionsServices';
+import { deleteMember, getMembers } from '../../services/membersService';
+import { BuildRemoveAdminTx } from '../../services/transaction-builder';
+import { submitTransaction } from '../../services/transactionsServices';
 import { Invitation } from '../../types';
 import { Member } from '../../types/Member';
 import {
@@ -26,6 +32,10 @@ import {
   RemoveAdminModal,
   RemoveAdminModalRef
 } from '../settings/components/RemoveAdminModal';
+import {
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef
+} from '../transactions/components/ReviewAndSendTransactionModal';
 import { InviteMemberFormValue, InviteMemberModal } from './components/InviteMemberModal';
 import { MembersTable } from './components/MembersTable';
 
@@ -38,7 +48,7 @@ export const MembersPage = () => {
   const { safeAdmins, threshold: currentThreshold } = useSafeAdmins();
   const isOrganizer = useIsOrganizer();
   const removeAdminModaldRef = useRef<RemoveAdminModalRef>(null);
-  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
+  const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
 
   const toast = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -106,39 +116,46 @@ export const MembersPage = () => {
 
   const onpenRemoveAdmin = (id: string) => {
     const user = members.find((m) => m.user_id === id);
-    removeAdminModaldRef.current?.open(user?.user!, reviewRemoveAdminTx);
+    removeAdminModaldRef.current?.open(user?.user!, removeAdmin);
   };
 
-  const reviewRemoveAdminTx = (formValue: RemoveAdminFormValue) => {
-    const { user } = formValue;
-    reviewTxRef.current?.review(
-      `Remove ${user.username} as an Admin`,
-      'removeOwner',
-      formValue,
-      onRemoveAdmin,
-    );
-  };
-
-  const onRemoveAdmin = async (confirmed: boolean, { user, threshold }: RemoveAdminFormValue) => {
-    if (confirmed && pool) {
-      try {
-        reviewTxRef.current?.openSubmitting('removeOwner');
-
-        let tx = await removeAdmin(signer, pool, user, currentThreshold, threshold);
-        if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
-        if (tx?.hash) {
-          (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
-            loadData();
-          });
+  const removeAdmin = async ({ user, threshold }: RemoveAdminFormValue) => {
+    if (pool) {
+      // if pool is not deployed
+      if (!isDeployed) {
+        //if user is not organizer throw error
+        if (!isOrganizer) {
+          toast({ status: 'error', title: 'You are not the organizer of this group' });
         }
-      } catch (e: any) {
-        toast({
-          title: e?.data?.message ?? e.message,
-          status: 'error',
-          isClosable: true,
-        });
-      } finally {
-        reviewTxRef.current?.closeSubmitting();
+        await deleteMember(pool.id, user.id);
+        loadData();
+        toast({ status: 'success', title: `${user.username} has been removed from the group` });
+      } else {
+        const transaction = await BuildRemoveAdminTx(
+          signer,
+          pool,
+          user,
+          currentThreshold,
+          threshold,
+        );
+
+        reviewTxRef.current?.open(
+          `Remove ${user.username} as a member`,
+          transaction.type,
+          () =>
+            currentThreshold > 1
+              ? Promise.resolve(BigNumber.from(0))
+              : estimateTransaction(provider!, transaction.transaction_data),
+          async () => {
+            const tx = await submitTransaction(user!, signer, pool!, transaction!);
+            if (tx?.hash) {
+              (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
+                loadData();
+              });
+            }
+            return { hash: tx?.hash, internalTxId: tx?.id };
+          },
+        );
       }
     }
   };
@@ -148,26 +165,30 @@ export const MembersPage = () => {
       <Helmet>
         <title>Members | {pool?.name}</title>
       </Helmet>
-      <Flex justify="space-between" align="center" my={4} mr={4}>
-        <Heading as="h2" size="lg">
-          Members
-        </Heading>
+      <Card>
+        <CardHeader>
+          <Heading as="h2" size="lg">
+            Members
+          </Heading>
 
-        <Spacer />
-        {!isDeployed && isOrganizer && (
-          <ButtonWithAdmingRights onClick={onOpen}> Invite a member</ButtonWithAdmingRights>
-        )}
-      </Flex>
+          <Spacer />
+          {!isDeployed && isOrganizer && (
+            <ButtonWithAdmingRights onClick={onOpen}> Invite a member</ButtonWithAdmingRights>
+          )}
+        </CardHeader>
+        <CardBody>
+          <MembersTable
+            adminAddresses={safeAdmins}
+            members={members}
+            invitations={invitations}
+            onRevoke={revoke}
+            onResendInvitation={resendInvitation}
+            isLoading={isLoading}
+            onRemoveAdmin={onpenRemoveAdmin}
+          ></MembersTable>
+        </CardBody>
+      </Card>
 
-      <MembersTable
-        adminAddresses={safeAdmins}
-        members={members}
-        invitations={invitations}
-        onRevoke={revoke}
-        onResendInvitation={resendInvitation}
-        isLoading={isLoading}
-        onRemoveAdmin={onpenRemoveAdmin}
-      ></MembersTable>
       {isOpen && (
         <InviteMemberModal
           isOpen={isOpen}
@@ -175,8 +196,8 @@ export const MembersPage = () => {
           onInvite={inviteMember}
         ></InviteMemberModal>
       )}
-      <RemoveAdminModal ref={removeAdminModaldRef} currentThreshold={currentThreshold} adminsCount={safeAdmins.length}/>
-      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
+      <RemoveAdminModal ref={removeAdminModaldRef} />
+      <ReviewAndSendTransactionModal ref={reviewTxRef} />
     </>
   );
 };

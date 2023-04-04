@@ -12,7 +12,7 @@ type State = {
 };
 
 type Action = {
-  type: 'INIT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'ERROR';
+  type: 'LOAD_TRANSACTIONS' | 'INSERT' | 'UPDATE' | 'DELETE' | 'ERROR';
   data: unknown;
 };
 const initialState: State = {
@@ -22,14 +22,14 @@ const initialState: State = {
 };
 
 const reducer = (state: State, action: Action): State => {
-  if (action.type === 'INIT') {
+  if (action.type === 'LOAD_TRANSACTIONS') {
     return {
+      ...state,
       loading: false,
       error: null,
       transactions: action.data as Transaction[],
     };
-  }
-  if (action.type === 'UPDATE') {
+  } else if (action.type === 'UPDATE') {
     const t = action.data as Transaction;
     return {
       ...state,
@@ -64,12 +64,13 @@ export function useTransactions(
   const [{ transactions, loading, error }, dispatch] = useReducer(reducer, initialState);
 
   const getInitialData = useCallback(async () => {
-    try {
-      const data = await getAllTransactions(pool_id, chainId, safeAddress, filter);
-      dispatch({ type: 'INIT', data: data });
-    } catch (error) {
-      dispatch({ type: 'ERROR', data: error });
-    }
+    getAllTransactions(pool_id, chainId, safeAddress, filter)
+      .then((data) => {
+        dispatch({ type: 'LOAD_TRANSACTIONS', data: data });
+      })
+      .catch((error) => {
+        dispatch({ type: 'ERROR', data: error });
+      });
   }, [chainId, filter, pool_id, safeAddress]);
 
   useEffect(() => {

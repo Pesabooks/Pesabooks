@@ -28,8 +28,6 @@ interface MembleTableRowProps {
   id: string;
   onRemove?: (id: string) => void;
   onResendInvitation?: (id: string) => void;
-  role?: string;
-  isAdmin: boolean;
 }
 
 export const MemberTableRow = ({
@@ -40,9 +38,7 @@ export const MemberTableRow = ({
   isInvitation,
   id,
   onRemove,
-  onResendInvitation,
-  role,
-  isAdmin,
+  onResendInvitation
 }: MembleTableRowProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
   let bgStatus = useColorModeValue('gray.400', '#1a202c');

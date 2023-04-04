@@ -1,7 +1,8 @@
 import { SmallCloseIcon } from '@chakra-ui/icons';
 import {
-  Button,
-  Flex,
+  Button, Card,
+  CardBody,
+  CardHeader, Flex,
   FormControl,
   FormLabel,
   HStack,
@@ -16,7 +17,6 @@ import {
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { FaUser } from 'react-icons/fa';
-import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { Invitation } from '../../../types';
 
 interface InviteMembersProps {
@@ -90,7 +90,7 @@ export const InviteMembers = ({
   const { isOpen, onClose, onOpen } = useDisclosure();
   return (
     <Card>
-      <CardHeader mb="40px">
+      <CardHeader>
         <Flex
           direction="column"
           align="center"

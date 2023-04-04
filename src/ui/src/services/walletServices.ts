@@ -1,6 +1,6 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ContractTransaction, ethers } from 'ethers';
 import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
 import { networks } from '../data/networks';
@@ -8,6 +8,7 @@ import { activitiesTable, supabase } from '../supabase';
 import { Activity, TokenBase } from '../types';
 import { SwapData } from '../types/transaction';
 import { checksummed, notifyTransaction } from '../utils';
+import { ActivityBusMessage, eventBus } from './eventBus';
 
 const getTimestamp = () => Math.floor(new Date().valueOf() / 1000);
 
@@ -27,20 +28,22 @@ export const approveToken = async (
     ethers.utils.parseUnits(amount.toString(), decimals),
   );
 
-  notifyTransaction(chainId, tx.hash);
+  const { data } = await activitiesTable()
+    .insert({
+      hash: tx.hash,
+      status: 'completed',
+      type: 'unlockToken',
+      chain_id: chainId,
+      timestamp,
+      metadata: {
+        token: token,
+        amount,
+      } as any,
+    })
+    .select()
+    .single();
 
-  await activitiesTable().insert({
-    hash: tx.hash,
-    status: 'completed',
-    type: 'unlockToken',
-    chain_id: chainId,
-    timestamp,
-    metadata: {
-      token: token,
-      amount,
-    } as any,
-  });
-
+  onActivitySubmitted(data as Activity, tx, chainId);
   return tx;
 };
 
@@ -60,26 +63,29 @@ export const sendToken = async (
     ethers.utils.parseUnits(amount.toString(), decimals),
   );
 
-  notifyTransaction(chainId, tx.hash);
-
-  await activitiesTable().insert({
-    hash: tx.hash,
-    status: 'completed',
-    type: 'transfer_out',
-    chain_id: chainId,
-    metadata: {
-      transfer_from: from,
-      transfer_to: address,
-      token: {
-        address: token.address,
-        symbol: token.symbol,
-        name: token.name,
-        decimals: token.decimals,
-        image: token.image,
+  const { data } = await activitiesTable()
+    .insert({
+      hash: tx.hash,
+      status: 'completed',
+      type: 'transfer_out',
+      chain_id: chainId,
+      metadata: {
+        transfer_from: from,
+        transfer_to: address,
+        token: {
+          address: token.address,
+          symbol: token.symbol,
+          name: token.name,
+          decimals: token.decimals,
+          image: token.image,
+        },
+        amount: amount,
       },
-      amount: amount,
-    },
-  });
+    })
+    .select()
+    .single();
+
+  onActivitySubmitted(data as Activity, tx, chainId);
 
   return tx;
 };
@@ -100,25 +106,30 @@ export const sendNativeToken = async (
 
   notifyTransaction(chainId, tx.hash);
 
-  await activitiesTable().insert({
-    hash: tx.hash,
-    status: 'completed',
-    type: 'transfer_out',
-    chain_id: chainId,
-    metadata: {
-      transfer_from: from,
-      transfer_to: address,
-      token: {
-        address: '',
-        symbol: network.nativeCurrency.symbol,
-        name: network.nativeCurrency.name,
-        decimals: network.nativeCurrency.decimals,
-        image: '',
-        is_native: true,
+  const { data } = await activitiesTable()
+    .insert({
+      hash: tx.hash,
+      status: 'completed',
+      type: 'transfer_out',
+      chain_id: chainId,
+      metadata: {
+        transfer_from: from,
+        transfer_to: address,
+        token: {
+          address: '',
+          symbol: network.nativeCurrency.symbol,
+          name: network.nativeCurrency.name,
+          decimals: network.nativeCurrency.decimals,
+          image: '',
+          is_native: true,
+        },
+        amount: amount,
       },
-      amount: amount,
-    },
-  });
+    })
+    .select()
+    .single();
+
+  onActivitySubmitted(data as Activity, tx, chainId);
 
   return tx;
 };
@@ -139,25 +150,27 @@ export const swapTokens = async (
     data,
   });
 
-  notifyTransaction(chainId, tx.hash);
+  const { data: activity } = await activitiesTable()
+    .insert({
+      hash: tx.hash,
+      status: 'completed',
+      type: 'swap',
+      chain_id: chainId,
+      metadata: {
+        src_token: tokenFrom,
+        src_usd: priceRoute.srcUSD,
+        src_amount: priceRoute.srcAmount,
+        dest_token: tokenTo,
+        dest_amount: priceRoute.destAmount,
+        dest_usd: priceRoute.destUSD,
+        gas_cost: priceRoute.gasCost,
+        gas_cost_usd: priceRoute.gasCostUSD,
+      } as SwapData,
+    })
+    .select()
+    .single();
 
-  await activitiesTable().insert({
-    hash: tx.hash,
-    status: 'completed',
-    type: 'swap',
-    chain_id: chainId,
-    metadata: {
-      src_token: tokenFrom,
-      src_usd: priceRoute.srcUSD,
-      src_amount: priceRoute.srcAmount,
-      dest_token: tokenTo,
-      dest_amount: priceRoute.destAmount,
-      dest_usd: priceRoute.destUSD,
-      gas_cost: priceRoute.gasCost,
-      gas_cost_usd: priceRoute.gasCostUSD,
-    } as SwapData,
-  });
-
+  onActivitySubmitted(activity as Activity, tx, chainId);
   return tx;
 };
 
@@ -224,6 +237,11 @@ export const purchaseToken = async (
   };
 
   await activitiesTable().insert(activity);
+
+  eventBus.channel('activity').emit<ActivityBusMessage>('execution_sent', {
+    activity: activity as Activity,
+    chainId,
+  });
 };
 
 export const getAllActivities = async (chainId: number, pageSize: number, pageIndex: number) => {
@@ -250,4 +268,27 @@ const fee = async (provider: Web3Provider, gasLimit: BigNumber) => {
   if (feeData.maxPriorityFeePerGas) {
     return feeData.maxPriorityFeePerGas.mul(gasLimit);
   } else if (feeData.gasPrice) return feeData.gasPrice.mul(gasLimit);
+};
+
+export const onActivitySubmitted = async (
+  activity: Activity,
+  tx: ContractTransaction,
+  chainId: number,
+) => {
+  const payload = { activity, blockchainTransaction: tx, chainId };
+
+  notifyTransaction(chainId, tx.hash);
+  eventBus.channel('activity').emit<ActivityBusMessage>('execution_sent', { ...payload });
+
+  tx?.wait().then(
+    (receipt) => {
+      eventBus.channel('activity').emit<ActivityBusMessage>('execution_completed', {
+        ...payload,
+        blockchainReceipt: receipt,
+      });
+    },
+    () => {
+      eventBus.channel('activity').emit<ActivityBusMessage>('execution_failed', payload);
+    },
+  );
 };

@@ -32,11 +32,11 @@ export const getNotificationDescription = (transaction: Transaction): string => 
     case 'addOwner':
       data = metadata as AddOrRemoveOwnerData;
       username = data.username;
-      return `Add ${username} as member`;
+      return `Add ${username} as a member`;
 
     case 'removeOwner':
       const removeOwnerData = metadata as AddOrRemoveOwnerData;
-      return `Remove ${removeOwnerData.username} as member`;
+      return `Remove ${removeOwnerData.username} as a member`;
 
     case 'unlockToken':
       return `Unlock token ${(metadata as any).token.symbol}`;
@@ -67,13 +67,13 @@ export const getNotificationDescription = (transaction: Transaction): string => 
 };
 
 export const sendNotification = async (
-  pool_id: string,
   user_id: string,
   type: NotificationType,
   transaction: Transaction,
   notificationData?: NotificationData,
 ) => {
   try {
+    const pool_id = transaction.pool_id;
     const notificationDescription = getNotificationDescription(transaction);
 
     const payload: SendNotificationRequest = {

@@ -1,392 +1,62 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { ERC20__factory } from '@pesabooks/contracts/typechain';
-import { SafeMultisigTransactionResponse, SafeTransaction } from '@safe-global/safe-core-sdk-types';
-import { BigNumber, ethers, Signer } from 'ethers';
-import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
-import { OptimalRate } from 'paraswap-core';
+import { ContractTransaction, ethers, Signer } from 'ethers';
 import { networks } from '../data/networks';
 import { Filter, handleSupabaseError, transationsTable } from '../supabase';
 import { Pool, User } from '../types';
+import { NewTransaction, Transaction, TransferData } from '../types/transaction';
+import { defaultProvider } from './blockchainServices';
 import {
-  AddOrRemoveOwnerData,
-  NewTransaction,
-  SwapData,
-  Transaction,
-  TransactionData,
-} from '../types/transaction';
-import { checksummed } from '../utils';
-import { notifyTransaction } from '../utils/notification';
-import { defaultProvider, getTokenContract } from './blockchainServices';
+  ConfirmTransactionPayload,
+  eventBus,
+  TransactionMessage,
+  TransactionPayload,
+} from './eventBus';
 import {
   confirmSafeTransaction,
   createSafeRejectionTransaction,
   createSafeTransaction,
   executeSafeTransaction,
   executeSafeTransactionByHash,
-  getAddOwnerTx,
-  getChangeThresholdTx,
-  getRemoveOwnerTx,
-  getSafePendingTransactions,
   getSafeTransaction,
   getSafeTransactionHash,
   getSafeTreshold,
   proposeSafeTransaction,
 } from './gnosisServices';
-import { sendNotification } from './notificationServices';
-import {
-  onTransactionComplete,
-  onTransactionFailed,
-  onTransactionSubmitted,
-} from './transaction-events';
 
-const getTransactionDataFromSafeTransaction = (
-  safe_address: string,
-  safeTransaction: SafeTransaction,
-): TransactionData => ({
-  from: safe_address,
-  to: safeTransaction.data.to,
-  value: safeTransaction.data.value,
-  data: safeTransaction.data.data,
-  nonce: safeTransaction.data.nonce,
-});
-
-export const deposit = async (
+export const submitDepositTx = async (
   provider: Web3Provider,
   pool: Pool,
   user: User,
-  category_id: number,
-  amount: number,
-  memo: string | null,
+  transaction: NewTransaction,
 ) => {
-  const { token } = pool;
-  if (token == null) throw new Error();
-  const signer = provider.getSigner();
+  const { metadata, transaction_data } = transaction;
 
-  const from = checksummed(await signer.getAddress());
-  const to = checksummed(pool.gnosis_safe_address!);
-  const tokenAddress = checksummed(token?.address);
+  const { token, amount, transfer_to } = metadata as TransferData;
+
+  const signer = provider.getSigner();
 
   const tokenContract = ERC20__factory.connect(token.address, signer);
   const decimals = await tokenContract.decimals();
-
   const _amount = ethers.utils.parseUnits(amount.toString(), decimals);
 
-  const transaction: NewTransaction = {
-    memo: memo,
-    type: 'deposit',
-    category_id: category_id,
-    status: 'pending',
-    pool_id: pool.id,
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    metadata: {
-      transfer_from_name: user.username!,
-      transfer_from: from,
-      transfer_to: to,
-      transfer_to_name: pool.name,
-      token: {
-        address: tokenAddress,
-        symbol: token.symbol,
-        name: token.name,
-        decimals: token.decimals,
-        image: `${process.env.PUBLIC_URL}/${token.image}`,
-      },
-      amount: amount,
-    },
-    transaction_data: {
-      from,
-      to,
-      value: '0',
-      data: ERC20__factory.createInterface().encodeFunctionData('transfer', [to, _amount]),
-    },
-  };
-
-  const gasLimit = await tokenContract.estimateGas.transfer(to, _amount);
+  const gasLimit = await provider.estimateGas(transaction_data);
   const gasPrice = await provider.getGasPrice();
 
-  const tx = await tokenContract.transfer(to, _amount, { gasLimit: gasLimit, gasPrice: gasPrice });
-
-  notifyTransaction(pool.chain_id, tx.hash);
+  const tx = await tokenContract.transfer(transfer_to, _amount, {
+    gasLimit: gasLimit,
+    gasPrice: gasPrice,
+  });
 
   const { data, error } = await transationsTable()
-    .insert({ ...transaction, hash: tx.hash })
+    .insert({ ...transaction, status: 'pending', hash: tx.hash })
     .select()
     .single();
   handleSupabaseError(error);
 
-  tx.wait().then(
-    (receipt) => {
-      onTransactionComplete(transaction, receipt, pool.chain_id);
-      sendNotification(pool.id, user.id, 'new_deposit', data as Transaction);
-    },
-    () => onTransactionFailed(tx.hash),
-  );
+  onTransactionSubmitted(data as Transaction, tx, pool.chain_id, false, user);
 
   return data as Transaction;
-};
-
-export const withdraw = async (
-  signer: JsonRpcSigner,
-  pool: Pool,
-  category_id: number,
-  amount: number,
-  memo: string | null,
-  user: User,
-): Promise<Transaction | undefined> => {
-  const { token } = pool;
-  if (token == null) throw new Error();
-
-  const tokenAddress = checksummed(token?.address);
-  const from = checksummed(pool.gnosis_safe_address!);
-  const to = checksummed(user.wallet);
-
-  const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
-  const decimals = await tokenContract.decimals();
-
-  const safeTransaction = await createSafeTransaction(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    {
-      to: checksummed(tokenAddress),
-      value: '0',
-      data: ERC20__factory.createInterface().encodeFunctionData('transfer', [
-        to,
-        ethers.utils.parseUnits(amount.toString(), decimals),
-      ]),
-    },
-  );
-
-  const transaction: NewTransaction = {
-    memo: memo,
-    type: 'withdrawal',
-    category_id: category_id,
-    pool_id: pool.id,
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    status: 'pending',
-    metadata: {
-      transfer_from_name: pool.name,
-      transfer_from: from,
-      transfer_to: to,
-      transfer_to_name: user.username!,
-      token: {
-        address: tokenAddress,
-        symbol: token.symbol,
-        name: token.name,
-        decimals: token.decimals,
-        image: `${process.env.PUBLIC_URL}/${token.image}`,
-      },
-      amount: amount,
-    },
-    transaction_data: getTransactionDataFromSafeTransaction(
-      pool.gnosis_safe_address!,
-      safeTransaction,
-    ),
-  };
-
-  return submitTransaction(user, signer, pool, transaction, safeTransaction);
-};
-
-export const addAdmin = async (
-  signer: JsonRpcSigner,
-  pool: Pool,
-  user: User,
-  currentTreshold: number,
-  threshold: number,
-): Promise<Transaction | undefined> => {
-  const safeTransaction = await getAddOwnerTx(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    checksummed(user.wallet),
-    threshold,
-  );
-  const transaction: NewTransaction = {
-    type: 'addOwner',
-    pool_id: pool.id,
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    category_id: null,
-    memo: null,
-    status: 'pending',
-    metadata: {
-      address: user.wallet,
-      user_id: user.id,
-      username: user.username!,
-      threshold: threshold,
-      current_threshold: currentTreshold,
-    },
-    transaction_data: getTransactionDataFromSafeTransaction(
-      pool.gnosis_safe_address!,
-      safeTransaction,
-    ),
-  };
-
-  return submitTransaction(user, signer, pool, transaction, safeTransaction);
-};
-
-export const removeAdmin = async (
-  signer: JsonRpcSigner,
-  pool: Pool,
-  user: User,
-  currentTreshold: number,
-  threshold: number,
-): Promise<Transaction | undefined> => {
-  const safeTransaction = await getRemoveOwnerTx(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    checksummed(user.wallet),
-    threshold,
-  );
-
-  const transaction: NewTransaction = {
-    type: 'removeOwner',
-    pool_id: pool.id,
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    category_id: null,
-    memo: null,
-    status: 'pending',
-    metadata: {
-      address: user.wallet,
-      user_id: user.id,
-      username: user.username,
-      current_threshold: currentTreshold,
-      threshold: threshold,
-    } as AddOrRemoveOwnerData,
-    transaction_data: getTransactionDataFromSafeTransaction(
-      pool.gnosis_safe_address!,
-      safeTransaction,
-    ),
-  };
-
-  return submitTransaction(user, signer, pool, transaction, safeTransaction);
-};
-
-export const changeThreshold = async (
-  user: User,
-  signer: JsonRpcSigner,
-  pool: Pool,
-  threshold: number,
-  currentThresold: number,
-): Promise<Transaction | undefined> => {
-  const safeTransaction = await getChangeThresholdTx(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    threshold,
-  );
-
-  const transaction: NewTransaction = {
-    type: 'changeThreshold',
-    pool_id: pool.id,
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    category_id: null,
-    memo: null,
-    status: 'pending',
-    metadata: {
-      threshold,
-      current_threshold: currentThresold,
-    },
-    transaction_data: getTransactionDataFromSafeTransaction(
-      pool.gnosis_safe_address!,
-      safeTransaction,
-    ),
-  };
-
-  return submitTransaction(user, signer, pool, transaction, safeTransaction);
-};
-
-export const approveToken = async (
-  user: User,
-  signer: JsonRpcSigner,
-  pool: Pool,
-  amount: number | undefined,
-  proxyContract: string,
-  token: ParaswapToken,
-): Promise<Transaction | undefined> => {
-  const tokenContract = getTokenContract(pool.chain_id, token.address);
-  const decimals = await tokenContract.decimals();
-  const maxAllowance = BigNumber.from('2').pow(BigNumber.from('256').sub(BigNumber.from('1')));
-
-  const safeTransaction = await createSafeTransaction(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    {
-      to: checksummed(token.address),
-      value: '0',
-      data: ERC20__factory.createInterface().encodeFunctionData('approve', [
-        checksummed(proxyContract),
-        amount ? ethers.utils.parseUnits(amount.toString(), decimals) : maxAllowance,
-      ]),
-    },
-  );
-
-  const transaction: NewTransaction = {
-    type: 'unlockToken',
-    pool_id: pool.id,
-    category_id: null,
-    memo: null,
-    status: 'pending',
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    metadata: {
-      token: token,
-      amount,
-    } as any,
-    transaction_data: getTransactionDataFromSafeTransaction(
-      pool.gnosis_safe_address!,
-      safeTransaction,
-    ),
-  };
-
-  return submitTransaction(user, signer, pool, transaction, safeTransaction);
-};
-
-export const swapTokens = async (
-  user: User,
-  signer: JsonRpcSigner,
-  pool: Pool,
-  paraswapTx: ParaswapTransaction,
-  tokenFrom: ParaswapToken,
-  tokenTo: ParaswapToken,
-  slippage: number,
-  priceRoute: OptimalRate,
-): Promise<Transaction | undefined> => {
-  const safeTransaction = await createSafeTransaction(
-    signer,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    {
-      to: checksummed(paraswapTx.to),
-      value: paraswapTx.value,
-      data: paraswapTx.data,
-    },
-  );
-
-  const transaction: NewTransaction = {
-    type: 'swap',
-    pool_id: pool.id,
-    timestamp: Math.floor(new Date().valueOf() / 1000),
-    category_id: null,
-    memo: null,
-    status: 'pending',
-    metadata: {
-      src_token: tokenFrom,
-      src_usd: priceRoute.srcUSD,
-      src_amount: priceRoute.srcAmount,
-      dest_token: tokenTo,
-      dest_amount: priceRoute.destAmount,
-      dest_usd: priceRoute.destUSD,
-      slippage,
-      gas_cost: priceRoute.gasCost,
-      gas_cost_usd: priceRoute.gasCostUSD,
-    } as SwapData,
-    transaction_data: getTransactionDataFromSafeTransaction(
-      pool.gnosis_safe_address!,
-      safeTransaction,
-    ),
-  };
-
-  return submitTransaction(user, signer, pool, transaction, safeTransaction);
 };
 
 export const submitTransaction = async (
@@ -394,11 +64,17 @@ export const submitTransaction = async (
   signer: Signer,
   pool: Pool,
   transaction: NewTransaction,
-  safeTransaction: SafeTransaction,
 ) => {
-  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
+  const safeTransaction = await createSafeTransaction(
+    signer,
+    pool.chain_id,
+    pool.gnosis_safe_address!,
+    transaction.transaction_data,
+  );
 
-  if (treshold > 1) {
+  const threshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
+
+  if (threshold > 1) {
     const safeTxHash = await proposeSafeTransaction(
       signer,
       pool.chain_id,
@@ -411,16 +87,17 @@ export const submitTransaction = async (
         safe_tx_hash: safeTxHash,
         safe_nonce: safeTransaction.data.nonce,
         status: 'awaitingConfirmations',
+        threshold,
       })
       .select()
       .single();
 
-    sendNotification(pool.id, user.id, 'new_proposal', data as Transaction, {
-      remaining_votes: treshold - 1,
+    eventBus.channel('transaction').emit<TransactionPayload>('proposed', {
+      transaction: data as Transaction,
     });
 
     return data as Transaction;
-  } else if (treshold === 1) {
+  } else if (threshold === 1) {
     const safeTxHash = await getSafeTransactionHash(
       signer,
       pool.gnosis_safe_address!,
@@ -439,9 +116,7 @@ export const submitTransaction = async (
       .select()
       .single();
 
-    onTransactionSubmitted(transaction, tx, pool.chain_id, false);
-
-    sendNotification(pool.id, user.id, 'proposal_execution', data as Transaction);
+    onTransactionSubmitted(data as Transaction, tx!, pool.chain_id, false, user);
 
     return data as Transaction;
   }
@@ -459,19 +134,27 @@ export const confirmTransaction = async (
   await confirmSafeTransaction(signer, pool.chain_id, pool.gnosis_safe_address!, safeTxHash);
 
   const safeTransaction = await getSafeTransaction(pool.chain_id, safeTxHash);
-  if (safeTransaction.confirmations?.length === treshold) {
-    await transationsTable().update({ status: 'awaitingExecution' }).eq('id', transaction.id);
+
+  let update: Partial<Transaction> = {};
+  if (isRejection) {
+    update = { ...update, rejections: safeTransaction.confirmations?.length ?? 1 };
+  } else {
+    update = { ...update, confirmations: safeTransaction.confirmations?.length };
   }
 
-  if (isRejection) {
-    sendNotification(pool.id, user.id, 'proposal_rejection', transaction);
-  } else {
-    const { confirmations, confirmationsRequired } = safeTransaction;
-    const remaining_votes = confirmations
-      ? confirmationsRequired - confirmations.length
-      : confirmations;
-    sendNotification(pool.id, user.id, 'proposal_confirmation', transaction, { remaining_votes });
+  if (safeTransaction.confirmations?.length === treshold) {
+    update = { ...update, status: 'awaitingExecution' };
   }
+  await transationsTable().update(update).eq('id', transaction.id);
+
+  const eventname = isRejection ? 'rejected' : 'confirmed';
+
+  eventBus.channel('transaction').emit<ConfirmTransactionPayload>(eventname, {
+    chainId: pool.chain_id,
+    userId: user.id,
+    transaction,
+    safeTxHash,
+  });
 };
 
 export const executeTransaction = async (
@@ -489,11 +172,11 @@ export const executeTransaction = async (
     safeTxHash,
   );
 
-  onTransactionSubmitted(transaction, tx, pool.chain_id, isRejection, safeTxHash);
+  onTransactionSubmitted(transaction, tx!, pool.chain_id, isRejection, user);
 
-  await transationsTable().update({ hash: tx?.hash, status: 'pending' }).eq('id', transaction.id);
-
-  sendNotification(pool.id, user.id, 'proposal_execution', transaction);
+  await transationsTable()
+    .update({ hash: tx?.hash, status: isRejection ? 'pending_rejection' : 'pending' })
+    .eq('id', transaction.id);
 
   return tx;
 };
@@ -519,12 +202,40 @@ export const createRejectTransaction = async (
   );
 
   const { data } = await transationsTable()
-    .update({ reject_safe_tx_hash: safeTxHash })
+    .update({ reject_safe_tx_hash: safeTxHash, rejections: 1 })
     .eq('id', transactionId)
     .select()
     .single();
 
-  sendNotification(pool.id, user.id, 'proposal_rejection', data as Transaction);
+  eventBus.channel('transaction').emit<ConfirmTransactionPayload>('rejected', {
+    chainId: pool.chain_id,
+    userId: user.id,
+    transaction: data as Transaction,
+    safeTxHash,
+  });
+};
+
+export const onTransactionSubmitted = async (
+  transaction: Transaction,
+  tx: ContractTransaction,
+  chainId: number,
+  isRejection: boolean = false,
+  user?: User,
+) => {
+  const payload = { transaction, blockchainTransaction: tx, chainId, isRejection, user };
+  eventBus.channel('transaction').emit<TransactionMessage>('execution_sent', payload);
+
+  tx?.wait().then(
+    (receipt) => {
+      eventBus.channel('transaction').emit<TransactionMessage>('execution_completed', {
+        ...payload,
+        blockchainReceipt: receipt,
+      });
+    },
+    () => {
+      eventBus.channel('transaction').emit<TransactionMessage>('execution_failed', payload);
+    },
+  );
 };
 
 export const getAllTransactions = async (
@@ -548,25 +259,6 @@ export const getAllTransactions = async (
   handleSupabaseError(error);
 
   const transactions = data as Transaction[] | null;
-
-  // If there are any pending transactions, we need to fetch the safe transactions
-  if (
-    transactions?.find(
-      (t) => t.status === 'awaitingConfirmations' || t.status === 'awaitingExecution',
-    )
-  ) {
-    const safeTransactions: Record<string, SafeMultisigTransactionResponse> = (
-      await getSafePendingTransactions(chainId, safeAddress)
-    ).reduce((acc, safeTx) => ({ ...acc, [safeTx.safeTxHash]: safeTx }), {});
-
-    return (
-      transactions?.map((d) => ({
-        ...d,
-        safeTx: safeTransactions[d.safe_tx_hash!],
-        rejectSafeTx: safeTransactions[d.reject_safe_tx_hash!],
-      })) ?? []
-    );
-  }
 
   return transactions ?? [];
 };
@@ -596,10 +288,7 @@ export const getTransactionById = async (txId: number) => {
 export const refreshTransaction = async (chain_id: number, t: Transaction) => {
   const provider = defaultProvider(chain_id);
   var tx = await provider.getTransaction(t.hash!);
-  await tx.wait().then(
-    async (receipt) => await onTransactionComplete(t, receipt, chain_id),
-    async () => await onTransactionFailed,
-  );
+  onTransactionSubmitted(t, tx, chain_id);
 };
 
 export const updateTransactionCategory = async (id: number, category_id: number) => {

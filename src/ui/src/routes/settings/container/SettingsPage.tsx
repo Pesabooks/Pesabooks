@@ -1,5 +1,6 @@
 import { Button, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { Outlet, useMatch, useNavigate, useResolvedPath } from 'react-router-dom';
+import { usePool } from '../../../hooks/usePool';
 
 const NavLink = ({ title, link }: { title: string; link: string }) => {
   const bgActiveButton = useColorModeValue('#fff', 'gray.700');
@@ -32,7 +33,7 @@ const NavLink = ({ title, link }: { title: string; link: string }) => {
 };
 
 export const SettingsPage = () => {
-  // const { isDeployed } = usePool();
+  const { isDeployed } = usePool();
   return (
     <>
       <Stack
@@ -42,7 +43,7 @@ export const SettingsPage = () => {
         mb="24px"
       >
         <NavLink title="Overview" link="./" />
-        <NavLink title="Group Wallet" link="./threshold" />
+        {isDeployed && <NavLink title="Group Wallet" link="./threshold" />}
         {/* {isDeployed && <NavLink title="Administrators" link="./admins" />} */}
         <NavLink title="Categories" link="./categories" />
       </Stack>

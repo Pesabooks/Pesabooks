@@ -16,7 +16,7 @@ export function AuthGuard() {
     if (isInitialised && web3Auth) {
       web3Auth
         .getUserInfo()
-        .then((user) => {
+        .then((user:any) => {
           const supabase_jwt_token = getTypedStorageItem('supabase_access_token');
           if (!user || !supabase_jwt_token || isTokenExpired(supabase_jwt_token)) {
             signOut();

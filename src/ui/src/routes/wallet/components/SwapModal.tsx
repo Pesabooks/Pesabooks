@@ -10,21 +10,15 @@ import {
 import { Web3Provider } from '@ethersproject/providers';
 import { BigNumber } from 'ethers';
 import { Transaction as ParaswapTx } from 'paraswap';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { formatBigNumber } from '../../../bignumber-utils';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
-import { onTransactionComplete } from '../../../services/blockchainServices';
 import { fee } from '../../../services/estimationService';
 import { approveToken, estimateApprove, swapTokens } from '../../../services/walletServices';
-import { TransactionType } from '../../../types';
 import {
-  ReviewTransactionModal,
-  ReviewTransactionModalRef
-} from '../../transactions/components/ReviewTransactionModal';
-import {
-  SubmittingTransactionModal,
-  SubmittingTxModalRef
-} from '../../transactions/components/SubmittingTransactionModal';
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef
+} from '../../transactions/components/ReviewAndSendTransactionModal';
 import { ApproveArgs, SwapArgs, SwapCard } from '../../transactions/components/SwapCard';
 
 export interface SwapModalProps {
@@ -33,91 +27,56 @@ export interface SwapModalProps {
   address: string;
   chainId: number;
   assets: string[];
-  onTxSubmitted: (type: TransactionType, hash: string) => void;
 }
 
-export const SwapModal = ({
-  isOpen,
-  onClose,
-  onTxSubmitted,
-  address,
-  chainId,
-  assets,
-}: SwapModalProps) => {
+export const SwapModal = ({ isOpen, onClose, address, chainId, assets }: SwapModalProps) => {
   const { provider } = useWeb3Auth();
   const signer = (provider as Web3Provider)?.getSigner();
-  const confirmTxRef = useRef<ReviewTransactionModalRef>(null);
-  const submittingRef = useRef<SubmittingTxModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
   const toast = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const confirmSwap = async (swapArg: SwapArgs) => {
     const { tokenFrom, tokenTo, priceRoute } = swapArg;
-    const gasfee = await fee(provider!, BigNumber.from(priceRoute.gasCost));
 
-    confirmTxRef.current?.openWithEstimate(
+    reviewTxRef.current?.open(
       `Swap ${formatBigNumber(priceRoute.srcAmount, tokenFrom.decimals)} ${
         tokenFrom.symbol
       } for ${formatBigNumber(priceRoute.destAmount, tokenTo.decimals)} ${tokenTo.symbol}`,
       'swap',
-      swapArg,
-      onConfirmSwap,
-      gasfee,
-      // ethers.utils.parseUnits(priceRoute.gasCost, 18)
+      () => fee(provider!, BigNumber.from(priceRoute.gasCost)),
+      () => swap(swapArg),
     );
   };
 
-  const onConfirmSwap = async (
-    confirmed: boolean,
-    { txParams, tokenFrom, tokenTo, priceRoute, callback }: SwapArgs,
-  ) => {
-    if (!confirmed) return;
+  const swap = async ({ txParams, tokenFrom, tokenTo, priceRoute }: SwapArgs) => {
+    const tx = await swapTokens(signer, txParams as ParaswapTx, tokenFrom, tokenTo, priceRoute);
 
-    submittingRef.current?.open('swap');
-    setIsSubmitting(true);
-
-    try {
-      const tx = await swapTokens(signer, txParams as ParaswapTx, tokenFrom, tokenTo, priceRoute);
-      callback();
-      if (tx) onTxSubmitted('swap', tx.hash);
-      onClose();
-    } catch (e: any) {
-      const message = typeof e === 'string' ? e : e.message;
-      toast({
-        title: message,
-        status: 'error',
-        isClosable: true,
-      });
-    } finally {
-      submittingRef.current?.close();
-      setIsSubmitting(false);
-    }
+    onClose();
+    return {
+      hash: tx?.hash,
+    };
   };
 
   const confirmApprove = async (approveArg: ApproveArgs) => {
     const { paraswapProxy, tokenFrom, amount } = approveArg;
-    const estimatedFee = await estimateApprove(provider!, paraswapProxy, tokenFrom, amount);
-    confirmTxRef.current?.openWithEstimate(
+
+    reviewTxRef.current?.open(
       `Unlock token ${tokenFrom.symbol} `,
       'unlockToken',
-      approveArg,
-      onConfirmApprove,
-      estimatedFee,
+      () => estimateApprove(provider!, paraswapProxy, tokenFrom, amount),
+      () => onConfirmApprove(approveArg),
     );
   };
 
-  const onConfirmApprove = async (confirmed: boolean, args: ApproveArgs) => {
-    if (!confirmed) return;
-    const { paraswapProxy, tokenFrom, callback, amount } = args;
+  const onConfirmApprove = async (args: ApproveArgs) => {
+    const { paraswapProxy, tokenFrom, amount } = args;
 
-    submittingRef.current?.open('unlockToken');
-    setIsSubmitting(true);
     try {
       const tx = await approveToken(signer, chainId, amount, paraswapProxy, tokenFrom);
 
-      if (tx?.hash) onTransactionComplete(chainId, tx.hash, callback);
-
-      onTxSubmitted('swap', tx.hash);
+      return {
+        hash: tx?.hash,
+      };
     } catch (e: any) {
       const message = typeof e === 'string' ? e : e.message;
       toast({
@@ -126,9 +85,6 @@ export const SwapModal = ({
         isClosable: true,
       });
       throw e;
-    } finally {
-      submittingRef.current?.close();
-      setIsSubmitting(false);
     }
   };
 
@@ -146,13 +102,11 @@ export const SwapModal = ({
               defaultTokenAddress={assets?.[0]}
               onSwap={confirmSwap}
               onApproveToken={confirmApprove}
-              isSubmitting={isSubmitting}
             />
           </ModalBody>
         </ModalContent>
       </Modal>
-      <SubmittingTransactionModal ref={submittingRef} />
-      <ReviewTransactionModal ref={confirmTxRef} />
+      <ReviewAndSendTransactionModal ref={reviewTxRef} />
     </>
   );
 };

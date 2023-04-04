@@ -1,42 +1,38 @@
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
-  Avatar,
-  Box,
-  Button,
-  ButtonGroup,
-  Center,
-  Container,
-  Flex,
-  Heading,
-  IconButton,
-  Image,
-  Link,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Spacer,
-  Stack,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Text,
-  useColorModeValue,
-  useDisclosure
+    Avatar,
+    Box,
+    Button,
+    ButtonGroup, Card, Center,
+    Container,
+    Flex,
+    Heading,
+    Image,
+    Link,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
+    Stack,
+    Tab,
+    TabList,
+    TabPanel,
+    TabPanels,
+    Tabs,
+    Text,
+    useColorModeValue,
+    useDisclosure
 } from '@chakra-ui/react';
 import {
-  RampInstantEvents,
-  RampInstantEventTypes,
-  RampInstantSDK
+    RampInstantEvents,
+    RampInstantEventTypes,
+    RampInstantSDK
 } from '@ramp-network/ramp-instant-sdk';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard, FiMoreVertical } from 'react-icons/fi';
+import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
 import { formatBigNumber } from '../../bignumber-utils';
-import { Card } from '../../components/Card';
 import { ConnectedChain } from '../../components/ConnectedChain';
 import { AvatarMenu } from '../../components/Layout/AvatarMenu';
 import { Logo } from '../../components/Layout/Logo';
@@ -47,13 +43,11 @@ import { networks } from '../../data/networks';
 import { useNativeBalance } from '../../hooks/useNativeBalance';
 import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { getBalances, TokenBalance } from '../../services/covalentServices';
+import { eventBus } from '../../services/eventBus';
 import { getAllActivities, purchaseToken } from '../../services/walletServices';
-import { Activity, TokenBase, TransactionType } from '../../types';
+import { Activity, TokenBase } from '../../types';
 import { AssetsList } from '../dashboard/components/AssetsList';
-import {
-  TransactionSubmittedModal,
-  TransactionSubmittedModalRef
-} from '../transactions/components/TransactionSubmittedModal';
+
 import { ActivitiesList } from './components/ActivitiesList';
 import { ReceiveModal } from './components/ReceiveModal';
 import { SendModal } from './components/SendModal';
@@ -93,7 +87,7 @@ export const NetworkSelectorMenu = () => {
 };
 
 export const WalletPage = () => {
-  const { account, chainId, user, web3Auth } = useWeb3Auth();
+  const { account, chainId, user } = useWeb3Auth();
   const { balance, loading: balanceLoading } = useNativeBalance();
   const { isOpen: isOpenReceive, onOpen: onOpenReceive, onClose: onCloseReceive } = useDisclosure();
   const { isOpen: isOpenSend, onOpen: onOpenSend, onClose: onCloseSend } = useDisclosure();
@@ -104,7 +98,6 @@ export const WalletPage = () => {
     total: 0,
   });
   const [balancesLoading, setBalancesLoading] = useState(true);
-  const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
   const { pageIndex, pageSize } = pagination;
@@ -115,7 +108,7 @@ export const WalletPage = () => {
   const balanceColor = useColorModeValue('gray.700', 'gray.400');
   const network = networks[chainId];
 
-  const getData = useCallback(async (chainId, account) => {
+  const getData = useCallback(async (chainId: number, account: string|null) => {
     if (account) {
       setBalancesLoading(true);
       getBalances(chainId, account)
@@ -196,20 +189,16 @@ export const WalletPage = () => {
       .show();
   };
 
-  const onTxSubmitted = useCallback(
-    (type: TransactionType, hash: string) => {
-      txSubmittedRef.current?.open(type, hash);
+  // subscribe to eventbus activities
+  useEffect(() => {
+    const subscription = eventBus.channel('activity').on('*', (_) => {
       getData(chainId, account);
-    },
-    [account, chainId, getData],
-  );
-
-  const getPrivateKey = async () => {
-    const privateKey = await web3Auth?.provider?.request({
-      method: 'eth_private_key',
     });
-    console.log('privateKey', privateKey);
-  };
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [account, chainId, getData]);
 
   return (
     <>
@@ -254,23 +243,9 @@ export const WalletPage = () => {
           </Stack>
         </Flex>
 
-        <Flex>
-          <Heading as="h2" size="lg">
-            My Wallet
-          </Heading>
-          <Spacer />
-          <Menu>
-            <MenuButton
-              as={IconButton}
-              aria-label="Options"
-              icon={<FiMoreVertical />}
-              variant="ghost"
-            />
-            <MenuList>
-              <MenuItem onClick={getPrivateKey}>print key</MenuItem>
-            </MenuList>
-          </Menu>
-        </Flex>
+        <Heading as="h2" size="lg">
+          My Wallet
+        </Heading>
 
         <Center py={6}>
           <Flex
@@ -368,7 +343,6 @@ export const WalletPage = () => {
               assets={balances
                 .filter((b: TokenBalance) => b.type !== 'dust')
                 .map((b) => b.token.address)}
-              onTxSubmitted={onTxSubmitted}
             />
           )}
           {isOpenSend && (
@@ -377,7 +351,6 @@ export const WalletPage = () => {
               onClose={onCloseSend}
               chainId={chainId}
               balances={balances}
-              onTxSubmitted={onTxSubmitted}
             />
           )}
         </>
@@ -402,7 +375,6 @@ export const WalletPage = () => {
           </Link>
         </Flex>
       </Flex>
-      <TransactionSubmittedModal ref={txSubmittedRef} chainId={chainId} />
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { SafeMultisigTransactionResponse } from '@safe-global/safe-core-sdk-types';
+import { SafeTransactionDataPartial } from '@safe-global/safe-core-sdk-types';
 import { Token as ParaswapToken } from 'paraswap';
 import { Table } from '../supabase';
 import { Category } from './Category';
@@ -23,6 +23,7 @@ export type TransactionStatus =
   | 'awaitingConfirmations'
   | 'awaitingExecution'
   | 'pending'
+  | 'pending_rejection'
   | 'completed'
   | 'failed'
   | 'rejected';
@@ -39,14 +40,13 @@ export type Transaction = Omit<Table<'transactions'>, 'metadata'> & {
   status: TransactionStatus;
   type: TransactionType;
   metadata?: Metadata;
-  safeTx?: SafeMultisigTransactionResponse;
-  rejectSafeTx?: SafeMultisigTransactionResponse;
   transaction_data: TransactionData;
 };
 
 export type NewTransaction = Omit<
   Transaction,
   | 'id'
+  | 'status'
   | 'created_at'
   | 'updated_at'
   | 'hash'
@@ -55,12 +55,15 @@ export type NewTransaction = Omit<
   | 'safe_nonce'
   | 'user_id'
   | 'transaction_data'
+  | 'threshold'
+  | 'confirmations'
+  | 'rejections'
 > & {
-  transaction_data: TransactionData;
+  transaction_data: TransactionData | SafeTransactionDataPartial;
 };
 
 export interface TransactionData {
-  from: string;
+  from?: string;
   to: string;
   value: string;
   data: string;

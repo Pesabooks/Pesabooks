@@ -18,7 +18,7 @@ import { BiCheckCircle } from 'react-icons/bi';
 import { MdOutlineCancel } from 'react-icons/md';
 import { CellProps, Column, useSortBy, useTable } from 'react-table';
 import Loading from '../../../components/Loading';
-import { Category, Pool, Transaction, TransactionStatus, User } from '../../../types';
+import { Pool, Transaction, TransactionStatus, User } from '../../../types';
 import { getTxAmountDescription } from '../../../utils';
 import { RefreshTransactionButton } from './RefreshTransactionButton';
 import { TransactionCell } from './TransactionCell';
@@ -54,15 +54,15 @@ export const TransactionsTable = ({
       {
         Header: 'Description',
         accessor: 'icon',
-        Cell: ({ cell: { value, row } }: CellProps<Transaction>) => (
-          <TransactionCell transaction={row.original} users={users} />
-        ),
+        Cell: ({ cell: { row } }) => {
+          return <TransactionCell transaction={row.original as Transaction} users={users} />;
+        },
       },
 
       {
         Header: 'Category',
         accessor: 'category',
-        Cell: ({ cell: { value } }: CellProps<Transaction, Category>) => <span>{value?.name}</span>,
+        Cell: ({ cell: { value } }) => <span>{value?.name}</span>,
       },
       // {
       //   Header: 'Memo',
@@ -84,6 +84,7 @@ export const TransactionsTable = ({
         Header: 'Amount',
         accessor: 'metadata.amount',
         isNumeric: true,
+        //@ts-ignore
         Cell: ({
           cell: {
             value,
@@ -96,6 +97,7 @@ export const TransactionsTable = ({
       {
         Header: 'Status',
         accessor: 'status',
+         //@ts-ignore
         Cell: ({ cell: { value } }: CellProps<Transaction, TransactionStatus>) => (
           <TransactionStatusBadge type={value} hideIcon={true} />
         ),
@@ -103,6 +105,7 @@ export const TransactionsTable = ({
       {
         Header: '',
         accessor: 'id',
+         //@ts-ignore
         Cell: ({
           cell: {
             row: { original },
@@ -110,7 +113,7 @@ export const TransactionsTable = ({
         }: CellProps<Transaction>) => {
           return (
             <Flex>
-              {original.status === 'pending' && original.hash && (
+              {['pending', 'pending_rejection'].includes(original.status) && original.hash && (
                 <RefreshTransactionButton chainId={pool.chain_id} transaction={original} />
               )}
             </Flex>
@@ -120,6 +123,7 @@ export const TransactionsTable = ({
       {
         Header: '',
         accessor: 'safeTxHash',
+         //@ts-ignore
         Cell: ({
           cell: {
             row: { original },
@@ -130,15 +134,15 @@ export const TransactionsTable = ({
               <Flex gap={2} alignItems="center">
                 <Icon as={BiCheckCircle} color="green.500" />
                 <Text size="sm">
-                  {original.safeTx?.confirmations?.length}/{original?.safeTx?.confirmationsRequired}
+                  {original.confirmations}/{original?.threshold}
                 </Text>
               </Flex>
-              {original.rejectSafeTx && (
+
+              {original.rejections > 0 && (
                 <Flex gap={2} alignItems="center">
                   <Icon as={MdOutlineCancel} color="red.500" />
                   <Text size="sm">
-                    {original.rejectSafeTx.confirmations?.length}/
-                    {original?.rejectSafeTx.confirmationsRequired}
+                    {original.rejections}/{original?.threshold}
                   </Text>
                 </Flex>
               )}
@@ -165,6 +169,7 @@ export const TransactionsTable = ({
 
   return (
     <Box overflowX="auto" w="100%">
+      {loading && <Loading m={4} />}
       <Table {...getTableProps()}>
         <Thead>
           {headerGroups.map((headerGroup) => (
@@ -189,28 +194,25 @@ export const TransactionsTable = ({
             </Tr>
           ))}
         </Thead>
-        {loading ? (
-          <Loading m={4} />
-        ) : (
-          <Tbody {...getTableBodyProps()}>
-            {rows.map((row) => {
-              prepareRow(row);
-              return (
-                <Tr
-                  _hover={{ cursor: 'pointer' }}
-                  {...row.getRowProps()}
-                  onClick={() => onSelect(row.original as Transaction)}
-                >
-                  {row.cells.map((cell) => (
-                    <Td {...cell.getCellProps()} isNumeric={cell.column.isNumeric}>
-                      {cell.render('Cell')}
-                    </Td>
-                  ))}
-                </Tr>
-              );
-            })}
-          </Tbody>
-        )}
+
+        <Tbody {...getTableBodyProps()}>
+          {rows.map((row) => {
+            prepareRow(row);
+            return (
+              <Tr
+                _hover={{ cursor: 'pointer' }}
+                {...row.getRowProps()}
+                onClick={() => onSelect(row.original as Transaction)}
+              >
+                {row.cells.map((cell) => (
+                  <Td {...cell.getCellProps()} isNumeric={cell.column.isNumeric}>
+                    {cell.render('Cell')}
+                  </Td>
+                ))}
+              </Tr>
+            );
+          })}
+        </Tbody>
       </Table>
     </Box>
   );

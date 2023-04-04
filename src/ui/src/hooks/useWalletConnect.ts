@@ -1,3 +1,4 @@
+//@ts-nocheck
 import WalletConnect from '@walletconnect/client';
 import { IClientMeta, IWalletConnectSession } from '@walletconnect/legacy-types';
 import { useCallback, useEffect, useRef, useState } from 'react';

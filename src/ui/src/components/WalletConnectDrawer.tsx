@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+//@ts-ignore
 import {
   Box,
   Button,
+  Card,
+  CardBody,
+  CardHeader,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -19,7 +24,6 @@ import {
   useToast,
   VStack
 } from '@chakra-ui/react';
-import { SafeTransaction } from '@safe-global/safe-core-sdk-types';
 
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -28,25 +32,13 @@ import { usePool } from '../hooks/usePool';
 import { useWalletConnectV1 } from '../hooks/useWalletConnect';
 import { useWeb3Auth } from '../hooks/useWeb3Auth';
 import {
-  ReviewTransactionModal,
-  ReviewTransactionModalRef
-} from '../routes/transactions/components/ReviewTransactionModal';
-import {
-  SubmittingTransactionModal,
-  SubmittingTxModalRef
-} from '../routes/transactions/components/SubmittingTransactionModal';
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef
+} from '../routes/transactions/components/ReviewAndSendTransactionModal';
 import { TextAreaMemoField } from '../routes/transactions/components/TextAreaMemoField';
-import {
-  TransactionSubmittedModal,
-  TransactionSubmittedModalRef
-} from '../routes/transactions/components/TransactionSubmittedModal';
 import { getAllCategories } from '../services/categoriesService';
-import { createSafeTransaction } from '../services/gnosisServices';
-import { submitTransaction } from '../services/transactionsServices';
-import { Category, NewTransaction } from '../types';
-import { checksummed } from '../utils';
+import { Category } from '../types';
 import { shortenString } from '../utils/string-utils';
-import { Card, CardHeader } from './Card';
 import { SelectCategoryField } from './Input/SelectCategoryField';
 
 interface DepositFormValue {
@@ -71,10 +63,8 @@ export const WalletConnectDrawer = () => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { provider, user } = useWeb3Auth();
-  const reviewTxRef = useRef<ReviewTransactionModalRef>(null);
-  const submittingRef = useRef<SubmittingTxModalRef>(null);
   const toast = useToast();
-  const txSubmittedRef = useRef<TransactionSubmittedModalRef>(null);
+  const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
 
   const methods = useForm<DepositFormValue>();
   const signer = provider?.getSigner();
@@ -88,74 +78,53 @@ export const WalletConnectDrawer = () => {
   }, [pool?.id]);
 
   const propose = async (formValue: DepositFormValue) => {
-    if (!provider || !pool) return;
-
-    const wallet = await signer?.getAddress();
-
-    const { memo, category } = formValue;
-
-    const {
-      id,
-      params: [{ data, gas, gasPrice, to, value }],
-    } = txRequestPayload;
-
-    const txData = {
-      to: checksummed(to),
-      data,
-      value: parseInt(value).toString(),
-      gasPrice: gasPrice ? parseInt(gasPrice) : undefined,
-      baseGas: gas ? parseInt(gas) : undefined,
-    };
-
-    const safetransaction: SafeTransaction = await createSafeTransaction(
-      signer!,
-      pool!.chain_id,
-      pool!.gnosis_safe_address!,
-      txData,
-    );
-    const transaction: NewTransaction = {
-      type: 'walletConnect',
-      pool_id: pool.id,
-      timestamp: Math.floor(new Date().valueOf() / 1000),
-      category_id: category.id,
-      memo: memo ?? null,
-      status: 'pending',
-      metadata: {
-        peer_data: clientData ?? undefined,
-        payload: txRequestPayload,
-        functionName: functionName,
-      },
-      transaction_data: {
-        from: wallet!,
-        to: safetransaction.data.to,
-        value: safetransaction.data.value,
-        data: safetransaction.data.data,
-        nonce: safetransaction.data.nonce,
-      },
-    };
-
-    try {
-      const tx = await submitTransaction(user!, signer!, pool, transaction, safetransaction);
-      connector?.approveRequest({
-        id,
-        result: tx?.safe_tx_hash,
-      });
-
-      if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
-
-      methods.reset();
-      onTxSumitted();
-    } catch (e: any) {
-      const message = typeof e === 'string' ? e : e?.data?.message ?? e.message;
-      toast({
-        title: message,
-        status: 'error',
-        isClosable: true,
-      });
-      throw e;
-    } finally {
-      submittingRef.current?.close();
-    }
+    // if (!provider || !pool) return;
+    // const { memo, category } = formValue;
+    // const {
+    //   id,
+    //   params: [{ data, gas, gasPrice, to, value }],
+    // } = txRequestPayload;
+    // const txData = {
+    //   to: checksummed(to),
+    //   data,
+    //   value: parseInt(value).toString(),
+    //   gasPrice: gasPrice ? parseInt(gasPrice) : undefined,
+    //   baseGas: gas ? parseInt(gas) : undefined,
+    // };
+    // const transaction: NewTransaction = {
+    //   type: 'walletConnect',
+    //   pool_id: pool.id,
+    //   timestamp: Math.floor(new Date().valueOf() / 1000),
+    //   category_id: category.id,
+    //   memo: memo ?? null,
+    //   status: 'pending',
+    //   metadata: {
+    //     peer_data: clientData ?? undefined,
+    //     payload: txRequestPayload,
+    //     functionName: functionName,
+    //   },
+    //   transaction_data: txData,
+    // };
+    // try {
+    //   const tx = await submitTransaction(user!, signer!, pool, transaction);
+    //   connector?.approveRequest({
+    //     id,
+    //     result: tx?.safe_tx_hash,
+    //   });
+    //   if (tx) txSubmittedRef.current?.open(tx.type, tx.hash, tx.id);
+    //   methods.reset();
+    //   onTxSumitted();
+    // } catch (e: any) {
+    //   const message = typeof e === 'string' ? e : e?.data?.message ?? e.message;
+    //   toast({
+    //     title: message,
+    //     status: 'error',
+    //     isClosable: true,
+    //   });
+    //   throw e;
+    // } finally {
+    //   submittingRef.current?.close();
+    // }
   };
 
   return (
@@ -231,34 +200,34 @@ export const WalletConnectDrawer = () => {
 
             {txRequestPayload && (
               <Card p={0} mt={20}>
-                <CardHeader p="6px 0px 32px 0px">
+                <CardHeader>
                   <Heading size="md">{functionName}</Heading>
                 </CardHeader>
-                <FormProvider {...methods}>
-                  <form onSubmit={methods.handleSubmit(propose)}>
-                    <SelectCategoryField mb="4" categories={categories} />
+                <CardBody>
+                  <FormProvider {...methods}>
+                    <form onSubmit={methods.handleSubmit(propose)}>
+                      <SelectCategoryField mb="4" categories={categories} />
 
-                    <TextAreaMemoField mb="4" />
+                      <TextAreaMemoField mb="4" />
 
-                    <Flex>
-                      <Button variant="outline" onClick={() => reject('')}>
-                        Cancel
-                      </Button>
-                      <Spacer />
-                      <Button isLoading={methods.formState.isSubmitting} type="submit">
-                        Create proposal
-                      </Button>
-                    </Flex>
-                  </form>
-                </FormProvider>
+                      <Flex>
+                        <Button variant="outline" onClick={() => reject('')}>
+                          Cancel
+                        </Button>
+                        <Spacer />
+                        <Button isLoading={methods.formState.isSubmitting} type="submit">
+                          Create proposal
+                        </Button>
+                      </Flex>
+                    </form>
+                  </FormProvider>
+                </CardBody>
               </Card>
             )}
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-      <TransactionSubmittedModal ref={txSubmittedRef} chainId={pool?.chain_id} />
-      <SubmittingTransactionModal ref={submittingRef} />
-      <ReviewTransactionModal ref={reviewTxRef} />
+      <ReviewAndSendTransactionModal ref={reviewTxRef} />
     </>
   );
 };

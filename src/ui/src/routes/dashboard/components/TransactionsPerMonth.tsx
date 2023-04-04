@@ -1,16 +1,15 @@
-import { Box } from '@chakra-ui/react';
+import { Box, Card } from '@chakra-ui/react';
 import { ApexOptions } from 'apexcharts';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import Chart from 'react-apexcharts';
-import { Card } from '../../../components/Card';
 import Loading from '../../../components/Loading';
 import { supabase } from '../../../supabase';
 
 const options: ApexOptions = {
   chart: {
     toolbar: {
-      show: false,
+      show: false, 
     },
   },
   tooltip: {
@@ -78,6 +77,7 @@ export const TransactionsPerMonth = ({ pool_id }: TransactionsPerMonthProps) => 
         const withdrawal = [];
 
         if (data) {
+          // @ts-ignore
           for (const d of data) {
             const month = dayjs(d.month).format('MMM YYYY');
             deposit.push({ x: month, y: d.deposit });
@@ -103,7 +103,7 @@ export const TransactionsPerMonth = ({ pool_id }: TransactionsPerMonthProps) => 
         {isLoading ? (
           <Loading />
         ) : (
-          <Chart options={options} series={series} type="bar" width="100%" height="100%" />
+          <Chart options={options} series={series as any} type="bar" width="100%" height="100%" />
         )}
       </Box>
     </Card>

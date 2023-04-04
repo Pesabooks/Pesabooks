@@ -1,6 +1,5 @@
-import { BoxProps, Stack, Text, useColorModeValue } from '@chakra-ui/react';
+import { BoxProps, Card, CardBody, CardHeader, Stack, Text, useColorModeValue } from '@chakra-ui/react';
 import { FaBell } from 'react-icons/fa';
-import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { TimelineRow } from '../../../components/TimelineRow';
 import { User } from '../../../types';
 import { getAddressName } from '../../../utils';
@@ -29,7 +28,7 @@ export const TransactionTimeline = ({
 
   return (
     <Card p={0} {...boxProps}>
-      <CardHeader mb="10px">
+      <CardHeader>
         <Text color={textColor} fontSize="lg" fontWeight="bold">
           Timeline
         </Text>

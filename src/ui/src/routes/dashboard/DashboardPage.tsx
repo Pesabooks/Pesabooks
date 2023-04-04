@@ -1,9 +1,8 @@
-import { Flex, SimpleGrid, Text } from '@chakra-ui/react';
+import { Card, CardBody, CardHeader, Flex, SimpleGrid, Text } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaArrowDown, FaArrowUp, FaWallet } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardBody, CardHeader } from '../../components/Card';
 import { CreateTeamSafe } from '../../components/CreateTeamSafe';
 import { usePool } from '../../hooks/usePool';
 import { useTransactions } from '../../hooks/useTransactions';
@@ -76,7 +75,7 @@ export const DashboardPage = () => {
       }
     };
     fetchData();
-  }, [pool]);
+  }, [pool.chain_id, pool.gnosis_safe_address, pool.id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -122,8 +121,8 @@ export const DashboardPage = () => {
           </SimpleGrid>
 
           <Flex gap="24px" mb={{ lg: '26px' }} direction={{ base: 'column', md: 'row' }}>
-            <Card p="28px 10px 16px 0px" mb={{ sm: '26px', lg: '0px' }}>
-              <CardHeader mb="20px" pl="22px">
+            <Card mb={{ sm: '26px', lg: '0px' }} w="50%">
+              <CardHeader>
                 <Flex direction="column" alignSelf="flex-start">
                   <Text fontSize="lg" fontWeight="bold" mb="6px">
                     Assets
@@ -133,8 +132,8 @@ export const DashboardPage = () => {
               <AssetsList balances={balances} loading={loading} />
             </Card>
 
-            <Card p="16px">
-              <CardHeader p="6px 0px 22px 0px">
+            <Card w="50%">
+              <CardHeader>
                 <Text fontSize="lg" fontWeight="bold">
                   Proposals
                 </Text>
@@ -159,7 +158,7 @@ export const DashboardPage = () => {
             mb={{ lg: '26px' }}
           > */}
           <Card mt="8">
-            <CardHeader p="6px 0px 22px 0px">
+            <CardHeader>
               <Text fontSize="lg" fontWeight="bold">
                 Last 5 Transactions
               </Text>

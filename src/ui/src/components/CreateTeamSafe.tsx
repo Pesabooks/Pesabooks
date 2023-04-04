@@ -1,21 +1,22 @@
 import { ExternalLinkIcon } from '@chakra-ui/icons';
-import { Button, Flex, Heading, Link, Stack, Text, useToast } from '@chakra-ui/react';
+import { Button, Card, Flex, Heading, Link, Stack, Text } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { usePool } from '../hooks/usePool';
 import { useWeb3Auth } from '../hooks/useWeb3Auth';
+import {
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef
+} from '../routes/transactions/components/ReviewAndSendTransactionModal';
+
+import { estimateSafeCreation } from '../services/estimationService';
 import { getPendingInvitationCount } from '../services/invitationService';
 import { deployNewSafe } from '../services/poolsService';
-import { Card } from './Card';
-import {
-  ReviewAndSubmitTransaction,
-  ReviewAndSubmitTransactionRef
-} from './ReviewAndSubmitTransaction';
 
 export const CreateTeamSafe = () => {
   const { provider, user } = useWeb3Auth();
   const { pool, refresh, isDeployed } = usePool();
-  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
-  const toast = useToast();
+  const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
+
   const [hasPendingInvitations, setHasPendingInvitations] = useState(false);
 
   const isOrganizer = pool?.organizer.id === user?.id;
@@ -31,26 +32,19 @@ export const CreateTeamSafe = () => {
   }, [pool?.id]);
 
   const confirmTx = () => {
-    reviewTxRef.current?.review(`Create group wallet`, 'createSafe', null, onDeployNewSafe);
+    reviewTxRef.current?.open(
+      `Create group wallet`,
+      'createSafe',
+      () => estimateSafeCreation(provider!),
+      onDeployNewSafe,
+      { closeOnSuccess: true },
+    );
   };
 
-  const onDeployNewSafe = async (confirmed: boolean) => {
-    if (confirmed && pool?.id && provider) {
-      try {
-        reviewTxRef.current?.openSubmitting('createSafe', 'Wait while the group wallet is created');
-        await deployNewSafe(provider, pool?.id);
-        refresh();
-      } catch (e: any) {
-        const message = typeof e === 'string' ? e : e?.data?.message ?? e.message;
-        toast({
-          title: message,
-          status: 'error',
-          isClosable: true,
-        });
-        throw e;
-      } finally {
-        reviewTxRef.current?.closeSubmitting();
-      }
+  const onDeployNewSafe = async () => {
+    if (pool?.id && provider) {
+      await deployNewSafe(provider, pool?.id);
+      refresh();
     }
   };
   if (isDeployed) return null;
@@ -123,7 +117,7 @@ export const CreateTeamSafe = () => {
         </Card>
       )}
 
-      <ReviewAndSubmitTransaction ref={reviewTxRef} />
+      <ReviewAndSendTransactionModal ref={reviewTxRef} />
     </>
   );
 };

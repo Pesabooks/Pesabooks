@@ -1,29 +1,27 @@
 import { EmailIcon } from '@chakra-ui/icons';
 import {
-  Button,
-  Checkbox,
-  Flex,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spacer,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  useDisclosure,
-  useToast
+    Button, Card, Checkbox,
+    Flex,
+    Modal,
+    ModalBody,
+    ModalCloseButton,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+    ModalOverlay,
+    Spacer,
+    Table,
+    TableContainer,
+    Tbody,
+    Td,
+    Text,
+    Th,
+    Thead,
+    Tr,
+    useDisclosure,
+    useToast
 } from '@chakra-ui/react';
 import { useCallback, useEffect, useState } from 'react';
-import { Card } from '../../../components/Card';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { acceptInvitation, getActiveInvitationsByEmail } from '../../../services/invitationService';
 import { Invitation } from '../../../types';

@@ -1,22 +1,29 @@
-import { Button, Container, Heading, useToast } from '@chakra-ui/react';
-import { Web3Provider } from '@ethersproject/providers';
+import { Button, Card, CardBody, CardHeader, Container, Heading } from '@chakra-ui/react';
+import { BigNumber } from 'ethers';
 import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Card, CardHeader } from '../../../components/Card';
+import { formatLongNumber } from '../../../bignumber-utils';
 import { InputAmountField } from '../../../components/Input/InputAmountField';
 import { SelectCategoryField } from '../../../components/Input/SelectCategoryField';
 import { SelectUserField } from '../../../components/Input/SelectUserField';
-import { ReviewAndSubmitTransaction, ReviewAndSubmitTransactionRef } from '../../../components/ReviewAndSubmitTransaction';
+
+import { Web3Provider } from '@ethersproject/providers';
 import { usePool } from '../../../hooks/usePool';
+import { useSafeAdmins } from '../../../hooks/useSafeAdmins';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAddressBalance } from '../../../services/blockchainServices';
 import { getAllCategories } from '../../../services/categoriesService';
+import { estimateTransaction } from '../../../services/estimationService';
 import { getMembers } from '../../../services/membersService';
-import { withdraw } from '../../../services/transactionsServices';
+import { buildWithdrawTx } from '../../../services/transaction-builder';
+import { submitTransaction } from '../../../services/transactionsServices';
 import { Category, User } from '../../../types';
+import {
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef
+} from '../components/ReviewAndSendTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
-
 export interface WithdrawFormValue {
   amount: number;
   memo: string | null;
@@ -25,18 +32,17 @@ export interface WithdrawFormValue {
 }
 
 export const WithdrawPage = () => {
+  const { provider } = useWeb3Auth();
   const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const { provider } = useWeb3Auth();
   const { pool } = usePool();
-  const toast = useToast();
   const [balance, setBalance] = useState<number>(0);
-  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
-
-  const signer = (provider as Web3Provider)?.getSigner();
+  const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
+  const { threshold } = useSafeAdmins();
   const methods = useForm<WithdrawFormValue>();
 
   const token = pool?.token;
+  const signer = (provider as Web3Provider)?.getSigner();
 
   if (!token) {
     throw new Error('Argument Exception');
@@ -56,41 +62,24 @@ export const WithdrawPage = () => {
     }
   }, [token, pool]);
 
-  const confirmTx = (formValue: WithdrawFormValue) => {
-    const { amount, user } = formValue;
-    reviewTxRef.current?.review(
-      `Withdraw ${amount} ${pool.token?.symbol} to ${user.wallet}`,
-      'withdrawal',
-      formValue,
-      onWithDraw,
-    );
-  };
-
-  const onWithDraw = async (confirmed: boolean, formValue: WithdrawFormValue) => {
-    if (!provider || !confirmed) return;
-
-    reviewTxRef.current?.openSubmitting('withdrawal');
-
+  const onWithDraw = async (formValue: WithdrawFormValue) => {
     const { amount, memo, user, category } = formValue;
 
-    try {
-      const tx = await withdraw(signer, pool, category.id, amount, memo, user);
+    const transaction = await buildWithdrawTx(pool, category.id, amount, memo, user);
 
-      if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
-
-      methods.reset();
-    } catch (e: any) {
-      const message = typeof e === 'string' ? e : e.message;
-      toast({
-        title: message,
-        status: 'error',
-        isClosable: true,
-      });
-
-      throw e;
-    } finally {
-      reviewTxRef.current?.closeSubmitting();
-    }
+    reviewTxRef.current?.open(
+      `Withdraw ${formatLongNumber(amount)} ${pool.token?.symbol} to ${user.username}`,
+      transaction.type,
+      () =>
+        threshold > 1
+          ? Promise.resolve(BigNumber.from(0))
+          : estimateTransaction(provider!, transaction.transaction_data),
+      async () => {
+        const tx = await submitTransaction(user!, signer, pool!, transaction!);
+        methods.reset();
+        return { hash: tx?.hash, internalTxId: tx?.id };
+      },
+    );
   };
 
   return (
@@ -101,27 +90,29 @@ export const WithdrawPage = () => {
 
       <Container mt={20}>
         <Card>
-          <CardHeader p="6px 0px 32px 0px">
+          <CardHeader>
             <Heading size="lg">Withdraw</Heading>
           </CardHeader>
-          <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(confirmTx)}>
-              <SelectCategoryField mb="4" categories={categories} />
+          <CardBody>
+            <FormProvider {...methods}>
+              <form onSubmit={methods.handleSubmit(onWithDraw)}>
+                <SelectCategoryField mb="4" categories={categories} />
 
-              <SelectUserField label="To User" mb="4" users={users} />
+                <SelectUserField label="To User" mb="4" users={users} />
 
-              <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
+                <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
 
-              <TextAreaMemoField mb="4" />
+                <TextAreaMemoField mb="4" />
 
-              <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
-                Review
-              </Button>
-            </form>
-          </FormProvider>
+                <Button mt={4} isLoading={methods.formState.isSubmitting} type="submit">
+                  Review
+                </Button>
+              </form>
+            </FormProvider>
+          </CardBody>
         </Card>
       </Container>
-      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
+      <ReviewAndSendTransactionModal ref={reviewTxRef} />
     </>
   );
 };

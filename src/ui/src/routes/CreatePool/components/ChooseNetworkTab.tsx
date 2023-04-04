@@ -1,6 +1,14 @@
 import { CheckIcon } from '@chakra-ui/icons';
-import { Button, Divider, Flex, Image, Spacer, Stack, Text } from '@chakra-ui/react';
-import { Card, CardBody, CardHeader } from '../../../components/Card';
+import {
+  Button, Card,
+  CardBody,
+  CardHeader, Divider,
+  Flex,
+  Image,
+  Spacer,
+  Stack,
+  Text
+} from '@chakra-ui/react';
 
 interface ChooseNetworkTabProps {
   onNext: () => void;
@@ -13,7 +21,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
 
   return (
     <Card>
-      <CardHeader mb="40px">
+      <CardHeader>
         <Flex
           direction="column"
           align="center"

@@ -1,20 +1,19 @@
-import { Button, Container, Heading, useToast } from '@chakra-ui/react';
+import { Button, Card, CardBody, CardHeader, Container, Heading } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Card, CardHeader } from '../../../components/Card';
 import { InputAmountField } from '../../../components/Input/InputAmountField';
 import { SelectCategoryField } from '../../../components/Input/SelectCategoryField';
-import {
-  ReviewAndSubmitTransaction,
-  ReviewAndSubmitTransactionRef
-} from '../../../components/ReviewAndSubmitTransaction';
 import { usePool } from '../../../hooks/usePool';
 import { useWeb3Auth } from '../../../hooks/useWeb3Auth';
 import { getAddressBalance } from '../../../services/blockchainServices';
 import { getAllCategories } from '../../../services/categoriesService';
-import { deposit } from '../../../services/transactionsServices';
-import { Category } from '../../../types';
+import { estimateTransfer } from '../../../services/estimationService';
+import { buildDepositTx } from '../../../services/transaction-builder';
+import { submitDepositTx } from '../../../services/transactionsServices';
+import { Category, NewTransaction } from '../../../types';
+
+import { ReviewAndSendTransactionModal, ReviewAndSendTransactionModalRef } from '../components/ReviewAndSendTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 
 export interface DepositFormValue {
@@ -28,8 +27,8 @@ export const DepositPage = () => {
   const { provider, account, user } = useWeb3Auth();
   const { pool } = usePool();
   const [balance, setBalance] = useState<number>(0);
-  const reviewTxRef = useRef<ReviewAndSubmitTransactionRef>(null);
-  const toast = useToast();
+  const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
+ 
   const methods = useForm<DepositFormValue>();
 
   const token = pool?.token;
@@ -57,39 +56,27 @@ export const DepositPage = () => {
     getBalance();
   }, [pool, account]);
 
-  const confirmTx = (formValue: DepositFormValue) => {
-    const { amount } = formValue;
-    reviewTxRef.current?.review(
-      `Deposit ${amount} ${pool.token?.symbol}`,
-      'deposit',
-      formValue,
-      onDeposit,
-    );
+  const deposit = async (transaction: NewTransaction) => {
+    const tx = await submitDepositTx(provider!, pool, user!, transaction);
+
+    methods.reset();
+
+    return {
+      hash: tx?.hash,
+      internalTxId: tx?.id,
+    };
   };
 
-  const onDeposit = async (confirmed: boolean, formValue: DepositFormValue) => {
-    if (!provider || !confirmed) return;
-    reviewTxRef.current?.openSubmitting('deposit');
-
+  const review = async (formValue: DepositFormValue) => {
     const { amount, memo, category } = formValue;
 
-    try {
-      const tx = await deposit(provider, pool, user!, category.id, amount, memo);
-
-      if (tx) reviewTxRef.current?.openTxSubmitted(tx.type, tx.hash, tx.id);
-
-      methods.reset();
-    } catch (e: any) {
-      const message = typeof e === 'string' ? e : e?.data?.message ?? e.message;
-      toast({
-        title: message,
-        status: 'error',
-        isClosable: true,
-      });
-      throw e;
-    } finally {
-      reviewTxRef.current?.closeSubmitting();
-    }
+    const tx = await buildDepositTx(provider!, pool, user!, category.id, amount, memo);
+    reviewTxRef.current?.open(
+      `Deposit ${amount} ${pool.token?.symbol}`,
+      tx.type,
+      () => estimateTransfer(provider!, pool!.token!.address, amount, pool!.gnosis_safe_address!),
+      () => deposit(tx),
+    );
   };
 
   return (
@@ -99,11 +86,12 @@ export const DepositPage = () => {
       </Helmet>
       <Container mt={20}>
         <Card>
-          <CardHeader p="6px 0px 32px 0px">
+          <CardHeader>
             <Heading size="lg">Deposit</Heading>
           </CardHeader>
+          <CardBody>
           <FormProvider {...methods}>
-            <form onSubmit={methods.handleSubmit(confirmTx)}>
+            <form onSubmit={methods.handleSubmit(review)}>
               <SelectCategoryField mb="4" categories={categories} />
 
               <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
@@ -115,9 +103,11 @@ export const DepositPage = () => {
               </Button>
             </form>
           </FormProvider>
+          </CardBody>
         </Card>
       </Container>
-      <ReviewAndSubmitTransaction ref={reviewTxRef} chainId={pool!.chain_id} />
+
+      <ReviewAndSendTransactionModal ref={reviewTxRef} />
     </>
   );
 };

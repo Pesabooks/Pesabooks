@@ -1,8 +1,5 @@
 import { extendTheme, withDefaultColorScheme, type ThemeConfig } from '@chakra-ui/react';
-import { StepsStyleConfig } from 'chakra-ui-steps';
-import { CardComponent } from './additions/card/Card';
-import { CardBodyComponent } from './additions/card/CardBody';
-import { CardHeaderComponent } from './additions/card/CardHeader';
+import { StepsTheme as Steps } from 'chakra-ui-steps';
 import { MainPanelComponent } from './additions/layout/MainPanel';
 import { PanelContainerComponent } from './additions/layout/PanelContainer';
 import { PanelContentComponent } from './additions/layout/PanelContent';
@@ -27,15 +24,12 @@ export default extendTheme(
   badgeStyles, // Badge styles
   linkStyles, // Link styles
   drawerStyles, // Sidebar variant for Chakra's drawer
-  CardComponent, // Card component
-  CardBodyComponent, // Card Body component
-  CardHeaderComponent, // Card Header component
   MainPanelComponent, // Main Panel component
   PanelContentComponent, // Panel Content component
   PanelContainerComponent, // Panel Container component
   {
     components: {
-      Steps: StepsStyleConfig,
+      Steps,
     },
   },
   withDefaultColorScheme({ colorScheme: 'teal' }),

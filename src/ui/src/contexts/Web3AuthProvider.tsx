@@ -3,34 +3,28 @@ import * as Sentry from '@sentry/react';
 import {
   ADAPTER_EVENTS,
   CHAIN_NAMESPACES,
+  CONNECTED_EVENT_DATA,
   CustomChainConfig,
+  UserInfo,
   WALLET_ADAPTERS
 } from '@web3auth/base';
-import { Web3AuthCore } from '@web3auth/core';
+import { Web3AuthNoModal } from '@web3auth/no-modal';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
-import {
-  onAuthStateChanged,
-  signInWithEmailLink,
-  signOut as FirebaseSignOut,
-  updateProfile as FirebaseUpdateProfile,
-  User as FirebaseUser
-} from 'firebase/auth';
 import React, { useCallback, useEffect, useState } from 'react';
 import { networks } from '../data/networks';
-import { firebaseAuth } from '../firebase';
 import { usersTable } from '../supabase';
 import { User } from '../types';
 import { clearTypedStorageItem, setTypedStorageItem } from '../utils/storage-utils';
 
 export interface IWeb3AuthContext {
-  web3Auth: Web3AuthCore | null;
+  web3Auth: Web3AuthNoModal | null;
   account: string | null;
   provider: Web3Provider | null;
   isInitialised: boolean;
   user: User | null | undefined;
   chainId: number;
   signOut: () => Promise<void>;
-  signIn: (email: string, emailLink: string) => Promise<void>;
+  signIn: (email: string) => Promise<void>;
   isAuthenticated: boolean;
   setChainId: (chainId: number) => void;
   updateProfile: (name: string) => Promise<void>;
@@ -38,7 +32,6 @@ export interface IWeb3AuthContext {
 }
 
 const web3AuthClientId = process.env.REACT_APP_WEB3AUTH_CLIENT_ID ?? '';
-const web3AuthVerifier = process.env.REACT_APP_WEB3AUTH_VERIFIER ?? '';
 const web3AuthNetwork = process.env.REACT_APP_WEB3AUTH_NETWORk ?? '';
 
 const defaultChain = 137;
@@ -58,18 +51,48 @@ export const Web3AuthContext = React.createContext<IWeb3AuthContext>({
   setUser: () => {},
 });
 
+const getIdFromUser = (user: UserInfo) => `${user.verifier}:${user.verifierId}`;
+
 export const Web3AuthProvider = ({ children }: any) => {
-  const [web3Auth, setWeb3Auth] = useState<Web3AuthCore | null>(null);
+  const [web3Auth, setWeb3Auth] = useState<Web3AuthNoModal | null>(null);
   const [provider, setProvider] = useState<Web3Provider | null>(null);
   const [chainId, setChainId] = useState<number>(defaultChain);
   const [user, setUser] = useState<User | null>(null);
   const [account, setAccount] = useState<string | null>(null);
   const [isInitialised, setIsInitialised] = useState(false);
 
+  const configureUser = useCallback(async (user: UserInfo | null) => {
+    if (!user) {
+      Sentry.configureScope((scope) => scope.setUser(null));
+      setUser(null);
+      return null;
+    }
+    const id = getIdFromUser(user);
+
+    Sentry.setUser({
+      email: user.email!,
+      id,
+    });
+    let { data } = await usersTable().select(`*`).eq('id', id).single();
+    if (data) setUser(data);
+  }, []);
+
   useEffect(() => {
-    const subscribeAuthEvents = (web3auth: Web3AuthCore) => {
-      web3auth.on(ADAPTER_EVENTS.CONNECTED, (data: unknown) => {
+    const subscribeAuthEvents = (web3auth: Web3AuthNoModal) => {
+      web3auth.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
+        console.log('connected');
         setProvider(new Web3Provider(web3auth.provider!));
+
+        const user = await web3auth.getUserInfo();
+        configureUser(user as UserInfo);
+        setTypedStorageItem('user_id', getIdFromUser(user as UserInfo));
+      });
+
+      web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
+        console.log('disconnected');
+        clearTypedStorageItem('supabase_access_token');
+        setProvider(null);
+        configureUser(null);
       });
     };
 
@@ -87,13 +110,16 @@ export const Web3AuthProvider = ({ children }: any) => {
 
     const init = async () => {
       try {
-        const web3AuthInstance = new Web3AuthCore({
+        const web3AuthInstance: Web3AuthNoModal = new Web3AuthNoModal({
+          clientId: web3AuthClientId,
           chainConfig: currentChainConfig,
-          enableLogging: false,
+          enableLogging: web3AuthNetwork === 'testnet',
         });
 
+        subscribeAuthEvents(web3AuthInstance);
+
         const adapter = new OpenloginAdapter({
-          loginSettings: { mfaLevel: 'none' },
+          //loginSettings: { mfaLevel: 'none' },
           adapterSettings: {
             clientId: web3AuthClientId,
             network: web3AuthNetwork === 'testnet' ? 'testnet' : 'mainnet',
@@ -101,26 +127,17 @@ export const Web3AuthProvider = ({ children }: any) => {
             redirectUrl: `${window.location.origin}/auth/callback`,
             whiteLabel: {
               name: 'Pesabooks',
-              logoLight: 'https://pesabooks.com/assets/img/icon.png',
-              logoDark: 'https://pesabooks.com/assets/img/icon.png',
-              dark: true,
-              theme: { primary: '4FD1C5' },
-            },
-            loginConfig: {
-              jwt: {
-                name: 'pesabooks firebase',
-                verifier: web3AuthVerifier,
-                typeOfLogin: 'jwt',
-                clientId: web3AuthClientId,
-              },
+               logoLight: 'https://pesabooks.com/assets/img/icon.png',
+               logoDark: 'https://pesabooks.com/assets/img/icon.png',
+               dark: true,
+              // theme: { primary: '4FD1C5' },
+              // defaultLanguage: 'en',
             },
           },
         });
         web3AuthInstance.configureAdapter(adapter);
-        subscribeAuthEvents(web3AuthInstance);
 
         await web3AuthInstance.init();
-
         setWeb3Auth(web3AuthInstance);
         if (web3AuthInstance.provider) {
           setProvider(new Web3Provider(web3AuthInstance.provider));
@@ -133,31 +150,21 @@ export const Web3AuthProvider = ({ children }: any) => {
     };
 
     init();
-  }, [chainId]);
+  }, [chainId, configureUser]);
 
-  const signIn = async (email: string, emailLink: string) => {
-    // log in firebase
-    const { user } = await signInWithEmailLink(firebaseAuth, email, emailLink);
-    const fbIdtoken = await user.getIdToken();
-
-    await web3Login(fbIdtoken);
-  };
-
-  const web3Login = async (jwtToken: string) => {
+  const signIn = async (email: string) => {
     if (!web3Auth) {
       throw new Error('web3auth not initialized yet');
     }
     if (web3Auth.status === 'connected') {
       await web3Auth.logout();
     }
+
+    //await web3Auth.connect();
+
     await web3Auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
-      relogin: false,
-      loginProvider: 'jwt',
-      extraLoginOptions: {
-        id_token: jwtToken,
-        domain: window.location.origin,
-        verifierIdField: 'email',
-      },
+      loginProvider: 'email_passwordless',
+      login_hint: email,
     });
   };
 
@@ -165,8 +172,10 @@ export const Web3AuthProvider = ({ children }: any) => {
     if (!web3Auth) {
       return;
     }
-
-    await FirebaseSignOut(firebaseAuth);
+    await web3Auth.logout();
+    clearTypedStorageItem('supabase_access_token');
+    setProvider(null);
+    configureUser(null);
   };
 
   useEffect(() => {
@@ -183,48 +192,8 @@ export const Web3AuthProvider = ({ children }: any) => {
   }, [provider, isInitialised]);
 
   const updateProfile = async (username: string) => {
-    const currentUser = firebaseAuth.currentUser;
-    if (currentUser) {
-      await FirebaseUpdateProfile(currentUser, { displayName: username });
-    }
     if (user) setUser({ ...user, username: username });
   };
-
-  const configureUser = useCallback(async (firebaseUser: FirebaseUser | undefined | null) => {
-    if (!firebaseUser) {
-      Sentry.configureScope((scope) => scope.setUser(null));
-      setUser(null);
-      return null;
-    }
-
-    Sentry.setUser({
-      email: firebaseUser.email!,
-      username: firebaseUser?.displayName ?? ' ',
-      id: firebaseUser.uid,
-    });
-    let { data } = await usersTable().select(`*`).eq('id', firebaseUser.uid).single();
-    if (data) setUser(data);
-  }, []);
-
-  useEffect(() => {
-    // Listen for changes on auth state (logged in, signed out, etc.)
-    const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
-      configureUser(user);
-
-      if (user) setTypedStorageItem('user_id', user.uid);
-      else {
-        clearTypedStorageItem('user_id');
-        if (web3Auth?.status === 'connected') {
-          web3Auth?.logout().then();
-        }
-
-        clearTypedStorageItem('supabase_access_token');
-        setProvider(null);
-      }
-    });
-
-    return unsubscribe;
-  }, [configureUser, web3Auth]);
 
   const contextProvider: IWeb3AuthContext = {
     web3Auth: web3Auth,

@@ -1,5 +1,6 @@
 import { handleSupabaseError, membersTable } from '../supabase';
 import { Member } from '../types';
+import { getPool } from './poolsService';
 
 export const getMembers = async (pool_id: string, includeInactive = false) => {
   const query = membersTable()
@@ -37,4 +38,14 @@ export const deactivateMember = async (pool_id: string, user_id: string) => {
     .eq('pool_id', pool_id)
     .eq('user_id', user_id);
   handleSupabaseError(error);
+};
+
+// delete member
+export const deleteMember = async (pool_id: string, user_id: string) => {
+  const pool = await getPool(pool_id);
+  // if pool is not deployed, delete member
+  if (!pool?.gnosis_safe_address) {
+    const { error } = await membersTable().delete().eq('pool_id', pool_id).eq('user_id', user_id);
+    handleSupabaseError(error);
+  }
 };

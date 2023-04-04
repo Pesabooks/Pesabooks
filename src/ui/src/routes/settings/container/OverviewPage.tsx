@@ -1,13 +1,12 @@
 import {
-  Editable,
-  EditableInput,
-  EditablePreview,
-  EditableTextarea,
-  HStack,
-  Stack,
-  Text
+    Card, CardBody, CardHeader, Editable,
+    EditableInput,
+    EditablePreview,
+    EditableTextarea,
+    HStack,
+    Stack,
+    Text
 } from '@chakra-ui/react';
-import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { EditableControls } from '../../../components/Editable/EditableControls';
 import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
 import { WalletAddress } from '../../../components/WalletAddress';

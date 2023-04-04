@@ -1,8 +1,7 @@
-import { Heading, Skeleton } from '@chakra-ui/react';
+import { Card, CardBody, CardHeader, Heading, Skeleton } from '@chakra-ui/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
-import { Card, CardBody, CardHeader } from '../../../components/Card';
 import { usePool } from '../../../hooks/usePool';
 import { useTransactions } from '../../../hooks/useTransactions';
 import { getMembers } from '../../../services/membersService';
@@ -55,7 +54,7 @@ export const TransactionsPage = () => {
       setIsLoading(false);
     };
     fetchData();
-  }, [pool, transactions]);
+  }, [pool.id]);
 
   const isPending = (t: Transaction) =>
     t.status === 'awaitingConfirmations' || t.status === 'awaitingExecution';

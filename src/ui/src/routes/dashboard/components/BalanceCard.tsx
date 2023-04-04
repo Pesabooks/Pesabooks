@@ -1,7 +1,5 @@
-import { Flex, Icon, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
+import { Card, CardBody, Flex, Icon, Stat, StatLabel, StatNumber } from '@chakra-ui/react';
 import { IconType } from 'react-icons/lib';
-import { Card } from '../../../components/Card/Card';
-import { CardBody } from '../../../components/Card/CardBody';
 import { IconBox } from '../../../components/Icons';
 import Loading from '../../../components/Loading';
 

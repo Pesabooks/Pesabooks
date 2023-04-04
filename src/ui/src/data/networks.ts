@@ -1,8 +1,7 @@
-import { AddEthereumChainParameter } from '@web3-react/types';
-
 export interface Network {
   chainId: string;
   rpcUrls: string[];
+  websockets?: string[];
   chainName: string;
   nativeCurrency: {
     name: string;
@@ -61,6 +60,7 @@ export const networks: { [chainId: number]: Network } = {
   5: {
     chainId: '0x5',
     rpcUrls: [`https://goerli.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
+    websockets: ['wss://eth-goerli.g.alchemy.com/v2/T_i4f_7MvSeXU557WFcYFFE-fvzz-mB3'],
     chainName: 'Goerli Test Network',
     nativeCurrency: {
       name: 'Ether',
@@ -75,6 +75,7 @@ export const networks: { [chainId: number]: Network } = {
   137: {
     chainId: '0x89',
     rpcUrls: [`https://polygon-mainnet.infura.io/v3/${process.env.REACT_APP_INFURA_KEY}`],
+    websockets: [`wss://polygon-mainnet.g.alchemy.com/v2/T_i4f_7MvSeXU557WFcYFFE-fvzz-mB3`],
     chainName: 'Polygon',
     nativeCurrency: {
       name: 'MATIC',
@@ -105,26 +106,3 @@ export const networks: { [chainId: number]: Network } = {
     logoUrl: 'images/chains/BNB.png',
   },
 };
-
-export const getAddChainParameters = (chainId: number): AddEthereumChainParameter => {
-  const chainInformation = networks[chainId];
-  return {
-    chainId,
-    chainName: chainInformation.chainName,
-    nativeCurrency: { ...chainInformation.nativeCurrency, decimals: 18 },
-    rpcUrls: chainInformation.rpcUrls,
-    blockExplorerUrls: chainInformation.blockExplorerUrls,
-  };
-};
-
-export const RPCURLS: { [chainId: number]: string[] } = Object.keys(networks).reduce<{
-  [chainId: number]: string[];
-}>((accumulator, chainId) => {
-  const validURLs: string[] = networks[Number(chainId)].rpcUrls;
-
-  if (validURLs.length) {
-    accumulator[Number(chainId)] = validURLs;
-  }
-
-  return accumulator;
-}, {});

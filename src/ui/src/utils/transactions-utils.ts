@@ -3,6 +3,7 @@ import { Transaction, User } from '../types';
 import {
   AddOrRemoveOwnerData,
   ChangeThresholdData,
+  NewTransaction,
   SwapData,
   TransactionStatus,
   TransactionType,
@@ -20,32 +21,42 @@ export const getAddressName = (address: string | undefined, users: User[]) => {
   return user?.username ?? address;
 };
 
-export const getTransactionDescription = (transaction: Transaction, addresses: User[]): string => {
+export const getTransactionDescription = (
+  transaction: Transaction | NewTransaction,
+  addresses?: User[],
+): string => {
   const { type, metadata } = transaction;
-  const isProposal = (
-    ['awaitingConfirmations', 'awaitingExecution'] as TransactionStatus[]
-  ).includes(transaction.status);
+
+  const isProposal = (['awaitingConfirmations', 'awaitingExecution'] as TransactionStatus[])
+    //@ts-ignore
+    .includes(transaction.status);
 
   switch (type) {
     case 'deposit':
-      return `Received From ${getAddressName((metadata as TransferData).transfer_from, addresses)}`;
+      const fromName = addresses
+        ? getAddressName((metadata as TransferData).transfer_from, addresses)
+        : (metadata as TransferData).transfer_from_name;
+      return `Received From ${fromName}`;
 
     case 'withdrawal':
+      const toName = addresses
+        ? getAddressName((metadata as TransferData).transfer_to, addresses)
+        : (metadata as TransferData).transfer_to_name;
       if (isProposal)
         return `Send ${(metadata as TransferData).amount} ${
           (metadata as TransferData)?.token?.symbol
-        } To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
-      return `Sent To ${getAddressName((metadata as TransferData).transfer_to, addresses)}`;
+        } To ${toName}`;
+      return `Sent To ${toName}`;
 
     case 'addOwner':
-      return `${isProposal ? 'Add' : 'Added'} ${getAddressName(
-        (metadata as AddOrRemoveOwnerData).address,
-        addresses,
-      )} as member`;
+      const ownerName = addresses
+        ? getAddressName((metadata as AddOrRemoveOwnerData).address, addresses)
+        : (metadata as AddOrRemoveOwnerData).username;
+      return `${isProposal ? 'Add' : 'Added'} ${ownerName} as a member`;
 
     case 'removeOwner':
       const removeOwnerData = metadata as AddOrRemoveOwnerData;
-      return `${isProposal ? 'Remove' : 'Removed'} ${removeOwnerData.username} as member`;
+      return `${isProposal ? 'Remove' : 'Removed'} ${removeOwnerData.username} as a member`;
 
     case 'unlockToken':
       return `${isProposal ? 'Unlock' : 'Unlocked'} token ${(metadata as any).token.symbol}`;
@@ -73,6 +84,7 @@ export const getTransactionDescription = (transaction: Transaction, addresses: U
       if (isProposal)
         return `Change required confirmations from ${thresholdData.current_threshold} to ${thresholdData.threshold}`;
       return `Change required confirmations to ${thresholdData.threshold}`;
+
     default:
       return transaction.type;
   }

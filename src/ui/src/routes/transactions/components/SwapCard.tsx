@@ -2,12 +2,10 @@ import {
   Alert,
   AlertDescription,
   AlertIcon,
-  AlertTitle,
   Box,
   Button,
-  CloseButton,
-  Editable,
-  EditableInput,
+  Card, CardBody, CardHeader,
+  Editable, EditableInput,
   EditablePreview,
   Flex,
   FormControl,
@@ -22,8 +20,7 @@ import {
   Spacer,
   Spinner,
   Stack,
-  Text,
-  useDisclosure
+  Text
 } from '@chakra-ui/react';
 import { BigNumber, ethers } from 'ethers';
 import { debounce } from 'lodash';
@@ -31,10 +28,10 @@ import { Address, APIError, ParaSwap, Token, Transaction as ParaswapTx } from 'p
 import { OptimalRate } from 'paraswap-core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaWallet } from 'react-icons/fa';
-import { formatBigNumber, formatCurrency } from '../../../bignumber-utils';
-import { Card, CardHeader } from '../../../components/Card';
+import { formatBigNumber, formatCurrency, formatLongNumber } from '../../../bignumber-utils';
 import { getTokenAllowance } from '../../../services/blockchainServices';
 import { getBalances, TokenBalance } from '../../../services/covalentServices';
+import { eventBus } from '../../../services/eventBus';
 import { getPendingTokenUnlockingTxCount } from '../../../services/transactionsServices';
 import { compareAddress } from '../../../utils';
 import { SelectParaswapToken } from '../components/SelectParaswapToken';
@@ -68,14 +65,12 @@ export interface SwapArgs {
   tokenTo: Token;
   priceRoute: OptimalRate;
   slippage: number;
-  callback: () => void;
 }
 
 export interface ApproveArgs {
   paraswapProxy: string;
   tokenFrom: Token;
   amount: number;
-  callback: () => void;
 }
 
 interface SwapCardProps {
@@ -84,7 +79,6 @@ interface SwapCardProps {
   defaultTokenAddress?: string;
   pool_id?: string;
   onApproveToken: (approveArgs: ApproveArgs) => void;
-  isSubmitting: boolean;
   onSwap: (swapargs: SwapArgs) => void;
 }
 
@@ -99,7 +93,6 @@ export const SwapCard = ({
   defaultTokenAddress,
   pool_id,
   onApproveToken,
-  isSubmitting,
   onSwap,
 }: SwapCardProps) => {
   const [paraswap, setParaswap] = useState<ParaSwap>();
@@ -110,9 +103,6 @@ export const SwapCard = ({
     availableTokens: [],
     slippage: DEFAULT_ALLOWED_SLIPPAGE,
     InputSlippage: DEFAULT_ALLOWED_SLIPPAGE.toString(),
-  });
-  const { isOpen: isDeadlineWarningVisible, onClose: onCloseDeadlineWarning } = useDisclosure({
-    defaultIsOpen: !!pool_id,
   });
 
   useEffect(() => {
@@ -416,6 +406,17 @@ export const SwapCard = ({
     },
   };
 
+  //Subscribe to transaction completed event
+  useEffect(() => {
+    const subscription = eventBus.channel('transaction').on('execution_completed', () => {
+      getBalancesCB();
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [getBalancesCB]);
+
   const unlock = async () => {
     if (!state.tokenFrom) return;
 
@@ -433,7 +434,6 @@ export const SwapCard = ({
       paraswapProxy: proxyOrError as string,
       tokenFrom: state.tokenFrom,
       amount: +state.srcAmount,
-      callback: getBalancesCB,
     });
 
     checkPendingTokenUnlocking();
@@ -476,13 +476,6 @@ export const SwapCard = ({
       tokenTo,
       priceRoute,
       slippage: state.slippage,
-      callback: () => {
-        setState((prevState) => ({
-          ...prevState,
-          loading: false,
-          status: '',
-        }));
-      },
     });
   };
 
@@ -521,26 +514,6 @@ export const SwapCard = ({
 
   return (
     <>
-      {isDeadlineWarningVisible && (
-        <Alert status="warning" mb={5}>
-          <AlertIcon />
-          <Box>
-            <AlertTitle>Swap deadline!</AlertTitle>
-            <AlertDescription>
-              Swap transaction should be approved and executed in 5min. Otherwise, the transaction
-              will be reverted. Get your team ready.
-            </AlertDescription>
-          </Box>
-          <CloseButton
-            alignSelf="flex-start"
-            position="relative"
-            right={-1}
-            top={-1}
-            onClick={onCloseDeadlineWarning}
-          />
-        </Alert>
-      )}
-
       {state.error && (
         <Alert status="error">
           <AlertIcon />
@@ -558,157 +531,154 @@ export const SwapCard = ({
       )}
       <Text>{state.status}</Text>
       <Card>
-        <CardHeader p="6px 0px 32px 0px">
+        <CardHeader>
           <Heading size="lg">Swap token </Heading>
         </CardHeader>
-        <Stack gap={5}>
-          <Box>
-            <Flex>
-              <FormLabel htmlFor="amount">Pay</FormLabel>
-              <Spacer />
-              <Button
-                onClick={fillMaxAmount}
-                size="xs"
-                colorScheme="white"
-                leftIcon={<FaWallet />}
-                variant="link"
-              >
-                {getTokenBalance(state.tokenFrom)} {state.tokenFrom?.symbol}
+        <CardBody>
+          <Stack gap={5}>
+            <Box>
+              <Flex>
+                <FormLabel htmlFor="amount">Pay</FormLabel>
+                <Spacer />
+                <Button
+                  onClick={fillMaxAmount}
+                  size="xs"
+                  colorScheme="white"
+                  leftIcon={<FaWallet />}
+                  variant="link"
+                >
+                  {getTokenBalance(state.tokenFrom)} {state.tokenFrom?.symbol}
+                </Button>
+              </Flex>
+              <Flex p={5} style={styles} alignItems="center">
+                <NumberInput
+                  min={0}
+                  variant="unstyled"
+                  w="100%"
+                  value={state.srcAmount}
+                  onChange={(e) => onAmountChange(e)}
+                >
+                  <NumberInputField id="fromAmount" />
+                </NumberInput>
+                <SelectParaswapToken
+                  value={state.tokenFrom}
+                  tokens={state.availableTokens}
+                  onChange={(e) => updatePair('tokenFrom', e)}
+                />
+              </Flex>
+
+              <Text color="red.300" fontSize="sm" mt={1}>
+                {state.validation === 'insufficientFunds' && 'Insufficient funds'}
+                {state.validation === 'invalidAmount' && 'invalid amount'}
+                {state.validation === 'insufficientAllowance' &&
+                  `You need to unlock ${formatLongNumber(+state.srcAmount)} ${
+                    state.tokenFrom?.symbol
+                  } before swapping`}
+              </Text>
+            </Box>
+
+            <FormControl>
+              <Flex>
+                <FormLabel htmlFor="amount">Receive</FormLabel>
+                <Spacer />
+                <Flex align="center" gap={1}>
+                  <Icon as={FaWallet} h={'12px'} w={'12px'} />
+                  <Text fontSize="sm">
+                    {getTokenBalance(state.tokenTo)} {state.tokenTo?.symbol}
+                  </Text>
+                </Flex>
+              </Flex>
+              <Flex gap={2} p={5} style={styles} alignItems="center">
+                <InputGroup>
+                  {state.loading ? (
+                    <Spinner />
+                  ) : (
+                    <Input
+                      id="toAmount"
+                      variant="unstyled"
+                      w="100%"
+                      value={formatBigNumber(
+                        state.priceRoute?.destAmount,
+                        state.tokenTo?.decimals!,
+                      )}
+                      readOnly
+                    ></Input>
+                  )}
+                  {state.priceRoute?.destUSD && (
+                    <Text as="i" fontSize="sm">
+                      ~${formatCurrency(state.priceRoute.destUSD)}
+                    </Text>
+                  )}
+                </InputGroup>
+
+                <SelectParaswapToken
+                  value={state.tokenTo}
+                  tokens={state.tokens}
+                  onChange={(e) => updatePair('tokenTo', e)}
+                />
+              </Flex>
+            </FormControl>
+            <Flex gap={5}>
+              {state.validation === 'insufficientAllowance' && (
+                <Button flex="1" onClick={unlock} disabled={state.pendingUnlocking}>
+                  Unlock {state.tokenFrom?.symbol}
+                </Button>
+              )}
+
+              <Button onClick={submitSwap} flex="1" disabled={!!state.validation}>
+                Swap
               </Button>
             </Flex>
-            <Flex p={5} style={styles} alignItems="center">
-              <NumberInput
-                min={0}
-                variant="unstyled"
-                w="100%"
-                value={state.srcAmount}
-                onChange={(e) => onAmountChange(e)}
-              >
-                <NumberInputField id="fromAmount" />
-              </NumberInput>
-              <SelectParaswapToken
-                value={state.tokenFrom}
-                tokens={state.availableTokens}
-                onChange={(e) => updatePair('tokenFrom', e)}
-              />
-            </Flex>
 
-            <Text color="red.300" fontSize="sm" mt={1}>
-              {state.validation === 'insufficientFunds' && 'Insufficient funds'}
-              {state.validation === 'invalidAmount' && 'invalid amount'}
-              {state.validation === 'insufficientAllowance' &&
-                `You need to unlock ${state.srcAmount} ${state.tokenFrom?.symbol} before swapping`}
-            </Text>
-          </Box>
-
-          <FormControl>
-            <Flex>
-              <FormLabel htmlFor="amount">Receive</FormLabel>
-              <Spacer />
-              <Flex align="center" gap={1}>
-                <Icon as={FaWallet} h={'12px'} w={'12px'} />
-                <Text fontSize="sm">
-                  {getTokenBalance(state.tokenTo)} {state.tokenTo?.symbol}
-                </Text>
-              </Flex>
-            </Flex>
-            <Flex gap={2} p={5} style={styles} alignItems="center">
-              <InputGroup>
-                {state.loading ? (
-                  <Spinner />
-                ) : (
-                  <Input
-                    id="toAmount"
-                    variant="unstyled"
-                    w="100%"
-                    value={formatBigNumber(state.priceRoute?.destAmount, state.tokenTo?.decimals!)}
-                    readOnly
-                  ></Input>
-                )}
-                {state.priceRoute?.destUSD && (
+            <Flex style={styles} direction="column" p={3}>
+              <Flex justifyContent="space-between">
+                <Text fontSize="sm">Estimated Cost:</Text>
+                {state.priceRoute?.gasCostUSD && (
                   <Text as="i" fontSize="sm">
-                    ~${formatCurrency(state.priceRoute.destUSD)}
+                    ~${formatCurrency(state.priceRoute.gasCostUSD)}
                   </Text>
                 )}
-              </InputGroup>
+              </Flex>
 
-              <SelectParaswapToken
-                value={state.tokenTo}
-                tokens={state.tokens}
-                onChange={(e) => updatePair('tokenTo', e)}
-              />
-            </Flex>
-          </FormControl>
-          <Flex gap={5}>
-            {state.validation === 'insufficientAllowance' && (
-              <Button
-                flex="1"
-                isLoading={isSubmitting}
-                onClick={unlock}
-                disabled={state.pendingUnlocking}
-              >
-                Unlock {state.tokenFrom?.symbol}
-              </Button>
-            )}
-
-            <Button
-              onClick={submitSwap}
-              flex="1"
-              isLoading={isSubmitting && !state.validation}
-              disabled={!!state.validation}
-            >
-              Swap
-            </Button>
-          </Flex>
-
-          <Flex style={styles} direction="column" p={3}>
-            <Flex justifyContent="space-between">
-              <Text fontSize="sm">Estimated Cost:</Text>
-              {state.priceRoute?.gasCostUSD && (
+              <Flex justifyContent="space-between">
+                <Text fontSize="sm">Minimum Received:</Text>
                 <Text as="i" fontSize="sm">
-                  ~${formatCurrency(state.priceRoute.gasCostUSD)}
+                  {formatBigNumber(minDestinationAmount?.toString(), state.tokenTo?.decimals!, 8)}{' '}
+                  {state.tokenTo?.symbol}
                 </Text>
-              )}
-            </Flex>
+              </Flex>
 
-            <Flex justifyContent="space-between">
-              <Text fontSize="sm">Minimum Received:</Text>
-              <Text as="i" fontSize="sm">
-                {formatBigNumber(minDestinationAmount?.toString(), state.tokenTo?.decimals!, 8)}{' '}
-                {state.tokenTo?.symbol}
-              </Text>
-            </Flex>
+              <Flex justifyContent="space-between">
+                <Text fontSize="sm">Slippage (Max allowed 15%):</Text>
+                <Flex alignItems="center" gap={0.5}>
+                  <Editable
+                    value={state.InputSlippage}
+                    onChange={(value) =>
+                      setState((prevState) => ({
+                        ...prevState,
+                        InputSlippage: value,
+                      }))
+                    }
+                    onBlur={changeSlippage}
+                  >
+                    <EditablePreview fontSize="sm" />
+                    <Input as={EditableInput} size="sm" />
+                  </Editable>
+                  <Text fontSize="sm" marginLeft={0}>
+                    %
+                  </Text>
+                </Flex>
+              </Flex>
 
-            <Flex justifyContent="space-between">
-              <Text fontSize="sm">Slippage (Max allowed 15%):</Text>
-              <Flex alignItems="center" gap={0.5}>
-                <Editable
-                  value={state.InputSlippage}
-                  onChange={(value) =>
-                    setState((prevState) => ({
-                      ...prevState,
-                      InputSlippage: value,
-                    }))
-                  }
-                  onBlur={changeSlippage}
-                >
-                  <EditablePreview fontSize="sm" />
-                  <Input as={EditableInput} size="sm" />
-                </Editable>
-                <Text fontSize="sm" marginLeft={0}>
-                  %
+              <Flex justifyContent="space-between">
+                <Text fontSize="sm">Deadline:</Text>
+                <Text as="i" fontSize="sm">
+                  5mn
                 </Text>
               </Flex>
             </Flex>
-
-            <Flex justifyContent="space-between">
-              <Text fontSize="sm">Deadline:</Text>
-              <Text as="i" fontSize="sm">
-                5mn
-              </Text>
-            </Flex>
-          </Flex>
-        </Stack>
+          </Stack>
+        </CardBody>
       </Card>
       <Flex justifyContent="end" alignContent="center" gap={2} mt={5}>
         <Text fontSize="sm">Powered by</Text>

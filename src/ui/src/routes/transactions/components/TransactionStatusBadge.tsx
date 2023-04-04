@@ -18,6 +18,7 @@ export const TransactionStatusBadge = ({
 
   switch (type) {
     case 'pending':
+    case 'pending_rejection':
       color = 'yellow';
       text = 'Pending';
       logo = BsClockHistory;

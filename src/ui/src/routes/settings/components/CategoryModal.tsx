@@ -14,9 +14,8 @@ import {
   ModalOverlay,
   Spacer,
   Stack,
-  Textarea,
+  Textarea
 } from '@chakra-ui/react';
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Category } from '../../../types';
 
@@ -56,7 +55,9 @@ export const CategoryModal = ({ isOpen, onClose, onSave, isSaving }: CategoryMod
                     placeholder="name"
                     {...register('name', { required: 'Name is required' })}
                   />
-                  <FormErrorMessage>{errors.name}</FormErrorMessage>
+                  <FormErrorMessage>
+                    <>{errors.name}</>
+                  </FormErrorMessage>
                 </FormControl>
 
                 <FormControl>

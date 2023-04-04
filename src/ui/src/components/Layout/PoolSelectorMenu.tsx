@@ -17,7 +17,8 @@ export const PoolSelectorMenu = ({ pool, pools }: PoolSelectorMenuProps) => {
 
   const selectPool = async (pool_id: string) => {
     if (user) await updateLastPool(user.id, pool_id);
-    window.location.replace(`/pool/${pool_id}`);
+    navigate(`/pool/${pool_id}`	)
+    // window.location.replace(`/pool/${pool_id}`);
   };
 
   if (pool) {

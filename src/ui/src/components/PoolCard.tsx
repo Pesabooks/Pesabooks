@@ -1,6 +1,13 @@
-import { Avatar, AvatarGroup, BoxProps, Flex, Text, useColorModeValue } from '@chakra-ui/react';
+import {
+  Avatar,
+  AvatarGroup,
+  BoxProps, Card,
+  CardBody,
+  CardHeader, Flex,
+  Text,
+  useColorModeValue
+} from '@chakra-ui/react';
 import { Pool } from '../types';
-import { Card, CardBody, CardHeader } from './Card';
 import { Separator } from './Layout/Separator';
 
 interface PoolCardProps extends BoxProps {
@@ -11,7 +18,7 @@ export const PoolCard = ({ pool, ...boxProps }: PoolCardProps) => {
 
   return (
     <Card alignSelf="flex-start" {...boxProps}>
-      <CardHeader mb="18px">
+      <CardHeader>
         <Flex justify="space-between" w="100%">
           <Flex direction="column">
             <Text fontSize="md" color={textColor} fontWeight="bold" mb="8px">

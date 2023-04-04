@@ -6,9 +6,14 @@ import { networks } from '../data/networks';
 export const getNetwork = (chain_id: number) => networks[chain_id];
 
 export const defaultProvider = (chain_id: number) => {
-  // return new ethers.providers.InfuraProvider(chain_id, process.env.REACT_APP_INFURA_KEY);
+  const network = networks[chain_id];
+  if (network.websockets) {
+    const provider = new ethers.providers.WebSocketProvider(network.websockets[0], chain_id);
+    return provider;
+  }
+
   let url = networks[chain_id].rpcUrls[0];
-  return new ethers.providers.JsonRpcProvider(url);
+  return new ethers.providers.JsonRpcProvider(url, chain_id);
 };
 
 export const getTokenContract = (chainId: number, address: string): ERC20 => {
@@ -32,20 +37,6 @@ export const getAddressBalance = async (
   const decimals = await tokenContract.decimals();
 
   return +ethers.utils.formatUnits(balance, decimals);
-};
-
-export const onTransactionComplete = async (
-  chain_id: number,
-  hash: string,
-  onComplete: Function,
-  onFailed?: Function,
-) => {
-  const provider = defaultProvider(chain_id);
-  var tx = await provider.getTransaction(hash);
-  await tx.wait().then(
-    () => onComplete(),
-    () => onFailed?.(),
-  );
 };
 
 export const getTokenAllowance = async (

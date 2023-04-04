@@ -152,7 +152,7 @@ export const executeSafeTransaction = async (
   const ethAdapter = getEthersAdapter(signer);
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
 
-  if (!safeSdk) return;
+  if (!safeSdk) throw new Error('Safe SDK not initialized');
 
   const executeTxResponse = await safeSdk.executeTransaction(safeTransaction);
 
@@ -185,36 +185,34 @@ export const getAddOwnerTx = async (
 ) => {
   const ethAdapter = getEthersAdapter(signer);
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
-  const nonce = await getNextTxNonce(chainId, safeAddress);
 
-  return safeSdk.createAddOwnerTx({ ownerAddress: address, threshold: treshold }, { nonce });
+  const tx = await safeSdk.createAddOwnerTx({ ownerAddress: address, threshold: treshold });
+  return tx.data;
 };
 
 export const getRemoveOwnerTx = async (
   signer: Signer,
-  chainId: number,
   safeAddress: string,
   address: string,
   treshold: number,
 ) => {
   const ethAdapter = getEthersAdapter(signer);
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
-  const nonce = await getNextTxNonce(chainId, safeAddress);
 
-  return safeSdk.createRemoveOwnerTx({ ownerAddress: address, threshold: treshold }, { nonce });
+  const tx = await safeSdk.createRemoveOwnerTx({ ownerAddress: address, threshold: treshold });
+  return tx.data;
 };
 
 export const getChangeThresholdTx = async (
   signer: Signer,
-  chainId: number,
   safeAddress: string,
   threshold: number,
 ) => {
   const ethAdapter = getEthersAdapter(signer);
   const safeSdk = await getSafeSDK(ethAdapter, safeAddress);
-  const nonce = await getNextTxNonce(chainId, safeAddress);
 
-  return safeSdk.createChangeThresholdTx(threshold, { nonce });
+  const tx = await safeSdk.createChangeThresholdTx(threshold);
+  return tx.data;
 };
 
 export const createSafeRejectionTransaction = async (
@@ -333,19 +331,19 @@ export const estimateSafeTransactionByHash = async (
   return reponse.safeTxGas;
 };
 
-export const estimateSafeTransaction = async (
-  chainId: number,
-  safeAddress: string,
-  txParam: { operation?: number; value: string; to: string; data?: string },
-) => {
-  const ethAdapter = getDefaultEthersAdapter(chainId);
-  const safeService = getServiceClient(ethAdapter, chainId);
-  const reponse = await safeService.estimateSafeTransaction(safeAddress, {
-    operation: txParam.operation ?? 0,
-    value: txParam.value,
-    to: txParam.to,
-    data: txParam.data,
-  });
+// export const estimateSafeTransaction = async (
+//   chainId: number,
+//   safeAddress: string,
+//   txParam: { operation?: number; value: string; to: string; data?: string },
+// ) => {
+//   const ethAdapter = getDefaultEthersAdapter(chainId);
+//   const safeService = getServiceClient(ethAdapter, chainId);
+//   const reponse = await safeService.estimateSafeTransaction(safeAddress, {
+//     operation: txParam.operation ?? 0,
+//     value: txParam.value,
+//     to: txParam.to,
+//     data: txParam.data,
+//   });
 
-  return reponse.safeTxGas;
-};
+//   return reponse.safeTxGas;
+// };

@@ -56,7 +56,7 @@ export const InputAmountField = ({ balance, symbol, ...boxProps }: InputAmountFi
   };
 
   return (
-    <FormControl {...boxProps} isInvalid={errors.amount} isRequired>
+    <FormControl {...boxProps} isInvalid={!!errors.amount} isRequired>
       <Flex>
         <FormLabel htmlFor="amount">Amount</FormLabel>
         <Spacer />

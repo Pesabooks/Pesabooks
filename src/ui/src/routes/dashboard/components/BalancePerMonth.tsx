@@ -1,8 +1,7 @@
-import { Box, Flex, Text } from '@chakra-ui/react';
+import { Box, Card, CardHeader, Flex, Text } from '@chakra-ui/react';
 import { ApexOptions } from 'apexcharts';
 import { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import { Card, CardHeader } from '../../../components/Card';
 import Loading from '../../../components/Loading';
 
 const options: ApexOptions = {
@@ -82,8 +81,8 @@ export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
   }, [pool_id]);
 
   return (
-    <Card p="28px 10px 16px 0px" mb={{ sm: '26px', lg: '0px' }}>
-      <CardHeader mb="20px" pl="22px">
+    <Card  mb={{ sm: '26px', lg: '0px' }}>
+      <CardHeader >
         <Flex direction="column" alignSelf="flex-start">
           <Text fontSize="lg" fontWeight="bold" mb="6px">
             Balance
@@ -96,7 +95,7 @@ export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
         ) : (
           <ReactApexChart
             options={options}
-            series={series}
+            series={series as any}
             type="area"
             width="100%"
             height="100%"

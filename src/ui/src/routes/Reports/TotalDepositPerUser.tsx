@@ -1,6 +1,18 @@
-import { Stack, Table, Tbody, Td, Text, Th, Thead, Tr, useColorModeValue } from '@chakra-ui/react';
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useColorModeValue
+} from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { Card, CardBody, CardHeader } from '../../components/Card';
 import { WalletAddress } from '../../components/WalletAddress';
 import { usePool } from '../../hooks/usePool';
 import { FunctionReturns, supabase } from '../../supabase';
@@ -22,8 +34,8 @@ export const TotalDepositPerUser = () => {
 
   return (
     <>
-      <Card px="0px">
-        <CardHeader px="22px" mb="32px">
+      <Card>
+        <CardHeader>
           <Text color={textColor} fontSize="lg" fontWeight="bold">
             Total Deposit Per User
           </Text>
@@ -48,30 +60,33 @@ export const TotalDepositPerUser = () => {
             </Thead>
             <Tbody>
               {deposits?.map((deposit, index) => (
-              <Tr key={index}>
-                <Td minW="180px">
-                  <Stack direction="row" spacing="16px">
+                <Tr key={index}>
+                  <Td minW="180px">
+                    <Stack direction="row" spacing="16px">
+                      <Text color={textColor} fontSize="sm" fontWeight="bold">
+                        {deposit.username}
+                      </Text>
+                    </Stack>
+                  </Td>
+                  <Td>
+                    <WalletAddress
+                      chainId={pool!.chain_id}
+                      address={deposit.wallet}
+                      type="address"
+                    />
+                  </Td>
+                  <Td>
                     <Text color={textColor} fontSize="sm" fontWeight="bold">
-                      {deposit.username}
+                      {deposit.total_deposit} {pool?.token?.symbol}
                     </Text>
-                  </Stack>
-                </Td>
-                <Td>
-                <WalletAddress chainId={pool!.chain_id} address={deposit.wallet} type="address" />
-                </Td>
-                <Td>
-                  <Text color={textColor} fontSize="sm" fontWeight="bold">
-                  {deposit.total_deposit} {pool?.token?.symbol}
-                  </Text>
-                </Td>
-                <Td>
-                  <Text color={textColor} fontSize="sm" fontWeight="bold">
-                  {deposit.stake.toFixed(2)}%
-                  </Text>
-                </Td>
-              </Tr>
-            ))}
-        
+                  </Td>
+                  <Td>
+                    <Text color={textColor} fontSize="sm" fontWeight="bold">
+                      {deposit.stake.toFixed(2)}%
+                    </Text>
+                  </Td>
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         </CardBody>

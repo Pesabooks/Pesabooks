@@ -62,15 +62,15 @@ export const ProposalsList = ({ proposals, users, onSelect, loading }: Transacti
                 <IconBox py={2} px={4} gap={2}>
                   <Icon as={BiCheckCircle} boxSize={5} />
                   <Text fontWeight="bold">
-                    {transaction.safeTx?.confirmations?.length}/
-                    {transaction.safeTx?.confirmationsRequired}
+                    {transaction.confirmations}/
+                    {transaction.threshold}
                   </Text>
                 </IconBox>
-                {transaction.rejectSafeTx && <IconBox py={2} px={4} gap={2} bg="red.500">
+                {transaction.rejections && <IconBox py={2} px={4} gap={2} bg="red.500">
                   <Icon as={MdOutlineCancel} boxSize={5} />
                   <Text fontWeight="bold">
-                    {transaction.rejectSafeTx?.confirmations?.length}/
-                    {transaction.rejectSafeTx?.confirmationsRequired}
+                    {transaction.rejections}/
+                    {transaction.threshold}
                   </Text>
                 </IconBox>}
               </HStack>

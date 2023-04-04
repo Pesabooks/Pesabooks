@@ -3,16 +3,11 @@ import { ERC20__factory } from '@pesabooks/contracts/typechain';
 import { BigNumber, ethers } from 'ethers';
 import { Transaction as ParaswapTx } from 'paraswap';
 import { TransactionData } from '../types';
-import {
-  estimateSafeTransaction,
-  getAddOwnerTx,
-  getRemoveOwnerTx,
-  getSafeTransaction,
-} from './gnosisServices';
+import { getAddOwnerTx, getRemoveOwnerTx, getSafeTransaction } from './gnosisServices';
 
 const INITIAL_SAFE_CREATION_TX_GAS_COST = 282912;
 
-export const estimateTransaction2 = async (
+export const estimateTransaction = async (
   provider: Web3Provider,
   transactionData: TransactionData,
 ) => {
@@ -53,6 +48,7 @@ export const estimateApprove = async (
   chain_id: number,
   safeAddress: string,
   spender: string,
+  tokenAddress: string,
 ) => {
   const maxAllowance = BigNumber.from('2').pow(BigNumber.from('256').sub(BigNumber.from('1')));
   const data = ERC20__factory.createInterface().encodeFunctionData('approve', [
@@ -60,23 +56,21 @@ export const estimateApprove = async (
     maxAllowance,
   ]);
 
-  const gasLimit = await estimateSafeTransaction(chain_id, safeAddress, {
+  return estimateTransaction(provider, {
+    from: safeAddress,
+    to: tokenAddress,
+    data,
     value: '0',
-    to: safeAddress,
-    data: data,
   });
-
-  return fee(provider, BigNumber.from(gasLimit));
 };
 
 export const estimateSwap = async (provider: Web3Provider, txParams: ParaswapTx) => {
-  const gasLimit = await estimateSafeTransaction(txParams.chainId, txParams.from, {
-    value: '0',
+  return estimateTransaction(provider, {
+    from: txParams.from,
     to: txParams.to,
     data: txParams.data,
+    value: '0',
   });
-
-  return fee(provider, BigNumber.from(gasLimit));
 };
 
 export const estimateAddOwner = async (
@@ -90,13 +84,12 @@ export const estimateAddOwner = async (
 
   const safeTransaction = await getAddOwnerTx(signer, chain_id, safe_address, address, treshold);
 
-  const gasLimit = await estimateSafeTransaction(chain_id, safe_address, {
+  return estimateTransaction(provider, {
+    from: safe_address,
+    to: safeTransaction.to,
+    data: safeTransaction.data,
     value: '0',
-    to: safeTransaction.data.to,
-    data: safeTransaction.data.data,
   });
-
-  return fee(provider, BigNumber.from(gasLimit));
 };
 
 export const estimateRemoveOwner = async (
@@ -108,18 +101,17 @@ export const estimateRemoveOwner = async (
 ) => {
   const signer = provider.getSigner();
 
-  const safeTransaction = await getRemoveOwnerTx(signer, chain_id, safe_address, address, treshold);
+  const safeTransaction = await getRemoveOwnerTx(signer, safe_address, address, treshold);
 
-  const gasLimit = await estimateSafeTransaction(chain_id, safe_address, {
+  return estimateTransaction(provider, {
+    from: safe_address,
+    to: safeTransaction.to,
+    data: safeTransaction.data,
     value: '0',
-    to: safeTransaction.data.to,
-    data: safeTransaction.data.data,
   });
-
-  return fee(provider, BigNumber.from(gasLimit));
 };
 
-export const estimateTransaction = async (
+export const estimateSafeTransaction = async (
   provider: Web3Provider,
   chain_id: number,
   safe_address: string,
@@ -139,20 +131,18 @@ export const estimateTransaction = async (
 
 export const estimateWithdraw = async (
   provider: Web3Provider,
-  chain_id: number,
   safeAddress: string,
   to: string,
   amount: BigNumber,
 ) => {
   const data = ERC20__factory.createInterface().encodeFunctionData('transfer', [to, amount]);
 
-  const gasLimit = await estimateSafeTransaction(chain_id, safeAddress, {
-    value: '0',
+  return estimateTransaction(provider, {
+    from: safeAddress,
     to: to,
     data: data,
+    value: '0',
   });
-
-  return fee(provider, BigNumber.from(gasLimit));
 };
 
 export const fee = async (provider: Web3Provider, gasLimit: BigNumber) => {

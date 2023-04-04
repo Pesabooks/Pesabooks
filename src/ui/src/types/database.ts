@@ -294,6 +294,7 @@ export interface Database {
       transactions: {
         Row: {
           category_id: number | null;
+          confirmations: number;
           created_at: string | null;
           hash: string | null;
           id: number;
@@ -301,16 +302,19 @@ export interface Database {
           metadata: Json | null;
           pool_id: string;
           reject_safe_tx_hash: string | null;
+          rejections: number;
           safe_nonce: number | null;
-          transaction_data: Json | null;
           safe_tx_hash: string | null;
           status: string;
+          threshold: number;
           timestamp: number | null;
+          transaction_data: Json | null;
           type: string;
           user_id: string;
         };
         Insert: {
           category_id?: number | null;
+          confirmations?: number;
           created_at?: string | null;
           hash?: string | null;
           id?: number;
@@ -318,16 +322,19 @@ export interface Database {
           metadata?: Json | null;
           pool_id: string;
           reject_safe_tx_hash?: string | null;
+          rejections?: number;
           safe_nonce?: number | null;
-          transaction_data?: Json | null;
           safe_tx_hash?: string | null;
           status: string;
+          threshold?: number;
           timestamp?: number | null;
+          transaction_data?: Json | null;
           type: string;
           user_id?: string;
         };
         Update: {
           category_id?: number | null;
+          confirmations?: number;
           created_at?: string | null;
           hash?: string | null;
           id?: number;
@@ -335,11 +342,13 @@ export interface Database {
           metadata?: Json | null;
           pool_id?: string;
           reject_safe_tx_hash?: string | null;
+          rejections?: number;
           safe_nonce?: number | null;
-          transaction_data?: Json | null;
           safe_tx_hash?: string | null;
           status?: string;
+          threshold?: number;
           timestamp?: number | null;
+          transaction_data?: Json | null;
           type?: string;
           user_id?: string;
         };

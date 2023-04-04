@@ -14,6 +14,7 @@ export const TransactionsStats = ({ pool }: { pool: Pool }) => {
       const { data } = await supabase()
         .rpc('get_transactions_stats', { pool_id: pool.id })
         .single();
+        // @ts-ignore
       if (data?.[0]) setState(data?.[0]);
     };
     fetchData();
