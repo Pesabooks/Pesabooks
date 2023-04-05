@@ -14,7 +14,7 @@ import { deployNewSafe } from '../services/poolsService';
 
 export const CreateTeamSafe = () => {
   const { provider, user } = useWeb3Auth();
-  const { pool, refresh, isDeployed } = usePool();
+  const { pool, isDeployed } = usePool();
   const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
 
   const [hasPendingInvitations, setHasPendingInvitations] = useState(false);
@@ -44,7 +44,6 @@ export const CreateTeamSafe = () => {
   const onDeployNewSafe = async () => {
     if (pool?.id && provider) {
       await deployNewSafe(provider, pool?.id);
-      refresh();
     }
   };
   if (isDeployed) return null;
@@ -52,7 +51,7 @@ export const CreateTeamSafe = () => {
   return (
     <>
       {!hasPendingInvitations && (
-        <Card flexDirection="column" alignItems="center">
+        <Card flexDirection="column" alignItems="center" p={10}>
           <Button mb={4} variant="outline" onClick={confirmTx} w={200}>
             Create Group Wallet
           </Button>

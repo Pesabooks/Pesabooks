@@ -233,6 +233,7 @@ export interface Database {
           gnosis_safe_address: string | null;
           id: string;
           name: string;
+          token_contract_address: string | null;
           token_id: number;
           user_id: string;
         };
@@ -244,6 +245,7 @@ export interface Database {
           gnosis_safe_address?: string | null;
           id?: string;
           name: string;
+          token_contract_address?: string | null;
           token_id: number;
           user_id?: string;
         };
@@ -255,6 +257,7 @@ export interface Database {
           gnosis_safe_address?: string | null;
           id?: string;
           name?: string;
+          token_contract_address?: string | null;
           token_id?: number;
           user_id?: string;
         };
@@ -399,15 +402,25 @@ export interface Database {
         };
         Returns: boolean;
       };
-      create_pool: {
-        Args: {
-          chain_id: number;
-          name: string;
-          description: string;
-          token_id: number;
-        };
-        Returns: string;
-      };
+      create_pool:
+        | {
+            Args: {
+              chain_id: number;
+              name: string;
+              description: string;
+              token_id: number;
+            };
+            Returns: string;
+          }
+        | {
+            Args: {
+              chain_id: number;
+              name: string;
+              description: string;
+              token_contract_address: string;
+            };
+            Returns: string;
+          };
       get_co_members_for_authenticated_user: {
         Args: Record<PropertyKey, never>;
         Returns: string[];

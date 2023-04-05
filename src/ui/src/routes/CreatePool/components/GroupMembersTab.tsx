@@ -79,7 +79,7 @@ const InviteForm = ({
   );
 };
 
-export const InviteMembers = ({
+export const GroupMembersTab = ({
   members,
   onAdd,
   onPrev,

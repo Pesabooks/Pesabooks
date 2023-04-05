@@ -122,7 +122,7 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
             w={{ sm: '75px', lg: '100px' }}
             h="35px"
             onClick={onNext}
-            disabled={!chainId}
+            isDisabled={!chainId}
             alignSelf="flex-end"
           >
             Next

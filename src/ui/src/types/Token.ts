@@ -1,5 +1,4 @@
 export interface Token {
-  id: number;
   address: string;
   symbol: string;
   name: string;
@@ -10,11 +9,4 @@ export interface Token {
   is_native?: boolean;
 }
 
-export interface TokenBase {
-  address: string;
-  symbol: string;
-  name: string;
-  decimals: number;
-  image: string;
-  is_native?: boolean;
-}
+export type TokenBase = Omit<Token, 'active' | 'chain_id'>;

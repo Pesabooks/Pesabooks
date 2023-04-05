@@ -1,6 +1,6 @@
 import { Container, Flex, Text, useToast } from '@chakra-ui/react';
 import { Step, Steps, useSteps } from 'chakra-ui-steps';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaEdit, FaEthereum, FaUsers } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
@@ -9,18 +9,18 @@ import { useWeb3Auth } from '../../hooks/useWeb3Auth';
 import { createInvitation } from '../../services/invitationService';
 import { createNewPool } from '../../services/poolsService';
 import { getAllTokens } from '../../services/tokensService';
-import { Invitation, Token } from '../../types';
+import { Invitation } from '../../types';
 import { ChooseNetworkTab } from './components/ChooseNetworkTab';
 import { CreatingPool } from './components/CreatingPool';
-import { InviteMembers } from './components/InviteMembers';
+import { GroupMembersTab } from './components/GroupMembersTab';
 import { CreatePoolFormValue, PoolFormTab } from './components/PoolFormTab';
 
 export const CreatePoolPage = () => {
   const { user } = useWeb3Auth();
-  const [tokens, setTokens] = useState<Token[]>([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const tokens = getAllTokens();
 
   const [chainId, setChainId] = useState<number | null>(null);
   const [poolInfo, setPoolInfo] = useState<CreatePoolFormValue>();
@@ -61,9 +61,7 @@ export const CreatePoolPage = () => {
     }
   };
 
-  useEffect(() => {
-    getAllTokens().then(setTokens);
-  }, []);
+
 
   const addMember = (member: Partial<Invitation>) => {
     if (!members.find((m) => m.email === member.email)) setMembers([...members, member]);
@@ -87,14 +85,14 @@ export const CreatePoolPage = () => {
   ) : null;
 
   const inviteMembersTab = (
-    <InviteMembers
+    <GroupMembersTab
       members={members}
       onAdd={addMember}
       onRemove={removeMember}
       loading={loading}
       onPrev={prevStep}
       onNext={createPool}
-    ></InviteMembers>
+    ></GroupMembersTab>
   );
 
   const steps = [

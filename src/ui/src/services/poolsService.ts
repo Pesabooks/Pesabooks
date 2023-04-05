@@ -1,23 +1,28 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { handleSupabaseError, poolsTable, supabase, transationsTable } from '../supabase';
 import { Pool, Token, User } from '../types';
+import { eventBus } from './eventBus';
 import { deploySafe } from './gnosisServices';
 import { getMembers } from './membersService';
+import { getTokenByAddress } from './tokensService';
 
 export const getPool = async (pool_id: string) => {
   const { data, error } = await poolsTable()
     .select(
       `
         *,
-        token:token_id(*),
         organizer:user_id(*),
         members2: members(*)
       `,
     )
-    .eq('id', pool_id);
+    .eq('id', pool_id)
+    .single();
+
   handleSupabaseError(error);
 
-  return data?.[0] as Pool;
+  const token = getTokenByAddress(data!.token_contract_address!);
+
+  return { ...data, token } as Pool;
 };
 
 export const getMyPools = async () => {
@@ -37,7 +42,7 @@ export const createNewPool = async (
       chain_id: chainId,
       name: name,
       description: description ?? '',
-      token_id: token.id,
+      token_contract_address: token.address,
     })
     .single();
 
@@ -66,6 +71,8 @@ export const deployNewSafe = async (provider: Web3Provider, pool_id: string) => 
     memo: null,
   });
 
+  eventBus.channel('pool').emit('safe_deployed');
+
   return pool_id;
 };
 
@@ -74,4 +81,6 @@ export const updatePoolInformation = async (id: string, pool: Partial<Pool>) => 
     .update({ name: pool.name, description: pool.description })
     .eq('id', id);
   handleSupabaseError(error);
+
+  eventBus.channel('pool').emit('updated');
 };

@@ -1,5 +1,8 @@
 import {
-  Button, Card, CardBody, Flex,
+  Button,
+  Card,
+  CardBody,
+  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -51,7 +54,7 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
     control,
     handleSubmit,
     register,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<CreatePoolFormValue>();
 
   const filteredTokens = useMemo(
@@ -60,8 +63,7 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
   );
 
   return (
-    <Card >
-      
+    <Card>
       <CardBody flexDirection="column">
         <form onSubmit={handleSubmit(submit)}>
           <Flex direction="column" w="100%">
@@ -101,8 +103,8 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
                       onBlur={onBlur}
                       value={value}
                       options={filteredTokens}
-                      getOptionLabel={(t:Token) => t.name}
-                      getOptionValue={(t:Token) => `${t.id}`}
+                      getOptionLabel={(t: Token) => t.name}
+                      getOptionValue={(t: Token) => `${t.address}`}
                       components={{ Option: IconOption }}
                     />
 
@@ -122,7 +124,13 @@ export const PoolFormTab = ({ chainId, tokens, onNext, onPrev }: PoolFormTabProp
               >
                 Prev
               </Button>
-              <Button alignSelf="flex-end" w={{ sm: '75px', lg: '100px' }} h="35px" type="submit">
+              <Button
+                alignSelf="flex-end"
+                w={{ sm: '75px', lg: '100px' }}
+                h="35px"
+                type="submit"
+                isDisabled={!isValid}
+              >
                 Next
               </Button>
             </Flex>

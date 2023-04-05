@@ -11,8 +11,10 @@ type EventName =
   | 'execution_completed'
   | 'execution_failed'
   | 'confirmed'
-  | 'rejected';
-type TypeName = 'transaction' | 'activity';
+  | 'rejected'
+  | 'safe_deployed'
+  | 'updated';
+type TypeName = 'transaction' | 'activity' | 'pool';
 type Payload =
   | TransactionPayload
   | TransactionMessage
@@ -76,7 +78,7 @@ const createEventBus = () => {
           )
           .subscribe(callback);
       },
-      emit: <T extends Payload>(event: EventName, payload: T) => {
+      emit: <T extends Payload>(event: EventName, payload?: T) => {
         bus.next({ type, event, payload });
       },
     };

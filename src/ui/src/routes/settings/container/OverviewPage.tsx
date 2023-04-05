@@ -1,11 +1,14 @@
 import {
-    Card, CardBody, CardHeader, Editable,
-    EditableInput,
-    EditablePreview,
-    EditableTextarea,
-    HStack,
-    Stack,
-    Text
+  Card,
+  CardBody,
+  CardHeader,
+  Editable,
+  EditableInput,
+  EditablePreview,
+  EditableTextarea,
+  HStack,
+  Stack,
+  Text
 } from '@chakra-ui/react';
 import { EditableControls } from '../../../components/Editable/EditableControls';
 import { TriggerEditableControls } from '../../../components/Editable/TriggerEditableControls';
@@ -19,12 +22,11 @@ export interface UpdatePoolFormValue {
 }
 
 export const OverviewPage = () => {
-  const { pool, refresh } = usePool();
+  const { pool } = usePool();
 
   const submit = async (values: UpdatePoolFormValue) => {
     if (pool) {
       await updatePoolInformation(pool.id, values);
-      refresh?.();
     }
   };
 
