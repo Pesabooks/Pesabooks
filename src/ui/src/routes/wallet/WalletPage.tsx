@@ -1,32 +1,32 @@
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
-    Avatar,
-    Box,
-    Button,
-    ButtonGroup, Card, Center,
-    Container,
-    Flex,
-    Heading,
-    Image,
-    Link,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuList,
-    Stack,
-    Tab,
-    TabList,
-    TabPanel,
-    TabPanels,
-    Tabs,
-    Text,
-    useColorModeValue,
-    useDisclosure
+  Avatar,
+  Box,
+  Button,
+  ButtonGroup, Card, Center,
+  Container,
+  Flex,
+  Heading,
+  Image,
+  Link,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Stack,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+  useColorModeValue,
+  useDisclosure
 } from '@chakra-ui/react';
 import {
-    RampInstantEvents,
-    RampInstantEventTypes,
-    RampInstantSDK
+  RampInstantEvents,
+  RampInstantEventTypes,
+  RampInstantSDK
 } from '@ramp-network/ramp-instant-sdk';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';

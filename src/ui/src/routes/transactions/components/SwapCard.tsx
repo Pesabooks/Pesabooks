@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/react';
 import { BigNumber, ethers } from 'ethers';
 import { debounce } from 'lodash';
-import { Address, APIError, ParaSwap, Token, Transaction as ParaswapTx } from 'paraswap';
+import { Address, APIError, NetworkID, ParaSwap, Token, Transaction as ParaswapTx } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaWallet } from 'react-icons/fa';
@@ -106,7 +106,7 @@ export const SwapCard = ({
   });
 
   useEffect(() => {
-    if (chain_id && (chain_id === 137 || chain_id === 56)) setParaswap(new ParaSwap(chain_id));
+     setParaswap(new ParaSwap(chain_id as NetworkID));
   }, [chain_id]);
 
   const getBalancesCB = useCallback(() => {

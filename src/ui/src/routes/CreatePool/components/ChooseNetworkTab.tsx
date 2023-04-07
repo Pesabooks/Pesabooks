@@ -1,14 +1,17 @@
 import { CheckIcon } from '@chakra-ui/icons';
 import {
-  Button, Card,
+  Button,
+  Card,
   CardBody,
-  CardHeader, Divider,
+  CardHeader,
+  Divider,
   Flex,
   Image,
   Spacer,
   Stack,
   Text
 } from '@chakra-ui/react';
+import { networks } from '../../../data/networks';
 
 interface ChooseNetworkTabProps {
   onNext: () => void;
@@ -19,6 +22,38 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
   // const textColor = useColorModeValue('gray.700', 'white');
   const includeTestnets = process.env.REACT_APP_INCLUDE_TESTNETS === 'true';
 
+  const ChainButton = ({
+    chainId,
+    selectedChainId,
+  }: {
+    chainId: number;
+    selectedChainId: number | null;
+  }) => {
+    const network = networks[chainId];
+    return (
+      <Button
+        variant={chainId === selectedChainId ? 'solid' : 'outline'}
+        size="lg"
+        display="flex"
+        justifyContent="start"
+        onClick={() => onSelect(chainId)}
+        transition=".5s all ease"
+        _hover={{ opacity: '0.8' }}
+        w="300px"
+      >
+        <Image
+          mr={4}
+          w="40px"
+          height="40px"
+          src={`${process.env.PUBLIC_URL}/${network.logoUrl}`}
+          alt={network.chainName}
+        />
+        {network.chainName}
+        <Spacer />
+        {selectedChainId === chainId && <CheckIcon />}
+      </Button>
+    );
+  };
   return (
     <Card>
       <CardHeader>
@@ -47,48 +82,9 @@ export const ChooseNetworkTab = ({ onNext, chainId, onSelect }: ChooseNetworkTab
             justifySelf="center"
             mb="24px"
           >
-            <Button
-              variant={chainId === 137 ? 'solid' : 'outline'}
-              size="lg"
-              display="flex"
-              justifyContent="start"
-              onClick={() => onSelect(137)}
-              transition=".5s all ease"
-              _hover={{ opacity: '0.8' }}
-              w="300px"
-            >
-              <Image
-                mr={4}
-                w="40px"
-                height="40px"
-                src={`${process.env.PUBLIC_URL}/images/chains/polygon-matic-logo.svg`}
-                alt="polygon"
-              />
-              Polygon
-              <Spacer />
-              {chainId === 137 && <CheckIcon />}
-            </Button>
-            <Button
-              variant={chainId === 56 ? 'solid' : 'outline'}
-              size="lg"
-              display="flex"
-              justifyContent="start"
-              onClick={() => onSelect(56)}
-              transition=".5s all ease"
-              _hover={{ opacity: '0.8' }}
-              w="300px"
-            >
-              <Image
-                mr={4}
-                w="40px"
-                height="40px"
-                src={`${process.env.PUBLIC_URL}/images/chains/BNB.png`}
-                alt="polygon"
-              />
-              BNB Smart Chain
-              <Spacer />
-              {chainId === 56 && <CheckIcon />}
-            </Button>
+            {[1, 42161, 10, 137, 56].map((key) => (
+              <ChainButton chainId={key} selectedChainId={chainId} />
+            ))}
             {includeTestnets && (
               <>
                 <Divider />

@@ -3,6 +3,7 @@ import { SafeTransaction, SafeTransactionDataPartial } from '@safe-global/safe-c
 import EthersAdapter from '@safe-global/safe-ethers-lib';
 import SafeServiceClient from '@safe-global/safe-service-client';
 import { ethers, Signer } from 'ethers';
+import { networks } from '../data/networks';
 import { defaultProvider } from './blockchainServices';
 import { TokenBalance } from './covalentServices';
 
@@ -28,29 +29,7 @@ const getSafeSDK = async (ethAdapter: EthersAdapter, safeAddress: string): Promi
 };
 
 const getServiceClient = (ethAdapter: EthersAdapter, chainId: number) => {
-  let txServiceUrl;
-
-  switch (chainId) {
-    case 1:
-      txServiceUrl = 'https://safe-transaction.gnosis.io';
-      break;
-    case 4:
-      txServiceUrl = 'https://safe-transaction.rinkeby.gnosis.io/';
-      break;
-    case 5:
-      txServiceUrl = 'https://safe-transaction.goerli.gnosis.io/';
-      break;
-    case 137:
-      txServiceUrl = 'https://safe-transaction.polygon.gnosis.io/';
-      break;
-    case 56:
-      txServiceUrl = 'https://safe-transaction.bsc.gnosis.io/';
-      break;
-    default:
-      throw new Error();
-  }
-
-  return new SafeServiceClient({ txServiceUrl, ethAdapter });
+  return new SafeServiceClient({ txServiceUrl: networks[chainId].gnosisServiceUrl, ethAdapter });
 };
 
 const calculateThreshold = (membersCount: number) => {
@@ -62,7 +41,11 @@ const calculateThreshold = (membersCount: number) => {
   else return Math.ceil(membersCount / 2);
 };
 
-export const deploySafe = async (signer: Signer, owners: string[]) => {
+export const deploySafe = async (
+  signer: Signer,
+  owners: string[],
+  callback?: (hash: string) => void,
+) => {
   const ethAdapter = getEthersAdapter(signer);
 
   const safeFactory = await SafeFactory.create({ ethAdapter });
@@ -73,7 +56,7 @@ export const deploySafe = async (signer: Signer, owners: string[]) => {
     owners,
     threshold: calculateThreshold(owners.length),
   };
-  const safe = await safeFactory.deploySafe({ safeAccountConfig });
+  const safe = await safeFactory.deploySafe({ safeAccountConfig, callback });
 
   return ethers.utils.getAddress(safe.getAddress());
 };

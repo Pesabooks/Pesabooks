@@ -61,7 +61,6 @@ const getTable = <T extends TableName>(
 export const usersTable = () => getTable('users');
 export const transationsTable = () => getTable('transactions');
 export const poolsTable = () => getTable('pools');
-export const tokensTable = () => getTable('tokens');
 export const categoriesTable = () => getTable('categories');
 export const membersTable = () => getTable('members');
 export const invitationsTable = () => getTable('invitations');

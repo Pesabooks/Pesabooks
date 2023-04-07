@@ -7,12 +7,12 @@ export const getNetwork = (chain_id: number) => networks[chain_id];
 
 export const defaultProvider = (chain_id: number) => {
   const network = networks[chain_id];
-  if (network.websockets) {
-    const provider = new ethers.providers.WebSocketProvider(network.websockets[0], chain_id);
+  if (network.websocketUrl) {
+    const provider = new ethers.providers.WebSocketProvider(network.websocketUrl, chain_id);
     return provider;
   }
 
-  let url = networks[chain_id].rpcUrls[0];
+  let url = networks[chain_id].rpcUrl;
   return new ethers.providers.JsonRpcProvider(url, chain_id);
 };
 

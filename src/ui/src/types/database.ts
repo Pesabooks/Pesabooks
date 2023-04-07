@@ -262,38 +262,6 @@ export interface Database {
           user_id?: string;
         };
       };
-      tokens: {
-        Row: {
-          active: boolean;
-          address: string;
-          chain_id: number;
-          decimals: number;
-          id: number;
-          image: string;
-          name: string;
-          symbol: string;
-        };
-        Insert: {
-          active: boolean;
-          address: string;
-          chain_id: number;
-          decimals: number;
-          id?: number;
-          image: string;
-          name: string;
-          symbol: string;
-        };
-        Update: {
-          active?: boolean;
-          address?: string;
-          chain_id?: number;
-          decimals?: number;
-          id?: number;
-          image?: string;
-          name?: string;
-          symbol?: string;
-        };
-      };
       transactions: {
         Row: {
           category_id: number | null;

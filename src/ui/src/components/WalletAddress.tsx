@@ -22,7 +22,7 @@ export const WalletAddress = ({ chainId, address, type }: WalletAddressProps) =>
         size="sm"
         icon={<MdContentCopy />}
       />
-      <Link isExternal href={networks[chainId]?.blockExplorerUrls[0] + type + '/' + address}>
+      <Link isExternal href={networks[chainId]?.blockExplorerUrl + type + '/' + address}>
         <ExternalLinkIcon />
       </Link>
     </Flex>

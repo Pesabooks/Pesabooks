@@ -55,9 +55,16 @@ export const deployNewSafe = async (provider: Web3Provider, pool_id: string) => 
   const signer = provider.getSigner();
 
   const members = await getMembers(pool_id);
+  let hash;
+
+  const callback = (_hash: string) => {
+    hash = _hash;
+  };
+
   const gnosis_address = await deploySafe(
     signer,
     members.map((m) => (m.user as User)!.wallet),
+    callback,
   );
 
   await poolsTable().update({ gnosis_safe_address: gnosis_address }).eq('id', pool_id);
@@ -69,11 +76,10 @@ export const deployNewSafe = async (provider: Web3Provider, pool_id: string) => 
     status: 'completed',
     category_id: null,
     memo: null,
+    hash,
   });
 
   eventBus.channel('pool').emit('safe_deployed');
-
-  return pool_id;
 };
 
 export const updatePoolInformation = async (id: string, pool: Partial<Pool>) => {

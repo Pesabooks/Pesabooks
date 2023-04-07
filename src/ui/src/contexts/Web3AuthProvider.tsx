@@ -80,7 +80,6 @@ export const Web3AuthProvider = ({ children }: any) => {
   useEffect(() => {
     const subscribeAuthEvents = (web3auth: Web3AuthNoModal) => {
       web3auth.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        console.log('connected');
         setProvider(new Web3Provider(web3auth.provider!));
 
         const user = await web3auth.getUserInfo();
@@ -89,7 +88,6 @@ export const Web3AuthProvider = ({ children }: any) => {
       });
 
       web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
-        console.log('disconnected');
         clearTypedStorageItem('supabase_access_token');
         setProvider(null);
         configureUser(null);
@@ -101,9 +99,9 @@ export const Web3AuthProvider = ({ children }: any) => {
     const currentChainConfig: CustomChainConfig = {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
       chainId: currentNetwork.chainId,
-      rpcTarget: currentNetwork.rpcUrls[0],
+      rpcTarget: currentNetwork.rpcUrl,
       displayName: currentNetwork.chainName,
-      blockExplorer: currentNetwork.blockExplorerUrls[0],
+      blockExplorer: currentNetwork.blockExplorerUrl,
       ticker: currentNetwork.nativeCurrency.symbol,
       tickerName: currentNetwork.nativeCurrency.name,
     };
@@ -119,7 +117,6 @@ export const Web3AuthProvider = ({ children }: any) => {
         subscribeAuthEvents(web3AuthInstance);
 
         const adapter = new OpenloginAdapter({
-          //loginSettings: { mfaLevel: 'none' },
           adapterSettings: {
             clientId: web3AuthClientId,
             network: web3AuthNetwork === 'testnet' ? 'testnet' : 'mainnet',
@@ -130,8 +127,6 @@ export const Web3AuthProvider = ({ children }: any) => {
                logoLight: 'https://pesabooks.com/assets/img/icon.png',
                logoDark: 'https://pesabooks.com/assets/img/icon.png',
                dark: true,
-              // theme: { primary: '4FD1C5' },
-              // defaultLanguage: 'en',
             },
           },
         });
@@ -159,8 +154,6 @@ export const Web3AuthProvider = ({ children }: any) => {
     if (web3Auth.status === 'connected') {
       await web3Auth.logout();
     }
-
-    //await web3Auth.connect();
 
     await web3Auth.connectTo(WALLET_ADAPTERS.OPENLOGIN, {
       loginProvider: 'email_passwordless',

@@ -300,7 +300,7 @@ export const updateTransactionMemo = async (id: number, memo: string) => {
 };
 
 export const getTxScanLink = (hash: string, chainId: number) => {
-  return `${networks[chainId].blockExplorerUrls[0]}tx/${hash}`;
+  return `${networks[chainId].blockExplorerUrl}tx/${hash}`;
 };
 
 export const getPendingTokenUnlockingTxCount = async (pool_id: string, symbol: string) => {

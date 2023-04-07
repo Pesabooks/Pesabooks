@@ -14,7 +14,7 @@ export const getBalances = async (chain_id: number, address: string) => {
   if (!Array.isArray(data)) throw new Error(data ?? '');
 
   return data
-    .filter((b) => b.type !== 'dust')
+    .filter((b) => b.balance !== '0')
     .map(
       (b) =>
         ({
