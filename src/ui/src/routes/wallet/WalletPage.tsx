@@ -147,6 +147,12 @@ export const WalletPage = () => {
     case 5:
       swapAsset = 'GOERLI_*';
       break;
+      case 10:
+      swapAsset = 'OPTIMISM_*';
+      break;
+      case 42161:
+      swapAsset = 'ARBITRUM_*';
+      break;
     default:
       break;
   }
