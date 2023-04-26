@@ -70,9 +70,12 @@ export const Web3AuthProvider = ({ children }: any) => {
     if (!user) {
       Sentry.configureScope((scope) => scope.setUser(null));
       setUser(null);
+      clearTypedStorageItem('supabase_access_token');
       return null;
     }
+
     const id = getIdFromUser(user);
+    setTypedStorageItem('user_id', id);
 
     Sentry.setUser({
       email: user.email!,
@@ -89,11 +92,9 @@ export const Web3AuthProvider = ({ children }: any) => {
 
         const user = await web3auth.getUserInfo();
         configureUser(user as UserInfo);
-        setTypedStorageItem('user_id', getIdFromUser(user as UserInfo));
       });
 
       web3auth.on(ADAPTER_EVENTS.DISCONNECTED, () => {
-        clearTypedStorageItem('supabase_access_token');
         setProvider(null);
         configureUser(null);
       });
@@ -196,7 +197,9 @@ export const Web3AuthProvider = ({ children }: any) => {
   const isAuthenticated = () => {
     const supabase_jwt_token = getTypedStorageItem('supabase_access_token');
     return (
-      web3Auth?.status === 'connected' && !!supabase_jwt_token && !isTokenExpired(supabase_jwt_token)
+      web3Auth?.status === 'connected' &&
+      !!supabase_jwt_token &&
+      !isTokenExpired(supabase_jwt_token)
     );
   };
 

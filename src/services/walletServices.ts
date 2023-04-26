@@ -237,12 +237,14 @@ export const purchaseToken = async (
     hash: finalTxHash,
   };
 
-  await activitiesTable().insert(activity);
+  const { data: newActivity } = await activitiesTable().insert(activity).select().single();
 
   eventBus.channel('activity').emit<ActivityBusMessage>('execution_sent', {
     activity: activity as Activity,
     chainId,
   });
+
+  return newActivity as Activity;
 };
 
 export const getAllActivities = async (chainId: number, pageSize: number, pageIndex: number) => {

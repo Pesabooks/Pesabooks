@@ -1,14 +1,10 @@
-import { Entity } from './Entity';
+import { Table } from 'supabase';
 import { SwapData, TransactionStatus, TransactionType, TransferData } from './transaction';
 
-export interface Activity extends Entity {
-  timestamp?: number;
-  hash: string;
+export type Activity = Omit<Table<'activities'>, 'metadata'> & {
   status: TransactionStatus;
   type: TransactionType;
-  user_id: string;
   metadata: TransferData | SwapData;
-  chain_id: number;
   pool_id?: string;
   pool_name?: string;
-}
+};

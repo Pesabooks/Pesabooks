@@ -1,43 +1,44 @@
 import { ChevronDownIcon } from '@chakra-ui/icons';
 import {
-    Avatar,
-    Box,
-    Button,
-    ButtonGroup, Card, Center,
-    Container,
-    Flex,
-    Heading,
-    Image,
-    Link,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuList,
-    Stack,
-    Tab,
-    TabList,
-    TabPanel,
-    TabPanels,
-    Tabs,
-    Text,
-    useColorModeValue,
-    useDisclosure
+  Avatar,
+  Box,
+  Button,
+  ButtonGroup,
+  Card,
+  Center,
+  Container,
+  Flex,
+  Heading,
+  Image,
+  Link,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Stack,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  Text,
+  useColorModeValue,
+  useDisclosure
 } from '@chakra-ui/react';
-import { ConnectedChain } from '@pesabooks/components/ConnectedChain';
-import { AvatarMenu } from '@pesabooks/components/Layout/AvatarMenu';
-import { Logo } from '@pesabooks/components/Layout/Logo';
-import Loading from '@pesabooks/components/Loading';
-import { Pagination } from '@pesabooks/components/Pagination';
-import { WalletAddress } from '@pesabooks/components/WalletAddress';
 import { useNativeBalance, useWeb3Auth } from '@pesabooks/hooks';
 import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
-import {
-    RampInstantEvents, RampInstantEventTypes, RampInstantSDK
-} from '@ramp-network/ramp-instant-sdk';
+import { RampInstantEventTypes, RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
+import { IPurchaseCreatedEvent } from '@ramp-network/ramp-instant-sdk/dist/types/types';
 import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
 import { Link as RouterLink } from 'react-router-dom';
+import { ConnectedChain } from '../../components/ConnectedChain';
+import { AvatarMenu } from '../../components/Layout/AvatarMenu';
+import { Logo } from '../../components/Layout/Logo';
+import Loading from '../../components/Loading';
+import { Pagination } from '../../components/Pagination';
+import { WalletAddress } from '../../components/WalletAddress';
 import { networks } from '../../data/networks';
 import { getBalances, TokenBalance } from '../../services/covalentServices';
 import { eventBus } from '../../services/events/eventBus';
@@ -105,7 +106,7 @@ export const WalletPage = () => {
   const balanceColor = useColorModeValue('gray.700', 'gray.400');
   const network = networks[chainId];
 
-  const getData = useCallback(async (chainId: number, account: string|null) => {
+  const getData = useCallback(async (chainId: number, account: string | null) => {
     if (account) {
       setBalancesLoading(true);
       getBalances(chainId, account)
@@ -144,10 +145,10 @@ export const WalletPage = () => {
     case 5:
       swapAsset = 'GOERLI_*';
       break;
-      case 10:
+    case 10:
       swapAsset = 'OPTIMISM_*';
       break;
-      case 42161:
+    case 42161:
       swapAsset = 'ARBITRUM_*';
       break;
     default:
@@ -164,7 +165,7 @@ export const WalletPage = () => {
       hostApiKey: process.env.REACT_APP_RAMP_API_KEY,
       webhookStatusUrl: `${process.env.REACT_APP_SUPABASE_FUNCTIONS_URL}/ramp-callback`,
     })
-      .on<RampInstantEvents>(RampInstantEventTypes.PURCHASE_CREATED, (event) => {
+      .on<IPurchaseCreatedEvent>(RampInstantEventTypes.PURCHASE_CREATED, (event) => {
         const purchase = event.payload?.purchase;
         const purchaseViewToken = event.payload?.purchaseViewToken;
         if (!purchase) return;
@@ -187,7 +188,9 @@ export const WalletPage = () => {
           cryptoAmount,
           finalTxHash,
           token,
-        );
+        ).then((activity) => {
+          setActivities({ data: [activity, ...activities.data], total: activities.total + 1 });
+        });
       })
       .show();
   };
