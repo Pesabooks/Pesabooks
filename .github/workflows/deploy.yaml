@@ -1,6 +1,7 @@
 name: Prod
 
 on:
+  push:
   workflow_dispatch:
   workflow_run:
     workflows: [Staging]
