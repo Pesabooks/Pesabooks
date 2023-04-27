@@ -1,12 +1,10 @@
-name: Prod
+name: Staging
 
 on:
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
-  workflow_run:
-    workflows: [Staging]
-    types:
-      - completed
-    #branches: [main]
 
 jobs:
   deploy_supbase_function:
@@ -14,7 +12,7 @@ jobs:
 
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
 
     steps:
       - uses: actions/checkout@v3
