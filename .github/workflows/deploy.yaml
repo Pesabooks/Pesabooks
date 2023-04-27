@@ -20,7 +20,7 @@ jobs:
 
       - name: deploy balances
         run: supabase functions deploy balances --project-ref $PROJECT_ID
-      -name: deploy get-access-token
+      - name: deploy get-access-token
         run: supabase functions deploy get-access-token --no-verify-jwt --project-ref $PROJECT_ID
       - name: deploy ramp-callback
         run: supabase functions deploy ramp-callback --no-verify-jwt --project-ref $PROJECT_ID
