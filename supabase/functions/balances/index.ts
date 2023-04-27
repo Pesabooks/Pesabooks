@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { BalanceQuery } from "./type.ts";
-import Sentry from "npm:@sentry/node";
+import * as Sentry from "npm:@sentry/node";
 
 Sentry.init({
   environment: Deno.env.get("ENV") ?? "",
