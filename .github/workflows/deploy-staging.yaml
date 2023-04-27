@@ -12,7 +12,7 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
 
-  deploy app:
+  deploy-app:
     runs-on: ubuntu-latest
 
     defaults:
