@@ -69,21 +69,14 @@ jobs:
         working-directory: ./app
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v1
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-      - name: Use Node.js 12.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
-      - run: npm install
-      - run: npm run build
+      - name: Install dependencies
+        run: npm install
 
-      - name: Deploy to netlify
-        uses: netlify/actions/cli@master
+      - name: Build
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           REACT_APP_SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           REACT_APP_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
@@ -94,6 +87,13 @@ jobs:
           REACT_APP_WEB3AUTH_NETWORk: ${{ inputs.web3auth_network }}
           REACT_APP_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
           REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
+        run: npm run build
+
+      - name: Deploy to netlify
+        uses: netlify/actions/cli@master
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         with:
           args: deploy --dir=app/build --prod
           secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
