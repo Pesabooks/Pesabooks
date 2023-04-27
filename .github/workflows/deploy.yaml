@@ -1,0 +1,95 @@
+name: Functions
+
+on:
+  workflow_call:
+    secrets:
+      SUPABASE_ACCESS_TOKEN:
+        required: true
+      SUPABASE_PROJECT_ID:
+        required: true
+      SUPABASE_ANON_KEY:
+        required: true
+      NETLIFY_AUTH_TOKEN:
+        required: true
+      NETLIFY_SITE_ID:
+        required: true
+      SENTRY_DSN:
+        required: true
+      ENV:
+        required: true
+      INFURA_KEY:
+        required: true
+      BLOCKNATIVE_KEY:
+        required: true
+      INCLUDE_TESTNETS:
+        required: true
+      WEB3AUTH_NETWORk:
+        required: true
+      WEB3AUTH_CLIENT_ID:
+        required: true
+      RAMP_API_KEY:
+        required: true
+
+jobs:
+  deploy-functions:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.modified, 'supabase/functions/') }}
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 1.37.1
+
+      - name: deploy balances
+        run: supabase functions deploy balances --project-ref $PROJECT_ID
+      - name: deploy get-access-token
+        run: supabase functions deploy get-access-token --no-verify-jwt --project-ref $PROJECT_ID
+      - name: deploy ramp-callback
+        run: supabase functions deploy ramp-callback --no-verify-jwt --project-ref $PROJECT_ID
+      - name: deploy send-invitation
+        run: supabase functions deploy send-invitation --project-ref $PROJECT_ID
+      - name: deploy send-notification
+        run: supabase functions deploy send-notification --project-ref $PROJECT_ID
+
+  deploy-app:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - run: npm install
+      - run: npm run build
+
+      - name: Deploy to netlify
+        uses: netlify/actions/cli@master
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          REACT_APP_SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+          REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          REACT_APP_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          REACT_APP_ENV: ${{ secrets.ENV }}
+          REACT_APP_INFURA_KEY: ${{ secrets.INFURA_KEY }}
+          REACT_APP_BLOCKNATIVE_KEY: ${{ secrets.BLOCKNATIVE_KEY }}
+          REACT_APP_INCLUDE_TESTNETS: ${{ secrets.INCLUDE_TESTNETS }}
+          REACT_APP_WEB3AUTH_NETWORk: ${{ secrets.WEB3AUTH_NETWORk }}
+          REACT_APP_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
+          REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
+        with:
+          args: deploy --dir=app/build --prod
+          secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
