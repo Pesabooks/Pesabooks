@@ -163,7 +163,7 @@ export const WalletPage = () => {
       userAddress: account!,
       userEmailAddress: user?.email,
       hostApiKey: process.env.REACT_APP_RAMP_API_KEY,
-      webhookStatusUrl: `${process.env.REACT_APP_SUPABASE_FUNCTIONS_URL}/ramp-callback`,
+      webhookStatusUrl: `https://${process.env.REACT_APP_SUPABASE_PROJECT_ID}.functions.supabase.co/ramp-callback`,
     })
       .on<IPurchaseCreatedEvent>(RampInstantEventTypes.PURCHASE_CREATED, (event) => {
         const purchase = event.payload?.purchase;

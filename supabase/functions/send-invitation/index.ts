@@ -2,9 +2,15 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
+import { serve } from "std/server";
 import { corsHeaders } from "../_shared/cors.ts";
 import { SendInvitationRequest } from "./type.ts";
+import Sentry from "Sentry";
+
+Sentry.init({
+  environment: Deno.env.get("ENV") ?? "",
+  dsn: Deno.env.get("SENTRY_DSN") ?? "",
+});
 
 const apiKey = Deno.env.get("SENDGRID_API_KEY");
 
@@ -48,6 +54,7 @@ serve(async (req) => {
       body: JSON.stringify(mail),
     });
   } catch (error) {
+    Sentry.captureException(error);
     return new Response(error.message, { headers: corsHeaders, status: 500 });
   }
 

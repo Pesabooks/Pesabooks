@@ -4,7 +4,7 @@ import { Database } from './types/database';
 import { isTokenExpired } from './utils/jwt-utils';
 import { getTypedStorageItem } from './utils/storage-utils';
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseUrl = `https://${process.env.REACT_APP_SUPABASE_PROJECT_ID}.supabase.co` ;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {

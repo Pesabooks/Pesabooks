@@ -1,0 +1,9 @@
+{
+  "imports": {
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.7.1",
+    "std/server": "https://deno.land/std@0.177.0/http/server.ts",
+    "Sentry": "npm:@sentry/node",
+    "jose": "https://deno.land/x/jose@v4.8.3/index.ts",
+    "dotenv/load": "https://deno.land/x/dotenv/load.ts"
+  }
+}

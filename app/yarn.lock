@@ -3082,10 +3082,10 @@
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.7.tgz#ccab5c8f7dc557a52ca3288c10075c9ccd37fff7"
   integrity sha512-Cr4OjIkipTtcXKjAsm8agyleBuDHvxzeBoa1v543lbv1YaIwQjESsVcmjiWiPEbC1FIeHOG/Op9kdCmAmiS3Kw==
 
-"@ramp-network/ramp-instant-sdk@^3.1.1":
-  version "3.2.3"
-  resolved "https://registry.yarnpkg.com/@ramp-network/ramp-instant-sdk/-/ramp-instant-sdk-3.2.3.tgz#c98d0d5f2b0c71851d35d5c8874444330971db61"
-  integrity sha512-va2oky7y+e6Gm+3aRmSUcRUmJhpytjhIMptSZOMuZU+oJRflRgbEwVj/EBohSrHwZCAO/94OTulgFdW4q+TyfA==
+"@ramp-network/ramp-instant-sdk@^4.0.2":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@ramp-network/ramp-instant-sdk/-/ramp-instant-sdk-4.0.2.tgz#91792e14a11f146c40523912a8b3a631f611bd5e"
+  integrity sha512-I+kKPjfVc3DVYocYNwU60nkdsFjEQIsc9eIXKfBdTeIQKRSDJLPOrmDiTLmsyy39o/VitD05aJBp0MDK9SN1vQ==
   dependencies:
     body-scroll-lock "^3.1.5"
 

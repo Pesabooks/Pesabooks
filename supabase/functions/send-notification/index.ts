@@ -2,14 +2,20 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
+import { serve } from "std/server";
 import { corsHeaders } from "../_shared/cors.ts";
 import { supabaseClient } from "../_shared/supabaseClient.ts";
 import { SendNotificationRequest } from "./type.ts";
+import Sentry from "Sentry";
+
+Sentry.init({
+  environment: Deno.env.get("ENV") ?? "",
+  dsn: Deno.env.get("SENTRY_DSN") ?? "",
+});
 
 const apiKey = Deno.env.get("SENDGRID_API_KEY");
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -17,7 +23,7 @@ serve(async (req) => {
   const { pool_id, user_id, notification_type, notification_description, notification_data }: SendNotificationRequest =
     await req.json();
 
-  let threshold_info_text: string = "";
+  let threshold_info_text = "";
 
   if (notification_data?.remaining_votes === 0) {
     threshold_info_text = "The proposal is ready to be executed.";
@@ -57,8 +63,6 @@ serve(async (req) => {
     .eq("active", true)
     .neq("user_id", user_id);
 
-  console.log("recipients", recipients);
-
   if (recipients)
     for (const recipient of recipients) {
       try {
@@ -97,6 +101,7 @@ serve(async (req) => {
           body: JSON.stringify(mail),
         });
       } catch (error) {
+        Sentry.captureException(error);
         return new Response(error.message, { headers: corsHeaders, status: 500 });
       }
     }
