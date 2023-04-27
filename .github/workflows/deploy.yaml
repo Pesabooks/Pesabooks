@@ -25,16 +25,9 @@ on:
         required: true
       SENTRY_DSN:
         required: true
-      ENV:
-        required: true
       INFURA_KEY:
         required: true
       BLOCKNATIVE_KEY:
-        required: true
-      INCLUDE_TESTNETS:
-        type: "boolean"
-        required: true
-      WEB3AUTH_NETWORk:
         required: true
       WEB3AUTH_CLIENT_ID:
         required: true
