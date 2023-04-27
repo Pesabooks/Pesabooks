@@ -70,13 +70,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install dependencies
         run: npm install
 
       - name: Build
         env:
+          GENERATE_SOURCEMAP: false
           REACT_APP_SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           REACT_APP_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
