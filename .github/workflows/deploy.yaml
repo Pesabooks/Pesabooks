@@ -2,8 +2,6 @@ name: Deploy Staging
 
 on:
   push:
-    branches:
-      - main
 
 jobs:
   deploy supbase function:
