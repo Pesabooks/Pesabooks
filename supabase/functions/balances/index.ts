@@ -1,6 +1,12 @@
 import { serve } from "std/server";
 import { corsHeaders } from "../_shared/cors.ts";
 import { BalanceQuery } from "./type.ts";
+import Sentry from "Sentry";
+
+Sentry.init({
+  environment: Deno.env.get("ENV") ?? "",
+  dsn: Deno.env.get("SENTRY_DSN") ?? "",
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -19,6 +25,7 @@ serve(async (req) => {
     const { data: balances, error: covError, error_message } = await jsonResponse.json();
 
     if (covError) {
+      Sentry.captureException(covError);
       throw new Error(error_message);
     }
 
@@ -27,6 +34,7 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
+    Sentry.captureException(error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
