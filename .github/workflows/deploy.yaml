@@ -22,7 +22,7 @@ on:
       BLOCKNATIVE_KEY:
         required: true
       INCLUDE_TESTNETS:
-        type: boolean
+        type: "boolean"
         required: true
       WEB3AUTH_NETWORk:
         required: true
