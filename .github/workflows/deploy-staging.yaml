@@ -12,39 +12,39 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
 
-  # deploy app:
-  #   runs-on: ubuntu-latest
+  deploy app:
+    runs-on: ubuntu-latest
 
-  #   defaults:
-  #     run:
-  #       working-directory: ./app
+    defaults:
+      run:
+        working-directory: ./app
 
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
 
-  #     - name: Use Node.js 12.x
-  #       uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 12.x
-  #     - run: npm install
-  #     - run: npm run build --if-present
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - run: npm install
+      - run: npm run build --if-present
 
-  #     - name: Deploy to netlify
-  #       uses: netlify/actions/cli@master
-  #       env:
-  #         NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-  #         NETLIFY_SITE_ID: ${{ env.NETLIFY_SITE_ID_STAGING }}
-  #         REACT_APP_SUPABASE_PROJECT_ID: ${{ env.SUPABASE_PROJECT_ID_STAGING }}
-  #         REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_STAGING }}
-  #         REACT_APP_SENTRY_DSN: https://841ca572c58e4befa7cb1b9085f126b6@o1123418.ingest.sentry.io/6161281
-  #         REACT_APP_ENV: staging
-  #         REACT_APP_INFURA_KEY: ${{ secrets.INFURA_KEY }}
-  #         REACT_APP_BLOCKNATIVE_KEY: ${{ secrets.BLOCKNATIVE_KEY }}
-  #         REACT_APP_INCLUDE_TESTNETS: true
-  #         REACT_APP_WEB3AUTH_NETWORk: testnet
-  #         REACT_APP_WEB3AUTH_CLIENT_ID: ${{ env.WEB3AUTH_CLIENT_ID_STAGING }}
-  #         REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY_STAGING }}
-  #       with:
-  #         args: deploy --dir=build --prod
-  #         secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
+      - name: Deploy to netlify
+        uses: netlify/actions/cli@master
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_STAGING }}
+          REACT_APP_SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
+          REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_STAGING }}
+          REACT_APP_SENTRY_DSN: https://841ca572c58e4befa7cb1b9085f126b6@o1123418.ingest.sentry.io/6161281
+          REACT_APP_ENV: staging
+          REACT_APP_INFURA_KEY: ${{ secrets.INFURA_KEY }}
+          REACT_APP_BLOCKNATIVE_KEY: ${{ secrets.BLOCKNATIVE_KEY }}
+          REACT_APP_INCLUDE_TESTNETS: true
+          REACT_APP_WEB3AUTH_NETWORk: testnet
+          REACT_APP_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID_STAGING }}
+          REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY_STAGING }}
+        with:
+          args: deploy --dir=build --prod
+          secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
