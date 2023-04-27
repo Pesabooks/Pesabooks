@@ -2,6 +2,16 @@ name: Functions
 
 on:
   workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      include_testnets:
+        required: true
+        type: boolean
+      web3auth_network:
+        required: true
+        type: string
     secrets:
       SUPABASE_ACCESS_TOKEN:
         required: true
@@ -84,11 +94,11 @@ jobs:
           REACT_APP_SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           REACT_APP_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          REACT_APP_ENV: ${{ secrets.ENV }}
+          REACT_APP_ENV: ${{ inputs.env }}
           REACT_APP_INFURA_KEY: ${{ secrets.INFURA_KEY }}
           REACT_APP_BLOCKNATIVE_KEY: ${{ secrets.BLOCKNATIVE_KEY }}
-          REACT_APP_INCLUDE_TESTNETS: ${{ secrets.INCLUDE_TESTNETS }}
-          REACT_APP_WEB3AUTH_NETWORk: ${{ secrets.WEB3AUTH_NETWORk }}
+          REACT_APP_INCLUDE_TESTNETS: ${{ inputs.include_testnets }}
+          REACT_APP_WEB3AUTH_NETWORk: ${{ inputs.web3auth_network }}
           REACT_APP_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
           REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
         with:
