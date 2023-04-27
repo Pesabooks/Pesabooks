@@ -2,7 +2,7 @@ name: Pipeline
 
 on:
   push:
-    branches: [test-github]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
