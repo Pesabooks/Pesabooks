@@ -5,7 +5,7 @@
 import { serve } from "std/server";
 import { corsHeaders } from "../_shared/cors.ts";
 import { SendInvitationRequest } from "./type.ts";
-import Sentry from "Sentry";
+import * as Sentry from "Sentry";
 
 Sentry.init({
   environment: Deno.env.get("ENV") ?? "",

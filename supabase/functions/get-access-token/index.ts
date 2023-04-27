@@ -1,4 +1,4 @@
-import Sentry from "Sentry";
+import * as Sentry from "Sentry";
 import { serve } from "std/server";
 import * as jose from "jose";
 import { corsHeaders } from "../_shared/cors.ts";

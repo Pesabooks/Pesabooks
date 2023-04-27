@@ -1,4 +1,4 @@
-import Sentry from "Sentry";
+import * as Sentry from "Sentry";
 import { serve } from "std/server";
 import { supabaseClient } from "../_shared/supabaseClient.ts";
 
