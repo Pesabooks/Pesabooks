@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-functions:
+  staging:
     uses: ./.github/workflows/deploy-functions.yaml
     secrets:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -27,8 +27,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 12.x
-      - run: npm install
-      - run: npm run build --if-present
+      - run: yarn install
+      - run: yarn build
 
       - name: Deploy to netlify
         uses: netlify/actions/cli@master
@@ -37,7 +37,7 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_STAGING }}
           REACT_APP_SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_STAGING }}
-          REACT_APP_SENTRY_DSN: https://841ca572c58e4befa7cb1b9085f126b6@o1123418.ingest.sentry.io/6161281
+          REACT_APP_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           REACT_APP_ENV: staging
           REACT_APP_INFURA_KEY: ${{ secrets.INFURA_KEY }}
           REACT_APP_BLOCKNATIVE_KEY: ${{ secrets.BLOCKNATIVE_KEY }}
@@ -46,5 +46,5 @@ jobs:
           REACT_APP_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID_STAGING }}
           REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY_STAGING }}
         with:
-          args: deploy --dir=build --prod
+          args: deploy --dir=app/build --prod
           secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
