@@ -2,11 +2,10 @@ name: Prod
 
 on:
   workflow_run:
-    workflows:
-      - Staging
+    workflows: [Staging]
     types:
       - completed
-    #branches: [main]
+    branches: [test-github]
 
 jobs:
   deploy-supbase-function:
