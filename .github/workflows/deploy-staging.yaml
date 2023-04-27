@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy_supbase_function:
+  deploy-supabase-function-staging:
     runs-on: ubuntu-latest
 
     env:

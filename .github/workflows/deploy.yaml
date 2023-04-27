@@ -1,15 +1,15 @@
 name: Prod
 
 on:
-  workflow_dispatch:
   workflow_run:
-    workflows: [Staging]
+    workflows:
+      - Staging
     types:
       - completed
     #branches: [main]
 
 jobs:
-  deploy_supbase_function:
+  deploy-supbase-function:
     runs-on: ubuntu-latest
 
     env:
