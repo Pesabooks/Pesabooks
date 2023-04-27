@@ -72,12 +72,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: npm install
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+      - run: npm install
 
       - name: Build
+        run: npm run build
         env:
-          GENERATE_SOURCEMAP: false
           REACT_APP_SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           REACT_APP_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
@@ -88,7 +91,6 @@ jobs:
           REACT_APP_WEB3AUTH_NETWORk: ${{ inputs.web3auth_network }}
           REACT_APP_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
           REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
-        run: npm run build
 
       - name: Deploy to netlify
         uses: netlify/actions/cli@master
