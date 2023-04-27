@@ -6,30 +6,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-supabase-function-staging:
-    runs-on: ubuntu-latest
-
-    env:
+  deploy-functions:
+    uses: paddyfink/Pesabooks/.github/workflows/deploy-functions.yml@branch
+    secrets:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: supabase/setup-cli@v1
-        with:
-          version: 1.37.1
-
-      - name: deploy balances
-        run: supabase functions deploy balances --project-ref $PROJECT_ID
-      - name: deploy get-access-token
-        run: supabase functions deploy get-access-token --no-verify-jwt --project-ref $PROJECT_ID
-      - name: deploy ramp-callback
-        run: supabase functions deploy ramp-callback --no-verify-jwt --project-ref $PROJECT_ID
-      - name: deploy send-invitation
-        run: supabase functions deploy send-invitation --project-ref $PROJECT_ID
-      - name: deploy send-notification
-        run: supabase functions deploy send-notification --project-ref $PROJECT_ID
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
 
   # deploy app:
   #   runs-on: ubuntu-latest
