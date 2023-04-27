@@ -17,7 +17,7 @@ jobs:
       - uses: supabase/setup-cli@v1
 
       - name: deploy balances
-        run: supabase functions deploy balances --project-ref $PROJECT_ID --import-map import_map.json
+        run: supabase functions deploy balances --project-ref $PROJECT_ID
       - name: deploy get-access-token
         run: supabase functions deploy get-access-token --no-verify-jwt --project-ref $PROJECT_ID
       - name: deploy ramp-callback
