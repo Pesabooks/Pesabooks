@@ -1,7 +1,13 @@
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-import * as jose from "https://deno.land/x/jose@v4.8.3/index.ts";
+import * as Sentry from "Sentry";
+import { serve } from "std/server";
+import * as jose from "jose";
 import { corsHeaders } from "../_shared/cors.ts";
 import { GetAccessTokenRequest, GetAccessTokenResponse } from "./type.ts";
+
+Sentry.init({
+  environment: Deno.env.get("ENV") ?? "",
+  dsn: Deno.env.get("SENTRY_DSN") ?? "",
+});
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -44,6 +50,8 @@ serve(async (req) => {
 
     return new Response(JSON.stringify(response), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
+    Sentry.captureException(error);
+
     return new Response(JSON.stringify(error), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
