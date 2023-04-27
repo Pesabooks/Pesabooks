@@ -9,7 +9,7 @@ on:
         required: true
 
 jobs:
-  deploy-supabase-function:
+  deploy-function:
     runs-on: ubuntu-latest
 
     env:

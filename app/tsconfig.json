@@ -18,7 +18,7 @@
     "sourceMap": true,
     "baseUrl": "./src",
     "paths": {
-      "@pesabooks/supabase/*": ["../supabase/*"],
+      "@pesabooks/supabase/*": ["../../supabase/*"],
       "@pesabooks/utils/*": ["./utils/*"],
       "@pesabooks/components/*": ["./components/*"],
       "@pesabooks/data/*": ["./data/*"],
