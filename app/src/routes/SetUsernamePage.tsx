@@ -43,7 +43,7 @@ export const SetUsernamePage = () => {
       }
     }
   };
-//comment to delete
+
   const checkAvailability = debounce(async (value: string) => {
     setErrors(null);
     try {
