@@ -77,7 +77,7 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
           echo "Commit message: $COMMIT_MESSAGE"
-          echo "::set-output name=commit_message::$COMMIT_MESSAGE"
+          echo "commit_message=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
 
       - name: Use Node.js 16.x
         uses: actions/setup-node@v1
