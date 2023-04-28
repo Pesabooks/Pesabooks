@@ -70,7 +70,7 @@ jobs:
         working-directory: ./app
 
     steps:
-      - name: Get commit message
+      - name: Set commit message
         run: |
           COMMIT_MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
           echo "Commit message: $COMMIT_MESSAGE"
@@ -100,13 +100,10 @@ jobs:
           REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
 
       - name: Deploy to netlify
-        run: |
-          COMMIT_MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
-          echo "Commit message: $COMMIT_MESSAGE"
         uses: netlify/actions/cli@master
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         with:
-          args: deploy --dir app/build --message "$COMMIT_MESSAGE" --prod
+          args: deploy --dir app/build --message "${{ steps.set_commit_message.outputs.commit_message }}" --prod
           secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
