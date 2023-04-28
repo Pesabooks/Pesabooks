@@ -34,6 +34,7 @@ import { WithdrawPage } from './routes/transactions/containers/WithdrawPage';
 import { WalletPage } from './routes/wallet/WalletPage';
 import theme from './theme/theme';
 import trackPathForAnalytics from './trackpageforanalytics';
+import { SetUsernamePage } from './routes/SetUsernamePage';
 
 function App() {
   const data = useLocation();
@@ -66,6 +67,7 @@ function App() {
                 <Route path="callback" element={<CallbackPage />} />
                 <Route path="invitation/:invitation_id" element={<InvitationPage />} />
               </Route>
+              <Route path="/set-username" element={<SetUsernamePage />} />
               <Route element={<AuthGuard />}>
                 <Route path="/new-pool" element={<CreatePoolPage />} />
 

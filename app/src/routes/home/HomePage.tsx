@@ -10,7 +10,6 @@ import {
     Text
 } from '@chakra-ui/react';
 import { NavbarLight } from '@pesabooks/components/Layout/NavbarLight';
-import { ChooseUsernameModal } from '@pesabooks/components/Modals/ChooseUsername';
 import { PoolCard } from '@pesabooks/components/PoolCard';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BsPlus } from 'react-icons/bs';
@@ -139,8 +138,6 @@ export const HomePage = () => {
               })}
             </Grid>
           </Box>
-
-          <ChooseUsernameModal />
         </Flex>
       </Center>
     </Box>
