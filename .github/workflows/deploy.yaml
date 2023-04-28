@@ -70,14 +70,14 @@ jobs:
         working-directory: ./app
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Set commit message
         run: |
           COMMIT_MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
           echo "Commit message: $COMMIT_MESSAGE"
           echo "::set-output name=commit_message::$COMMIT_MESSAGE"
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
       - name: Use Node.js 16.x
         uses: actions/setup-node@v1
