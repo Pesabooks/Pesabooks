@@ -35,9 +35,27 @@ on:
         required: true
 
 jobs:
+  # JOB to run change detection
+  changes:
+    runs-on: ubuntu-latest
+    # Set job outputs to values from filter step
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+      functions: ${{ steps.filter.outputs.functions }}
+    steps:
+      # For pull requests it's not necessary to checkout the code
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            app:
+              - 'app/**'
+            functions:
+              - 'supabase/functions/**'
+
   deploy-functions:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.modified, 'supabase/functions/') }}
+    if: ${{ needs.changes.outputs.functions == 'true' }}
 
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -63,7 +81,7 @@ jobs:
 
   deploy-app:
     runs-on: ubuntu-latest
-    # if: ${{ github.event_name == 'push' && contains(github.event.head_commit.modified, 'app/') }}
+    if: ${{ needs.changes.outputs.app == 'true' }}
 
     defaults:
       run:
