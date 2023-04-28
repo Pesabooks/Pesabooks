@@ -63,12 +63,19 @@ jobs:
 
   deploy-app:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' && contains(github.event.head_commit.modified, 'app/') }}
 
     defaults:
       run:
         working-directory: ./app
 
     steps:
+      - name: Get commit message
+        run: |
+          COMMIT_MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
+          echo "Commit message: $COMMIT_MESSAGE"
+          echo "::set-output name=commit_message::$COMMIT_MESSAGE"
+
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -93,10 +100,13 @@ jobs:
           REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
 
       - name: Deploy to netlify
+        run: |
+          COMMIT_MESSAGE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
+          echo "Commit message: $COMMIT_MESSAGE"
         uses: netlify/actions/cli@master
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         with:
-          args: deploy --dir app/build --message "${{ github.event.head_commit.message }}" --prod
+          args: deploy --dir app/build --message "$COMMIT_MESSAGE" --prod
           secrets: '["NETLIFY_AUTH_TOKEN", "NETLIFY_SITE_ID"]'
