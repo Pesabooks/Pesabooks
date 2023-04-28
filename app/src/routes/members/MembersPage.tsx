@@ -1,15 +1,17 @@
 import {
-    Card,
-    CardBody,
-    CardHeader, Heading,
-    Spacer,
-    useDisclosure,
-    useToast
+  Card,
+  CardBody,
+  CardHeader,
+  Flex,
+  Heading,
+  Spacer,
+  useDisclosure,
+  useToast,
 } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import {
-    ReviewAndSendTransactionModal,
-    ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef,
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
 import { ButtonWithAdmingRights } from '@pesabooks/components/withConnectedWallet';
 import { useIsOrganizer, usePool, useSafeAdmins, useWeb3Auth } from '@pesabooks/hooks';
@@ -18,10 +20,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { estimateTransaction } from '../../services/estimationService';
 import {
-    createInvitation,
-    getActiveInvitations,
-    revokeInvitation,
-    sendInvitation
+  createInvitation,
+  getActiveInvitations,
+  revokeInvitation,
+  sendInvitation,
 } from '../../services/invitationService';
 import { deleteMember, getMembers } from '../../services/membersService';
 import { BuildRemoveAdminTx } from '../../services/transaction-builder';
@@ -29,9 +31,9 @@ import { submitTransaction } from '../../services/transactionsServices';
 import { Invitation } from '../../types';
 import { Member } from '../../types/Member';
 import {
-    RemoveAdminFormValue,
-    RemoveAdminModal,
-    RemoveAdminModalRef
+  RemoveAdminFormValue,
+  RemoveAdminModal,
+  RemoveAdminModalRef,
 } from '../settings/components/RemoveAdminModal';
 import { InviteMemberFormValue, InviteMemberModal } from './components/InviteMemberModal';
 import { MembersTable } from './components/MembersTable';
@@ -164,14 +166,16 @@ export const MembersPage = () => {
       </Helmet>
       <Card>
         <CardHeader>
-          <Heading as="h2" size="lg">
-            Members
-          </Heading>
+          <Flex>
+            <Heading as="h2" size="lg">
+              Members
+            </Heading>
 
-          <Spacer />
-          {!isDeployed && isOrganizer && (
-            <ButtonWithAdmingRights onClick={onOpen}> Invite a member</ButtonWithAdmingRights>
-          )}
+            <Spacer />
+            {!isDeployed && isOrganizer && (
+              <ButtonWithAdmingRights onClick={onOpen}> Invite a member</ButtonWithAdmingRights>
+            )}
+          </Flex>
         </CardHeader>
         <CardBody>
           <MembersTable
