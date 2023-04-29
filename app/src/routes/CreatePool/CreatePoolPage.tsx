@@ -61,8 +61,6 @@ export const CreatePoolPage = () => {
     }
   };
 
-
-
   const addMember = (member: Partial<Invitation>) => {
     if (!members.find((m) => m.email === member.email)) setMembers([...members, member]);
   };
@@ -106,7 +104,7 @@ export const CreatePoolPage = () => {
       <Helmet>
         <title>Create Group</title>
       </Helmet>
-        <NavbarLight  />
+      <NavbarLight />
       <Flex direction="column" minH="100vh" align="center" pt={{ sm: '125px', lg: '75px' }}>
         <Flex direction="column" textAlign="center" mb={{ sm: '25px', md: '45px' }}>
           <Text fontSize={{ sm: '2xl', md: '3xl', lg: '4xl' }} fontWeight="bold" mb="8px">

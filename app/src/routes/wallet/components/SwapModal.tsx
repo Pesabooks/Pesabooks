@@ -1,16 +1,16 @@
 import {
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalHeader,
-    ModalOverlay,
-    useToast
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  useToast,
 } from '@chakra-ui/react';
 import { Web3Provider } from '@ethersproject/providers';
 import {
-    ReviewAndSendTransactionModal,
-    ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef,
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
 import { useWeb3Auth } from '@pesabooks/hooks';
 import { fee } from '@pesabooks/services/estimationService';

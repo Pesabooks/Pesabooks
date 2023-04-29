@@ -1,13 +1,15 @@
 import {
-    Box,
-    Button,
-    ButtonGroup, Card, Center,
-    Flex,
-    Grid,
-    Icon,
-    Link,
-    Spinner,
-    Text
+  Box,
+  Button,
+  ButtonGroup,
+  Card,
+  Center,
+  Flex,
+  Grid,
+  Icon,
+  Link,
+  Spinner,
+  Text,
 } from '@chakra-ui/react';
 import { NavbarLight } from '@pesabooks/components/Layout/NavbarLight';
 import { PoolCard } from '@pesabooks/components/PoolCard';

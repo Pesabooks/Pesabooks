@@ -8,7 +8,7 @@ import { Transaction } from '../types';
 type State = {
   transactions: Transaction[];
   loading: boolean;
-  error: any;
+  error: unknown;
 };
 
 type Action = {
@@ -43,7 +43,7 @@ const reducer = (state: State, action: Action): State => {
       ...state,
       transactions: [payload, ...state.transactions],
     };
-  } else if ((action.type = 'ERROR')) {
+  } else if (action.type === 'ERROR') {
     return {
       ...state,
       loading: false,
@@ -60,7 +60,7 @@ export function useTransactions(
   safeAddress: string,
   filter?: Filter<'transactions'>,
   config?: { useRealTime?: boolean; includeFailedTx?: boolean },
-): { transactions: Transaction[]; loading: boolean; error: any; refresh: () => void } {
+): { transactions: Transaction[]; loading: boolean; error: unknown; refresh: () => void } {
   const [{ transactions, loading, error }, dispatch] = useReducer(reducer, initialState);
 
   const getInitialData = useCallback(async () => {

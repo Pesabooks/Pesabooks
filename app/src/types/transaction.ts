@@ -28,12 +28,13 @@ export type TransactionStatus =
   | 'failed'
   | 'rejected';
 
-type Metadata =
+export type Metadata =
   | TransferData
   | AddOrRemoveOwnerData
   | SwapData
   | WalletConnectData
-  | ChangeThresholdData;
+  | ChangeThresholdData
+  | UnlockTokenData;
 
 export type Transaction = Omit<Table<'transactions'>, 'metadata'> & {
   category?: Category;
@@ -132,4 +133,11 @@ export interface WalletConnectData {
 export interface UnlockTokenData {
   token: TokenBase;
   amount: number;
+}
+
+export interface PurchaseData {
+  token: TokenBase;
+  amount: string;
+  ramp_id: string;
+  ramp_purchase_view_token: string;
 }

@@ -23,7 +23,7 @@ import {
   Tabs,
   Text,
   useColorModeValue,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 import { useNativeBalance, useWeb3Auth } from '@pesabooks/hooks';
 import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';

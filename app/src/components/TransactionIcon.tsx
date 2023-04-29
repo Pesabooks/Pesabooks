@@ -10,7 +10,7 @@ import {
   FiUnlock,
   FiUserPlus,
   FiUsers,
-  FiUserX
+  FiUserX,
 } from 'react-icons/fi';
 import { MdCancel } from 'react-icons/md';
 import { TransactionType } from '../types';
@@ -56,9 +56,9 @@ export const TransactionIcon = ({ type }: { type: TransactionType }) => {
     case 'walletConnect':
       logo = FiCode;
       break;
-      case 'changeThreshold':
-        logo = FiSettings;
-        break;
+    case 'changeThreshold':
+      logo = FiSettings;
+      break;
     default:
       break;
   }

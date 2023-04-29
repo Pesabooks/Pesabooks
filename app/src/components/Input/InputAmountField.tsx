@@ -10,7 +10,7 @@ import {
   NumberInput,
   NumberInputField,
   Spacer,
-  Text
+  Text,
 } from '@chakra-ui/react';
 import { formatLongNumber } from '@pesabooks/utils/bignumber-utils';
 import { useState } from 'react';

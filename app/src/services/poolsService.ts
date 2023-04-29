@@ -63,7 +63,7 @@ export const deployNewSafe = async (provider: Web3Provider, pool_id: string) => 
 
   const gnosis_address = await deploySafe(
     signer,
-    members.map((m) => (m.user as User)!.wallet),
+    members.map((m) => (m.user as User).wallet),
     callback,
   );
 

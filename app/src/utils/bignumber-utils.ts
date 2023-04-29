@@ -14,7 +14,7 @@ export const formatBigNumber = (
 
   const amountN = Number(rawFormattedAmount);
 
-  return formatLongNumber(amountN);
+  return formatLongNumber(amountN, digits);
 };
 
 export const formatLongNumber = (amount: number | undefined, digits = 4) => {

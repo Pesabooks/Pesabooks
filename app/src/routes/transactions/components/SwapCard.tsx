@@ -23,7 +23,7 @@ import {
   Spacer,
   Spinner,
   Stack,
-  Text
+  Text,
 } from '@chakra-ui/react';
 import { getTokenAllowance } from '@pesabooks/services/blockchainServices';
 import { getBalances, TokenBalance } from '@pesabooks/services/covalentServices';
@@ -33,16 +33,18 @@ import { compareAddress } from '@pesabooks/utils/addresses-utils';
 import {
   formatBigNumber,
   formatCurrency,
-  formatLongNumber
+  formatLongNumber,
 } from '@pesabooks/utils/bignumber-utils';
 import { BigNumber, ethers } from 'ethers';
 import { debounce } from 'lodash';
 import {
   Address,
-  APIError, ETHER_ADDRESS as NATIVE_TOKEN_ADDRESS, NetworkID,
+  APIError,
+  ETHER_ADDRESS as NATIVE_TOKEN_ADDRESS,
+  NetworkID,
   ParaSwap,
   Token,
-  Transaction as ParaswapTx
+  Transaction as ParaswapTx,
 } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
 import { useCallback, useEffect, useMemo, useState } from 'react';

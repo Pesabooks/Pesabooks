@@ -1,14 +1,14 @@
 import {
-    Button,
-    Flex,
-    Icon,
-    NumberDecrementStepper,
-    NumberIncrementStepper,
-    NumberInput,
-    NumberInputField,
-    NumberInputStepper,
-    Stack,
-    Text
+  Button,
+  Flex,
+  Icon,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  Stack,
+  Text,
 } from '@chakra-ui/react';
 import { GrFormNext, GrFormPrevious } from 'react-icons/gr';
 

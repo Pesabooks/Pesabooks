@@ -10,7 +10,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
-  Stack
+  Stack,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 

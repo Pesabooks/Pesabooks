@@ -1,6 +1,6 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { ERC20__factory } from '@pesabooks/utils/erc20';
-import { ContractTransaction, ethers, Signer } from 'ethers';
+import { ContractTransaction, Signer, ethers } from 'ethers';
 import { networks } from '../data/networks';
 import { Filter, handleSupabaseError, transationsTable } from '../supabase';
 import { Pool, User } from '../types';
@@ -8,9 +8,9 @@ import { NewTransaction, Transaction, TransferData } from '../types/transaction'
 import { defaultProvider } from './blockchainServices';
 import {
   ConfirmTransactionPayload,
-  eventBus,
   TransactionMessage,
   TransactionPayload,
+  eventBus,
 } from './events/eventBus';
 import {
   confirmSafeTransaction,
@@ -219,7 +219,7 @@ const onTransactionSentToNetwork = async (
   transaction: Transaction,
   tx: ContractTransaction,
   chainId: number,
-  isRejection: boolean = false,
+  isRejection = false,
   user?: User,
 ) => {
   const payload = { transaction, blockchainTransaction: tx, chainId, isRejection, user };
@@ -285,7 +285,7 @@ export const getTransactionById = async (txId: number) => {
 
 export const refreshTransaction = async (chain_id: number, t: Transaction) => {
   const provider = defaultProvider(chain_id);
-  var tx = await provider.getTransaction(t.hash!);
+  const tx = await provider.getTransaction(t.hash!);
   onTransactionSentToNetwork(t, tx, chain_id);
 };
 

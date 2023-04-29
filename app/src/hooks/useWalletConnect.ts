@@ -1,3 +1,4 @@
+/* eslint-disable */
 //@ts-nocheck
 import WalletConnect from '@walletconnect/client';
 import { IClientMeta, IWalletConnectSession } from '@walletconnect/legacy-types';

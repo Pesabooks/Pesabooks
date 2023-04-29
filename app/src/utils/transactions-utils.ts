@@ -2,7 +2,9 @@ import { Transaction, User } from '../types';
 import {
   AddOrRemoveOwnerData,
   ChangeThresholdData,
+  Metadata,
   NewTransaction,
+  PurchaseData,
   SwapData,
   TransactionStatus,
   TransactionType,
@@ -32,13 +34,14 @@ export const getTransactionDescription = (
     .includes(transaction.status);
 
   switch (type) {
-    case 'deposit':
+    case 'deposit': {
       const fromName = addresses
         ? getAddressName((metadata as TransferData).transfer_from, addresses)
         : (metadata as TransferData).transfer_from_name;
       return `Received From ${fromName}`;
+    }
 
-    case 'withdrawal':
+    case 'withdrawal': {
       const toName = addresses
         ? getAddressName((metadata as TransferData).transfer_to, addresses)
         : (metadata as TransferData).transfer_to_name;
@@ -47,21 +50,26 @@ export const getTransactionDescription = (
           (metadata as TransferData)?.token?.symbol
         } To ${toName}`;
       return `Sent To ${toName}`;
+    }
 
-    case 'addOwner':
+    case 'addOwner': {
       const ownerName = addresses
         ? getAddressName((metadata as AddOrRemoveOwnerData).address, addresses)
         : (metadata as AddOrRemoveOwnerData).username;
       return `${isProposal ? 'Add' : 'Added'} ${ownerName} as a member`;
+    }
 
-    case 'removeOwner':
+    case 'removeOwner': {
       const removeOwnerData = metadata as AddOrRemoveOwnerData;
       return `${isProposal ? 'Remove' : 'Removed'} ${removeOwnerData.username} as a member`;
+    }
 
     case 'unlockToken':
-      return `${isProposal ? 'Unlock' : 'Unlocked'} token ${(metadata as any).token.symbol}`;
+      return `${isProposal ? 'Unlock' : 'Unlocked'} token ${
+        (metadata as UnlockTokenData).token.symbol
+      }`;
 
-    case 'swap':
+    case 'swap': {
       const swapData = metadata as SwapData;
       if (isProposal)
         return `Trade ${formatBigNumber(swapData.src_amount, swapData.src_token.decimals)} ${
@@ -70,21 +78,23 @@ export const getTransactionDescription = (
           swapData.dest_token.symbol
         }  `;
       return `Traded ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
+    }
 
     case 'createSafe':
       return 'Created group wallet';
-    case 'walletConnect':
+    case 'walletConnect': {
       const walletConnectData = metadata as WalletConnectData;
       return `Contract interaction ${
         walletConnectData.functionName ? `- ${walletConnectData.functionName}` : ''
       } `;
+    }
 
-    case 'changeThreshold':
+    case 'changeThreshold': {
       const thresholdData = metadata as ChangeThresholdData;
       if (isProposal)
         return `Change required confirmations from ${thresholdData.current_threshold} to ${thresholdData.threshold}`;
       return `Change required confirmations to ${thresholdData.threshold}`;
-
+    }
     default:
       return transaction.type;
   }
@@ -121,7 +131,12 @@ export const getTransactionTypeLabel = (type: TransactionType | undefined) => {
   }
 };
 
-export const getTxAmountDescription = (type: TransactionType, metadata: any) => {
+export const getTxAmountDescription = (
+  type: TransactionType,
+  metadata: Metadata | undefined,
+): string => {
+  if (!metadata) return type;
+
   if (['deposit', 'withdrawal', 'transfer_out'].includes(type)) {
     const transferAmout = `${(metadata as TransferData).amount} ${
       (metadata as TransferData)?.token?.symbol
@@ -130,7 +145,10 @@ export const getTxAmountDescription = (type: TransactionType, metadata: any) => 
     return transferAmout;
   }
   if (type === 'purchase') {
-    return `${formatBigNumber(metadata.amount, metadata.token.decimals)} ${metadata.token.symbol}`;
+    const purchaseData = metadata as PurchaseData;
+    return `${formatBigNumber(purchaseData.amount, purchaseData.token.decimals)} ${
+      purchaseData.token.symbol
+    }`;
   }
   if (type === 'swap') {
     const swapData = metadata as SwapData;
@@ -140,10 +158,10 @@ export const getTxAmountDescription = (type: TransactionType, metadata: any) => 
   }
   if (type === 'unlockToken') {
     const data = metadata as UnlockTokenData;
-    if (!data.amount) return null;
+    if (!data.amount) return type;
 
     return `${data.amount.toPrecision(4)} ${data.token.symbol}`;
   }
 
-  return;
+  return type;
 };

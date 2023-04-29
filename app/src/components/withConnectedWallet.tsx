@@ -5,7 +5,7 @@ import {
   IconButtonProps,
   Switch,
   SwitchProps,
-  Tooltip
+  Tooltip,
 } from '@chakra-ui/react';
 import { usePool, useWeb3Auth } from '@pesabooks/hooks';
 import { forwardRef, useMemo } from 'react';

@@ -1,18 +1,18 @@
 import {
-    Avatar,
-    Badge,
-    Button,
-    Flex,
-    Icon,
-    IconButton,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuList,
-    Td,
-    Text,
-    Tr,
-    useColorModeValue
+  Avatar,
+  Badge,
+  Button,
+  Flex,
+  Icon,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Td,
+  Text,
+  Tr,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { WalletAddress } from '@pesabooks/components/WalletAddress';
 import { usePool } from '@pesabooks/hooks';
@@ -38,7 +38,7 @@ export const MemberTableRow = ({
   isInvitation,
   id,
   onRemove,
-  onResendInvitation
+  onResendInvitation,
 }: MembleTableRowProps) => {
   const textColor = useColorModeValue('gray.700', 'white');
   let bgStatus = useColorModeValue('gray.400', '#1a202c');

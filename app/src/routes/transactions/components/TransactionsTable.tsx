@@ -1,15 +1,17 @@
 import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
 import {
-    Box, chakra, Flex,
-    Icon,
-    Table,
-    Tbody,
-    Td,
-    Text,
-    Th,
-    Thead,
-    Tooltip,
-    Tr
+  Box,
+  Flex,
+  Icon,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tooltip,
+  Tr,
+  chakra,
 } from '@chakra-ui/react';
 import Loading from '@pesabooks/components/Loading';
 import { getTxAmountDescription } from '@pesabooks/utils/transactions-utils';
@@ -85,7 +87,6 @@ export const TransactionsTable = ({
         //@ts-ignore
         Cell: ({
           cell: {
-            value,
             row: { original },
           },
         }: CellProps<Transaction>) => (
@@ -95,7 +96,7 @@ export const TransactionsTable = ({
       {
         Header: 'Status',
         accessor: 'status',
-         //@ts-ignore
+        //@ts-ignore
         Cell: ({ cell: { value } }: CellProps<Transaction, TransactionStatus>) => (
           <TransactionStatusBadge type={value} hideIcon={true} />
         ),
@@ -103,7 +104,7 @@ export const TransactionsTable = ({
       {
         Header: '',
         accessor: 'id',
-         //@ts-ignore
+        //@ts-ignore
         Cell: ({
           cell: {
             row: { original },
@@ -121,7 +122,7 @@ export const TransactionsTable = ({
       {
         Header: '',
         accessor: 'safeTxHash',
-         //@ts-ignore
+        //@ts-ignore
         Cell: ({
           cell: {
             row: { original },

@@ -74,7 +74,9 @@ export const SetUsernamePage = () => {
         <title>Set username</title>
       </Helmet>
       <VStack p={20} align="start" gap={5}>
-        <Heading as="h2" mb={4} size="md">One last step and you're all set</Heading>
+        <Heading as="h2" mb={4} size="md">
+          One last step and you're all set
+        </Heading>
 
         <FormControl isInvalid={!!errors}>
           <FormLabel>Choose a username</FormLabel>

@@ -6,7 +6,7 @@ import {
   Box,
   CloseButton,
   Container,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
 import { Transaction as ParaswapTx } from 'paraswap';
@@ -21,7 +21,7 @@ import { submitTransaction } from '@pesabooks/services/transactionsServices';
 import { BigNumber } from 'ethers';
 import {
   ReviewAndSendTransactionModal,
-  ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModalRef,
 } from '../../../components/ReviewAndSendTransactionModal';
 import { ApproveArgs, SwapArgs, SwapCard } from '../components/SwapCard';
 

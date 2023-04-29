@@ -13,7 +13,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Select,
-  Text
+  Text,
 } from '@chakra-ui/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -22,7 +22,7 @@ export interface ChangeThresholdModalProps {
   onClose: (hash?: string) => void;
   onChange: (threshold: number) => void;
   currenThreshold: number;
-  adminsCount:number
+  adminsCount: number;
 }
 
 export interface ChangeThresholdFormValue {
@@ -34,7 +34,7 @@ export const ChangeThresholdModal = ({
   onClose,
   onChange,
   currenThreshold,
-  adminsCount
+  adminsCount,
 }: ChangeThresholdModalProps) => {
   const methods = useForm<ChangeThresholdFormValue>({
     defaultValues: { threshold: currenThreshold },

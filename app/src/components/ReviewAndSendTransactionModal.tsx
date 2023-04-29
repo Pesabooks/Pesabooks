@@ -21,7 +21,7 @@ import {
   Text,
   useColorModeValue,
   useDisclosure,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import { useNativeBalance, useWeb3Auth } from '@pesabooks/hooks';
 import { getTxScanLink } from '@pesabooks/services/transactionsServices';
@@ -29,11 +29,13 @@ import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
 import { getTransactionTypeLabel } from '@pesabooks/utils/transactions-utils';
 import { BigNumber } from 'ethers';
 import {
-  forwardRef, Reducer,
-  Ref, useEffect,
+  forwardRef,
+  Reducer,
+  Ref,
+  useEffect,
   useImperativeHandle,
   useReducer,
-  useState
+  useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { networks } from '../data/networks';

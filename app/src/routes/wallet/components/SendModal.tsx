@@ -1,32 +1,32 @@
 import {
-    Button,
-    Flex,
-    FormControl,
-    FormErrorMessage,
-    FormLabel,
-    Image,
-    Input,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalHeader,
-    ModalOverlay,
-    Stack,
-    Text
+  Button,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Image,
+  Input,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Stack,
+  Text,
 } from '@chakra-ui/react';
 import { InputAmountField } from '@pesabooks/components/Input/InputAmountField';
 import {
-    ReviewAndSendTransactionModal,
-    ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef,
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
 import { useWeb3Auth } from '@pesabooks/hooks';
 import { TokenBalance } from '@pesabooks/services/covalentServices';
 import { fee } from '@pesabooks/services/estimationService';
 import {
-    estimateTokenTransfer,
-    sendNativeToken,
-    sendToken
+  estimateTokenTransfer,
+  sendNativeToken,
+  sendToken,
 } from '@pesabooks/services/walletServices';
 import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
 import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';

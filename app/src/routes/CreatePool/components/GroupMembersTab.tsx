@@ -1,8 +1,10 @@
 import { SmallCloseIcon } from '@chakra-ui/icons';
 import {
-  Button, Card,
+  Button,
+  Card,
   CardBody,
-  CardHeader, Flex,
+  CardHeader,
+  Flex,
   FormControl,
   FormLabel,
   HStack,
@@ -13,7 +15,7 @@ import {
   ListItem,
   Stack,
   Text,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { FaUser } from 'react-icons/fa';

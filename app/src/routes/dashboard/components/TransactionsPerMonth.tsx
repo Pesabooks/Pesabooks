@@ -9,7 +9,7 @@ import { supabase } from '../../../supabase';
 const options: ApexOptions = {
   chart: {
     toolbar: {
-      show: false, 
+      show: false,
     },
   },
   tooltip: {

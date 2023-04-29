@@ -1,16 +1,16 @@
 import {
-    Card,
-    CardBody,
-    CardHeader,
-    Stack,
-    Table,
-    Tbody,
-    Td,
-    Text,
-    Th,
-    Thead,
-    Tr,
-    useColorModeValue
+  Card,
+  CardBody,
+  CardHeader,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { WalletAddress } from '@pesabooks/components/WalletAddress';
 import { usePool } from '@pesabooks/hooks';

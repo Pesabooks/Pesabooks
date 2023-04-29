@@ -14,7 +14,7 @@ import {
   ModalOverlay,
   Spacer,
   Stack,
-  Textarea
+  Textarea,
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { Category } from '../../../types';

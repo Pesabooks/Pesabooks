@@ -8,7 +8,7 @@ import { OptimalRate } from 'paraswap-core';
 import { networks } from '../data/networks';
 import { activitiesTable, supabase } from '../supabase';
 import { Activity, TokenBase } from '../types';
-import { SwapData } from '../types/transaction';
+import { Metadata, SwapData } from '../types/transaction';
 import { ActivityBusMessage, eventBus } from './events/eventBus';
 
 const getTimestamp = () => Math.floor(new Date().valueOf() / 1000);
@@ -39,7 +39,7 @@ export const approveToken = async (
       metadata: {
         token: token,
         amount,
-      } as any,
+      } as Partial<Metadata>,
     })
     .select()
     .single();

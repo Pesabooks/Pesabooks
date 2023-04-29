@@ -10,7 +10,7 @@ export function PoolGuard({ children }: { children: JSX.Element }) {
     return <Loading fullHeight></Loading>;
   } else if (!pool) {
     return <Navigate to="/" />;
-  } else if (pool.members2?.find((m) => m.user_id=== user?.id && !m.active )) {
+  } else if (pool.members2?.find((m) => m.user_id === user?.id && !m.active)) {
     return <Navigate to="/403" />;
   }
   return children;

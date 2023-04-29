@@ -11,7 +11,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { Web3Provider } from '@ethersproject/providers';
 import {
   ReviewAndSendTransactionModal,
-  ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModalRef,
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
 import { usePool, useSafeAdmins, useWeb3Auth } from '@pesabooks/hooks';
 import { getAddressBalance } from '@pesabooks/services/blockchainServices';

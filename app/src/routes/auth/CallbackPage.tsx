@@ -5,9 +5,9 @@ import Loading from '@pesabooks/components/Loading';
 import { useWeb3Auth } from '@pesabooks/hooks';
 import { GetAccessTokenRequest, GetAccessTokenResponse } from '@pesabooks/supabase/functions';
 import {
-    clearTypedStorageItem,
-    getTypedStorageItem,
-    setTypedStorageItem
+  clearTypedStorageItem,
+  getTypedStorageItem,
+  setTypedStorageItem,
 } from '@pesabooks/utils/storage-utils';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';

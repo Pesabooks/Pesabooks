@@ -1,4 +1,12 @@
-import { BoxProps, Card, CardBody, CardHeader, Stack, Text, useColorModeValue } from '@chakra-ui/react';
+import {
+  BoxProps,
+  Card,
+  CardBody,
+  CardHeader,
+  Stack,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react';
 import { TimelineRow } from '@pesabooks/components/TimelineRow';
 import { formatDate, formatTimestampSeconds } from '@pesabooks/utils/date-utils';
 import { getAddressName } from '@pesabooks/utils/transactions-utils';

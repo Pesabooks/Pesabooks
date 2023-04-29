@@ -1,17 +1,17 @@
 import { TriangleDownIcon, TriangleUpIcon } from '@chakra-ui/icons';
 import {
-    chakra,
-    Editable,
-    EditableInput,
-    EditablePreview,
-    Flex,
-    Stack,
-    Table,
-    Tbody,
-    Td,
-    Th,
-    Thead,
-    Tr
+  chakra,
+  Editable,
+  EditableInput,
+  EditablePreview,
+  Flex,
+  Stack,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
 } from '@chakra-ui/react';
 import { SwitchWithAdmingRights } from '@pesabooks/components/withConnectedWallet';
 import React from 'react';

@@ -1,14 +1,14 @@
 import {
-    Card,
-    CardBody,
-    CardHeader,
-    Editable,
-    EditableInput,
-    EditablePreview,
-    EditableTextarea,
-    HStack,
-    Stack,
-    Text
+  Card,
+  CardBody,
+  CardHeader,
+  Editable,
+  EditableInput,
+  EditablePreview,
+  EditableTextarea,
+  HStack,
+  Stack,
+  Text,
 } from '@chakra-ui/react';
 import { EditableControls } from '@pesabooks/components/Editable/EditableControls';
 import { TriggerEditableControls } from '@pesabooks/components/Editable/TriggerEditableControls';

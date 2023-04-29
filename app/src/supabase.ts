@@ -4,7 +4,7 @@ import { Database } from './types/database';
 import { isTokenExpired } from './utils/jwt-utils';
 import { getTypedStorageItem } from './utils/storage-utils';
 
-const supabaseUrl = `https://${process.env.REACT_APP_SUPABASE_PROJECT_ID}.supabase.co` ;
+const supabaseUrl = `https://${process.env.REACT_APP_SUPABASE_PROJECT_ID}.supabase.co`;
 const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
@@ -50,6 +50,7 @@ type FunctionName = string & keyof Schema['Functions'];
 export type Table<T extends TableName> = Schema['Tables'][T]['Row'];
 export type FunctionReturns<F extends FunctionName> = Schema['Functions'][F]['Returns'];
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type QueryBuilder<T extends TableName> = PostgrestFilterBuilder<Schema, Table<T>, any>;
 
 export type Filter<T extends TableName> = (query: QueryBuilder<T>) => QueryBuilder<T>;

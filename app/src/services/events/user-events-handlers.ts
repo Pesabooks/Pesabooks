@@ -6,7 +6,7 @@ export class UserEventHandler {
   handleAdminRemoval = ({ payload: { transaction } }: BusMessage<TransactionMessage>) => {
     if (transaction?.type === 'removeOwner') {
       const metadata = transaction.metadata as AddOrRemoveOwnerData;
-      deactivateMember(transaction!.pool_id!, metadata.user_id);
+      deactivateMember(transaction.pool_id, metadata.user_id);
     }
   };
 

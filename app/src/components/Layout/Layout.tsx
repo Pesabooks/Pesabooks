@@ -32,8 +32,6 @@ export const Layout = () => {
       >
         <Navbar onOpen={onOpen} />
         <Box ms="auto" me="auto" ps="15px" pe="15px">
-          
-
           <Box p="30px 15px" minHeight="calc(100vh - 123px)">
             {<Outlet />}
           </Box>
@@ -41,7 +39,6 @@ export const Layout = () => {
         <Footer />
         <BottomSheet />
       </MainPanel>
-      
     </>
   );
 };

@@ -22,7 +22,7 @@ import {
   Text,
   useDisclosure,
   useToast,
-  VStack
+  VStack,
 } from '@chakra-ui/react';
 
 import { usePool, useWalletConnectV1, useWeb3Auth } from '@pesabooks/hooks';
@@ -36,7 +36,7 @@ import { Category } from '../types';
 import { SelectCategoryField } from './Input/SelectCategoryField';
 import {
   ReviewAndSendTransactionModal,
-  ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModalRef,
 } from './ReviewAndSendTransactionModal';
 
 interface DepositFormValue {

@@ -4,7 +4,7 @@ import { usePool, useWeb3Auth } from '@pesabooks/hooks';
 import { useEffect, useRef, useState } from 'react';
 import {
   ReviewAndSendTransactionModal,
-  ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModalRef,
 } from './ReviewAndSendTransactionModal';
 
 import { estimateSafeCreation } from '../services/estimationService';

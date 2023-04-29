@@ -1,4 +1,4 @@
-export type Json = any;
+export type Json = unknown;
 
 export interface Database {
   public: {

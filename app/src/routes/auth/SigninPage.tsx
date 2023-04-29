@@ -7,7 +7,7 @@ import {
   Input,
   Text,
   useColorModeValue,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import Loading from '@pesabooks/components/Loading';
 import { useWeb3Auth } from '@pesabooks/hooks';

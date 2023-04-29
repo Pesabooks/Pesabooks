@@ -30,7 +30,7 @@ export const fee = async (provider: Web3Provider, gasLimit: BigNumber) => {
   let baseFee: BigNumber = BigNumber.from(0);
 
   if (maxFeePerGas) {
-    var priority = maxPriorityFeePerGas;
+    const priority = maxPriorityFeePerGas;
     const base = priority ? maxFeePerGas.sub(priority) : maxFeePerGas;
     baseFee = base.mul(gasLimit);
   } else if (gasPrice) baseFee = gasPrice.mul(gasLimit);

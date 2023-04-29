@@ -53,6 +53,7 @@ export interface BusMessage<T extends Payload> {
 }
 
 const createEventBus = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const bus = new Subject<BusMessage<any>>();
 
   //logs all events

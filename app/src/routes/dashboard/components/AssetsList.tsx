@@ -9,7 +9,7 @@ interface AssetsCardProps {
 }
 export const AssetsList = ({ balances, loading }: AssetsCardProps) => {
   return (
-    <Box w="100%"  ps="8px">
+    <Box w="100%" ps="8px">
       {loading ? (
         <Loading />
       ) : (

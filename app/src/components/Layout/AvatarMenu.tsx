@@ -16,7 +16,7 @@ import {
   Text,
   VStack,
   useColorMode,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { useWeb3Auth } from '@pesabooks/hooks';
 import { shortenHash } from '@pesabooks/utils/addresses-utils';
@@ -37,7 +37,8 @@ export const AvatarMenu = () => {
 
   return (
     <Menu>
-      <MenuButton p={0}
+      <MenuButton
+        p={0}
         as={Button}
         rounded="full"
         variant="ghost"

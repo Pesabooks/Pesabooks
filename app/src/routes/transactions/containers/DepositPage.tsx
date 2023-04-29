@@ -14,7 +14,7 @@ import { Category, NewTransaction } from '../../../types';
 
 import {
   ReviewAndSendTransactionModal,
-  ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModalRef,
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 

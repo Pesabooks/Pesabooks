@@ -1,6 +1,8 @@
 import { EmailIcon } from '@chakra-ui/icons';
 import {
-  Button, Card, Checkbox,
+  Button,
+  Card,
+  Checkbox,
   Flex,
   Modal,
   ModalBody,
@@ -19,10 +21,13 @@ import {
   Thead,
   Tr,
   useDisclosure,
-  useToast
+  useToast,
 } from '@chakra-ui/react';
 import { useWeb3Auth } from '@pesabooks/hooks';
-import { acceptInvitation, getActiveInvitationsByEmail } from '@pesabooks/services/invitationService';
+import {
+  acceptInvitation,
+  getActiveInvitationsByEmail,
+} from '@pesabooks/services/invitationService';
 import { useCallback, useEffect, useState } from 'react';
 import { Invitation } from '../../../types';
 
@@ -70,7 +75,7 @@ export const PendingInvitation = ({ onAccepted }: PendingInvitationProps) => {
 
   return invitations.length > 0 ? (
     <>
-      <Card px={10} py={1} >
+      <Card px={10} py={1}>
         <Flex gap={5} align="center">
           <EmailIcon />
           <Text> You have {invitations.length} pending group invitations</Text>

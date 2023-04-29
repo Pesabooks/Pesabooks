@@ -1,27 +1,27 @@
 import {
-    Alert,
-    AlertIcon,
-    Button,
-    Drawer,
-    DrawerBody,
-    DrawerCloseButton,
-    DrawerContent,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerOverlay,
-    Editable,
-    EditablePreview,
-    EditableTextarea,
-    Flex,
-    HStack,
-    Image,
-    Img,
-    Spacer,
-    StackDivider,
-    Text,
-    useDisclosure,
-    useToast,
-    VStack
+  Alert,
+  AlertIcon,
+  Button,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  Editable,
+  EditablePreview,
+  EditableTextarea,
+  Flex,
+  HStack,
+  Image,
+  Img,
+  Spacer,
+  StackDivider,
+  Text,
+  useDisclosure,
+  useToast,
+  VStack,
 } from '@chakra-ui/react';
 import type { Web3Provider } from '@ethersproject/providers';
 import { EditableControls } from '@pesabooks/components/Editable/EditableControls';
@@ -33,39 +33,37 @@ import { BigNumber } from 'ethers';
 import { forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { getAllCategories } from '@pesabooks/services/categoriesService';
-import {
-    estimateTransaction
-} from '@pesabooks/services/estimationService';
+import { estimateTransaction } from '@pesabooks/services/estimationService';
 import { getSafeNonce, getSafeTransaction } from '@pesabooks/services/gnosisServices';
 import { getMembers } from '@pesabooks/services/membersService';
 import {
-    confirmTransaction,
-    createRejectTransaction,
-    executeTransaction,
-    getTransactionById,
-    updateTransactionCategory,
-    updateTransactionMemo
+  confirmTransaction,
+  createRejectTransaction,
+  executeTransaction,
+  getTransactionById,
+  updateTransactionCategory,
+  updateTransactionMemo,
 } from '@pesabooks/services/transactionsServices';
 
 import {
-    ReviewAndSendTransactionModal,
-    ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModal,
+  ReviewAndSendTransactionModalRef,
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
 import { UserWalletCard } from '@pesabooks/components/UserWalletCard';
 import { WalletAddress } from '@pesabooks/components/WalletAddress';
 import { usePool, useWeb3Auth } from '@pesabooks/hooks';
 import { compareAddress, mathAddress } from '@pesabooks/utils/addresses-utils';
 import {
-    getTransactionDescription,
-    getTransactionTypeLabel
+  getTransactionDescription,
+  getTransactionTypeLabel,
 } from '@pesabooks/utils/transactions-utils';
 import { Category, Transaction, User } from '../../../types';
 import {
-    AddOrRemoveOwnerData,
-    ChangeThresholdData,
-    SwapData,
-    TransferData,
-    WalletConnectData
+  AddOrRemoveOwnerData,
+  ChangeThresholdData,
+  SwapData,
+  TransferData,
+  WalletConnectData,
 } from '../../../types/transaction';
 import { EditableSelect } from './EditableSelect';
 import { TransactionStatusBadge } from './TransactionStatusBadge';

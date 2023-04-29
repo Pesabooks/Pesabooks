@@ -34,14 +34,16 @@ export const getNotificationDescription = (transaction: Transaction): string => 
       username = data.username;
       return `Add ${username} as a member`;
 
-    case 'removeOwner':
+    case 'removeOwner': {
       const removeOwnerData = metadata as AddOrRemoveOwnerData;
       return `Remove ${removeOwnerData.username} as a member`;
+    }
 
     case 'unlockToken':
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return `Unlock token ${(metadata as any).token.symbol}`;
 
-    case 'swap':
+    case 'swap': {
       const swapData = metadata as SwapData;
 
       return `Trade ${formatBigNumber(swapData.src_amount, swapData.src_token.decimals)} ${
@@ -49,17 +51,19 @@ export const getNotificationDescription = (transaction: Transaction): string => 
       } for ${formatBigNumber(swapData.dest_amount, swapData.dest_token.decimals)} ${
         swapData.dest_token.symbol
       }  `;
-
-    case 'walletConnect':
+    }
+    case 'walletConnect': {
       const walletConnectData = metadata as WalletConnectData;
       return `Contract interaction ${
         walletConnectData.functionName ? `- ${walletConnectData.functionName}` : ''
       } `;
+    }
 
-    case 'changeThreshold':
+    case 'changeThreshold': {
       const thresholdData = metadata as ChangeThresholdData;
 
       return `Change required confirmations from ${thresholdData.current_threshold} to ${thresholdData.threshold}`;
+    }
 
     default:
       return transaction.type;

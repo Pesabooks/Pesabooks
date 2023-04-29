@@ -7,4 +7,4 @@ export interface BaseEntity<T> {
   user?: User;
 }
 
-export interface Entity extends BaseEntity<number> {}
+export type Entity = BaseEntity<number>;

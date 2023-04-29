@@ -7,7 +7,12 @@ import { BigNumber, ethers } from 'ethers';
 import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
 import { Pool, User } from '../types';
-import { AddOrRemoveOwnerData, NewTransaction, SwapData } from '../types/transaction';
+import {
+  AddOrRemoveOwnerData,
+  NewTransaction,
+  SwapData,
+  UnlockTokenData,
+} from '../types/transaction';
 import { getTokenContract } from './blockchainServices';
 import { getAddOwnerTx, getChangeThresholdTx, getRemoveOwnerTx } from './gnosisServices';
 
@@ -235,9 +240,14 @@ export const buildApproveTokenTx = async (
     memo: null,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
-      token: token,
+      token: {
+        address: token.address,
+        symbol: token.symbol,
+        image: token.img,
+        decimals: token.decimals,
+      },
       amount,
-    } as any,
+    } as UnlockTokenData,
     transaction_data: { from: pool.gnosis_safe_address!, ...txData },
   };
 

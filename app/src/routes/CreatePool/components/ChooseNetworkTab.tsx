@@ -9,7 +9,7 @@ import {
   Image,
   Spacer,
   Stack,
-  Text
+  Text,
 } from '@chakra-ui/react';
 import { networks } from '../../../data/networks';
 

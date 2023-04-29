@@ -3,7 +3,7 @@ import { isTokenExpired } from '@pesabooks/utils/jwt-utils';
 import {
   clearTypedStorageItem,
   getTypedStorageItem,
-  setTypedStorageItem
+  setTypedStorageItem,
 } from '@pesabooks/utils/storage-utils';
 import * as Sentry from '@sentry/react';
 import {
@@ -12,7 +12,7 @@ import {
   CONNECTED_EVENT_DATA,
   CustomChainConfig,
   UserInfo,
-  WALLET_ADAPTERS
+  WALLET_ADAPTERS,
 } from '@web3auth/base';
 import { Web3AuthNoModal } from '@web3auth/no-modal';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';

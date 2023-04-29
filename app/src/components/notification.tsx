@@ -4,7 +4,7 @@ import {
   AlertTitle,
   Box,
   createStandaloneToast,
-  Progress
+  Progress,
 } from '@chakra-ui/react';
 import { defaultProvider } from '../services/blockchainServices';
 import { eventBus, TransactionMessage } from '../services/events/eventBus';
@@ -25,7 +25,7 @@ const PendingNotification = ({ description }: any) => {
 };
 
 export const notifyTransaction = async (chain_id: number, txHash: string, description?: string) => {
-  const { toast }= createStandaloneToast({ theme, colorMode: 'dark' });
+  const { toast } = createStandaloneToast({ theme, colorMode: 'dark' });
 
   toast({
     id: txHash,

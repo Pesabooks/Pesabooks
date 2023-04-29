@@ -62,17 +62,17 @@ export const ProposalsList = ({ proposals, users, onSelect, loading }: Transacti
                 <IconBox py={2} px={4} gap={2}>
                   <Icon as={BiCheckCircle} boxSize={5} />
                   <Text fontWeight="bold">
-                    {transaction.confirmations}/
-                    {transaction.threshold}
+                    {transaction.confirmations}/{transaction.threshold}
                   </Text>
                 </IconBox>
-                {transaction.rejections && <IconBox py={2} px={4} gap={2} bg="red.500">
-                  <Icon as={MdOutlineCancel} boxSize={5} />
-                  <Text fontWeight="bold">
-                    {transaction.rejections}/
-                    {transaction.threshold}
-                  </Text>
-                </IconBox>}
+                {transaction.rejections && (
+                  <IconBox py={2} px={4} gap={2} bg="red.500">
+                    <Icon as={MdOutlineCancel} boxSize={5} />
+                    <Text fontWeight="bold">
+                      {transaction.rejections}/{transaction.threshold}
+                    </Text>
+                  </IconBox>
+                )}
               </HStack>
             </Flex>
           );

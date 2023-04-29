@@ -6,7 +6,7 @@ import {
   ModalFooter,
   ModalOverlay,
   Spacer,
-  useDisclosure
+  useDisclosure,
 } from '@chakra-ui/react';
 import { forwardRef, Ref, useImperativeHandle, useState } from 'react';
 

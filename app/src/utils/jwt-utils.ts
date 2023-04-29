@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-types */
 /**
  * Try to decode a JWT. If the token is valid you'll get an object otherwise you'll get null
  * @param token - The JWT that you want to decode
@@ -36,8 +37,9 @@ export function decodeToken<T = Object>(token: string): T | null {
  * @returns boolean
  */
 export function isTokenExpired(token: string): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const decodedToken: any = decodeToken(token);
-  let result: boolean = true;
+  let result = true;
 
   if (decodedToken && decodedToken.exp) {
     const expirationDate: Date = new Date(0);

@@ -22,7 +22,6 @@ export const MembersTable = ({
   adminAddresses,
   isLoading,
 }: MembersTableProps) => {
-
   return (
     <>
       <Table variant="simple">

@@ -1,11 +1,13 @@
 import {
   Avatar,
   AvatarGroup,
-  BoxProps, Card,
+  BoxProps,
+  Card,
   CardBody,
-  CardHeader, Flex,
+  CardHeader,
+  Flex,
   Text,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { Pool } from '../types';
 import { Separator } from './Layout/Separator';

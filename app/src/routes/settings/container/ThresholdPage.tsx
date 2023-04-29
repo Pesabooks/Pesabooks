@@ -2,7 +2,7 @@ import { Card, CardBody, CardHeader, Flex, Spinner, Text, useDisclosure } from '
 import { Web3Provider } from '@ethersproject/providers';
 import {
   ReviewAndSendTransactionModal,
-  ReviewAndSendTransactionModalRef
+  ReviewAndSendTransactionModalRef,
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
 import { ButtonWithAdmingRights } from '@pesabooks/components/withConnectedWallet';
 import { usePool, useSafeAdmins, useWeb3Auth } from '@pesabooks/hooks';

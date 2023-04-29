@@ -11,7 +11,7 @@ export const defaultProvider = (chain_id: number) => {
     return provider;
   }
 
-  let url = networks[chain_id].rpcUrl;
+  const url = networks[chain_id].rpcUrl;
   return new ethers.providers.JsonRpcProvider(url, chain_id);
 };
 

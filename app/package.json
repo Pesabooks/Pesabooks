@@ -47,10 +47,14 @@
     "build": "craco build",
     "test": "craco test",
     "eject": "craco eject",
+    "lint": "eslint . --ext .ts",
     "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
   },
   "eslintConfig": {
     "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:@typescript-eslint/recommended",
       "react-app",
       "react-app/jest"
     ]
@@ -79,11 +83,16 @@
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.10",
     "@types/react-table": "^7.7.14",
+    "@typescript-eslint/eslint-plugin": "^5.59.1",
+    "@typescript-eslint/parser": "^5.59.1",
     "@walletconnect/legacy-types": "^2.0.0-rc.0",
-    "husky": "^7.0.4",
-    "lint-staged": "^12.3.2",
+    "eslint": "^8.39.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
     "node-polyfill-webpack-plugin": "^2.0.1",
-    "prettier": "^2.5.1",
+    "prettier": "^2.8.8",
     "react-scripts": "5.0.0",
     "ts-loader": "8.2.0",
     "typescript": "^4.9.4",

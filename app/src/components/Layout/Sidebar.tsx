@@ -14,7 +14,7 @@ import {
   List,
   Stack,
   Text,
-  useColorModeValue
+  useColorModeValue,
 } from '@chakra-ui/react';
 import { BsGraphDown } from 'react-icons/bs';
 import { FaCircle, FaExchangeAlt, FaHome, FaUsers } from 'react-icons/fa';

@@ -1,6 +1,9 @@
 import { Flex, HStack, Text } from '@chakra-ui/react';
 import { TransactionIcon } from '@pesabooks/components/TransactionIcon';
-import { getTransactionDescription, getTxAmountDescription } from '@pesabooks/utils/transactions-utils';
+import {
+  getTransactionDescription,
+  getTxAmountDescription,
+} from '@pesabooks/utils/transactions-utils';
 import dayjs from 'dayjs';
 import { Transaction, User } from '../../../types';
 import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';

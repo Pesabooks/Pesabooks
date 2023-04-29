@@ -70,7 +70,7 @@ export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
     const fetchData = async () => {
       try {
         // const { data } = await supabase().rpc('get_balance_per_month', { pool_id });
-        const data:any[] = [];
+        const data: any[] = [];
 
         setSeries([{ name: 'Balance', data: data?.map((d) => ({ x: d.month, y: d.balance })) }]);
       } finally {
@@ -81,8 +81,8 @@ export const BalancesPerMonth = ({ pool_id }: BalancesPerMonthProps) => {
   }, [pool_id]);
 
   return (
-    <Card  mb={{ sm: '26px', lg: '0px' }}>
-      <CardHeader >
+    <Card mb={{ sm: '26px', lg: '0px' }}>
+      <CardHeader>
         <Flex direction="column" alignSelf="flex-start">
           <Text fontSize="lg" fontWeight="bold" mb="6px">
             Balance
