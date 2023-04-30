@@ -5,14 +5,14 @@ import { IconBox } from '../Icons';
 import { RouteInstance } from './Sidebar';
 
 export const NavLinkButton = (prop: RouteInstance) => {
-  let activeBg = useColorModeValue('white', 'gray.700');
-  let inactiveBg = useColorModeValue('white', 'gray.700');
-  let activeColor = useColorModeValue('gray.700', 'white');
-  let inactiveColor = useColorModeValue('gray.400', 'gray.400');
-  let sidebarActiveShadow = '0px 7px 11px rgba(0, 0, 0, 0.04)';
+  const activeBg = useColorModeValue('white', 'gray.700');
+  const inactiveBg = useColorModeValue('white', 'gray.700');
+  const activeColor = useColorModeValue('gray.700', 'white');
+  const inactiveColor = useColorModeValue('gray.400', 'gray.400');
+  const sidebarActiveShadow = '0px 7px 11px rgba(0, 0, 0, 0.04)';
 
-  let resolved = useResolvedPath(prop.path);
-  let match = useMatch({ path: resolved.pathname, end: true });
+  const resolved = useResolvedPath(prop.path);
+  const match = useMatch({ path: resolved.pathname, end: true });
 
   const boxShadow = match ? '0px 7px 11px rgba(0, 0, 0, 0.04)' : 'none';
 

@@ -2,7 +2,7 @@ import { handleSupabaseError, membersTable } from '../supabase';
 import { Member } from '../types';
 import { getPool } from './poolsService';
 
-export const getMembers = async (pool_id: string, includeInactive = false) => {
+export const getMembers = async (pool_id: string, includeInactive = false): Promise<Member[]> => {
   const query = membersTable()
     .select(
       `*, 
@@ -17,7 +17,7 @@ export const getMembers = async (pool_id: string, includeInactive = false) => {
 
   const { data, error } = await query;
   handleSupabaseError(error);
-  return (data as Member[] | null) ?? [];
+  return (data as Member[]) ?? [];
 };
 
 export const isMemberAdmin = async (userId: string, pool_id: string) => {

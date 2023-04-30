@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Web3Provider } from '@ethersproject/providers';
 import { isTokenExpired } from '@pesabooks/utils/jwt-utils';
 import {
@@ -9,14 +10,13 @@ import * as Sentry from '@sentry/react';
 import {
   ADAPTER_EVENTS,
   CHAIN_NAMESPACES,
-  CONNECTED_EVENT_DATA,
   CustomChainConfig,
   UserInfo,
   WALLET_ADAPTERS,
 } from '@web3auth/base';
 import { Web3AuthNoModal } from '@web3auth/no-modal';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { networks } from '../data/networks';
 import { usersTable } from '../supabase';
 import { User } from '../types';
@@ -58,7 +58,7 @@ export const Web3AuthContext = React.createContext<IWeb3AuthContext>({
 
 const getIdFromUser = (user: UserInfo) => `${user.verifier}:${user.verifierId}`;
 
-export const Web3AuthProvider = ({ children }: any) => {
+export const Web3AuthProvider = ({ children }: { children: ReactNode }) => {
   const [web3Auth, setWeb3Auth] = useState<Web3AuthNoModal | null>(null);
   const [provider, setProvider] = useState<Web3Provider | null>(null);
   const [chainId, setChainId] = useState<number>(defaultChain);
@@ -78,17 +78,18 @@ export const Web3AuthProvider = ({ children }: any) => {
     setTypedStorageItem('user_id', id);
 
     Sentry.setUser({
-      email: user.email!,
+      email: user.email,
       id,
     });
-    let { data } = await usersTable().select(`*`).eq('id', id).single();
+    const { data } = await usersTable().select(`*`).eq('id', id).single();
     if (data) setUser(data);
   }, []);
 
   useEffect(() => {
     const subscribeAuthEvents = (web3auth: Web3AuthNoModal) => {
-      web3auth.on(ADAPTER_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-        setProvider(new Web3Provider(web3auth.provider!));
+      web3auth.on(ADAPTER_EVENTS.CONNECTED, async () => {
+        if (!web3auth.provider) return;
+        setProvider(new Web3Provider(web3auth.provider));
 
         const user = await web3auth.getUserInfo();
         configureUser(user as UserInfo);

@@ -2,7 +2,8 @@ import { QuestionIcon } from '@chakra-ui/icons';
 import { Button, Flex, FlexProps, Link, Text } from '@chakra-ui/react';
 import { IconBox } from '../Icons';
 
-interface SidebarHelpProps extends FlexProps {}
+type SidebarHelpProps = FlexProps;
+
 export function SidebarHelp(props: SidebarHelpProps) {
   // Pass the computed styles into the `__css` prop
   return (
@@ -16,6 +17,7 @@ export function SidebarHelp(props: SidebarHelpProps) {
       p="16px"
       h="170px"
       w="100%"
+      {...props}
     >
       <IconBox width="35px" h="35px" bg="white" mb="auto">
         <QuestionIcon color="teal.300" h="18px" w="18px" />

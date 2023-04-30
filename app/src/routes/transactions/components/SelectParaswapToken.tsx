@@ -1,9 +1,9 @@
 import { Box, Flex, Image, Text } from '@chakra-ui/react';
-import { chakraComponents, GroupBase, OptionProps, Select } from 'chakra-react-select';
+import { GroupBase, OptionProps, Select, SingleValue, chakraComponents } from 'chakra-react-select';
 import { Token } from 'paraswap';
 
 interface SelectParaswapTokenProps {
-  onChange?: (token: Token) => void;
+  onChange?: (token: Token | null) => void;
   value?: Token;
   tokens: Token[];
 }
@@ -23,7 +23,7 @@ export const SelectParaswapToken = ({ value, tokens, onChange }: SelectParaswapT
   return (
     <Box w={300}>
       <Select
-        onChange={(e: any) => onChange?.(e)}
+        onChange={(e) => onChange?.(e as SingleValue<Token>)}
         value={value}
         options={tokens}
         getOptionLabel={(t) => `${t.symbol}`}

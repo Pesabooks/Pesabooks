@@ -1,6 +1,6 @@
 import { Flex, FlexProps } from '@chakra-ui/react';
 
-interface IconBoxProps extends FlexProps {}
+type IconBoxProps = FlexProps;
 export const IconBox = (props: IconBoxProps) => {
   const { children, ...rest } = props;
 

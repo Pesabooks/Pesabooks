@@ -24,7 +24,7 @@ export const Pagination = ({ pageIndex, pageSize, total, onChangePage }: Paginat
   const gotoPage = (page: number) => onChangePage(page);
 
   const createPages = (count: number) => {
-    let arrPageCount = [];
+    const arrPageCount = [];
 
     for (let i = 1; i <= count; i++) {
       arrPageCount.push(i);

@@ -15,8 +15,8 @@ type A = {
 };
 
 export function withAdminRight<T>(Component: React.ComponentType<T>) {
-  return forwardRef(({ ...props }: T & A, _) => {
-    const componentsProps: any = { ...props };
+  return forwardRef(({ ...props }: T & A) => {
+    const componentsProps = { ...props };
 
     const { user } = useWeb3Auth();
     const { pool, isDeployed } = usePool();

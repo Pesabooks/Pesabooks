@@ -53,6 +53,10 @@ export const MembersPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const signer = (provider as Web3Provider)?.getSigner();
 
+  if (!provider) throw new Error('Provider is not set');
+  if (!user) throw new Error('User is not set');
+  if (!pool) throw new Error('Pool is not set');
+
   const loadData = useCallback(async () => {
     try {
       if (pool) {
@@ -75,7 +79,7 @@ export const MembersPage = () => {
     if (!pool) throw new Error('Argument Exception: pool');
     if (!user) throw new Error('Argument Exception: user');
     try {
-      await createInvitation(pool, name, email, user.username!);
+      await createInvitation(pool, name, email, user.username ?? user.email);
       toast({
         title: `${name} has been invited to join the group`,
         status: 'success',
@@ -105,7 +109,9 @@ export const MembersPage = () => {
 
   const resendInvitation = async (invitation_id: string) => {
     const invitation = invitations.find((i) => i.id === invitation_id);
-    await sendInvitation(invitation!);
+    if (!invitation) throw new Error('Invitation not found');
+
+    await sendInvitation(invitation);
     toast({
       title: `Invitation sent to ${invitation?.name}`,
       status: 'success',
@@ -115,7 +121,8 @@ export const MembersPage = () => {
 
   const onpenRemoveAdmin = (id: string) => {
     const user = members.find((m) => m.user_id === id);
-    removeAdminModaldRef.current?.open(user?.user!, removeAdmin);
+    if (!user) throw new Error('User not found');
+    removeAdminModaldRef.current?.open(user.user!, removeAdmin);
   };
 
   const removeAdmin = async ({ user, threshold }: RemoveAdminFormValue) => {
@@ -144,11 +151,11 @@ export const MembersPage = () => {
           () =>
             currentThreshold > 1
               ? Promise.resolve(BigNumber.from(0))
-              : estimateTransaction(provider!, transaction.transaction_data),
+              : estimateTransaction(provider, transaction.transaction_data),
           async () => {
-            const tx = await submitTransaction(user!, signer, pool!, transaction!);
+            const tx = await submitTransaction(user, signer, pool, transaction);
             if (tx?.hash) {
-              (await (provider as Web3Provider)?.getTransaction(tx.hash)).wait().then(() => {
+              (await (provider as Web3Provider)?.getTransaction(tx.hash))?.wait().then(() => {
                 loadData();
               });
             }

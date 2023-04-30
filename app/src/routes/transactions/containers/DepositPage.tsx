@@ -59,7 +59,10 @@ export const DepositPage = () => {
   }, [pool, account]);
 
   const deposit = async (transaction: NewTransaction) => {
-    const tx = await submitDepositTx(provider!, pool, user!, transaction);
+    if (!provider) throw new Error('Provider not initialized');
+    if (!user) throw new Error('User not initialized');
+
+    const tx = await submitDepositTx(provider, pool, user, transaction);
 
     methods.reset();
 
@@ -70,13 +73,16 @@ export const DepositPage = () => {
   };
 
   const review = async (formValue: DepositFormValue) => {
+    if (!provider) throw new Error('Provider not initialized');
+    if (!user) throw new Error('User not initialized');
+
     const { amount, memo, category } = formValue;
 
-    const transaction = await buildDepositTx(provider!, pool, user!, category.id, amount, memo);
+    const transaction = await buildDepositTx(provider, pool, user, category.id, amount, memo);
     reviewTxRef.current?.open(
       `Deposit ${amount} ${pool.token?.symbol}`,
       transaction.type,
-      () => estimateTransaction(provider!, transaction.transaction_data),
+      () => estimateTransaction(provider, transaction.transaction_data),
       () => deposit(transaction),
     );
   };

@@ -16,10 +16,11 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
+import { ReactNode } from 'react';
 import { BsGraphDown } from 'react-icons/bs';
 import { FaCircle, FaExchangeAlt, FaHome, FaUsers } from 'react-icons/fa';
 import { IoSettingsSharp } from 'react-icons/io5';
-import { Link as reactRouterLink, NavLink, useLocation } from 'react-router-dom';
+import { NavLink, Link as reactRouterLink, useLocation } from 'react-router-dom';
 import { IconBox } from '../Icons';
 import { Logo } from './Logo';
 import { NavLinkButton } from './NavLinkButton';
@@ -31,25 +32,25 @@ interface SidebarProps extends BoxProps {
 
 export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
   // this is for the rest of the collapses
-  let sidebarBg = 'none';
+  const sidebarBg = 'none';
   let sidebarRadius = '0px';
   let sidebarMargins = '0px';
   sidebarRadius = '16px';
   sidebarMargins = '16px 0px 16px 16px';
 
-  let location = useLocation();
+  const location = useLocation();
   const activeRoute = (routeName: string) => {
     return location.pathname.includes(routeName);
   };
-  let variantChange = '0.2s linear';
+  const variantChange = '0.2s linear';
 
-  let activeBg = useColorModeValue('teal.300', 'teal.300');
-  let activeAccordionBg = useColorModeValue('white', 'gray.700');
-  let inactiveBg = useColorModeValue('white', 'gray.700');
-  let inactiveColorIcon = useColorModeValue('teal.300', 'teal.300');
-  let activeColorIcon = useColorModeValue('white', 'white');
-  let activeColor = useColorModeValue('gray.700', 'white');
-  let inactiveColor = useColorModeValue('gray.400', 'gray.400');
+  const activeBg = useColorModeValue('teal.300', 'teal.300');
+  const activeAccordionBg = useColorModeValue('white', 'gray.700');
+  const inactiveBg = useColorModeValue('white', 'gray.700');
+  const inactiveColorIcon = useColorModeValue('teal.300', 'teal.300');
+  const activeColorIcon = useColorModeValue('white', 'white');
+  const activeColor = useColorModeValue('gray.700', 'white');
+  const inactiveColor = useColorModeValue('gray.400', 'gray.400');
 
   const createLinks = (routes: RouteInstance[]) => {
     return routes.map((prop, key) => {
@@ -164,13 +165,15 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
                 )}
                 <AccordionIcon color="gray.400" />
               </AccordionButton>
-              <AccordionPanel pb="8px">
-                <List>
-                  {
-                    createLinks(prop.items!) // for bullet accordion links
-                  }
-                </List>
-              </AccordionPanel>
+              {prop.items && (
+                <AccordionPanel pb="8px">
+                  <List>
+                    {
+                      createLinks(prop.items) // for bullet accordion links
+                    }
+                  </List>
+                </AccordionPanel>
+              )}
             </AccordionItem>
           </Accordion>
         );
@@ -184,7 +187,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
     });
   };
 
-  var brand = (
+  const brand = (
     <Box pt="10px" ps="16px" mb="8px">
       <Flex justifyContent="space-between">
         <Link
@@ -207,7 +210,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
     </Box>
   );
 
-  var links = <>{createLinks(routes)}</>;
+  const links = <>{createLinks(routes)}</>;
   return (
     <Box
       bg={sidebarBg}
@@ -240,7 +243,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
 export interface RouteInstance {
   path: string;
   name: string;
-  icon: any;
+  icon: ReactNode;
   collapse?: boolean;
   items?: RouteInstance[];
 }

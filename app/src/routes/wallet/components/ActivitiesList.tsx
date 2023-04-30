@@ -5,7 +5,7 @@ import { getTxAmountDescription } from '@pesabooks/utils/transactions-utils';
 import dayjs from 'dayjs';
 import { Link as RouterLink } from 'react-router-dom';
 import { Activity } from '../../../types';
-import { SwapData, TransferData } from '../../../types/transaction';
+import { SwapData, TransferData, UnlockTokenData } from '../../../types/transaction';
 import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';
 
 interface TransactionsListProps {
@@ -28,13 +28,15 @@ const getActivityDescription = (activity: Activity): string | JSX.Element => {
         );
       else return `Sent to ${shortenHash((metadata as TransferData).transfer_to)}`;
     case 'unlockToken':
-      return `unlock token ${(metadata as any).token.symbol}`;
-    case 'swap':
+      return `unlock token ${(metadata as UnlockTokenData).token.symbol}`;
+    case 'swap': {
       const swapData = metadata as SwapData;
       return `Traded ${swapData.src_token.symbol} for ${swapData.dest_token.symbol}  `;
-    case 'purchase':
+    }
+    case 'purchase': {
       const data = metadata as TransferData;
       return `Purchased ${data.token.symbol}`;
+    }
     default:
       return type;
   }

@@ -18,7 +18,7 @@ import {
 } from '@chakra-ui/react';
 import { UserWalletCard } from '@pesabooks/components/UserWalletCard';
 import { usePool, useSafeAdmins } from '@pesabooks/hooks';
-import { forwardRef, Ref, useImperativeHandle, useRef, useState } from 'react';
+import { Ref, forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { User } from '../../../types';
 
 type callbackfn = (data: RemoveAdminFormValue) => void | Promise<void>;
@@ -59,8 +59,9 @@ export const RemoveAdminModal = forwardRef((_, ref: Ref<RemoveAdminModalRef>) =>
   }));
 
   const submit = () => {
+    if (!user) throw new Error('User is not defined');
     onClose();
-    onConfirmRef.current?.({ user: user!, threshold });
+    onConfirmRef.current?.({ user: user, threshold });
   };
 
   return (

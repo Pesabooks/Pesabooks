@@ -1,5 +1,5 @@
 import { useWeb3Auth } from '@pesabooks/hooks';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { eventBus } from '../services/events/eventBus';
 import { getPool } from '../services/poolsService';
@@ -9,7 +9,7 @@ import { Pool } from '../types';
 type PoolContextType = {
   pool: Pool | undefined;
   loading: boolean;
-  error: any;
+  error: unknown;
   isDeployed: boolean;
 };
 
@@ -20,12 +20,12 @@ export const PoolContext = React.createContext<PoolContextType>({
   isDeployed: false,
 });
 
-export const PoolProvider = ({ children }: any) => {
+export const PoolProvider = ({ children }: { children: ReactNode }) => {
   const { user, setChainId } = useWeb3Auth();
   const [pool, setPool] = useState<Pool>();
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  let { pool_id } = useParams();
+  const { pool_id } = useParams();
 
   const fetchPool = useCallback(() => {
     if (pool_id)

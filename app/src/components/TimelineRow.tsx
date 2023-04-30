@@ -1,10 +1,10 @@
 import { Box, Flex, Icon, Stack, Tag, Text, useColorModeValue } from '@chakra-ui/react';
-import React from 'react';
 import { FiCheckCircle, FiCircle, FiXCircle } from 'react-icons/fi';
+import { IconType } from 'react-icons/lib';
 
 interface TimelineRowProps {
   status: 'done' | 'pending' | 'rejected' | 'approved';
-  logo: any;
+  logo: IconType;
   title: string;
   titleColor?: string;
   date?: string;

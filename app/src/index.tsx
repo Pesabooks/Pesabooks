@@ -21,8 +21,11 @@ Sentry.init({
   tracesSampleRate: 1.0,
   enabled: process.env.REACT_APP_ENV !== 'development',
 });
+const rootElement = document.getElementById('root');
 
-const root = createRoot(document.getElementById('root')!);
+if (!rootElement) throw new Error('Root element not found');
+
+const root = createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <BrowserRouter>

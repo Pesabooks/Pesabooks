@@ -84,7 +84,7 @@ export const ProfilePage = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  let swapAsset: string = '';
+  let swapAsset = '';
   switch (chainId) {
     case 1:
       swapAsset = 'ETH_ETH,ETH_USDC,ETH_DAI';

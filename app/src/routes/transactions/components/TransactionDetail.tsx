@@ -63,6 +63,7 @@ import {
   ChangeThresholdData,
   SwapData,
   TransferData,
+  UnlockTokenData,
   WalletConnectData,
 } from '../../../types/transaction';
 import { EditableSelect } from './EditableSelect';
@@ -74,7 +75,7 @@ export interface TransactionDetailRef {
   open: (id: number) => void;
 }
 
-export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDetailRef>) => {
+export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<TransactionDetailRef>) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { pool } = usePool();
   const { provider, account, user } = useWeb3Auth();
@@ -94,12 +95,15 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   const { transaction, safeTransaction, safeRejectionTransaction } = transactions;
   const threshold = transaction?.threshold;
 
+  if (!provider) throw new Error('Provider is not set');
+  if (!user) throw new Error('User is not set');
+  if (!pool) throw new Error('Pool is not set');
+
   const loadTransaction = async (id: number) => {
-    let transaction: Transaction | null;
     let safeTransaction: SafeMultisigTransactionResponse | null = null;
     let safeRejectionTransaction: SafeMultisigTransactionResponse | null = null;
 
-    transaction = await getTransactionById(id);
+    const transaction = await getTransactionById(id);
     if (pool && transaction?.safe_tx_hash)
       safeTransaction = await getSafeTransaction(pool.chain_id, transaction.safe_tx_hash);
     if (pool && transaction?.reject_safe_tx_hash)
@@ -114,8 +118,10 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   useEffect(() => {
     const fetchData = async () => {
       if (pool) {
-        getMembers(pool.id, true).then((members) => setUsers(members?.map((m) => m.user!)));
-        getSafeNonce(pool.chain_id, pool.gnosis_safe_address!).then(setCurrentSafeNonce);
+        if (!pool.gnosis_safe_address) throw new Error('Pool has no gnosis safe address');
+
+        getMembers(pool.id, true).then((members) => setUsers(members?.map((m) => m.user as User)));
+        getSafeNonce(pool.chain_id, pool.gnosis_safe_address).then(setCurrentSafeNonce);
         getAllCategories(pool.id, { activeOnly: true }).then(setCategories);
       }
     };
@@ -138,11 +144,11 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
     })) ?? []),
   ];
 
-  const hasApproved: boolean = !!safeTransaction?.confirmations?.find((c) =>
+  const hasApproved = !!safeTransaction?.confirmations?.find((c) =>
     compareAddress(c.owner, account),
   );
 
-  const hasRejected: boolean = !!safeRejectionTransaction?.confirmations?.find((c) =>
+  const hasRejected = !!safeRejectionTransaction?.confirmations?.find((c) =>
     compareAddress(c.owner, account),
   );
 
@@ -162,14 +168,9 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
       transaction.type,
       () => Promise.resolve(BigNumber.from(0)),
       async () => {
-        await confirmTransaction(
-          user!,
-          signer,
-          pool,
-          transaction,
-          transaction?.safe_tx_hash!,
-          false,
-        );
+        if (!transaction.safe_tx_hash) throw new Error('Transaction has no safe tx hash');
+
+        await confirmTransaction(user, signer, pool, transaction, transaction.safe_tx_hash, false);
         loadTransaction(transaction.id);
         toast({ title: 'You approved the transaction', status: 'success' });
       },
@@ -178,27 +179,31 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
   };
 
   const execute = (isRejection: boolean) => {
-    const { type, safe_tx_hash, reject_safe_tx_hash } = transaction!;
-    const safeTxHash = isRejection ? reject_safe_tx_hash! : safe_tx_hash!;
+    if (!transaction) return;
+
+    const { type, safe_tx_hash, reject_safe_tx_hash } = transaction;
+    const safeTxHash = isRejection ? reject_safe_tx_hash : safe_tx_hash;
+
+    if (!safeTxHash) throw new Error('Transaction has no safe tx hash');
 
     const message = isRejection
       ? `Execute rejection`
-      : getTransactionDescription(transaction!, users);
+      : getTransactionDescription(transaction, users);
 
     reviewTxRef.current?.open(
       message,
       isRejection ? 'rejection' : type,
-      () => estimateTransaction(provider!, transaction!.transaction_data),
+      () => estimateTransaction(provider, transaction.transaction_data),
       async () => {
         const tx = await executeTransaction(
-          user!,
+          user,
           signer,
-          pool!,
+          pool,
           transaction as Transaction,
-          safeTxHash!,
-          isRejection!,
+          safeTxHash,
+          isRejection,
         );
-        loadTransaction(transaction!.id);
+        loadTransaction(transaction.id);
         return {
           hash: tx?.hash,
         };
@@ -216,7 +221,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
       async () => {
         if (transaction.reject_safe_tx_hash) {
           await confirmTransaction(
-            user!,
+            user,
             signer,
             pool,
             transaction,
@@ -224,13 +229,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
             true,
           );
         } else {
-          await createRejectTransaction(
-            user!,
-            signer,
-            pool,
-            transaction.id,
-            safeTransaction?.nonce,
-          );
+          await createRejectTransaction(user, signer, pool, transaction.id, safeTransaction?.nonce);
         }
         loadTransaction(transaction.id);
         toast({ title: 'You rejected the transaction', status: 'success' });
@@ -272,7 +271,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                 <TxPropertyBox label="Type" value={getTransactionTypeLabel(transaction?.type)} />
                 <TxPropertyBox
                   label="Description"
-                  value={getTransactionDescription(transaction!, users)}
+                  value={transaction ? getTransactionDescription(transaction, users) : undefined}
                 />
                 {transaction?.type === 'unlockToken' && (
                   <TxPropertyBox label="Token" flex="1">
@@ -280,10 +279,12 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                       <Image
                         w="20px"
                         h="20px"
-                        src={(transaction?.metadata as any)?.token?.img}
+                        src={(transaction?.metadata as UnlockTokenData)?.token?.image}
                         alt=""
                       />
-                      <Text ml="10px">{(transaction?.metadata as any)?.token.symbol}</Text>
+                      <Text ml="10px">
+                        {(transaction?.metadata as UnlockTokenData)?.token.symbol}
+                      </Text>
                     </Flex>
                   </TxPropertyBox>
                 )}
@@ -423,9 +424,12 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
 
                 <TxPropertyBox label="Category">
                   <EditableSelect
-                    onSelect={(categoryId) =>
-                      updateTransactionCategory(transaction?.id ?? 0, +categoryId)
-                    }
+                    onSelect={(categoryId) => {
+                      if (!transaction?.id || !categoryId) {
+                        throw new Error('Transaction id or category id is not defined');
+                      }
+                      updateTransactionCategory(transaction.id, +categoryId);
+                    }}
                     defaultValue={transaction?.category_id ?? undefined}
                     options={categories.map((c) => ({ value: c.id, name: c.name }))}
                   />
@@ -459,7 +463,7 @@ export const TransactionDetail = forwardRef((_props: any, ref: Ref<TransactionDe
                 <TransactionTimeline
                   mt={10}
                   isExecuted={isExecuted}
-                  executionTimestamp={transaction?.timestamp!}
+                  executionTimestamp={transaction?.timestamp}
                   submissionDate={safeTransaction?.submissionDate}
                   users={users}
                   confirmations={confirmations}

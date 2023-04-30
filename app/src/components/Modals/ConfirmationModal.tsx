@@ -8,7 +8,7 @@ import {
   Spacer,
   useDisclosure,
 } from '@chakra-ui/react';
-import { forwardRef, Ref, useImperativeHandle, useState } from 'react';
+import { Ref, forwardRef, useImperativeHandle, useState } from 'react';
 
 export interface ConfirmationRef {
   open: (message: string, data?: unknown) => void;
@@ -17,7 +17,7 @@ export interface ConfirmationRef {
 //todo: use https://chakra-ui.com/docs/components/alert-dialog instead
 export interface ConfirmationModalProps {
   ref: Ref<ConfirmationRef>;
-  afterClosed: (confirmed: boolean, data?: any) => void | Promise<void>;
+  afterClosed: (confirmed: boolean, data?: unknown) => void | Promise<void>;
 }
 
 export const ConfirmationModal = forwardRef(

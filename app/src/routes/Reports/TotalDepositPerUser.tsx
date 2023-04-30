@@ -24,10 +24,11 @@ export const TotalDepositPerUser = () => {
   const { pool } = usePool();
 
   useEffect(() => {
+    if (!pool?.id) throw new Error('Pool not set');
+
     supabase()
-      .rpc('report_users_stake', { pool_id: pool?.id! })
-      .then(({ data, error }) => {
-        //@ts-ignore
+      .rpc('report_users_stake', { pool_id: pool.id })
+      .then(({ data }) => {
         setDeposits(data);
       });
   }, [pool?.id]);
@@ -69,11 +70,13 @@ export const TotalDepositPerUser = () => {
                     </Stack>
                   </Td>
                   <Td>
-                    <WalletAddress
-                      chainId={pool!.chain_id}
-                      address={deposit.wallet}
-                      type="address"
-                    />
+                    {pool?.chain_id && (
+                      <WalletAddress
+                        chainId={pool.chain_id}
+                        address={deposit.wallet}
+                        type="address"
+                      />
+                    )}
                   </Td>
                   <Td>
                     <Text color={textColor} fontSize="sm" fontWeight="bold">

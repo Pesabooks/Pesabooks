@@ -19,12 +19,15 @@ import {
 } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { FaUser } from 'react-icons/fa';
-import { Invitation } from '../../../types';
 
+export interface Invitee {
+  name: string;
+  email: string;
+}
 interface InviteMembersProps {
-  members: Partial<Invitation>[];
-  onAdd: (member: Partial<Invitation>) => void;
-  onRemove: (member: Partial<Invitation>) => void;
+  members: Invitee[];
+  onAdd: (member: Invitee) => void;
+  onRemove: (member: Invitee) => void;
   loading: boolean;
   onPrev: () => void;
   onNext: () => void;
@@ -39,7 +42,7 @@ const InviteForm = ({
   onAdd,
   onClose,
 }: {
-  onAdd: (member: Partial<Invitation>) => void;
+  onAdd: (member: Invitee) => void;
   onClose: () => void;
 }) => {
   const {

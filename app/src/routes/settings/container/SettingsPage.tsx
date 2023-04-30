@@ -7,21 +7,21 @@ const NavLink = ({ title, link }: { title: string; link: string }) => {
   const textColor = useColorModeValue('gray.700', 'white');
   const navigate = useNavigate();
 
-  let resolved = useResolvedPath(link);
-  let match = useMatch({ path: resolved.pathname, end: true });
+  const resolved = useResolvedPath(link);
+  const match = useMatch({ path: resolved.pathname, end: true });
 
   return (
     <Button
       borderRadius="12px"
-      boxShadow={!!match ? '0px 2px 5.5px rgba(0, 0, 0, 0.06)' : 'none'}
-      bg={!!match ? bgActiveButton : 'transparent'}
+      boxShadow={match ? '0px 2px 5.5px rgba(0, 0, 0, 0.06)' : 'none'}
+      bg={match ? bgActiveButton : 'transparent'}
       transition="all .5s ease"
       w={{ sm: '100%', lg: '135px' }}
       h="35px"
       _hover={{}}
       _focus={{ boxShadow: '0px 2px 5.5px rgba(0, 0, 0, 0.06)' }}
       _active={{
-        boxShadow: !!match ? '0px 2px 5.5px rgba(0, 0, 0, 0.06)' : 'none',
+        boxShadow: match ? '0px 2px 5.5px rgba(0, 0, 0, 0.06)' : 'none',
       }}
       onClick={() => navigate(`${link}`)}
     >

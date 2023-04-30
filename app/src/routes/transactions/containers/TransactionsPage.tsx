@@ -12,7 +12,7 @@ import { TransactionsTable } from '../components/TransactionsTable';
 export const TransactionsPage = () => {
   const { pool } = usePool();
   const [users, setUsers] = useState<User[]>([]);
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const txDetailRef = useRef<TransactionDetailRef>(null);
   const [isLoading, setIsLoading] = useState(true);
 

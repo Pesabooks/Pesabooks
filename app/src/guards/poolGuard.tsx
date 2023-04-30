@@ -3,7 +3,7 @@ import { usePool, useWeb3Auth } from '@pesabooks/hooks';
 import { Navigate } from 'react-router-dom';
 
 export function PoolGuard({ children }: { children: JSX.Element }) {
-  let { pool, loading } = usePool();
+  const { pool, loading } = usePool();
   const { user } = useWeb3Auth();
 
   if (loading) {

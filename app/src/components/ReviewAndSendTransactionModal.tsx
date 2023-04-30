@@ -29,9 +29,9 @@ import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
 import { getTransactionTypeLabel } from '@pesabooks/utils/transactions-utils';
 import { BigNumber } from 'ethers';
 import {
-  forwardRef,
   Reducer,
   Ref,
+  forwardRef,
   useEffect,
   useImperativeHandle,
   useReducer,

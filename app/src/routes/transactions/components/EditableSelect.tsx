@@ -3,9 +3,9 @@ import { ButtonGroup, Flex, IconButton, Select, SelectProps, Spacer } from '@cha
 import { IconButtonWithAdmingRights } from '@pesabooks/components/withConnectedWallet';
 import { useState } from 'react';
 
-interface EditableSelectProps extends SelectProps {
-  options: { value: any; name: string }[];
-  onSelect: (value: any) => void;
+interface EditableSelectProps extends Omit<SelectProps, 'onSelect'> {
+  options: { value: string | number | undefined; name: string }[];
+  onSelect: (value: string | number | undefined) => void;
 }
 
 export const EditableSelect = ({ options, defaultValue, onSelect }: EditableSelectProps) => {
@@ -27,7 +27,7 @@ export const EditableSelect = ({ options, defaultValue, onSelect }: EditableSele
     <>
       {!isEditing && (
         <Flex>
-          {options.find((o) => o.value.toString() === value?.toString())?.name}
+          {options.find((o) => o.value?.toString() === value?.toString())?.name}
           <Spacer />
           <IconButtonWithAdmingRights
             onClick={() => setIsEditing(true)}

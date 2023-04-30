@@ -36,6 +36,7 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
       }}
       pt="8px"
       w={{ sm: 'calc(100vw - 30px)', xl: 'calc(100vw - 75px - 275px)' }}
+      {...flexProps}
     >
       <IconButton
         display={{ sm: 'flex', xl: 'none' }}

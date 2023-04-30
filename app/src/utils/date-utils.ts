@@ -4,7 +4,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-export const formatTimestampSeconds = (seconds: number | undefined) => {
+export const formatTimestampSeconds = (seconds: number | undefined | null) => {
   if (!seconds) return '';
   return dayjs.unix(seconds).format('LLL');
 };

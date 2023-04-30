@@ -19,7 +19,6 @@ export const MembersTable = ({
   onRevoke,
   onRemoveAdmin,
   onResendInvitation,
-  adminAddresses,
   isLoading,
 }: MembersTableProps) => {
   return (

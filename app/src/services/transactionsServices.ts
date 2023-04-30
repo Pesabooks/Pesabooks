@@ -1,5 +1,6 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { ERC20__factory } from '@pesabooks/utils/erc20';
+import { notEqual } from 'assert';
 import { ContractTransaction, Signer, ethers } from 'ethers';
 import { networks } from '../data/networks';
 import { Filter, handleSupabaseError, transationsTable } from '../supabase';
@@ -65,20 +66,22 @@ export const submitTransaction = async (
   pool: Pool,
   transaction: NewTransaction,
 ) => {
+  if (!pool.gnosis_safe_address) throw new Error('Pool has no gnosis safe address');
+
   const safeTransaction = await createSafeTransaction(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address!,
+    pool.gnosis_safe_address,
     transaction.transaction_data,
   );
 
-  const threshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
+  const threshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address);
 
   if (threshold > 1) {
     const safeTxHash = await proposeSafeTransaction(
       signer,
       pool.chain_id,
-      pool.gnosis_safe_address!,
+      pool.gnosis_safe_address,
       safeTransaction,
     );
     const { data } = await transationsTable()
@@ -100,23 +103,25 @@ export const submitTransaction = async (
   } else if (threshold === 1) {
     const safeTxHash = await getSafeTransactionHash(
       signer,
-      pool.gnosis_safe_address!,
+      pool.gnosis_safe_address,
       safeTransaction,
     );
-    const tx = await executeSafeTransaction(signer, pool.gnosis_safe_address!, safeTransaction);
+    const tx = await executeSafeTransaction(signer, pool.gnosis_safe_address, safeTransaction);
+
+    if (!tx) throw new Error('Transaction is null. Something went wrong');
 
     const { data } = await transationsTable()
       .insert({
         ...transaction,
         safe_tx_hash: safeTxHash,
         safe_nonce: safeTransaction.data.nonce,
-        hash: tx?.hash,
+        hash: tx.hash,
         status: 'pending',
       })
       .select()
       .single();
 
-    onTransactionSentToNetwork(data as Transaction, tx!, pool.chain_id, false, user);
+    onTransactionSentToNetwork(data as Transaction, tx, pool.chain_id, false, user);
 
     return data as Transaction;
   }
@@ -130,8 +135,10 @@ export const confirmTransaction = async (
   safeTxHash: string,
   isRejection: boolean,
 ) => {
-  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
-  await confirmSafeTransaction(signer, pool.chain_id, pool.gnosis_safe_address!, safeTxHash);
+  if (!pool.gnosis_safe_address) throw new Error('Pool has no gnosis safe address');
+
+  const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address);
+  await confirmSafeTransaction(signer, pool.chain_id, pool.gnosis_safe_address, safeTxHash);
 
   const safeTransaction = await getSafeTransaction(pool.chain_id, safeTxHash);
 
@@ -165,14 +172,18 @@ export const executeTransaction = async (
   safeTxHash: string,
   isRejection: boolean,
 ) => {
+  if (!pool.gnosis_safe_address) throw new Error('Pool has no gnosis safe address');
+
   const tx = await executeSafeTransactionByHash(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address!,
+    pool.gnosis_safe_address,
     safeTxHash,
   );
 
-  onTransactionSentToNetwork(transaction, tx!, pool.chain_id, isRejection, user);
+  if (!tx) throw new Error('Transaction is null. Something went wrong');
+
+  onTransactionSentToNetwork(transaction, tx, pool.chain_id, isRejection, user);
 
   await transationsTable()
     .update({ hash: tx?.hash, status: isRejection ? 'pending_rejection' : 'pending' })
@@ -188,16 +199,18 @@ export const createRejectTransaction = async (
   transactionId: number,
   nonce: number,
 ) => {
+  if (!pool.gnosis_safe_address) throw new Error('Pool has no gnosis safe address');
+
   const safeTransaction = await createSafeRejectionTransaction(
     signer,
-    pool.gnosis_safe_address!,
+    pool.gnosis_safe_address,
     nonce,
   );
 
   const safeTxHash = await proposeSafeTransaction(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address!,
+    pool.gnosis_safe_address,
     safeTransaction,
   );
 
@@ -225,7 +238,7 @@ const onTransactionSentToNetwork = async (
   const payload = { transaction, blockchainTransaction: tx, chainId, isRejection, user };
   eventBus.channel('transaction').emit<TransactionMessage>('execution_sent', payload);
 
-  tx?.wait().then(
+  tx.wait().then(
     (receipt) => {
       eventBus.channel('transaction').emit<TransactionMessage>('execution_completed', {
         ...payload,
@@ -262,6 +275,7 @@ export const getAllTransactions = async (
 };
 
 export const getAllProposals = async (pool: Pool) => {
+  notEqual;
   const filter: Filter<'transactions'> = (query) =>
     query.in('status', ['awaitingConfirmations', 'awaitingExecution']);
   return getAllTransactions(pool.id, filter);
@@ -284,8 +298,10 @@ export const getTransactionById = async (txId: number) => {
 };
 
 export const refreshTransaction = async (chain_id: number, t: Transaction) => {
+  if (!t.hash) return;
+
   const provider = defaultProvider(chain_id);
-  const tx = await provider.getTransaction(t.hash!);
+  const tx = await provider.getTransaction(t.hash);
   onTransactionSentToNetwork(t, tx, chain_id);
 };
 

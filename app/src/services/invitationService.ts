@@ -68,7 +68,7 @@ export const createInvitation = async (
   handleSupabaseError(error);
 
   const newIinvitation = data as Invitation;
-  sendInvitation(newIinvitation!);
+  sendInvitation(newIinvitation);
 
   return newIinvitation;
 };
@@ -114,5 +114,5 @@ export const getPendingInvitationCount = async (pool_id: string) => {
     .filter('pool_id', 'eq', pool_id);
 
   handleSupabaseError(error);
-  return count;
+  return count ?? 0;
 };

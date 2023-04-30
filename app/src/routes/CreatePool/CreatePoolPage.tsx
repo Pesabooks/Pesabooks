@@ -1,18 +1,18 @@
 import { Container, Flex, Text, useToast } from '@chakra-ui/react';
 import { NavbarLight } from '@pesabooks/components/Layout/NavbarLight';
 import { useWeb3Auth } from '@pesabooks/hooks';
+import { getErrorMessage } from '@pesabooks/utils/error-utils';
 import { Step, Steps, useSteps } from 'chakra-ui-steps';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaEdit, FaEthereum, FaUsers } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
 import { createInvitation } from '../../services/invitationService';
 import { createNewPool } from '../../services/poolsService';
 import { getAllTokens } from '../../services/tokensService';
-import { Invitation } from '../../types';
 import { ChooseNetworkTab } from './components/ChooseNetworkTab';
 import { CreatingPool } from './components/CreatingPool';
-import { GroupMembersTab } from './components/GroupMembersTab';
+import { GroupMembersTab, Invitee } from './components/GroupMembersTab';
 import { CreatePoolFormValue, PoolFormTab } from './components/PoolFormTab';
 
 export const CreatePoolPage = () => {
@@ -24,15 +24,22 @@ export const CreatePoolPage = () => {
 
   const [chainId, setChainId] = useState<number | null>(null);
   const [poolInfo, setPoolInfo] = useState<CreatePoolFormValue>();
-  const [members, setMembers] = useState<Partial<Invitation>[]>([
-    { name: user?.username ?? undefined, email: user?.email },
-  ]);
+  const [members, setMembers] = useState<Invitee[]>([]);
+
+  useEffect(() => {
+    if (user && user.username && !members.find((m) => m.email === user.email))
+      setMembers([{ name: user.username, email: user?.email }, ...members]);
+  }, [user]);
 
   const { nextStep, prevStep, setStep, activeStep } = useSteps({
     initialStep: 0,
   });
 
   const createPool = async () => {
+    if (!user?.username) {
+      throw new Error("User's username is not set");
+    }
+
     setLoading(true);
     if (!chainId || !poolInfo) return;
     try {
@@ -40,18 +47,22 @@ export const CreatePoolPage = () => {
 
       nextStep();
       const pool = await createNewPool(name, description, token, chainId);
+
+      const username: string = user.username;
+
       if (pool) {
         await Promise.all(
           members
-            .filter((m) => m.email !== user?.email!)
-            .map((member) => createInvitation(pool, member.name!, member.email!, user?.username!)),
+            .filter((m) => m.email !== user?.email)
+            .map((member) => createInvitation(pool, member.name, member.email, username)),
         );
 
         navigate(`/pool/${pool.id}`);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = getErrorMessage(e);
       toast({
-        title: e.message,
+        title: message,
         status: 'error',
         isClosable: true,
       });
@@ -61,10 +72,10 @@ export const CreatePoolPage = () => {
     }
   };
 
-  const addMember = (member: Partial<Invitation>) => {
+  const addMember = (member: Invitee) => {
     if (!members.find((m) => m.email === member.email)) setMembers([...members, member]);
   };
-  const removeMember = (member: Partial<Invitation>) => {
+  const removeMember = (member: Invitee) => {
     setMembers([...members.filter((m) => m.email !== member.email)]);
   };
 

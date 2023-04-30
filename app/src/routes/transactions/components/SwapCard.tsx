@@ -26,7 +26,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { getTokenAllowance } from '@pesabooks/services/blockchainServices';
-import { getBalances, TokenBalance } from '@pesabooks/services/covalentServices';
+import { TokenBalance, getBalances } from '@pesabooks/services/covalentServices';
 import { eventBus } from '@pesabooks/services/events/eventBus';
 import { getPendingTokenUnlockingTxCount } from '@pesabooks/services/transactionsServices';
 import { compareAddress } from '@pesabooks/utils/addresses-utils';
@@ -38,13 +38,13 @@ import {
 import { BigNumber, ethers } from 'ethers';
 import { debounce } from 'lodash';
 import {
-  Address,
   APIError,
+  Address,
   ETHER_ADDRESS as NATIVE_TOKEN_ADDRESS,
   NetworkID,
   ParaSwap,
-  Token,
   Transaction as ParaswapTx,
+  Token,
 } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -316,10 +316,10 @@ export const SwapCard = ({
     if (tokenTo && tokenFrom) getBestPrice(state.srcAmount, tokenTo, tokenFrom);
   };
 
-  const updatePair = (key: 'tokenFrom' | 'tokenTo', token: Token) => {
+  const updatePair = (key: 'tokenFrom' | 'tokenTo', token: Token | null) => {
     if (
-      (key === 'tokenFrom' && token.symbol === state.tokenTo?.symbol) ||
-      (key === 'tokenTo' && token.symbol === state.tokenFrom?.symbol)
+      (key === 'tokenFrom' && token?.symbol === state.tokenTo?.symbol) ||
+      (key === 'tokenTo' && token?.symbol === state.tokenFrom?.symbol)
     ) {
       switchToken();
       return;
@@ -329,12 +329,14 @@ export const SwapCard = ({
       ...prevState,
       [key]: token,
     }));
-    if (key === 'tokenFrom' && state.tokenTo) getBestPrice(state.srcAmount, token, state.tokenTo);
-    else if (key === 'tokenTo' && state.tokenFrom)
+    if (key === 'tokenFrom' && state.tokenTo && token) {
+      getBestPrice(state.srcAmount, token, state.tokenTo);
+    } else if (key === 'tokenTo' && state.tokenFrom && token) {
       getBestPrice(state.srcAmount, state.tokenFrom, token);
+    }
   };
 
-  const onAmountChange = (value: any) => {
+  const onAmountChange = (value: string) => {
     setState((prevState) => ({
       ...prevState,
       srcAmount: value,
@@ -347,7 +349,7 @@ export const SwapCard = ({
     if (!token) return '0';
     const balance = formatBigNumber(
       state.balances?.find((b) => compareParaswapToken(b, token))?.balance,
-      token?.decimals!,
+      token?.decimals,
     );
     if (balance) return balance.toString();
     return '0';
@@ -451,7 +453,7 @@ export const SwapCard = ({
 
   const submitSwap = async () => {
     const { tokenFrom, tokenTo, srcAmount, priceRoute } = state;
-    if (!paraswap || !tokenFrom || !tokenTo) return;
+    if (!paraswap || !tokenFrom || !tokenTo || !minDestinationAmount) return;
 
     if (!priceRoute) {
       setState((prevState) => ({
@@ -461,13 +463,13 @@ export const SwapCard = ({
       return;
     }
 
-    const _srcAmount = ethers.utils.parseUnits(srcAmount.toString(), tokenFrom!.decimals);
+    const _srcAmount = ethers.utils.parseUnits(srcAmount.toString(), tokenFrom.decimals);
 
     const txParams = await paraswap.buildTx(
-      tokenFrom!.address,
-      tokenTo!.address,
+      tokenFrom.address,
+      tokenTo.address,
       _srcAmount.toString(),
-      minDestinationAmount!.toString(),
+      minDestinationAmount.toString(),
       priceRoute,
       address,
     );
@@ -494,8 +496,8 @@ export const SwapCard = ({
       compareAddress(b.token.address, state.tokenFrom?.address),
     )?.balance;
 
-    if (balanceBN) {
-      const balance = ethers.utils.formatUnits(balanceBN, state.tokenFrom?.decimals!);
+    if (balanceBN && state.tokenFrom?.decimals) {
+      const balance = ethers.utils.formatUnits(balanceBN, state.tokenFrom.decimals);
       onAmountChange(balance);
     }
   };
@@ -607,10 +609,11 @@ export const SwapCard = ({
                       id="toAmount"
                       variant="unstyled"
                       w="100%"
-                      value={formatBigNumber(
-                        state.priceRoute?.destAmount,
-                        state.tokenTo?.decimals!,
-                      )}
+                      value={
+                        state.tokenTo
+                          ? formatBigNumber(state.priceRoute?.destAmount, state.tokenTo.decimals)
+                          : ''
+                      }
                       readOnly
                     ></Input>
                   )}
@@ -652,10 +655,12 @@ export const SwapCard = ({
 
               <Flex justifyContent="space-between">
                 <Text fontSize="sm">Minimum Received:</Text>
-                <Text as="i" fontSize="sm">
-                  {formatBigNumber(minDestinationAmount?.toString(), state.tokenTo?.decimals!, 8)}{' '}
-                  {state.tokenTo?.symbol}
-                </Text>
+                {state.tokenTo && (
+                  <Text as="i" fontSize="sm">
+                    {formatBigNumber(minDestinationAmount?.toString(), state.tokenTo.decimals, 8)}{' '}
+                    {state.tokenTo.symbol}
+                  </Text>
+                )}
               </Flex>
 
               <Flex justifyContent="space-between">

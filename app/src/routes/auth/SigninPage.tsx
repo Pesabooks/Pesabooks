@@ -25,7 +25,7 @@ export const SignInPage = () => {
   const titleColor = useColorModeValue('teal.300', 'teal.200');
   const textColor = useColorModeValue('gray.700', 'white');
   const bgColor = useColorModeValue('white', 'gray.700');
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl') ?? '/';
   const toast = useToast();
   const { signIn, isInitialised, isAuthenticated } = useWeb3Auth();

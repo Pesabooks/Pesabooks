@@ -40,7 +40,7 @@ import Loading from '../../components/Loading';
 import { Pagination } from '../../components/Pagination';
 import { WalletAddress } from '../../components/WalletAddress';
 import { networks } from '../../data/networks';
-import { getBalances, TokenBalance } from '../../services/covalentServices';
+import { TokenBalance, getBalances } from '../../services/covalentServices';
 import { eventBus } from '../../services/events/eventBus';
 import { getAllActivities, purchaseToken } from '../../services/walletServices';
 import { Activity, TokenBase } from '../../types';
@@ -131,7 +131,7 @@ export const WalletPage = () => {
     getData(chainId, account);
   }, [account, chainId, getData]);
 
-  let swapAsset: string = '';
+  let swapAsset = '';
   switch (chainId) {
     case 1:
       swapAsset = 'ETH_ETH,ETH_USDC,ETH_DAI';
@@ -197,7 +197,7 @@ export const WalletPage = () => {
 
   // subscribe to eventbus activities
   useEffect(() => {
-    const subscription = eventBus.channel('activity').on('*', (_) => {
+    const subscription = eventBus.channel('activity').on('*', () => {
       getData(chainId, account);
     });
 

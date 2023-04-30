@@ -13,11 +13,12 @@ import {
   VStack,
 } from '@chakra-ui/react';
 import { useWeb3Auth } from '@pesabooks/hooks';
+import { checkifUsernameExists, updateUsername } from '@pesabooks/services/profilesService';
+import { getErrorMessage } from '@pesabooks/utils/error-utils';
 import { debounce } from 'lodash';
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { checkifUsernameExists, updateUsername } from '@pesabooks/services/profilesService';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export const SetUsernamePage = () => {
   const { user, updateProfile } = useWeb3Auth();
@@ -25,19 +26,22 @@ export const SetUsernamePage = () => {
   const [errors, setErrors] = useState<string | null>();
   const [isValidating, setIsValidating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  let [searchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const returnUrl = searchParams.get('returnUrl') ?? '/';
 
   const onSubmit = async () => {
+    if (!user?.id) throw new Error('User is not set');
+
     if (username) {
       try {
         setIsSubmitting(true);
-        await updateUsername(user?.id!, username);
+        await updateUsername(user.id, username);
         updateProfile(username);
         navigate(returnUrl ?? '/');
-      } catch (error) {
+      } catch (error: unknown) {
+        setErrors(getErrorMessage(error));
       } finally {
         setIsSubmitting(false);
       }
@@ -62,7 +66,7 @@ export const SetUsernamePage = () => {
     }
   }, 1000);
 
-  const onUsernameChange = (e: any) => {
+  const onUsernameChange = (e: string) => {
     setIsValidating(true);
     setUsername(e);
     checkAvailability(e);

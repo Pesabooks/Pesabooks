@@ -16,6 +16,7 @@ import { useWeb3Auth } from '@pesabooks/hooks';
 import { fee } from '@pesabooks/services/estimationService';
 import { approveToken, estimateApprove, swapTokens } from '@pesabooks/services/walletServices';
 import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
+import { getErrorMessage } from '@pesabooks/utils/error-utils';
 import { BigNumber } from 'ethers';
 import { Transaction as ParaswapTx } from 'paraswap';
 import { useRef } from 'react';
@@ -35,6 +36,8 @@ export const SwapModal = ({ isOpen, onClose, address, chainId, assets }: SwapMod
   const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
   const toast = useToast();
 
+  if (!provider) throw new Error('Provider is not set');
+
   const confirmSwap = async (swapArg: SwapArgs) => {
     const { tokenFrom, tokenTo, priceRoute } = swapArg;
 
@@ -43,7 +46,7 @@ export const SwapModal = ({ isOpen, onClose, address, chainId, assets }: SwapMod
         tokenFrom.symbol
       } for ${formatBigNumber(priceRoute.destAmount, tokenTo.decimals)} ${tokenTo.symbol}`,
       'swap',
-      () => fee(provider!, BigNumber.from(priceRoute.gasCost)),
+      () => fee(provider, BigNumber.from(priceRoute.gasCost)),
       () => swap(swapArg),
     );
   };
@@ -63,7 +66,7 @@ export const SwapModal = ({ isOpen, onClose, address, chainId, assets }: SwapMod
     reviewTxRef.current?.open(
       `Unlock token ${tokenFrom.symbol} `,
       'unlockToken',
-      () => estimateApprove(provider!, paraswapProxy, tokenFrom, amount),
+      () => estimateApprove(provider, paraswapProxy, tokenFrom, amount),
       () => onConfirmApprove(approveArg),
     );
   };
@@ -77,8 +80,8 @@ export const SwapModal = ({ isOpen, onClose, address, chainId, assets }: SwapMod
       return {
         hash: tx?.hash,
       };
-    } catch (e: any) {
-      const message = typeof e === 'string' ? e : e.message;
+    } catch (e: unknown) {
+      const message = getErrorMessage(e);
       toast({
         title: message,
         status: 'error',

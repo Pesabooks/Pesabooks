@@ -43,22 +43,22 @@ export const WithdrawPage = () => {
   const signer = (provider as Web3Provider)?.getSigner();
 
   if (!token) {
-    throw new Error('Argument Exception');
+    throw new Error('token is not set');
   }
+  if (!provider) throw new Error('Provider is not set');
 
   useEffect(() => {
-    getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user!)));
-
+    getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user as User)));
     getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
       setCategories(categories ?? []),
     );
   }, [methods, pool]);
 
   useEffect(() => {
-    if (pool) {
-      getAddressBalance(pool.chain_id, token.address, pool.gnosis_safe_address!).then(setBalance);
+    if (pool.gnosis_safe_address) {
+      getAddressBalance(pool.chain_id, token.address, pool.gnosis_safe_address).then(setBalance);
     }
-  }, [token, pool]);
+  }, [token, pool?.chain_id, pool?.gnosis_safe_address]);
 
   const onWithDraw = async (formValue: WithdrawFormValue) => {
     const { amount, memo, user, category } = formValue;
@@ -71,9 +71,9 @@ export const WithdrawPage = () => {
       () =>
         threshold > 1
           ? Promise.resolve(BigNumber.from(0))
-          : estimateTransaction(provider!, transaction.transaction_data),
+          : estimateTransaction(provider, transaction.transaction_data),
       async () => {
-        const tx = await submitTransaction(user!, signer, pool!, transaction!);
+        const tx = await submitTransaction(user, signer, pool, transaction);
         methods.reset();
         return { hash: tx?.hash, internalTxId: tx?.id };
       },

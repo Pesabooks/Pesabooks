@@ -2,7 +2,7 @@ import { Box, BoxProps } from '@chakra-ui/react';
 import { useWeb3Auth } from '@pesabooks/hooks';
 import { ChainTag } from './ChainTag';
 
-interface ConnectedChainProps extends BoxProps {}
+type ConnectedChainProps = BoxProps;
 
 export const ConnectedChain = (props: ConnectedChainProps) => {
   const { chainId } = useWeb3Auth();

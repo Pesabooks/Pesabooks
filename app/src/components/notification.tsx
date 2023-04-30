@@ -10,7 +10,7 @@ import { defaultProvider } from '../services/blockchainServices';
 import { eventBus, TransactionMessage } from '../services/events/eventBus';
 import theme from '../theme/theme';
 
-const PendingNotification = ({ description }: any) => {
+const PendingNotification = ({ description }: { description: string | undefined }) => {
   return (
     <>
       <Progress size="sm" isIndeterminate />
@@ -37,10 +37,10 @@ export const notifyTransaction = async (chain_id: number, txHash: string, descri
   });
 
   const provider = defaultProvider(chain_id);
-  var tx = await provider.getTransaction(txHash);
+  const tx = await provider.getTransaction(txHash);
 
   tx?.wait().then(
-    (receipt) => {
+    () => {
       toast.update(tx.hash, {
         title: 'Your transaction has succeeded',
         description: description,
@@ -49,7 +49,7 @@ export const notifyTransaction = async (chain_id: number, txHash: string, descri
         isClosable: true,
       });
     },
-    (reason) => {
+    () => {
       toast.update(tx.hash, {
         title: 'Your transaction failed',
         description: description,

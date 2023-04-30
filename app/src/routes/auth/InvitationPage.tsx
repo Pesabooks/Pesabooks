@@ -8,10 +8,10 @@ import { Invitation } from '../../types';
 
 export const InvitationPage = () => {
   const [loading, setLoading] = useState(false);
-  let location = useLocation();
-  let navigate = useNavigate();
-  let { isAuthenticated } = useWeb3Auth();
-  let { invitation_id } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated } = useWeb3Auth();
+  const { invitation_id } = useParams();
   const [invitation, setInvitation] = useState<Invitation | null>();
   const toast = useToast();
 

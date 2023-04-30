@@ -3,7 +3,7 @@ import { useWeb3Auth } from '@pesabooks/hooks';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 export function AuthGuard() {
-  let location = useLocation();
+  const location = useLocation();
 
   const { isInitialised, isAuthenticated, user } = useWeb3Auth();
 

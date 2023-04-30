@@ -34,7 +34,7 @@ export const buildDepositTx = async (
   const signer = provider.getSigner();
 
   const from = checksummed(await signer.getAddress());
-  const to = checksummed(pool.gnosis_safe_address!);
+  const to = checksummed(pool.gnosis_safe_address as string);
   const tokenAddress = checksummed(token.address);
 
   const tokenContract = ERC20__factory.connect(tokenAddress, signer);
@@ -49,7 +49,7 @@ export const buildDepositTx = async (
     pool_id: pool.id,
     timestamp: Math.floor(new Date().valueOf() / 1000),
     metadata: {
-      transfer_from_name: user.username!,
+      transfer_from_name: user.username ?? undefined,
       transfer_from: from,
       transfer_to: to,
       transfer_to_name: pool.name,
@@ -84,7 +84,7 @@ export const buildWithdrawTx = async (
   if (token == null) throw new Error();
 
   const tokenAddress = checksummed(token?.address);
-  const from = checksummed(pool.gnosis_safe_address!);
+  const from = checksummed(pool.gnosis_safe_address as string);
   const to = checksummed(user.wallet);
 
   const tokenContract = getTokenContract(pool.chain_id, tokenAddress);
@@ -100,7 +100,7 @@ export const buildWithdrawTx = async (
       transfer_from_name: pool.name,
       transfer_from: from,
       transfer_to: to,
-      transfer_to_name: user.username!,
+      transfer_to_name: user.username ?? undefined,
       token: {
         address: tokenAddress,
         symbol: token.symbol,
@@ -134,7 +134,7 @@ export const buildAddAdminTx = async (
   const txData = await getAddOwnerTx(
     signer,
     pool.chain_id,
-    pool.gnosis_safe_address!,
+    pool.gnosis_safe_address as string,
     checksummed(user.wallet),
     threshold,
   );
@@ -196,7 +196,9 @@ export const buildChangeThresholdTx = async (
   threshold: number,
   currentThresold: number,
 ) => {
-  const safeTransaction = await getChangeThresholdTx(signer, pool.gnosis_safe_address!, threshold);
+  if (!pool.gnosis_safe_address) throw new Error('No gnosis safe address');
+
+  const safeTransaction = await getChangeThresholdTx(signer, pool.gnosis_safe_address, threshold);
 
   const transaction: NewTransaction = {
     type: 'changeThreshold',
@@ -208,7 +210,7 @@ export const buildChangeThresholdTx = async (
       threshold,
       current_threshold: currentThresold,
     },
-    transaction_data: { from: pool.gnosis_safe_address!, ...safeTransaction },
+    transaction_data: { from: pool.gnosis_safe_address, ...safeTransaction },
   };
 
   return transaction;
@@ -220,6 +222,8 @@ export const buildApproveTokenTx = async (
   proxyContract: string,
   token: ParaswapToken,
 ) => {
+  if (!pool.gnosis_safe_address) throw new Error('No gnosis safe address');
+
   const tokenContract = getTokenContract(pool.chain_id, token.address);
   const decimals = await tokenContract.decimals();
   const maxAllowance = BigNumber.from('2').pow(BigNumber.from('256').sub(BigNumber.from('1')));
@@ -248,7 +252,7 @@ export const buildApproveTokenTx = async (
       },
       amount,
     } as UnlockTokenData,
-    transaction_data: { from: pool.gnosis_safe_address!, ...txData },
+    transaction_data: { from: pool.gnosis_safe_address, ...txData },
   };
 
   return transaction;
@@ -263,7 +267,7 @@ export const buildSwapTokensTx = async (
   priceRoute: OptimalRate,
 ) => {
   const txData = {
-    from: pool.gnosis_safe_address!,
+    from: pool.gnosis_safe_address,
     to: checksummed(paraswapTx.to),
     value: paraswapTx.value,
     data: paraswapTx.data,

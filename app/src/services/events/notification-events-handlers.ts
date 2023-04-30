@@ -1,7 +1,7 @@
 import { getSafeTransaction, getSafeTreshold } from '../gnosisServices';
 import { sendNotification } from '../notificationServices';
 import { getPool } from '../poolsService';
-import { BusMessage, ConfirmTransactionPayload, eventBus, TransactionMessage } from './eventBus';
+import { BusMessage, ConfirmTransactionPayload, TransactionMessage, eventBus } from './eventBus';
 
 export class NotificationEventHandler {
   onTransactionRejected = async ({
@@ -46,10 +46,11 @@ export class NotificationEventHandler {
   };
 
   onNewProposal = async ({ payload: { transaction, user } }: BusMessage<TransactionMessage>) => {
-    const pool = await getPool(transaction.pool_id!);
+    const pool = await getPool(transaction.pool_id);
     const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
 
-    sendNotification(user!.id, 'new_proposal', transaction, {
+    if (!user?.id) return;
+    sendNotification(user.id, 'new_proposal', transaction, {
       remaining_votes: treshold - 1,
     });
   };

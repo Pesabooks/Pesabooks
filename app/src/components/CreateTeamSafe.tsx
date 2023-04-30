@@ -24,17 +24,19 @@ export const CreateTeamSafe = () => {
     const fetchData = async () => {
       if (pool?.id) {
         const pendingInvitationsCount = await getPendingInvitationCount(pool.id);
-        setHasPendingInvitations(pendingInvitationsCount! > 0);
+        setHasPendingInvitations(pendingInvitationsCount > 0);
       }
     };
     fetchData();
   }, [pool?.id]);
 
   const confirmTx = () => {
+    if (!provider) throw new Error('Provider not initialized');
+
     reviewTxRef.current?.open(
       `Create group wallet`,
       'createSafe',
-      () => estimateSafeCreation(provider!),
+      () => estimateSafeCreation(provider),
       onDeployNewSafe,
       { closeOnSuccess: true },
     );

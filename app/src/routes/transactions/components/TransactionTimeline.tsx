@@ -16,7 +16,7 @@ import { User } from '../../../types';
 interface TransactionTimelineProps extends BoxProps {
   users: User[];
   isExecuted: boolean;
-  executionTimestamp: number | undefined;
+  executionTimestamp: number | undefined | null;
   submissionDate: string | undefined;
   confirmations: {
     rejected: boolean;
