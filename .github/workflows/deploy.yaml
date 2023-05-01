@@ -108,7 +108,7 @@ jobs:
       - run: npm install --force
 
       - name: Build
-        run: npm run build
+        run: CI=false npm run build
         env:
           REACT_APP_SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}

@@ -33,13 +33,18 @@ export const SwapPage = () => {
   const { isOpen: isDeadlineWarningVisible, onClose: onCloseDeadlineWarning } = useDisclosure({
     defaultIsOpen: threshold > 1,
   });
+
+  if (!pool) throw new Error('Pool not set');
+  if (!provider) throw new Error('Provider not set');
+  if (!user) throw new Error('User not set');
+
   const signer = (provider as Web3Provider)?.getSigner();
 
   const approve = async (args: ApproveArgs) => {
     const { paraswapProxy, tokenFrom } = args;
 
     const transaction = await buildApproveTokenTx(
-      pool!,
+      pool,
       undefined, //state.srcAmount,
       paraswapProxy,
       tokenFrom,
@@ -51,9 +56,9 @@ export const SwapPage = () => {
       () =>
         threshold > 1
           ? Promise.resolve(BigNumber.from(0))
-          : estimateTransaction(provider!, transaction.transaction_data),
+          : estimateTransaction(provider, transaction.transaction_data),
       async () => {
-        const tx = await submitTransaction(user!, signer, pool!, transaction!);
+        const tx = await submitTransaction(user, signer, pool, transaction);
         return { hash: tx?.hash, internalTxId: tx?.id };
       },
     );
@@ -79,9 +84,9 @@ export const SwapPage = () => {
       () =>
         threshold > 1
           ? Promise.resolve(BigNumber.from(0))
-          : estimateTransaction(provider!, transaction.transaction_data),
+          : estimateTransaction(provider, transaction.transaction_data),
       async () => {
-        const tx = await submitTransaction(user!, signer, pool!, transaction!);
+        const tx = await submitTransaction(user, signer, pool, transaction);
         return { hash: tx?.hash, internalTxId: tx?.id };
       },
     );
@@ -115,7 +120,7 @@ export const SwapPage = () => {
 
         {pool && (
           <SwapCard
-            address={pool.gnosis_safe_address!}
+            address={pool.gnosis_safe_address as string}
             chain_id={pool.chain_id}
             pool_id={pool.id}
             defaultTokenAddress={pool.token?.address}
