@@ -29,9 +29,9 @@ export const getTransactionDescription = (
 ): string => {
   const { type, metadata } = transaction;
 
-  const isProposal = (['awaitingConfirmations', 'awaitingExecution'] as TransactionStatus[])
-    //@ts-ignore
-    .includes(transaction.status);
+  const isProposal = (
+    ['awaitingConfirmations', 'awaitingExecution'] as TransactionStatus[]
+  ).includes((transaction as Transaction).status);
 
   switch (type) {
     case 'deposit': {

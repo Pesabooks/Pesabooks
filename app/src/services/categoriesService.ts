@@ -5,7 +5,7 @@ export const getAllCategories = async (pool_id: string, options?: { activeOnly: 
   let query = categoriesTable().select().order('id').eq('pool_id', pool_id);
 
   if (options?.activeOnly) {
-    query = query.order('active', { ascending: false });
+    query = query.eq('active', true);
   }
 
   const { data, error } = await query;

@@ -3681,6 +3681,18 @@
     "@tanstack/query-core" "4.29.1"
     use-sync-external-store "^1.2.0"
 
+"@tanstack/react-table@^8.8.5":
+  version "8.8.5"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-table/-/react-table-8.8.5.tgz#d345fd855bb8067cd32b7a9b5231bdefd9cbde55"
+  integrity sha512-g/t21E/ICHvaCOJOhsDNr5QaB/6aDQEHFbx/YliwwU/CJThMqG+dS28vnToIBV/5MBgpeXoGRi2waDJVJlZrtg==
+  dependencies:
+    "@tanstack/table-core" "8.8.5"
+
+"@tanstack/table-core@8.8.5":
+  version "8.8.5"
+  resolved "https://registry.yarnpkg.com/@tanstack/table-core/-/table-core-8.8.5.tgz#4d75b452a9989a273174df1b9249157292a15bd5"
+  integrity sha512-Xnwa1qxpgvSW7ozLiexmKp2PIYcLBiY/IizbdGriYCL6OOHuZ9baRhrrH51zjyz+61ly6K59rmt6AI/3RR+97Q==
+
 "@testing-library/dom@^7.28.1":
   version "7.31.2"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-7.31.2.tgz#df361db38f5212b88555068ab8119f5d841a8c4a"
@@ -4179,13 +4191,6 @@
   version "18.0.11"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.0.11.tgz#321351c1459bc9ca3d216aefc8a167beec334e33"
   integrity sha512-O38bPbI2CWtgw/OoQoY+BRelw7uysmXbWvw3nLWO21H1HSh+GOlqPuXshJfjmpNlKiiSDG9cc1JZAaMmVdcTlw==
-  dependencies:
-    "@types/react" "*"
-
-"@types/react-table@^7.7.14":
-  version "7.7.14"
-  resolved "https://registry.yarnpkg.com/@types/react-table/-/react-table-7.7.14.tgz#b880f1ae140ed065bca2e21b3008ca1ebe71595a"
-  integrity sha512-TYrv7onCiakaG1uAu/UpQ9FojNEt/4/ht87EgJQaEGFoWV606ZLWUZAcUHzMxgc3v1mywP1cDyz3qB4ho3hWOw==
   dependencies:
     "@types/react" "*"
 
@@ -12972,11 +12977,6 @@ react-supabase@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/react-supabase/-/react-supabase-0.2.0.tgz#63b1083e18754b5a0e6946ef4701a0559ba713b5"
   integrity sha512-dlAOhkFaWr8ZqHUkWflGvDpFUT69DbWE7+LxmH/a56ma/qS1EinsIKcxskPcPlaWO70QI7hxu9y8imp8qxDCLw==
-
-react-table@^7.7.0:
-  version "7.8.0"
-  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.8.0.tgz#07858c01c1718c09f7f1aed7034fcfd7bda907d2"
-  integrity sha512-hNaz4ygkZO4bESeFfnfOft73iBUj8K5oKi1EcSHPAibEydfsX2MyU6Z8KCr3mv3C9Kqqh71U+DhZkFvibbnPbA==
 
 react-transition-group@^4.3.0:
   version "4.4.5"

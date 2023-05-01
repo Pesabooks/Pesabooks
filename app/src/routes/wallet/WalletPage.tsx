@@ -160,7 +160,7 @@ export const WalletPage = () => {
       hostAppName: 'Pesabooks',
       hostLogoUrl: 'https://pesabooks.com/assets/img/logo-dark.png',
       swapAsset,
-      userAddress: account!,
+      userAddress: account as string,
       userEmailAddress: user?.email,
       hostApiKey: process.env.REACT_APP_RAMP_API_KEY,
       webhookStatusUrl: `https://${process.env.REACT_APP_SUPABASE_PROJECT_ID}.functions.supabase.co/ramp-callback`,

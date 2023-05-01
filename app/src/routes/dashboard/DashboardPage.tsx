@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaArrowDown, FaArrowUp, FaWallet } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { getBalances, TokenBalance } from '../../services/covalentServices';
+import { TokenBalance, getBalances } from '../../services/covalentServices';
 import { getMembers } from '../../services/membersService';
 import { getAllProposals } from '../../services/transactionsServices';
 import { QueryBuilder, supabase } from '../../supabase';
@@ -65,7 +65,6 @@ export const DashboardPage = () => {
             .rpc('get_transactions_stats', { pool_id: pool.id })
             .single()
             .then(({ data }) => {
-              //@ts-ignore todo: fix this
               if (data) setTxStats(data);
             });
         }

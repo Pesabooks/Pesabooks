@@ -102,7 +102,6 @@ export function useTransactions(
         .subscribe((status) => {
           if (status === 'SUBSCRIBED') {
             const access_token = getTypedStorageItem('supabase_access_token');
-            // @ts-ignore
             client.realtime.setAuth(access_token);
           }
         });
