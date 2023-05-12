@@ -7,7 +7,7 @@ Sentry.init({
   environment: Deno.env.get("ENV") ?? "",
   dsn: Deno.env.get("SENTRY_DSN") ?? "",
 });
-// modify functions
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     console.log("OPTIONS called");

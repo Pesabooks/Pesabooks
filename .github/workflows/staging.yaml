@@ -1,8 +1,8 @@
-name: Functions
+name: Staging
 
 on:
   push:
-    branches: [refactor-github-action]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
