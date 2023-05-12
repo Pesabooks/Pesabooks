@@ -1,6 +1,6 @@
+import { Activity, Transaction } from '@pesabooks/types';
 import { ContractReceipt, ContractTransaction } from 'ethers';
 import { Subject, filter } from 'rxjs';
-import { Activity, Transaction, User } from '../../types';
 import { NotificationEventHandler } from './notification-events-handlers';
 import { TransactionEventHandler } from './transaction-events-handlers';
 import { UserEventHandler } from './user-events-handlers';
@@ -36,7 +36,8 @@ export interface TransactionMessage extends TransactionPayload {
   blockchainTransaction: ContractTransaction;
   blockchainReceipt?: ContractReceipt;
   chainId: number;
-  user?: User;
+  userId: string | null;
+  isRejection: boolean;
 }
 
 export interface ActivityBusMessage {

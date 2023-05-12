@@ -33,7 +33,7 @@ import { BigNumber } from 'ethers';
 import { forwardRef, Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import { getAllCategories } from '@pesabooks/services/categoriesService';
-import { estimateTransaction } from '@pesabooks/services/estimationService';
+import { estimateSafeTransaction } from '@pesabooks/services/estimationService';
 import { getSafeNonce, getSafeTransaction } from '@pesabooks/services/gnosisServices';
 import { getMembers } from '@pesabooks/services/membersService';
 import {
@@ -52,12 +52,6 @@ import {
 import { UserWalletCard } from '@pesabooks/components/UserWalletCard';
 import { WalletAddress } from '@pesabooks/components/WalletAddress';
 import { usePool, useWeb3Auth } from '@pesabooks/hooks';
-import { compareAddress, mathAddress } from '@pesabooks/utils/addresses-utils';
-import {
-  getTransactionDescription,
-  getTransactionTypeLabel,
-} from '@pesabooks/utils/transactions-utils';
-import { Category, Transaction, User } from '../../../types';
 import {
   AddOrRemoveOwnerData,
   ChangeThresholdData,
@@ -65,7 +59,13 @@ import {
   TransferData,
   UnlockTokenData,
   WalletConnectData,
-} from '../../../types/transaction';
+} from '@pesabooks/types';
+import { compareAddress, mathAddress } from '@pesabooks/utils/addresses-utils';
+import {
+  getTransactionDescription,
+  getTransactionTypeLabel,
+} from '@pesabooks/utils/transactions-utils';
+import { Category, Transaction, User } from '../../../types';
 import { EditableSelect } from './EditableSelect';
 import { TransactionStatusBadge } from './TransactionStatusBadge';
 import { TransactionTimeline } from './TransactionTimeline';
@@ -78,7 +78,7 @@ export interface TransactionDetailRef {
 export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<TransactionDetailRef>) => {
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { pool } = usePool();
-  const { provider, account, user } = useWeb3Auth();
+  const { provider, account } = useWeb3Auth();
   const [loading, setLoading] = useState(true);
   const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
   const [currentSafeNonce, setCurrentSafeNonce] = useState(0);
@@ -96,7 +96,6 @@ export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<Transacti
   const threshold = transaction?.threshold;
 
   if (!provider) throw new Error('Provider is not set');
-  if (!user) throw new Error('User is not set');
   if (!pool) throw new Error('Pool is not set');
 
   const loadTransaction = async (id: number) => {
@@ -170,7 +169,7 @@ export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<Transacti
       async () => {
         if (!transaction.safe_tx_hash) throw new Error('Transaction has no safe tx hash');
 
-        await confirmTransaction(user, signer, pool, transaction, transaction.safe_tx_hash, false);
+        await confirmTransaction(signer, pool, transaction, transaction.safe_tx_hash, false);
         loadTransaction(transaction.id);
         toast({ title: 'You approved the transaction', status: 'success' });
       },
@@ -193,10 +192,9 @@ export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<Transacti
     reviewTxRef.current?.open(
       message,
       isRejection ? 'rejection' : type,
-      () => estimateTransaction(provider, transaction.transaction_data),
+      () => estimateSafeTransaction(provider, pool.gnosis_safe_address!, pool.chain_id, safeTxHash),
       async () => {
         const tx = await executeTransaction(
-          user,
           signer,
           pool,
           transaction as Transaction,
@@ -221,7 +219,6 @@ export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<Transacti
       async () => {
         if (transaction.reject_safe_tx_hash) {
           await confirmTransaction(
-            user,
             signer,
             pool,
             transaction,
@@ -229,7 +226,7 @@ export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<Transacti
             true,
           );
         } else {
-          await createRejectTransaction(user, signer, pool, transaction.id, safeTransaction?.nonce);
+          await createRejectTransaction(signer, pool, transaction.id, safeTransaction?.nonce);
         }
         loadTransaction(transaction.id);
         toast({ title: 'You rejected the transaction', status: 'success' });
@@ -491,7 +488,7 @@ export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<Transacti
                         colorScheme="red"
                         mr={8}
                         onClick={reject}
-                        disabled={hasRejected}
+                        isDisabled={hasRejected}
                         w={150}
                       >
                         Reject
@@ -502,7 +499,7 @@ export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<Transacti
                         colorScheme="red"
                         onClick={() => execute(true)}
                         w={160}
-                        disabled={!isNextExecution}
+                        isDisabled={!isNextExecution}
                       >
                         Execute Rejection
                       </Button>
@@ -514,12 +511,12 @@ export const TransactionDetail = forwardRef((_props: unknown, ref: Ref<Transacti
                       {safeTransaction?.confirmations?.length ?? 0}/{threshold} Approved
                     </Text>
                     {!canExecute && (
-                      <Button disabled={hasApproved} onClick={approve} w={150}>
+                      <Button isDisabled={hasApproved} onClick={approve} w={150}>
                         Approve
                       </Button>
                     )}
                     {canExecute && (
-                      <Button onClick={() => execute(false)} w={150} disabled={!isNextExecution}>
+                      <Button onClick={() => execute(false)} w={150} isDisabled={!isNextExecution}>
                         Execute
                       </Button>
                     )}

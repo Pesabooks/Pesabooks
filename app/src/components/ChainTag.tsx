@@ -16,7 +16,6 @@ export const ChainTag = ({
         boxSize="1rem"
         borderRadius="full"
         src={`${process.env.PUBLIC_URL}/${network.logoUrl}`}
-        alt="Fluffybuns the destroyer"
         mr="12px"
       />
       <TagLabel>{networks[chainId]?.chainName}</TagLabel>

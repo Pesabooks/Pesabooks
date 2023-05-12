@@ -4,7 +4,7 @@ import { SelectCategoryField } from '@pesabooks/components/Input/SelectCategoryF
 import { SelectUserField } from '@pesabooks/components/Input/SelectUserField';
 import { formatLongNumber } from '@pesabooks/utils/bignumber-utils';
 import { BigNumber } from 'ethers';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FormProvider, useForm } from 'react-hook-form';
 
@@ -20,6 +20,7 @@ import { estimateTransaction } from '@pesabooks/services/estimationService';
 import { getMembers } from '@pesabooks/services/membersService';
 import { buildWithdrawTx } from '@pesabooks/services/transaction-builder';
 import { submitTransaction } from '@pesabooks/services/transactionsServices';
+import { useQuery } from '@tanstack/react-query';
 import { Category, User } from '../../../types';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 export interface WithdrawFormValue {
@@ -31,10 +32,7 @@ export interface WithdrawFormValue {
 
 export const WithdrawPage = () => {
   const { provider } = useWeb3Auth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const { pool } = usePool();
-  const [balance, setBalance] = useState<number>(0);
   const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
   const { threshold } = useSafeAdmins();
   const methods = useForm<WithdrawFormValue>();
@@ -47,18 +45,25 @@ export const WithdrawPage = () => {
   }
   if (!provider) throw new Error('Provider is not set');
 
-  useEffect(() => {
-    getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user as User)));
-    getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
-      setCategories(categories ?? []),
-    );
-  }, [methods, pool]);
+  const { data: users } = useQuery({
+    queryKey: [pool.id, 'members'],
+    queryFn: () => getMembers(pool.id).then((members) => members.map((m) => m.user!)),
+    enabled: !!pool.id,
+  });
 
-  useEffect(() => {
-    if (pool.gnosis_safe_address) {
-      getAddressBalance(pool.chain_id, token.address, pool.gnosis_safe_address).then(setBalance);
-    }
-  }, [token, pool?.chain_id, pool?.gnosis_safe_address]);
+  const { data: categories } = useQuery({
+    queryKey: [pool.id, 'categories', { active: true }],
+    queryFn: () =>
+      getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
+        categories.filter((c) => c.active),
+      ),
+    enabled: !!pool.id,
+  });
+
+  const { data: balance } = useQuery({
+    queryKey: ['token_balance', pool.chain_id, token.symbol, pool.gnosis_safe_address],
+    queryFn: () => getAddressBalance(pool.chain_id, token.address, pool.gnosis_safe_address!),
+  });
 
   const onWithDraw = async (formValue: WithdrawFormValue) => {
     const { amount, memo, user, category } = formValue;
@@ -73,7 +78,7 @@ export const WithdrawPage = () => {
           ? Promise.resolve(BigNumber.from(0))
           : estimateTransaction(provider, transaction.transaction_data),
       async () => {
-        const tx = await submitTransaction(user, signer, pool, transaction);
+        const tx = await submitTransaction(signer, pool, transaction);
         methods.reset();
         return { hash: tx?.hash, internalTxId: tx?.id };
       },
@@ -94,9 +99,9 @@ export const WithdrawPage = () => {
           <CardBody>
             <FormProvider {...methods}>
               <form onSubmit={methods.handleSubmit(onWithDraw)}>
-                <SelectCategoryField mb="4" categories={categories} />
+                <SelectCategoryField mb="4" categories={categories ?? []} />
 
-                <SelectUserField label="To User" mb="4" users={users} />
+                <SelectUserField label="To User" mb="4" users={users ?? []} />
 
                 <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
 

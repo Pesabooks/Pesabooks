@@ -1,15 +1,15 @@
 import { Container, Flex, Text, useToast } from '@chakra-ui/react';
 import { NavbarLight } from '@pesabooks/components/Layout/NavbarLight';
 import { useWeb3Auth } from '@pesabooks/hooks';
+import { createInvitation } from '@pesabooks/services/invitationService';
+import { createNewPool } from '@pesabooks/services/poolsService';
+import { getAllTokens } from '@pesabooks/services/tokensService';
 import { getErrorMessage } from '@pesabooks/utils/error-utils';
 import { Step, Steps, useSteps } from 'chakra-ui-steps';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaEdit, FaEthereum, FaUsers } from 'react-icons/fa';
 import { useNavigate } from 'react-router';
-import { createInvitation } from '../../services/invitationService';
-import { createNewPool } from '../../services/poolsService';
-import { getAllTokens } from '../../services/tokensService';
 import { ChooseNetworkTab } from './components/ChooseNetworkTab';
 import { CreatingPool } from './components/CreatingPool';
 import { GroupMembersTab, Invitee } from './components/GroupMembersTab';

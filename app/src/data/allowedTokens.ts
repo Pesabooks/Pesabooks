@@ -1,4 +1,4 @@
-import { Token } from '../types';
+import { Token } from '@pesabooks/types';
 
 export const allowedTokens: { [key: number]: Token[] } = {
   1: [

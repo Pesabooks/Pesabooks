@@ -4,14 +4,14 @@ import { BusMessage, eventBus, TransactionMessage } from './eventBus';
 
 export class TransactionEventHandler {
   handleExecutionCompleted = async ({
-    payload: { blockchainReceipt, chainId, transaction },
+    payload: { blockchainReceipt, chainId, isRejection },
   }: BusMessage<TransactionMessage>) => {
     if (blockchainReceipt?.blockNumber) {
       const timestamp = (await defaultProvider(chainId).getBlock(blockchainReceipt.blockNumber))
         .timestamp;
       const { error } = await transationsTable()
         .update({
-          status: transaction?.status === 'pending_rejection' ? 'rejected' : 'completed',
+          status: isRejection ? 'rejected' : 'completed',
           timestamp,
         })
         .eq('hash', blockchainReceipt.transactionHash);

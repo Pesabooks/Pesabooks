@@ -1,6 +1,6 @@
+import { Database } from '@pesabooks/types';
 import { PostgrestFilterBuilder, PostgrestQueryBuilder } from '@supabase/postgrest-js';
-import { createClient, PostgrestError, SupabaseClient } from '@supabase/supabase-js';
-import { Database } from './types/database';
+import { PostgrestError, SupabaseClient, createClient } from '@supabase/supabase-js';
 import { isTokenExpired } from './utils/jwt-utils';
 import { getTypedStorageItem } from './utils/storage-utils';
 

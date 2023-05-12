@@ -1,7 +1,7 @@
 import { BoxProps, FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/react';
+import { Category } from '@pesabooks/types';
 import { Select } from 'chakra-react-select';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Category } from '../../types';
 
 interface Props extends BoxProps {
   categories: Category[];

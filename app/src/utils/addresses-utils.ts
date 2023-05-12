@@ -1,5 +1,5 @@
+import { User } from '@pesabooks/types';
 import { ethers } from 'ethers';
-import { User } from '../types';
 
 export const shortenHash = (address: string): string => {
   if (!address) return '';

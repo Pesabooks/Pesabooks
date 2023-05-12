@@ -9,7 +9,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { Pool } from '../types';
+import { Pool } from '@pesabooks/types';
 import { Separator } from './Layout/Separator';
 
 interface PoolCardProps extends BoxProps {

@@ -29,12 +29,12 @@ import { Logo } from '@pesabooks/components/Layout/Logo';
 import { PoolCard } from '@pesabooks/components/PoolCard';
 import { WalletAddress } from '@pesabooks/components/WalletAddress';
 import { useNativeBalance, useWeb3Auth } from '@pesabooks/hooks';
+import { getMyPools } from '@pesabooks/services/poolsService';
+import { Pool } from '@pesabooks/types';
 import { useEffect, useState } from 'react';
 import { FiArrowDownLeft, FiArrowUpRight, FiCreditCard } from 'react-icons/fi';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { networks } from '../../data/networks';
-import { getMyPools } from '../../services/poolsService';
-import { Pool } from '../../types';
 
 export const NetworkSelectorMenu = () => {
   const { setChainId } = useWeb3Auth();

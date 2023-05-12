@@ -1,5 +1,5 @@
+import { Category } from '@pesabooks/types';
 import { categoriesTable, handleSupabaseError } from '../supabase';
-import { Category } from '../types';
 
 export const getAllCategories = async (pool_id: string, options?: { activeOnly: boolean }) => {
   let query = categoriesTable().select().order('id').eq('pool_id', pool_id);

@@ -1,20 +1,19 @@
 import { Card, CardBody, CardHeader, Heading, Skeleton } from '@chakra-ui/react';
 import { usePool, useTransactions } from '@pesabooks/hooks';
 import { getMembers } from '@pesabooks/services/membersService';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
 import { Filter } from '../../../supabase';
-import { Transaction, User } from '../../../types';
+import { Transaction } from '../../../types';
 import { TransactionDetail, TransactionDetailRef } from '../components/TransactionDetail';
 import { TransactionsTable } from '../components/TransactionsTable';
 
 export const TransactionsPage = () => {
   const { pool } = usePool();
-  const [users, setUsers] = useState<User[]>([]);
   const [searchParams] = useSearchParams();
   const txDetailRef = useRef<TransactionDetailRef>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const openTransactionPane = (transactionId: number) => {
     txDetailRef.current?.open(transactionId);
@@ -24,6 +23,12 @@ export const TransactionsPage = () => {
   if (!pool) {
     throw new Error();
   }
+
+  const { data: users, isLoading } = useQuery({
+    queryKey: [pool.id, 'members'],
+    queryFn: () => getMembers(pool.id).then((members) => members.map((m) => m.user!)),
+    enabled: !!pool.id,
+  });
 
   useEffect(() => {
     const transactionId = Number(transactionIdParam);
@@ -36,24 +41,9 @@ export const TransactionsPage = () => {
     return query.order('timestamp', { ascending: false }).limit(200);
   }, []);
 
-  const { transactions, loading: txsLoading } = useTransactions(
-    pool.id,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    filter,
-    {
-      useRealTime: true,
-    },
-  );
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const members = await getMembers(pool.id);
-      setUsers(members?.map((m) => m.user!));
-      setIsLoading(false);
-    };
-    fetchData();
-  }, [pool.id]);
+  const { transactions, isLoading: txsLoading } = useTransactions(pool.id, filter, {
+    useRealTime: true,
+  });
 
   const isPending = (t: Transaction) =>
     t.status === 'awaitingConfirmations' || t.status === 'awaitingExecution';
@@ -92,7 +82,7 @@ export const TransactionsPage = () => {
             <TransactionsTable
               pool={pool}
               transactions={txQueue}
-              users={users}
+              users={users ?? []}
               loading={txsLoading}
               onSelect={(t) => openTransactionPane(t.id)}
               showNonce={true}
@@ -113,7 +103,7 @@ export const TransactionsPage = () => {
           <TransactionsTable
             pool={pool}
             transactions={txHistory}
-            users={users}
+            users={users ?? []}
             loading={txsLoading}
             onSelect={(t) => openTransactionPane(t.id)}
             showNonce={false}

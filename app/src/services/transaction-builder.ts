@@ -1,4 +1,12 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
+import {
+  AddOrRemoveOwnerData,
+  NewTransaction,
+  Pool,
+  SwapData,
+  UnlockTokenData,
+  User,
+} from '@pesabooks/types';
 import { checksummed } from '@pesabooks/utils/addresses-utils';
 import { ERC20__factory } from '@pesabooks/utils/erc20';
 import { SafeTransaction } from '@safe-global/safe-core-sdk-types';
@@ -6,13 +14,6 @@ import { Transaction } from '@sentry/tracing';
 import { BigNumber, ethers } from 'ethers';
 import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'paraswap';
 import { OptimalRate } from 'paraswap-core';
-import { Pool, User } from '../types';
-import {
-  AddOrRemoveOwnerData,
-  NewTransaction,
-  SwapData,
-  UnlockTokenData,
-} from '../types/transaction';
 import { getTokenContract } from './blockchainServices';
 import { getAddOwnerTx, getChangeThresholdTx, getRemoveOwnerTx } from './gnosisServices';
 

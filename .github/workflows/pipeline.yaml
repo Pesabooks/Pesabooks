@@ -24,21 +24,21 @@ jobs:
       WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID_STAGING }}
       RAMP_API_KEY: ${{ secrets.RAMP_API_KEY_STAGING }}
 
-  Prod:
-    needs: Staging
-    uses: ./.github/workflows/deploy.yaml
-    with:
-      env: prod
-      include_testnets: false
-      web3auth_network: mainnet
-    secrets:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-      SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-      INFURA_KEY: ${{ secrets.INFURA_KEY }}
-      BLOCKNATIVE_KEY: ${{ secrets.BLOCKNATIVE_KEY }}
-      WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
-      RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
+  # Prod:
+  #   needs: Staging
+  #   uses: ./.github/workflows/deploy.yaml
+  #   with:
+  #     env: prod
+  #     include_testnets: false
+  #     web3auth_network: mainnet
+  #   secrets:
+  #     SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+  #     SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+  #     SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+  #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+  #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+  #     SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  #     INFURA_KEY: ${{ secrets.INFURA_KEY }}
+  #     BLOCKNATIVE_KEY: ${{ secrets.BLOCKNATIVE_KEY }}
+  #     WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
+  #     RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}

@@ -1,11 +1,10 @@
 import { Flex, HStack, Link, Text } from '@chakra-ui/react';
 import { TransactionIcon } from '@pesabooks/components/TransactionIcon';
+import { Activity, SwapData, TransferData, UnlockTokenData } from '@pesabooks/types';
 import { shortenHash } from '@pesabooks/utils/addresses-utils';
 import { getTxAmountDescription } from '@pesabooks/utils/transactions-utils';
 import dayjs from 'dayjs';
 import { Link as RouterLink } from 'react-router-dom';
-import { Activity } from '../../../types';
-import { SwapData, TransferData, UnlockTokenData } from '../../../types/transaction';
 import { TransactionStatusBadge } from '../../transactions/components/TransactionStatusBadge';
 
 interface TransactionsListProps {
@@ -20,7 +19,7 @@ const getActivityDescription = (activity: Activity): string | JSX.Element => {
       if (pool_id)
         return (
           <>
-            Sent to{' '}
+            Deposit to{' '}
             <Link as={RouterLink} to={`/pool/${pool_id}`} textDecoration="underline">
               {pool_name}
             </Link>

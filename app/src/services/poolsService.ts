@@ -1,6 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
+import { Pool, Token, User } from '@pesabooks/types';
 import { handleSupabaseError, poolsTable, supabase, transationsTable } from '../supabase';
-import { Pool, Token, User } from '../types';
 import { eventBus } from './events/eventBus';
 import { deploySafe } from './gnosisServices';
 import { getMembers } from './membersService';
@@ -89,4 +89,14 @@ export const updatePoolInformation = async (id: string, pool: Partial<Pool>) => 
   handleSupabaseError(error);
 
   eventBus.channel('pool').emit('updated');
+};
+
+export type TransactionsStats = ReturnType<typeof getTransactionsStats>;
+
+export const getTransactionsStats = async (poolId: string) => {
+  const { data, error } = await supabase()
+    .rpc('get_transactions_stats', { pool_id: poolId })
+    .single();
+  handleSupabaseError(error);
+  return data ?? { count: 0, deposit: 0, withdrawal: 0 };
 };

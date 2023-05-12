@@ -24,7 +24,7 @@
       "@pesabooks/data/*": ["./data/*"],
       "@pesabooks/guards/*": ["./guards/*"],
       "@pesabooks/hooks": ["./hooks"],
-      "@pesabooks/types/*": ["./types/*"],
+      "@pesabooks/types": ["./types"],
       "@pesabooks/routes/*": ["./routes/*"],
       "@pesabooks/services/*": ["./services/*"]
     }

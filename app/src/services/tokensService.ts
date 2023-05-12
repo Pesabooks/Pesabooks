@@ -1,5 +1,5 @@
+import { Token } from '@pesabooks/types';
 import { allowedTokens } from '../data/allowedTokens';
-import { Token } from '../types';
 
 export const getAllTokens = (): Token[] => {
   return Object.values(allowedTokens).flat();

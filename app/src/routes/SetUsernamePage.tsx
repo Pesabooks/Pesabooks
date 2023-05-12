@@ -103,7 +103,7 @@ export const SetUsernamePage = () => {
           onClick={onSubmit}
           colorScheme="teal"
           isLoading={isSubmitting}
-          disabled={isValidating || !!errors}
+          isDisabled={isValidating || !!errors}
           type="submit"
         >
           Submit

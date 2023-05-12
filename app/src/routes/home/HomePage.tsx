@@ -13,20 +13,20 @@ import {
 } from '@chakra-ui/react';
 import { NavbarLight } from '@pesabooks/components/Layout/NavbarLight';
 import { PoolCard } from '@pesabooks/components/PoolCard';
+import { getMyPools } from '@pesabooks/services/poolsService';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { BsPlus } from 'react-icons/bs';
 import { MdSubject } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
-import { getMyPools } from '../../services/poolsService';
 import { PendingInvitation } from './components/PendingInvitation';
 
 export const HomePage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const KEY = 'my-pools';
+  const KEY = 'pools';
 
   const { data: pools, isLoading } = useQuery({
-    queryKey: ['my-pools'],
+    queryKey: [KEY],
     queryFn: getMyPools,
   });
 

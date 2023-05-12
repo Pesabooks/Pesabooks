@@ -15,7 +15,7 @@ import { ChangeThresholdModal } from '../components/ChangeThresholdModal';
 
 export const ThresholdPage = () => {
   const { pool } = usePool();
-  const { provider, user } = useWeb3Auth();
+  const { provider } = useWeb3Auth();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
   const signer = (provider as Web3Provider)?.getSigner();
@@ -34,7 +34,7 @@ export const ThresholdPage = () => {
             ? Promise.resolve(BigNumber.from(0))
             : estimateTransaction(provider!, transaction.transaction_data),
         async () => {
-          const tx = await submitTransaction(user!, signer, pool!, transaction!);
+          const tx = await submitTransaction(signer, pool!, transaction!);
           onClose();
           return { hash: tx?.hash, internalTxId: tx?.id };
         },

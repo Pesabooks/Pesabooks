@@ -1,9 +1,9 @@
 /* eslint-disable */
 //@ts-nocheck
+import { Pool } from '@pesabooks/types';
 import WalletConnect from '@walletconnect/client';
 import { IClientMeta, IWalletConnectSession } from '@walletconnect/legacy-types';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Pool } from '../types';
 
 type connectType = ({ uri, session }: { uri?: string; session?: IWalletConnectSession }) => void;
 

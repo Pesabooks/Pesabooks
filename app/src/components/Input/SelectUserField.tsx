@@ -1,8 +1,8 @@
 import { BoxProps, FormControl, FormErrorMessage, FormLabel } from '@chakra-ui/react';
+import { User } from '@pesabooks/types';
 import { shortenHash } from '@pesabooks/utils/addresses-utils';
 import { GroupBase, OptionProps, Select, chakraComponents } from 'chakra-react-select';
 import { Controller, useFormContext } from 'react-hook-form';
-import { User } from '../../types';
 import { UserWalletCard } from '../UserWalletCard';
 
 interface Props extends BoxProps {

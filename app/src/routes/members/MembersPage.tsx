@@ -15,21 +15,20 @@ import {
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
 import { ButtonWithAdmingRights } from '@pesabooks/components/withConnectedWallet';
 import { useIsOrganizer, usePool, useSafeAdmins, useWeb3Auth } from '@pesabooks/hooks';
-import { BigNumber } from 'ethers';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Helmet } from 'react-helmet-async';
-import { estimateTransaction } from '../../services/estimationService';
+import { estimateTransaction } from '@pesabooks/services/estimationService';
 import {
   createInvitation,
   getActiveInvitations,
   revokeInvitation,
   sendInvitation,
-} from '../../services/invitationService';
-import { deleteMember, getMembers } from '../../services/membersService';
-import { BuildRemoveAdminTx } from '../../services/transaction-builder';
-import { submitTransaction } from '../../services/transactionsServices';
-import { Invitation } from '../../types';
-import { Member } from '../../types/Member';
+} from '@pesabooks/services/invitationService';
+import { deleteMember, getMembers } from '@pesabooks/services/membersService';
+import { BuildRemoveAdminTx } from '@pesabooks/services/transaction-builder';
+import { submitTransaction } from '@pesabooks/services/transactionsServices';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { BigNumber } from 'ethers';
+import { useRef } from 'react';
+import { Helmet } from 'react-helmet-async';
 import {
   RemoveAdminFormValue,
   RemoveAdminModal,
@@ -40,40 +39,33 @@ import { MembersTable } from './components/MembersTable';
 
 export const MembersPage = () => {
   const { user, provider } = useWeb3Auth();
-  const [members, setMembers] = useState<Member[]>([]);
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const { pool, isDeployed } = usePool();
   const { isOpen, onClose, onOpen } = useDisclosure();
   const { safeAdmins, threshold: currentThreshold } = useSafeAdmins();
   const isOrganizer = useIsOrganizer();
   const removeAdminModaldRef = useRef<RemoveAdminModalRef>(null);
   const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
-
+  const queryClient = useQueryClient();
   const toast = useToast();
-  const [isLoading, setIsLoading] = useState(false);
   const signer = (provider as Web3Provider)?.getSigner();
 
   if (!provider) throw new Error('Provider is not set');
-  if (!user) throw new Error('User is not set');
   if (!pool) throw new Error('Pool is not set');
 
-  const loadData = useCallback(async () => {
-    try {
-      if (pool) {
-        const members = await getMembers(pool.id);
-        const activeInvitations = await getActiveInvitations(pool.id);
-        setMembers(members ?? []);
-        setInvitations(activeInvitations ?? []);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [pool]);
+  const membersKey = [pool.id, 'members'];
+  const invitationsKey = [pool.id, 'invitations'];
 
-  useEffect(() => {
-    setIsLoading(true);
-    loadData();
-  }, [loadData]);
+  const { data: members, isLoading } = useQuery({
+    queryKey: membersKey,
+    queryFn: () => getMembers(pool.id),
+    enabled: !!pool.id,
+  });
+
+  const { data: invitations } = useQuery({
+    queryKey: invitationsKey,
+    queryFn: () => getActiveInvitations(pool.id),
+    enabled: !!pool.id,
+  });
 
   const inviteMember = async ({ name, email }: InviteMemberFormValue) => {
     if (!pool) throw new Error('Argument Exception: pool');
@@ -87,7 +79,7 @@ export const MembersPage = () => {
       });
 
       onClose();
-      await loadData();
+      queryClient.invalidateQueries(invitationsKey);
     } catch (error: any) {
       toast({
         title: error.message,
@@ -99,7 +91,7 @@ export const MembersPage = () => {
 
   const revoke = async (invitation_id: string) => {
     await revokeInvitation(invitation_id);
-    await loadData();
+    queryClient.invalidateQueries(invitationsKey);
     toast({
       title: 'Invitation revoked',
       status: 'success',
@@ -108,7 +100,7 @@ export const MembersPage = () => {
   };
 
   const resendInvitation = async (invitation_id: string) => {
-    const invitation = invitations.find((i) => i.id === invitation_id);
+    const invitation = invitations?.find((i) => i.id === invitation_id);
     if (!invitation) throw new Error('Invitation not found');
 
     await sendInvitation(invitation);
@@ -120,7 +112,7 @@ export const MembersPage = () => {
   };
 
   const onpenRemoveAdmin = (id: string) => {
-    const user = members.find((m) => m.user_id === id);
+    const user = members?.find((m) => m.user_id === id);
     if (!user) throw new Error('User not found');
     removeAdminModaldRef.current?.open(user.user!, removeAdmin);
   };
@@ -134,7 +126,7 @@ export const MembersPage = () => {
           toast({ status: 'error', title: 'You are not the organizer of this group' });
         }
         await deleteMember(pool.id, user.id);
-        loadData();
+        queryClient.invalidateQueries(membersKey);
         toast({ status: 'success', title: `${user.username} has been removed from the group` });
       } else {
         const transaction = await BuildRemoveAdminTx(
@@ -153,10 +145,10 @@ export const MembersPage = () => {
               ? Promise.resolve(BigNumber.from(0))
               : estimateTransaction(provider, transaction.transaction_data),
           async () => {
-            const tx = await submitTransaction(user, signer, pool, transaction);
+            const tx = await submitTransaction(signer, pool, transaction);
             if (tx?.hash) {
               (await (provider as Web3Provider)?.getTransaction(tx.hash))?.wait().then(() => {
-                loadData();
+                queryClient.invalidateQueries(membersKey);
               });
             }
             return { hash: tx?.hash, internalTxId: tx?.id };
@@ -187,8 +179,8 @@ export const MembersPage = () => {
         <CardBody>
           <MembersTable
             adminAddresses={safeAdmins}
-            members={members}
-            invitations={invitations}
+            members={members ?? []}
+            invitations={invitations ?? []}
             onRevoke={revoke}
             onResendInvitation={resendInvitation}
             isLoading={isLoading}

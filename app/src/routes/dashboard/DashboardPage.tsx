@@ -1,15 +1,16 @@
 import { Card, CardBody, CardHeader, Flex, SimpleGrid, Text } from '@chakra-ui/react';
 import { CreateTeamSafe } from '@pesabooks/components/CreateTeamSafe';
 import { usePool, useTransactions } from '@pesabooks/hooks';
-import { useCallback, useEffect, useState } from 'react';
+import { getBalances } from '@pesabooks/services/covalentServices';
+import { getMembers } from '@pesabooks/services/membersService';
+import { getTransactionsStats } from '@pesabooks/services/poolsService';
+import { getAllProposals } from '@pesabooks/services/transactionsServices';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FaArrowDown, FaArrowUp, FaWallet } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { TokenBalance, getBalances } from '../../services/covalentServices';
-import { getMembers } from '../../services/membersService';
-import { getAllProposals } from '../../services/transactionsServices';
-import { QueryBuilder, supabase } from '../../supabase';
-import { Transaction, User } from '../../types';
+import { QueryBuilder } from '../../supabase';
 import { TransactionsTable } from '../transactions/components/TransactionsTable';
 import { AssetsList } from './components/AssetsList';
 import BalanceCard from './components/BalanceCard';
@@ -17,15 +18,7 @@ import { ProposalsList } from './components/ProposalsList';
 
 export const DashboardPage = () => {
   const { pool, isDeployed } = usePool();
-  const [users, setUsers] = useState<User[]>([]);
-  const [balances, setBalances] = useState<TokenBalance[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [proposalsLoading, setProposalsLoading] = useState(true);
-  const [txStats, setTxStats] = useState({ count: 0, deposit: 0, withdrawal: 0 });
-  const [proposals, setProposals] = useState<Transaction[]>([]);
   const navigate = useNavigate();
-
-  const total = balances.reduce((balance, resp) => balance + resp.quote, 0);
 
   const navigateToTransactions = () => navigate(`../transactions`);
 
@@ -41,52 +34,35 @@ export const DashboardPage = () => {
       .limit(5);
   }, []);
 
-  const { transactions, loading: txLoading } = useTransactions(
-    pool.id,
-    pool.chain_id,
-    pool.gnosis_safe_address!,
-    filter,
-    {
-      useRealTime: true,
-    },
-  );
+  const { transactions, isLoading: txLoading } = useTransactions(pool.id, filter, {
+    useRealTime: true,
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await getMembers(pool.id).then((members) => setUsers(members?.map((m) => m.user!)));
+  const { data: balances, isLoading: isBalancesLoading } = useQuery({
+    queryKey: [pool.id, 'balances'],
+    queryFn: () => getBalances(pool.chain_id, pool.gnosis_safe_address!),
+    enabled: !!pool.gnosis_safe_address,
+  });
 
-        if (pool.gnosis_safe_address) {
-          await getBalances(pool.chain_id, pool.gnosis_safe_address).then((balances) => {
-            setBalances(balances ?? []);
-          });
+  const total = balances?.reduce((balance, resp) => balance + resp.quote, 0);
 
-          await supabase()
-            .rpc('get_transactions_stats', { pool_id: pool.id })
-            .single()
-            .then(({ data }) => {
-              if (data) setTxStats(data);
-            });
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [pool.chain_id, pool.gnosis_safe_address, pool.id]);
+  const { data: txStats, isLoading: isStatsLoading } = useQuery({
+    queryKey: [pool.id, 'transactions_stats'],
+    queryFn: () => getTransactionsStats(pool.id),
+    enabled: !!pool.id,
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (pool) {
-          await getAllProposals(pool).then(setProposals);
-        }
-      } finally {
-        setProposalsLoading(false);
-      }
-    };
-    fetchData();
-  }, [pool]);
+  const { data: users } = useQuery({
+    queryKey: [pool.id, 'members'],
+    queryFn: () => getMembers(pool.id).then((members) => members.map((m) => m.user!)),
+    enabled: !!pool.id,
+  });
+
+  const { data: proposals, isLoading: proposalsLoading } = useQuery({
+    queryKey: [pool.id, 'proposals'],
+    queryFn: () => getAllProposals(pool),
+    enabled: !!pool,
+  });
 
   return (
     <>
@@ -98,20 +74,20 @@ export const DashboardPage = () => {
         <Flex direction="column">
           <SimpleGrid mb={4} columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
             <BalanceCard
-              description={`$ ${total.toFixed(2)}`}
-              loading={loading}
+              description={`$ ${total?.toFixed(2)}`}
+              loading={isBalancesLoading}
               icon={FaWallet}
               title="Balance"
             />
             <BalanceCard
-              description={`${txStats.deposit} ${pool.token?.symbol}`}
-              loading={loading}
+              description={`${txStats?.deposit} ${pool.token?.symbol}`}
+              loading={isStatsLoading}
               icon={FaArrowUp}
               title="Deposit"
             />
             <BalanceCard
-              description={`${txStats.withdrawal} ${pool.token?.symbol}`}
-              loading={loading}
+              description={`${txStats?.withdrawal} ${pool.token?.symbol}`}
+              loading={isStatsLoading}
               icon={FaArrowDown}
               iconBg="#f44336"
               title="Withdrawal"
@@ -127,7 +103,9 @@ export const DashboardPage = () => {
                   </Text>
                 </Flex>
               </CardHeader>
-              <AssetsList balances={balances} loading={loading} />
+              <CardBody>
+                <AssetsList balances={balances ?? []} loading={isBalancesLoading} />
+              </CardBody>
             </Card>
 
             <Card w="50%">
@@ -139,8 +117,8 @@ export const DashboardPage = () => {
               <CardBody>
                 <Flex direction="column" w="100%">
                   <ProposalsList
-                    proposals={proposals}
-                    users={users}
+                    proposals={proposals ?? []}
+                    users={users ?? []}
                     onSelect={navigateToTransactions}
                     loading={proposalsLoading}
                   />
@@ -165,7 +143,7 @@ export const DashboardPage = () => {
               <TransactionsTable
                 pool={pool}
                 transactions={transactions}
-                users={users}
+                users={users ?? []}
                 loading={txLoading}
                 onSelect={navigateToTransactions}
                 showNonce={false}

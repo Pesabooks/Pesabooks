@@ -1,11 +1,11 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
+import { NewTransaction, Pool, Transaction, TransferData } from '@pesabooks/types';
 import { ERC20__factory } from '@pesabooks/utils/erc20';
+import { getTypedStorageItem } from '@pesabooks/utils/storage-utils';
 import { notEqual } from 'assert';
 import { ContractTransaction, Signer, ethers } from 'ethers';
 import { networks } from '../data/networks';
 import { Filter, handleSupabaseError, transationsTable } from '../supabase';
-import { Pool, User } from '../types';
-import { NewTransaction, Transaction, TransferData } from '../types/transaction';
 import { defaultProvider } from './blockchainServices';
 import {
   ConfirmTransactionPayload,
@@ -28,7 +28,6 @@ import {
 export const submitDepositTx = async (
   provider: Web3Provider,
   pool: Pool,
-  user: User,
   transaction: NewTransaction,
 ) => {
   const { metadata, transaction_data } = transaction;
@@ -55,13 +54,12 @@ export const submitDepositTx = async (
     .single();
   handleSupabaseError(error);
 
-  onTransactionSentToNetwork(data as Transaction, tx, pool.chain_id, false, user);
+  onTransactionSentToNetwork(data as Transaction, tx, pool.chain_id, false);
 
   return data as Transaction;
 };
 
 export const submitTransaction = async (
-  user: User,
   signer: Signer,
   pool: Pool,
   transaction: NewTransaction,
@@ -121,14 +119,13 @@ export const submitTransaction = async (
       .select()
       .single();
 
-    onTransactionSentToNetwork(data as Transaction, tx, pool.chain_id, false, user);
+    onTransactionSentToNetwork(data as Transaction, tx, pool.chain_id, false);
 
     return data as Transaction;
   }
 };
 
 export const confirmTransaction = async (
-  user: User,
   signer: Signer,
   pool: Pool,
   transaction: Transaction,
@@ -158,14 +155,13 @@ export const confirmTransaction = async (
 
   eventBus.channel('transaction').emit<ConfirmTransactionPayload>(eventname, {
     chainId: pool.chain_id,
-    userId: user.id,
+    userId: getTypedStorageItem('user_id')!,
     transaction,
     safeTxHash,
   });
 };
 
 export const executeTransaction = async (
-  user: User,
   signer: Signer,
   pool: Pool,
   transaction: Transaction,
@@ -183,7 +179,7 @@ export const executeTransaction = async (
 
   if (!tx) throw new Error('Transaction is null. Something went wrong');
 
-  onTransactionSentToNetwork(transaction, tx, pool.chain_id, isRejection, user);
+  onTransactionSentToNetwork(transaction, tx, pool.chain_id, isRejection);
 
   await transationsTable()
     .update({ hash: tx?.hash, status: isRejection ? 'pending_rejection' : 'pending' })
@@ -193,7 +189,6 @@ export const executeTransaction = async (
 };
 
 export const createRejectTransaction = async (
-  user: User,
   signer: JsonRpcSigner,
   pool: Pool,
   transactionId: number,
@@ -222,7 +217,7 @@ export const createRejectTransaction = async (
 
   eventBus.channel('transaction').emit<ConfirmTransactionPayload>('rejected', {
     chainId: pool.chain_id,
-    userId: user.id,
+    userId: getTypedStorageItem('user_id')!,
     transaction: data as Transaction,
     safeTxHash,
   });
@@ -233,9 +228,15 @@ const onTransactionSentToNetwork = async (
   tx: ContractTransaction,
   chainId: number,
   isRejection = false,
-  user?: User,
 ) => {
-  const payload = { transaction, blockchainTransaction: tx, chainId, isRejection, user };
+  const userId = getTypedStorageItem('user_id');
+  const payload = {
+    transaction,
+    blockchainTransaction: tx,
+    chainId,
+    isRejection,
+    userId: userId ?? null,
+  };
   eventBus.channel('transaction').emit<TransactionMessage>('execution_sent', payload);
 
   tx.wait().then(

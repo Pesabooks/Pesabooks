@@ -126,7 +126,7 @@ export const PendingInvitation = ({ onAccepted }: PendingInvitationProps) => {
             </Button>
             <Button
               variant="ghost"
-              disabled={selectedInviations.length === 0}
+              isDisabled={selectedInviations.length === 0}
               onClick={acceptInvitations}
             >
               Accept {selectedInviations.length} invitation(s)

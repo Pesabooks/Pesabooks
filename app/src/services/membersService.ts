@@ -1,5 +1,5 @@
+import { Member } from '@pesabooks/types';
 import { handleSupabaseError, membersTable } from '../supabase';
-import { Member } from '../types';
 import { getPool } from './poolsService';
 
 export const getMembers = async (pool_id: string, includeInactive = false): Promise<Member[]> => {

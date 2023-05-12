@@ -1,4 +1,5 @@
 import { Box, Icon } from '@chakra-ui/react';
+import { TransactionType } from '@pesabooks/types';
 import { BiTransfer } from 'react-icons/bi';
 import { BsSafe } from 'react-icons/bs';
 import {
@@ -9,11 +10,10 @@ import {
   FiSettings,
   FiUnlock,
   FiUserPlus,
-  FiUsers,
   FiUserX,
+  FiUsers,
 } from 'react-icons/fi';
 import { MdCancel } from 'react-icons/md';
-import { TransactionType } from '../types';
 
 export const TransactionIcon = ({ type }: { type: TransactionType }) => {
   let logo;

@@ -1,5 +1,6 @@
 import { JsonRpcSigner, Web3Provider } from '@ethersproject/providers';
 import { notifyTransaction } from '@pesabooks/components/notification';
+import { Activity, Metadata, SwapData, TokenBase } from '@pesabooks/types';
 import { checksummed } from '@pesabooks/utils/addresses-utils';
 import { ERC20__factory } from '@pesabooks/utils/erc20';
 import { BigNumber, ContractTransaction, ethers } from 'ethers';
@@ -7,8 +8,6 @@ import { Token as ParaswapToken, Transaction as ParaswapTransaction } from 'para
 import { OptimalRate } from 'paraswap-core';
 import { networks } from '../data/networks';
 import { activitiesTable, supabase } from '../supabase';
-import { Activity, TokenBase } from '../types';
-import { Metadata, SwapData } from '../types/transaction';
 import { ActivityBusMessage, eventBus } from './events/eventBus';
 
 const getTimestamp = () => Math.floor(new Date().valueOf() / 1000);

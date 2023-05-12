@@ -1,8 +1,8 @@
 import { BalanceQuery, BalancesReponse } from '@pesabooks/supabase/functions';
+import { TokenBase } from '@pesabooks/types';
 import { supabase } from '../supabase';
-import { TokenBase } from '../types/Token';
 
-export const getBalances = async (chain_id: number, address: string) => {
+export const getBalances = async (chain_id: number, address: string): Promise<TokenBalance[]> => {
   if (!address) throw new Error();
 
   const body: BalanceQuery = { chain_id, address, quote: 'USD' };

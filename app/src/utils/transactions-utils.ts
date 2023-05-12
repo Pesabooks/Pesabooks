@@ -1,4 +1,3 @@
-import { Transaction, User } from '../types';
 import {
   AddOrRemoveOwnerData,
   ChangeThresholdData,
@@ -6,12 +5,14 @@ import {
   NewTransaction,
   PurchaseData,
   SwapData,
+  Transaction,
   TransactionStatus,
   TransactionType,
   TransferData,
   UnlockTokenData,
+  User,
   WalletConnectData,
-} from '../types/transaction';
+} from '@pesabooks/types';
 import { compareAddress } from './addresses-utils';
 import { formatBigNumber } from './bignumber-utils';
 

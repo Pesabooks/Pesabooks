@@ -1,10 +1,10 @@
 import { Box, Button, Heading, Stack, Text, useColorModeValue, useToast } from '@chakra-ui/react';
 import { useWeb3Auth } from '@pesabooks/hooks';
+import { acceptInvitation, getInvitation } from '@pesabooks/services/invitationService';
+import { Invitation } from '@pesabooks/types';
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { acceptInvitation, getInvitation } from '../../services/invitationService';
-import { Invitation } from '../../types';
 
 export const InvitationPage = () => {
   const [loading, setLoading] = useState(false);

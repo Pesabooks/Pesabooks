@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Web3Provider } from '@ethersproject/providers';
+import { User } from '@pesabooks/types';
 import { isTokenExpired } from '@pesabooks/utils/jwt-utils';
 import {
   clearTypedStorageItem,
@@ -19,7 +20,6 @@ import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { networks } from '../data/networks';
 import { usersTable } from '../supabase';
-import { User } from '../types';
 
 export interface IWeb3AuthContext {
   web3Auth: Web3AuthNoModal | null;

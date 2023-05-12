@@ -1,9 +1,9 @@
 import { AddIcon, ChevronDownIcon } from '@chakra-ui/icons';
 import { Button, Link, Menu, MenuButton, MenuDivider, MenuItem, MenuList } from '@chakra-ui/react';
 import { useWeb3Auth } from '@pesabooks/hooks';
+import { updateLastPool } from '@pesabooks/services/profilesService';
+import { Pool } from '@pesabooks/types';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { updateLastPool } from '../../services/profilesService';
-import { Pool } from '../../types';
 import { Logo } from './Logo';
 
 interface PoolSelectorMenuProps {

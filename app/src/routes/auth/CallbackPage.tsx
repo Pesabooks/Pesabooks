@@ -4,6 +4,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import Loading from '@pesabooks/components/Loading';
 import { useWeb3Auth } from '@pesabooks/hooks';
 import { GetAccessTokenRequest, GetAccessTokenResponse } from '@pesabooks/supabase/functions';
+import { User } from '@pesabooks/types';
 import {
   clearTypedStorageItem,
   getTypedStorageItem,
@@ -12,7 +13,6 @@ import {
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { initSupabaseClient, supabase, usersTable } from '../../supabase';
-import { User } from '../../types';
 
 export const CallbackPage = () => {
   const { web3Auth, isInitialised, setUser } = useWeb3Auth();

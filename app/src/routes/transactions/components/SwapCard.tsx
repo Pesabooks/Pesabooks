@@ -633,12 +633,12 @@ export const SwapCard = ({
             </FormControl>
             <Flex gap={5}>
               {state.validation === 'insufficientAllowance' && (
-                <Button flex="1" onClick={unlock} disabled={state.pendingUnlocking}>
+                <Button flex="1" onClick={unlock} isDisabled={state.pendingUnlocking}>
                   Unlock {state.tokenFrom?.symbol}
                 </Button>
               )}
 
-              <Button onClick={submitSwap} flex="1" disabled={!!state.validation}>
+              <Button onClick={submitSwap} flex="1" isDisabled={!!state.validation}>
                 Swap
               </Button>
             </Flex>

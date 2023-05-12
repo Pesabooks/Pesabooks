@@ -26,13 +26,14 @@ import {
 } from '@chakra-ui/react';
 
 import { usePool, useWalletConnectV1, useWeb3Auth } from '@pesabooks/hooks';
+import { Category } from '@pesabooks/types';
 import { shortenString } from '@pesabooks/utils/string-utils';
-import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { BiTransfer } from 'react-icons/bi';
 import { TextAreaMemoField } from '../routes/transactions/components/TextAreaMemoField';
 import { getAllCategories } from '../services/categoriesService';
-import { Category } from '../types';
 import { SelectCategoryField } from './Input/SelectCategoryField';
 import {
   ReviewAndSendTransactionModal,
@@ -45,7 +46,6 @@ interface DepositFormValue {
 }
 
 export const WalletConnectDrawer = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
   const { pool } = usePool();
   const {
     connector,
@@ -67,13 +67,13 @@ export const WalletConnectDrawer = () => {
   const methods = useForm<DepositFormValue>();
   const signer = provider?.getSigner();
 
-  useEffect(() => {
-    if (pool?.id) {
-      getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
-        setCategories(categories ?? []),
-      );
-    }
-  }, [pool?.id]);
+  const { data: categories } = useQuery({
+    queryKey: [pool!.id, 'categories', { active: true }],
+    queryFn: () =>
+      getAllCategories(pool!.id, { activeOnly: true }).then((categories) =>
+        categories.filter((c) => c.active),
+      ),
+  });
 
   const propose = async (formValue: DepositFormValue) => {
     // if (!provider || !pool) return;
@@ -204,7 +204,7 @@ export const WalletConnectDrawer = () => {
                 <CardBody>
                   <FormProvider {...methods}>
                     <form onSubmit={methods.handleSubmit(propose)}>
-                      <SelectCategoryField mb="4" categories={categories} />
+                      <SelectCategoryField mb="4" categories={categories ?? []} />
 
                       <TextAreaMemoField mb="4" />
 

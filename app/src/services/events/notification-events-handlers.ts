@@ -24,7 +24,7 @@ export class NotificationEventHandler {
   };
 
   onTransactionExecuted = async ({
-    payload: { transaction, user },
+    payload: { transaction, userId },
   }: BusMessage<TransactionMessage>) => {
     // const pool = await getPool(transaction.pool_id!);
 
@@ -36,21 +36,21 @@ export class NotificationEventHandler {
     // const safeTransaction = await getSafeTransaction(pool.chain_id, safeTxHash);
 
     // const wallet =safeTransaction.executor;
-    if (!user?.id) return;
+    if (!userId) return;
 
     if (transaction?.type === 'deposit') {
-      sendNotification(user.id, 'new_deposit', transaction);
+      sendNotification(userId, 'new_deposit', transaction);
     } else {
-      sendNotification(user.id, 'proposal_execution', transaction);
+      sendNotification(userId, 'proposal_execution', transaction);
     }
   };
 
-  onNewProposal = async ({ payload: { transaction, user } }: BusMessage<TransactionMessage>) => {
+  onNewProposal = async ({ payload: { transaction, userId } }: BusMessage<TransactionMessage>) => {
     const pool = await getPool(transaction.pool_id);
     const treshold = await getSafeTreshold(pool.chain_id, pool.gnosis_safe_address!);
 
-    if (!user?.id) return;
-    sendNotification(user.id, 'new_proposal', transaction, {
+    if (!userId) return;
+    sendNotification(userId, 'new_proposal', transaction, {
       remaining_votes: treshold - 1,
     });
   };

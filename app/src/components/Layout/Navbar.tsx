@@ -1,9 +1,9 @@
 import { HamburgerIcon } from '@chakra-ui/icons';
 import { Flex, FlexProps, IconButton, Stack } from '@chakra-ui/react';
 import { usePool } from '@pesabooks/hooks';
+import { getMyPools } from '@pesabooks/services/poolsService';
+import { Pool } from '@pesabooks/types';
 import { useEffect, useState } from 'react';
-import { getMyPools } from '../../services/poolsService';
-import { Pool } from '../../types';
 import { ConnectedChain } from '../ConnectedChain';
 import { NewTransactionMenu } from '../NewTransactionMenu';
 import { AvatarMenu } from './AvatarMenu';

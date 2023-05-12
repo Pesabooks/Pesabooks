@@ -1,6 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
+import { TransactionData } from '@pesabooks/types';
 import { BigNumber } from 'ethers';
-import { TransactionData } from '../types';
+import { getSafeTransaction } from './gnosisServices';
 
 const INITIAL_SAFE_CREATION_TX_GAS_COST = 282912;
 
@@ -17,6 +18,21 @@ export const estimateTransaction = async (
   };
   const gasLimit = await provider.estimateGas(tx);
   return fee(provider, gasLimit);
+};
+
+export const estimateSafeTransaction = async (
+  provider: Web3Provider,
+  gnosis_safe_address: string,
+  chain_id: number,
+  SafeTxHash: string,
+) => {
+  const { to, data, value } = await getSafeTransaction(chain_id, SafeTxHash);
+  return estimateTransaction(provider, {
+    from: gnosis_safe_address,
+    to: to,
+    data: data ?? '',
+    value: value,
+  });
 };
 
 export const estimateSafeCreation = async (provider: Web3Provider) => {

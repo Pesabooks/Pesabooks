@@ -1,6 +1,6 @@
 import { SendInvitationRequest } from '@pesabooks/supabase/functions';
+import { Invitation, NewInvitation, Pool } from '@pesabooks/types';
 import { handleSupabaseError, invitationsTable, supabase } from '../supabase';
-import { Invitation, NewInvitation, Pool } from '../types';
 
 export const getActiveInvitations = async (pool_id: string) => {
   const { data, error } = await invitationsTable()

@@ -26,6 +26,10 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { useNativeBalance, useWeb3Auth } from '@pesabooks/hooks';
+import { TokenBalance, getBalances } from '@pesabooks/services/covalentServices';
+import { eventBus } from '@pesabooks/services/events/eventBus';
+import { getAllActivities, purchaseToken } from '@pesabooks/services/walletServices';
+import { Activity, TokenBase } from '@pesabooks/types';
 import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
 import { RampInstantEventTypes, RampInstantSDK } from '@ramp-network/ramp-instant-sdk';
 import { IPurchaseCreatedEvent } from '@ramp-network/ramp-instant-sdk/dist/types/types';
@@ -40,10 +44,6 @@ import Loading from '../../components/Loading';
 import { Pagination } from '../../components/Pagination';
 import { WalletAddress } from '../../components/WalletAddress';
 import { networks } from '../../data/networks';
-import { TokenBalance, getBalances } from '../../services/covalentServices';
-import { eventBus } from '../../services/events/eventBus';
-import { getAllActivities, purchaseToken } from '../../services/walletServices';
-import { Activity, TokenBase } from '../../types';
 import { AssetsList } from '../dashboard/components/AssetsList';
 
 import { ActivitiesList } from './components/ActivitiesList';

@@ -2,24 +2,27 @@ import { Card, CardBody, CardHeader, Flex, Text, useDisclosure } from '@chakra-u
 import { ButtonWithAdmingRights } from '@pesabooks/components/withConnectedWallet';
 import { usePool } from '@pesabooks/hooks';
 import { addCategory, editCategory, getAllCategories } from '@pesabooks/services/categoriesService';
-import { useCallback, useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useState } from 'react';
 import { Category } from '../../../types';
 import { CategoriesTable } from '../components/CategoriesTable';
 import { CategoryModal } from '../components/CategoryModal';
 
 export const CategoriesPage = () => {
   const { pool } = usePool();
-  const [categories, setCategories] = useState<Category[]>([]);
   const { isOpen, onClose, onOpen } = useDisclosure();
   const [isSaving, setIsSaving] = useState(false);
+  const queryClient = useQueryClient();
 
-  const getCategories = useCallback(() => {
-    if (pool) getAllCategories(pool?.id).then(setCategories);
-  }, [pool]);
+  if (!pool) throw new Error('Pool is not set');
 
-  useEffect(() => {
-    getCategories();
-  }, [getCategories]);
+  const cacheKey = [pool.id, 'categories'];
+
+  const { data: categories } = useQuery({
+    queryKey: cacheKey,
+    queryFn: () => getAllCategories(pool.id),
+    enabled: !!pool.id,
+  });
 
   const onEditCategory = useCallback(async (categoryId: number, category: Partial<Category>) => {
     await editCategory(categoryId, category);
@@ -30,7 +33,7 @@ export const CategoriesPage = () => {
       setIsSaving(true);
       if (pool) await addCategory(pool.id, category);
       onClose();
-      await getCategories();
+      queryClient.invalidateQueries(cacheKey);
     } finally {
       setIsSaving(false);
     }
@@ -50,7 +53,7 @@ export const CategoriesPage = () => {
           </Flex>
         </CardHeader>
         <CardBody>
-          <CategoriesTable categories={categories} onEdit={onEditCategory}></CategoriesTable>
+          <CategoriesTable categories={categories ?? []} onEdit={onEditCategory}></CategoriesTable>
         </CardBody>
       </Card>
       {isOpen && (

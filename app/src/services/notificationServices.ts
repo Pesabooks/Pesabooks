@@ -1,6 +1,4 @@
 import { SendNotificationRequest } from '@pesabooks/supabase/functions';
-import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
-import { supabase } from '../supabase';
 import {
   AddOrRemoveOwnerData,
   ChangeThresholdData,
@@ -10,7 +8,9 @@ import {
   Transaction,
   TransferData,
   WalletConnectData,
-} from '../types';
+} from '@pesabooks/types';
+import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
+import { supabase } from '../supabase';
 
 export const getNotificationDescription = (transaction: Transaction): string => {
   const { type, metadata } = transaction;

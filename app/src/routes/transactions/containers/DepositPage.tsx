@@ -7,7 +7,7 @@ import { getAllCategories } from '@pesabooks/services/categoriesService';
 import { estimateTransaction } from '@pesabooks/services/estimationService';
 import { buildDepositTx } from '@pesabooks/services/transaction-builder';
 import { submitDepositTx } from '@pesabooks/services/transactionsServices';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Category, NewTransaction } from '../../../types';
@@ -16,6 +16,7 @@ import {
   ReviewAndSendTransactionModal,
   ReviewAndSendTransactionModalRef,
 } from '@pesabooks/components/ReviewAndSendTransactionModal';
+import { useQuery } from '@tanstack/react-query';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 
 export interface DepositFormValue {
@@ -25,10 +26,8 @@ export interface DepositFormValue {
 }
 
 export const DepositPage = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
   const { provider, account, user } = useWeb3Auth();
   const { pool } = usePool();
-  const [balance, setBalance] = useState<number>(0);
   const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
 
   const methods = useForm<DepositFormValue>();
@@ -39,30 +38,26 @@ export const DepositPage = () => {
     throw new Error('Argument Exception');
   }
 
-  useEffect(() => {
-    getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
-      setCategories(categories ?? []),
-    );
-  }, [pool]);
+  const { data: categories } = useQuery({
+    queryKey: [pool.id, 'categories', { active: true }],
+    queryFn: () =>
+      getAllCategories(pool.id, { activeOnly: true }).then((categories) =>
+        categories.filter((c) => c.active),
+      ),
+    enabled: !!pool.id,
+  });
 
-  useEffect(() => {
-    const getBalance = async () => {
-      if (account) {
-        if (pool?.token) {
-          const balance = await getAddressBalance(pool.chain_id, pool.token.address, account);
-          setBalance(balance);
-        }
-      }
-    };
-
-    getBalance();
-  }, [pool, account]);
+  const { data: balance } = useQuery({
+    queryKey: ['token_balance', pool.chain_id, token.symbol, account],
+    queryFn: () => getAddressBalance(pool.chain_id, pool!.token!.address, account!),
+    enabled: !!pool?.token && !!account,
+  });
 
   const deposit = async (transaction: NewTransaction) => {
     if (!provider) throw new Error('Provider not initialized');
     if (!user) throw new Error('User not initialized');
 
-    const tx = await submitDepositTx(provider, pool, user, transaction);
+    const tx = await submitDepositTx(provider, pool, transaction);
 
     methods.reset();
 
@@ -100,7 +95,7 @@ export const DepositPage = () => {
           <CardBody>
             <FormProvider {...methods}>
               <form onSubmit={methods.handleSubmit(review)}>
-                <SelectCategoryField mb="4" categories={categories} />
+                <SelectCategoryField mb="4" categories={categories ?? []} />
 
                 <InputAmountField mb="4" balance={balance} symbol={token.symbol} />
 

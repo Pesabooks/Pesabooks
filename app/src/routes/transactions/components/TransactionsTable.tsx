@@ -109,8 +109,8 @@ export const TransactionsTable = ({
 
   return (
     <Box overflowX="auto" w="100%">
-      {loading && <Loading m={4} />}
       <DataTable columns={filteredColumns} data={transactions} onSelect={onSelect} />
+      {loading && <Loading m={4} />}
     </Box>
   );
 };

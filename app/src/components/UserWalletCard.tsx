@@ -1,6 +1,6 @@
 import { Avatar, Flex, Text } from '@chakra-ui/react';
+import { User } from '@pesabooks/types';
 import { shortenHash } from '@pesabooks/utils/addresses-utils';
-import { User } from '../types';
 
 export const UserWalletCard = ({ user }: { user: User | undefined }) => {
   return (

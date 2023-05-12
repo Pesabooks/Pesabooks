@@ -27,7 +27,7 @@ import { ApproveArgs, SwapArgs, SwapCard } from '../components/SwapCard';
 
 export const SwapPage = () => {
   const { pool } = usePool();
-  const { provider, user } = useWeb3Auth();
+  const { provider } = useWeb3Auth();
   const reviewTxRef = useRef<ReviewAndSendTransactionModalRef>(null);
   const { threshold } = useSafeAdmins();
   const { isOpen: isDeadlineWarningVisible, onClose: onCloseDeadlineWarning } = useDisclosure({
@@ -36,7 +36,6 @@ export const SwapPage = () => {
 
   if (!pool) throw new Error('Pool not set');
   if (!provider) throw new Error('Provider not set');
-  if (!user) throw new Error('User not set');
 
   const signer = (provider as Web3Provider)?.getSigner();
 
@@ -58,7 +57,7 @@ export const SwapPage = () => {
           ? Promise.resolve(BigNumber.from(0))
           : estimateTransaction(provider, transaction.transaction_data),
       async () => {
-        const tx = await submitTransaction(user, signer, pool, transaction);
+        const tx = await submitTransaction(signer, pool, transaction);
         return { hash: tx?.hash, internalTxId: tx?.id };
       },
     );
@@ -86,7 +85,7 @@ export const SwapPage = () => {
           ? Promise.resolve(BigNumber.from(0))
           : estimateTransaction(provider, transaction.transaction_data),
       async () => {
-        const tx = await submitTransaction(user, signer, pool, transaction);
+        const tx = await submitTransaction(signer, pool, transaction);
         return { hash: tx?.hash, internalTxId: tx?.id };
       },
     );

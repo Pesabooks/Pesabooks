@@ -153,7 +153,7 @@ export const GroupMembersTab = ({
             alignSelf="flex-end"
             w={150}
             h="35px"
-            disabled={members.length < 2}
+            isDisabled={members.length < 2}
             isLoading={loading}
             onClick={onNext}
           >

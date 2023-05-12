@@ -1,10 +1,10 @@
 import { useWeb3Auth } from '@pesabooks/hooks';
+import { Pool } from '@pesabooks/types';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { eventBus } from '../services/events/eventBus';
 import { getPool } from '../services/poolsService';
 import { membersTable } from '../supabase';
-import { Pool } from '../types';
 
 type PoolContextType = {
   pool: Pool | undefined;

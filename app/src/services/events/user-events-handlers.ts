@@ -1,4 +1,4 @@
-import { AddOrRemoveOwnerData } from '../../types/transaction';
+import { AddOrRemoveOwnerData } from '@pesabooks/types';
 import { deactivateMember } from '../membersService';
 import { BusMessage, eventBus, TransactionMessage } from './eventBus';
 

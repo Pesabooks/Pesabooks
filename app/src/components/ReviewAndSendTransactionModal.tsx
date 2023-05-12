@@ -25,6 +25,7 @@ import {
 } from '@chakra-ui/react';
 import { useNativeBalance, useWeb3Auth } from '@pesabooks/hooks';
 import { getTxScanLink } from '@pesabooks/services/transactionsServices';
+import { TransactionType } from '@pesabooks/types';
 import { formatBigNumber } from '@pesabooks/utils/bignumber-utils';
 import { getTransactionTypeLabel } from '@pesabooks/utils/transactions-utils';
 import { BigNumber } from 'ethers';
@@ -39,7 +40,6 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { networks } from '../data/networks';
-import { TransactionType } from '../types';
 import Loading from './Loading';
 import { TransactionIcon } from './TransactionIcon';
 
@@ -132,6 +132,7 @@ const reducer: Reducer<State, Action> = (state = IninitialState, action: Action)
         ...state,
         status: 'reviewing',
         error: payload.error,
+        isEstimating: false,
       };
     default:
       return state;
@@ -294,7 +295,7 @@ export const ReviewAndSendTransactionModal = forwardRef(
               Cancel
             </Button>
             <Spacer />
-            <Button onClick={execute} disabled={isEstimating}>
+            <Button onClick={execute} isDisabled={isEstimating}>
               {options.labelSubmit ? options.labelSubmit : isProposal() ? 'Propose' : 'Submit'}
             </Button>
           </ModalFooter>

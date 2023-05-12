@@ -10,19 +10,20 @@ import { PoolProvider } from './contexts/PoolContext';
 import { Web3AuthProvider } from './contexts/Web3AuthProvider';
 import { AuthGuard } from './guards/authGuard';
 import { PoolGuard } from './guards/poolGuard';
+import { CreatePoolPage } from './routes/CreatePool/CreatePoolPage';
+import { ReportsPage } from './routes/Reports/ReportsPage';
+import { TotalDepositPerUser } from './routes/Reports/TotalDepositPerUser';
+import { SetUsernamePage } from './routes/SetUsernamePage';
 import { Auth } from './routes/auth/Auth';
 import { CallbackPage } from './routes/auth/CallbackPage';
 import { InvitationPage } from './routes/auth/InvitationPage';
 import { SignInPage } from './routes/auth/SigninPage';
-import { CreatePoolPage } from './routes/CreatePool/CreatePoolPage';
 import { DashboardPage } from './routes/dashboard/DashboardPage';
 import { HomePage } from './routes/home/HomePage';
 import { MembersPage } from './routes/members/MembersPage';
 import { NotFound } from './routes/notfound/NotFound';
 import { Unauthorized } from './routes/notfound/Unauthorized';
 import { ProfilePage } from './routes/profile';
-import { ReportsPage } from './routes/Reports/ReportsPage';
-import { TotalDepositPerUser } from './routes/Reports/TotalDepositPerUser';
 import { CategoriesPage } from './routes/settings/container/CategoriesPage';
 import { OverviewPage } from './routes/settings/container/OverviewPage';
 import { SettingsPage } from './routes/settings/container/SettingsPage';
@@ -34,7 +35,8 @@ import { WithdrawPage } from './routes/transactions/containers/WithdrawPage';
 import { WalletPage } from './routes/wallet/WalletPage';
 import theme from './theme/theme';
 import trackPathForAnalytics from './trackpageforanalytics';
-import { SetUsernamePage } from './routes/SetUsernamePage';
+
+const queryClient = new QueryClient();
 
 function App() {
   const data = useLocation();
@@ -47,8 +49,6 @@ function App() {
   useEffect(() => {
     analytics();
   }, [analytics]);
-
-  const queryClient = new QueryClient();
 
   return (
     <QueryClientProvider client={queryClient}>
