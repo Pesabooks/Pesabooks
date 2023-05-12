@@ -19,7 +19,7 @@ export const TransactionsPage = () => {
     txDetailRef.current?.open(transactionId);
   };
   const transactionIdParam = searchParams.get('id');
-
+  //toto
   if (!pool) {
     throw new Error();
   }

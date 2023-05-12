@@ -1,13 +1,13 @@
+import * as Sentry from "Sentry";
 import { serve } from "std/server";
 import { corsHeaders } from "../_shared/cors.ts";
 import { BalanceQuery } from "./type.ts";
-import * as Sentry from "Sentry";
 
 Sentry.init({
   environment: Deno.env.get("ENV") ?? "",
   dsn: Deno.env.get("SENTRY_DSN") ?? "",
 });
-
+// modify functions
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     console.log("OPTIONS called");
