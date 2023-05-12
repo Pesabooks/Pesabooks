@@ -37,7 +37,6 @@ jobs:
 
   App:
     needs: changes
-    runs-on: ubuntu-latest
     if: ${{ needs.changes.outputs.app == 'true' }}
     uses: ./.github/workflows/app.yaml
     with:
