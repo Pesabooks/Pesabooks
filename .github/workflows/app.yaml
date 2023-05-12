@@ -1,4 +1,4 @@
-name: Functions
+name: App
 
 on:
   workflow_call:
@@ -13,8 +13,6 @@ on:
         required: true
         type: string
     secrets:
-      SUPABASE_ACCESS_TOKEN:
-        required: true
       SUPABASE_PROJECT_ID:
         required: true
       SUPABASE_ANON_KEY:
@@ -35,58 +33,8 @@ on:
         required: true
 
 jobs:
-  # JOB to run change detection
-  changes:
+  deploy:
     runs-on: ubuntu-latest
-    # Set job outputs to values from filter step
-    outputs:
-      app: ${{ steps.filter.outputs.app }}
-      functions: ${{ steps.filter.outputs.functions }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # For pull requests it's not necessary to checkout the code
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            app:
-              - 'app/**'
-            functions:
-              - 'supabase/functions/**'
-
-  deploy-functions:
-    needs: changes
-    runs-on: ubuntu-latest
-    if: ${{ needs.changes.outputs.functions == 'true' }}
-
-    env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - uses: supabase/setup-cli@v1
-        with:
-          version: 1.37.1
-
-      - name: deploy balances
-        run: supabase functions deploy balances --project-ref $PROJECT_ID
-      - name: deploy get-access-token
-        run: supabase functions deploy get-access-token --no-verify-jwt --project-ref $PROJECT_ID
-      - name: deploy ramp-callback
-        run: supabase functions deploy ramp-callback --no-verify-jwt --project-ref $PROJECT_ID
-      - name: deploy send-invitation
-        run: supabase functions deploy send-invitation --project-ref $PROJECT_ID
-      - name: deploy send-notification
-        run: supabase functions deploy send-notification --project-ref $PROJECT_ID
-
-  deploy-app:
-    needs: changes
-    runs-on: ubuntu-latest
-    if: ${{ needs.changes.outputs.app == 'true' }}
 
     defaults:
       run:
