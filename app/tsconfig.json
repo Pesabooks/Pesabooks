@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "sourceMap": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@pesabooks/supabase/*": ["../../supabase/*"],
+      "@pesabooks/utils/*": ["./utils/*"],
+      "@pesabooks/components/*": ["./components/*"],
+      "@pesabooks/data/*": ["./data/*"],
+      "@pesabooks/guards/*": ["./guards/*"],
+      "@pesabooks/hooks": ["./hooks"],
+      "@pesabooks/types": ["./types"],
+      "@pesabooks/routes/*": ["./routes/*"],
+      "@pesabooks/services/*": ["./services/*"]
+    }
+  },
+  "include": ["src"]
+}
