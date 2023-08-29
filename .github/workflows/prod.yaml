@@ -15,7 +15,7 @@ jobs:
     with:
       env: prod
       include_testnets: false
-      web3auth_network: mainnet
+      web3auth_network: cyan
     secrets:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_FUNCTIONS_URL: ${{ secrets.SUPABASE_FUNCTIONS_URL }}

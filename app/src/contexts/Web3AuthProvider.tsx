@@ -15,6 +15,7 @@ import {
   UserInfo,
   WALLET_ADAPTERS,
 } from '@web3auth/base';
+import { EthereumPrivateKeyProvider } from '@web3auth/ethereum-provider';
 import { Web3AuthNoModal } from '@web3auth/no-modal';
 import { OpenloginAdapter } from '@web3auth/openlogin-adapter';
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
@@ -37,7 +38,7 @@ export interface IWeb3AuthContext {
 }
 
 const web3AuthClientId = process.env.REACT_APP_WEB3AUTH_CLIENT_ID ?? '';
-const web3AuthNetwork = process.env.REACT_APP_WEB3AUTH_NETWORk ?? '';
+const web3AuthNetwork = (process.env.REACT_APP_WEB3AUTH_NETWORk ?? 'testnet') as 'testnet' | 'cyan';
 
 const defaultChain = 137;
 
@@ -119,14 +120,19 @@ export const Web3AuthProvider = ({ children }: { children: ReactNode }) => {
           clientId: web3AuthClientId,
           chainConfig: currentChainConfig,
           enableLogging: web3AuthNetwork === 'testnet',
+          web3AuthNetwork,
         });
 
         subscribeAuthEvents(web3AuthInstance);
 
+        const privateKeyProvider = new EthereumPrivateKeyProvider({
+          config: { chainConfig: currentChainConfig },
+        });
+
         const adapter = new OpenloginAdapter({
           adapterSettings: {
             clientId: web3AuthClientId,
-            network: web3AuthNetwork === 'testnet' ? 'testnet' : 'mainnet',
+            network: web3AuthNetwork,
             uxMode: 'redirect',
             redirectUrl: `${window.location.origin}/auth/callback`,
             whiteLabel: {
@@ -136,6 +142,7 @@ export const Web3AuthProvider = ({ children }: { children: ReactNode }) => {
               dark: true,
             },
           },
+          privateKeyProvider,
         });
         web3AuthInstance.configureAdapter(adapter);
 

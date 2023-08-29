@@ -8,7 +8,7 @@
       "name": "Supabase-functions",
       "type": "node",
       "request": "launch",
-      "cwd": "${workspaceFolder}\\supabase",
+      "cwd": "${workspaceFolder}",
       "runtimeExecutable": "deno",
       "runtimeArgs": [
         "run",
