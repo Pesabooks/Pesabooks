@@ -1,6 +1,14 @@
-/* eslint-disable prettier/prettier */
 import { DeleteIcon } from '@chakra-ui/icons';
-import { Avatar, Card, CardBody, CardHeader, CardProps, Heading, IconButton, Text } from '@chakra-ui/react';
+import {
+  Avatar,
+  Card,
+  CardBody,
+  CardHeader,
+  CardProps,
+  Heading,
+  IconButton,
+  Text,
+} from '@chakra-ui/react';
 
 interface IProps {
   topic?: string;

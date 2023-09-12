@@ -1,20 +1,19 @@
-/* eslint-disable prettier/prettier */
 import {
-    Avatar,
-    Box,
-    Button,
-    Flex,
-    HStack,
-    Heading,
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalFooter,
-    ModalHeader,
-    ModalOverlay,
-    Spacer,
-    Text
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  HStack,
+  Heading,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Spacer,
+  Text,
 } from '@chakra-ui/react';
 import { TextAreaMemoField } from '@pesabooks/routes/transactions/components/TextAreaMemoField';
 import { Category } from '@pesabooks/types';
@@ -70,7 +69,6 @@ export const TransactionRequestModal = ({
                   <Text>
                     {txRequestPayload?.peerMetadata?.url?.split('https://')[1] ?? 'Unknown'}
                   </Text>
-                  
                 </Box>
               </HStack>
 

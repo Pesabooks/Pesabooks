@@ -57,10 +57,13 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.x
-      - run: npm install --force
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install
 
       - name: Build
-        run: CI=false npm run build
+        run: yarn build
         env:
           REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           REACT_APP_SUPABASE_FUNCTIONS_URL: ${{ secrets.SUPABASE_FUNCTIONS_URL }}
