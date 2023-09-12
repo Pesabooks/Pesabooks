@@ -70,7 +70,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
               >
                 {activeRoute(prop.path) ? (
                   <Box
-                    as="button"
+                    // as="button"
                     boxSize="initial"
                     justifyContent="flex-start"
                     alignItems="center"
@@ -116,7 +116,7 @@ export const Sidebar = ({ onClose, ...boxProps }: SidebarProps) => {
                   </Box>
                 ) : (
                   <Box
-                    as="button"
+                    // as="button"
                     boxSize="initial"
                     justifyContent="flex-start"
                     alignItems="center"

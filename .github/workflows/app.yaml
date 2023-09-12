@@ -33,6 +33,8 @@ on:
         required: true
       RAMP_API_KEY:
         required: true
+      WALLET_CONNECT_PROJECT_ID:
+        required: true
 
 jobs:
   deploy:
@@ -71,6 +73,7 @@ jobs:
           REACT_APP_WEB3AUTH_NETWORk: ${{ inputs.web3auth_network }}
           REACT_APP_WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
           REACT_APP_RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
+          REACT_APP_WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}
 
       - name: Deploy to netlify
         uses: netlify/actions/cli@master

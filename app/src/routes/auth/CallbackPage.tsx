@@ -24,13 +24,21 @@ export const CallbackPage = () => {
       if (isInitialised && web3Auth) {
         const { idToken, email } = await web3Auth.getUserInfo();
 
+        if (!user_id) {
+          throw new Error('user_id not found');
+        }
+
+        if (!idToken) {
+          throw new Error('idToken not found');
+        }
+
         const provider = new Web3Provider(web3Auth.provider!);
 
         const address = await provider.getSigner().getAddress();
 
         const body: GetAccessTokenRequest = {
-          user_id: user_id!,
-          id_token: idToken!,
+          user_id: user_id,
+          id_token: idToken,
         };
         const { data, error } = await supabase().functions.invoke<GetAccessTokenResponse>(
           'get-access-token',

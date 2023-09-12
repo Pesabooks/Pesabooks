@@ -6,6 +6,7 @@ import { Pool } from '@pesabooks/types';
 import { useEffect, useState } from 'react';
 import { ConnectedChain } from '../ConnectedChain';
 import { NewTransactionMenu } from '../NewTransactionMenu';
+import { WalletConnect } from '../WalletConnect';
 import { AvatarMenu } from './AvatarMenu';
 import { PoolSelectorMenu } from './PoolSelectorMenu';
 interface NavBarProps extends FlexProps {
@@ -49,7 +50,7 @@ export const Navbar = ({ onOpen, ...flexProps }: NavBarProps) => {
 
       <Stack direction={'row'} spacing={7}>
         <Flex gap={7} display={{ sm: 'none', xl: 'flex' }} alignItems="center">
-          {/* <WalletConnectDrawer /> */}
+          <WalletConnect />
           <NewTransactionMenu />
           <ConnectedChain />
         </Flex>

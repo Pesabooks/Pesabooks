@@ -27,3 +27,4 @@ jobs:
       BLOCKNATIVE_KEY: ${{ secrets.BLOCKNATIVE_KEY }}
       WEB3AUTH_CLIENT_ID: ${{ secrets.WEB3AUTH_CLIENT_ID }}
       RAMP_API_KEY: ${{ secrets.RAMP_API_KEY }}
+      WALLET_CONNECT_PROJECT_ID: ${{ secrets.WALLET_CONNECT_PROJECT_ID }}

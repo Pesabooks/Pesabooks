@@ -80,13 +80,13 @@ export const DashboardPage = () => {
               title="Balance"
             />
             <BalanceCard
-              description={`${txStats?.deposit} ${pool.token?.symbol}`}
+              description={`${txStats?.deposit ?? 0} ${pool.token?.symbol}`}
               loading={isStatsLoading}
               icon={FaArrowUp}
               title="Deposit"
             />
             <BalanceCard
-              description={`${txStats?.withdrawal} ${pool.token?.symbol}`}
+              description={`${txStats?.withdrawal ?? 0} ${pool.token?.symbol}`}
               loading={isStatsLoading}
               icon={FaArrowDown}
               iconBg="#f44336"

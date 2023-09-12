@@ -37,10 +37,10 @@ export const MembersTable = ({
           </Tr>
         </Thead>
         <Tbody>
-          {members.map((member) => {
+          {members.map((member, index) => {
             return (
               <MemberTableRow
-                key={member.user_id}
+                key={member.user_id ?? index}
                 name={member.user?.username}
                 wallet={member.user?.wallet}
                 active={member.active}

@@ -75,19 +75,20 @@ yarn
 
 You can use the .env.example file as a reference. Here's the list of all the required and optional variables:
 
-| Env variable                    |              | Description                                                                                                |
-| ------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
-| `REACT_APP_ENV`                 | **required** | Environment. Default `development`                                                                         |
-| `REACT_APP_SUPABASE_PROJECT_ID` | **required** | [Supabase](https://supabase.com/) project id                                                               |
-| `REACT_APP_SUPABASE_ANON_KEY`   | **required** | [Supabase](https://supabase.com/) anon key                                                                 |
-| `REACT_APP_INFURA_KEY`          | **required** | [Infura](https://docs.infura.io/infura/networks/ethereum/how-to/secure-a-project/project-id) RPC API token |
-| `REACT_APP_INCLUDE_TESTNETS`    | optional     | Include or not the tesnets (Goerli)                                                                        |
-| `REACT_APP_WEB3AUTH_NETWORk`    | **required** | [Web3Auth](https://web3auth.io/) network: `testnets`, `cyan`, or `cyan`                                    |
-| `REACT_APP_WEB3AUTH_CLIENT_ID`  | **required** | [Web3Auth](https://web3auth.io/) client id                                                                 |
-| `REACT_APP_RAMP_API_KEY`        | optional     | [Ramp](https://ramp.network/) host api key for Fiat onrampCollB                                            |
-| `REACT_APP_SENTRY_DSN`          | optional     | [Sentry](https://sentry.io) id for tracking runtime errors `NEXT_PUBLIC_INFURA_TOKEN`                      |
+| Env variable                          |              | Description                                                                                                |
+| ------------------------------------- | ------------ | ---------------------------------------------------------------------------------------------------------- |
+| `REACT_APP_ENV`                       | **required** | Environment. Default `development`                                                                         |
+| `REACT_APP_SUPABASE_PROJECT_ID`       | **required** | [Supabase](https://supabase.com/) project id                                                               |
+| `REACT_APP_SUPABASE_ANON_KEY`         | **required** | [Supabase](https://supabase.com/) anon key                                                                 |
+| `REACT_APP_INFURA_KEY`                | **required** | [Infura](https://docs.infura.io/infura/networks/ethereum/how-to/secure-a-project/project-id) RPC API token |
+| `REACT_APP_INCLUDE_TESTNETS`          | optional     | Include or not the tesnets (Goerli)                                                                        |
+| `REACT_APP_WEB3AUTH_NETWORk`          | **required** | [Web3Auth](https://web3auth.io/) network: `testnets` or `cyan`                                             |
+| `REACT_APP_WEB3AUTH_CLIENT_ID`        | **required** | [Web3Auth](https://web3auth.io/) client id                                                                 |
+| `REACT_APP_RAMP_API_KEY`              | optional     | [Ramp](https://ramp.network/) host api key for Fiat onrampCollB                                            |
+| `REACT_APP_SENTRY_DSN`                | optional     | [Sentry](https://sentry.io) id for tracking runtime errors                                                 |
+| `REACT_APP_WALLET_CONNECT_PROJECT_ID` | optional     | [WalletConnect](https://walletconnect.com/) project id                                                     |
 
-4. Start the development server:
+1. Start the development server:
 
 ```
 yarn start

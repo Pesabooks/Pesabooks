@@ -1,139 +1,191 @@
-/* eslint-disable */
-//@ts-nocheck
+import { useToast } from '@chakra-ui/react';
 import { Pool } from '@pesabooks/types';
-import WalletConnect from '@walletconnect/client';
-import { IClientMeta, IWalletConnectSession } from '@walletconnect/legacy-types';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { createWeb3Wallet, pair, web3wallet } from '@pesabooks/utils/wallet-connect';
+import { SessionTypes, SignClientTypes } from '@walletconnect/types';
+import { getSdkError } from '@walletconnect/utils';
+import { Web3WalletTypes } from '@walletconnect/web3wallet';
+import { useCallback, useEffect, useState } from 'react';
 
-type connectType = ({ uri, session }: { uri?: string; session?: IWalletConnectSession }) => void;
-
-interface useWalletConnectV1Type {
-  connector?: WalletConnect;
-  clientData: IClientMeta | null;
-  isConnected: boolean;
+type connectType = (uri: string) => Promise<void>;
+export type WalletConnectTransactionRequest = {
+  id: number;
+  topic: string;
+  method: string;
+  payload: any;
+  peerMetadata?: SignClientTypes.Metadata;
+  functionName?: string;
+};
+interface useWalletConnectType {
   connect: connectType;
-  disconnect: () => Promise<void>;
-  reject: (message: string) => void;
-  txRequestPayload: any;
+  disconnect: (topic: string) => Promise<void>;
+  rejectTransactionRequest: (id: number, topic: string) => Promise<void>;
+  txRequest?: WalletConnectTransactionRequest;
   onTxSumitted: () => void;
   functionName?: string;
+  connecting: boolean;
+  sessions: SessionTypes.Struct[];
 }
 
-export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
-  const [connector, setConnector] = useState<WalletConnect | undefined>();
-  const [clientData, setClientData] = useState<IClientMeta | null>(null);
-  const [txRequestPayload, setTxRequestPayload] = useState<any>();
+export const useWalletConnect = (pool: Pool): useWalletConnectType => {
+  const [initialized, setInitialized] = useState(false);
+
+  const [txRequest, setTxRequest] = useState<WalletConnectTransactionRequest>();
   const [functionName, setFunctionName] = useState<string>();
-
-  const isConnected = connector?.connected === true;
-  const localStorageSessionKey = useRef(`session_${pool.gnosis_safe_address}`);
-
-  const onSessionRequest = useCallback(
-    async (connector: WalletConnect, error, payload) => {
-      if (error) {
-        throw error;
-      }
-      console.log(payload);
-
-      connector.approveSession({
-        accounts: [pool!.gnosis_safe_address!],
-        chainId: pool!.chain_id,
-      });
-
-      setClientData(payload.params[0].peerMeta);
-      localStorage.setItem(localStorageSessionKey.current, JSON.stringify(connector.session));
-    },
-    [pool],
-  );
-
-  const onCallRequest = useCallback(async (connector: WalletConnect, error, payload) => {
-    if (error) {
-      throw error;
-    }
-    console.log(payload);
-
-    if (payload.method === 'eth_sendTransaction') {
-      setTxRequestPayload(payload);
-    } else {
-      connector.rejectRequest({
-        id: payload.id,
-        error: {
-          message: 'Method not supported',
-        },
-      });
-    }
-  }, []);
-
-  const connect: connectType = useCallback(async ({ uri, session }) => {
-    const connector = new WalletConnect({
-      // Required
-      uri: uri,
-      session: session,
-      // Required
-      clientMeta: {
-        description: 'Pesabooks',
-        url: 'www.pesabook.com',
-        icons: ['https://walletconnect.org/walletconnect-logo.png'],
-        name: 'Pesabooks App',
-      },
-    });
-    setConnector(connector);
-    if (connector.session?.connected) setClientData(connector.session.peerMeta);
-  }, []);
-
-  const disconnect = useCallback(async () => {
-    setConnector(undefined);
-    setClientData(null);
-    setTxRequestPayload(undefined);
-    localStorage.removeItem(localStorageSessionKey.current);
-    try {
-      await connector?.killSession();
-    } catch (error) {
-      console.log('Error trying to close WC session: ', error);
-    }
-  }, [connector]);
+  const [connecting, setConnecting] = useState(false);
+  const [sessions, setSessions] = useState<SessionTypes.Struct[]>([]);
+  const toast = useToast();
 
   useEffect(() => {
-    if (connector) {
-      connector.on('session_request', (error, payload) =>
-        onSessionRequest(connector, error, payload),
-      );
-      connector.on('call_request', (error, payload) => onCallRequest(connector, error, payload));
-      connector.on('disconnect', (error, payload) => {
-        disconnect();
+    if (!initialized) {
+      createWeb3Wallet().then(() => {
+        setInitialized(true);
       });
     }
-  }, [connector, onCallRequest, onSessionRequest, disconnect]);
+  }, [initialized]);
 
-  const reject = (message: string) => {
-    connector?.rejectRequest({
-      id: txRequestPayload.id,
-      error: {
-        message: message ?? 'Rejected by user',
-      },
+  const onSessionApproval = useCallback(async (proposal: Web3WalletTypes.SessionProposal) => {
+    setConnecting(true);
+
+    try {
+      const { id, params } = proposal;
+      const { requiredNamespaces } = params;
+
+      // reject if it is not the right chain
+      if (
+        !requiredNamespaces.eip155.chains ||
+        requiredNamespaces.eip155.chains[0] !== `eip155:${pool.chain_id}`
+      ) {
+        web3wallet.rejectSession({
+          id,
+          reason: getSdkError('USER_REJECTED_CHAINS'),
+        });
+        toast({
+          status: 'error',
+          title: 'Wrong network',
+          description: `Please switch network on the dapps`,
+        });
+        return;
+      }
+
+      const namespaces: SessionTypes.Namespaces = {};
+      Object.keys(requiredNamespaces).forEach((key) => {
+        const accounts: string[] = [];
+        requiredNamespaces[key].chains?.map((chain) => {
+          accounts.push(`${chain}:${pool.gnosis_safe_address}`);
+        });
+        namespaces[key] = {
+          accounts,
+          methods: requiredNamespaces[key].methods,
+          events: requiredNamespaces[key].events,
+        };
+      });
+
+      const session = await web3wallet.approveSession({
+        id: proposal.id,
+        namespaces,
+      });
+
+      setSessions(Object.values(web3wallet?.getActiveSessions() ?? []));
+
+      toast({
+        status: 'success',
+        description: `Connected to ${session?.peer.metadata.name ?? 'walletConnect'}`,
+      });
+    } finally {
+      setConnecting(false);
+    }
+  }, []);
+
+  const onSessionRequest = useCallback(async (args: Web3WalletTypes.SessionRequest) => {
+    console.log('onSessionRequest', args);
+    const {
+      params: { request },
+      id,
+      topic,
+    } = args;
+
+    const requestSession = web3wallet.engine.signClient.session.get(topic);
+
+    if (request.method === 'eth_sendTransaction') {
+      setTxRequest({
+        id,
+        topic,
+        method: request.method,
+        payload: request.params[0],
+        peerMetadata: requestSession?.peer.metadata,
+        functionName,
+      });
+    } else {
+      web3wallet?.rejectSession({
+        id: id,
+        reason: getSdkError('UNSUPPORTED_METHODS'),
+      });
+    }
+  }, []);
+
+  const onSessionDelete = useCallback(async (args: Web3WalletTypes.SessionDelete) => {
+    disconnect(args.topic).then(() => {
+      setSessions(Object.values(web3wallet?.getActiveSessions() ?? []));
     });
-    setTxRequestPayload(undefined);
+  }, []);
+
+  const disconnect = async (topic: string) => {
+    setTxRequest(undefined);
+
+    await web3wallet?.disconnectSession({
+      topic,
+      reason: getSdkError('USER_DISCONNECTED'),
+    });
+    const session = web3wallet.engine.signClient.session.get(topic);
+
+    toast({
+      status: 'info',
+      description: `Disconnected from ${session?.peer.metadata.name ?? 'walletConnect'}`,
+    });
+
+    setSessions(Object.values(web3wallet?.getActiveSessions() ?? []));
   };
 
-  const onTxSumitted = () => setTxRequestPayload(undefined);
-
   useEffect(() => {
-    if (!connector) {
-      const session = localStorage.getItem(localStorageSessionKey.current);
-      if (session) {
-        connect({ session: JSON.parse(session) });
-      }
+    if (initialized) {
+      setSessions(Object.values(web3wallet?.getActiveSessions() ?? []));
+
+      web3wallet.on('session_proposal', onSessionApproval);
+      web3wallet.on('session_request', onSessionRequest);
+      web3wallet.on('session_delete', onSessionDelete);
+
+      // cleanup
+      return () => {
+        web3wallet.off('session_proposal', onSessionApproval);
+        web3wallet.off('session_request', onSessionRequest);
+        web3wallet.off('session_delete', onSessionDelete);
+      };
     }
-  }, [connector, connect]);
+  }, [initialized, onSessionApproval, onSessionRequest]);
 
-  // useEffect(() => {
-  //   if (!connector && uri) {
-  //     connect({ uri });
-  //   }
-  // }, [connector, connect, uri]);
+  const connect: connectType = async (uri) => {
+    await pair({ uri });
+  };
+
+  const rejectTransactionRequest = async (id: number, topic: string) => {
+    const response = {
+      id,
+      error: {
+        code: 5000,
+        message: 'User rejected.',
+      },
+      jsonrpc: '2.0',
+    };
+
+    await web3wallet.respondSessionRequest({ topic, response });
+
+    setTxRequest(undefined);
+  };
+
+  const onTxSumitted = () => setTxRequest(undefined);
 
   useEffect(() => {
-    const data: string = txRequestPayload?.params?.[0]?.data;
+    const data = txRequest?.payload.data;
     if (data)
       fetch(`https://api.etherface.io/v1/signatures/hash/all/${data.substring(2, 10)}/1`, {
         method: 'GET',
@@ -149,17 +201,16 @@ export const useWalletConnectV1 = (pool: Pool): useWalletConnectV1Type => {
           setFunctionName(undefined);
         });
     else setFunctionName(undefined);
-  }, [txRequestPayload]);
+  }, [txRequest]);
 
   return {
-    connector,
-    clientData,
-    isConnected,
     connect,
     disconnect,
-    reject,
-    txRequestPayload,
+    rejectTransactionRequest,
+    txRequest,
     onTxSumitted,
     functionName,
+    connecting,
+    sessions,
   };
 };

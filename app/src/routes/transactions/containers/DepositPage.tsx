@@ -20,9 +20,9 @@ import { useQuery } from '@tanstack/react-query';
 import { TextAreaMemoField } from '../components/TextAreaMemoField';
 
 export interface DepositFormValue {
-  amount: number;
-  memo: string | null;
-  category: Category;
+  amount?: number;
+  memo?: string;
+  category?: Category;
 }
 
 export const DepositPage = () => {
@@ -59,7 +59,9 @@ export const DepositPage = () => {
 
     const tx = await submitDepositTx(provider, pool, transaction);
 
-    methods.reset();
+    methods.setValue('amount', undefined);
+    methods.setValue('category', undefined);
+    methods.setValue('memo', undefined);
 
     return {
       hash: tx?.hash,
@@ -73,7 +75,14 @@ export const DepositPage = () => {
 
     const { amount, memo, category } = formValue;
 
-    const transaction = await buildDepositTx(provider, pool, user, category.id, amount, memo);
+    const transaction = await buildDepositTx(
+      provider,
+      pool,
+      user,
+      category!.id,
+      amount!,
+      memo ?? null,
+    );
     reviewTxRef.current?.open(
       `Deposit ${amount} ${pool.token?.symbol}`,
       transaction.type,
